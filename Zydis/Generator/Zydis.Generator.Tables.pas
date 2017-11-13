@@ -398,6 +398,7 @@ begin
       { operandReference            } Writer.WriteHex(Operands.Mapping[Item.Encoding][Index]);
       { operandSizeMapping          } Writer.WriteDec(Ord(Item.OperandSizeMap));
       { flagsReference              } Writer.WriteHex(AccessedFlags.Mapping[Item.Encoding][Index]);
+      { requiresProtectedMode       } Writer.WriteStr(ZydisBool[dfProtectedMode in Item.Flags]);
       { acceptsAddressSizeOverride  } Writer.WriteStr(ZydisBool[AcceptsASZOverride(Item)]);
       { category                    } Writer.WriteStr(
                                         'ZYDIS_CATEGORY_' +
