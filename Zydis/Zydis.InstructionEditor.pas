@@ -737,6 +737,7 @@ type
   public
     property Editor: TZYInstructionEditor read FEditor;
     property Parent: TZYInstructionTreeNode read FParent;
+    property Inserted: Boolean read FInserted;
     property FilterIndex[Filter: TZYInstructionFilterClass]: Integer read GetFilterIndex
       write SetFilterIndex;
     property InstructionParts: TZYInstructionPartInfo read FInstructionParts;
@@ -796,6 +797,7 @@ type
     FUpdateCount: Integer;
     FDefinitions: TList<TZYInstructionDefinition>;
     FRootNode: TZYInstructionTreeNode;
+    FDelayDefinitionRegistration: Boolean;
     FPreventDefinitionRemoval: Boolean;
   strict private
     FOnWorkStart: TZYEditorWorkStartEvent;
@@ -825,6 +827,7 @@ type
     procedure UnregisterDefinition(Definition: TZYInstructionDefinition); inline;
     procedure InsertDefinition(Definition: TZYInstructionDefinition);
     procedure RemoveDefinition(Definition: TZYInstructionDefinition);
+    procedure DefinitionChanged(Definition: TZYInstructionDefinition); inline;
   private
     procedure RaiseNodeEvent(Id: Integer; Node: TZYInstructionTreeNode); inline;
     procedure RaiseDefinitionEvent(Id: Integer; Definition: TZYInstructionDefinition); inline;
@@ -3070,9 +3073,9 @@ begin
   UpdateConflictState;
   if (FHasConflicts = B) then
   begin
-    // If the conflict state has been changed, the CHANGED event gets raised by the
+    // If the conflict state has been changed, `DefinitionChanged` gets called by the
     // @c UpdateConflictState method.
-    FEditor.RaiseDefinitionEvent(TZYInstructionEditor.CHANGED, Self);
+    FEditor.DefinitionChanged(Self);
   end;
   FInstructionParts.Update(Self);
 end;
@@ -3594,7 +3597,7 @@ begin
   FHasConflicts := (dfForceConflict in FFlags) or (not TZYDefinitionValidator.Validate(Self));
   if (B <> FHasConflicts) then
   begin
-    FEditor.RaiseDefinitionEvent(TZYInstructionEditor.CHANGED, Self);
+    FEditor.DefinitionChanged(Self);
   end;
   if Assigned(FParent) then
   begin
@@ -3738,6 +3741,20 @@ begin
   Result := TZYInstructionDefinition.Create(Self, Mnemonic);
 end;
 
+procedure TZYInstructionEditor.DefinitionChanged(Definition: TZYInstructionDefinition);
+begin
+  // Changes in property values might cause a change in the definition order. This method
+  // re-inserts the definition to update the list
+  if (not FDelayDefinitionRegistration) then
+  begin
+    UnregisterDefinition(Definition);
+    RegisterDefinition(Definition);
+  end;
+
+  // Raise the `CHANGED` event
+  RaiseDefinitionEvent(TZYInstructionEditor.CHANGED, Definition);
+end;
+
 destructor TZYInstructionEditor.Destroy;
 
 procedure DestroyChildNodes(Node: TZYInstructionTreeNode);
@@ -3862,6 +3879,10 @@ var
   FilterList: TZYInstructionFilterList;
   IsRequiredFilter: Boolean;
 begin
+  if (FDelayDefinitionRegistration) then
+  begin
+    RegisterDefinition(Definition);
+  end;
   BeginUpdate;
   try
     // Remove the definition from its old position
@@ -3980,6 +4001,10 @@ begin
         FOnWorkStart(Self, 0, JSON.InnerObject.Count);
       end;
       try
+        // Delays the definition-registration until the definition gets inserted for the first
+        // time
+        FDelayDefinitionRegistration := true;
+
         for I := 0 to JSON.InnerObject.Count - 1 do
         begin
           D := CreateDefinition('new_definition');
@@ -4005,6 +4030,7 @@ begin
           end;
         end;
       finally
+        FDelayDefinitionRegistration := false;
         if (Assigned(FOnWorkEnd)) then
         begin
           FOnWorkEnd(Self);
@@ -4041,6 +4067,12 @@ var
   I: Integer;
 begin
   // This method is automatically called by TZYInstructionDefinition.Create
+
+  if (FDelayDefinitionRegistration) and (not Definition.Inserted) then
+  begin
+    Exit;
+  end;
+
   Assert(not FDefinitions.Contains(Definition));
   FDefinitions.BinarySearch(Definition, I, TComparer<TZYInstructionDefinition>.Construct(
     function(const Left, Right: TZYInstructionDefinition): Integer
