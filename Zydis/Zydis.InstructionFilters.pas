@@ -53,6 +53,7 @@ type
     ifcEvexB,
     ifcMvexE,
     ifcModeAMD,
+    ifcModeKNC,
     ifcModeMPX,
     ifcModeCET,
     ifcModeLZCNT,
@@ -199,6 +200,8 @@ type
       { ifcMvexE }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcModeAMD }
+      (FNumberOfValues:   2; FFlags: [iffIsOptional]),
+      { ifcModeKNC }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcModeMPX }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
@@ -367,7 +370,8 @@ begin
       ifcModrmMod,
       ifcRexW,
       ifcOperandSize,
-      ifcAddressSize
+      ifcAddressSize,
+      ifcModeKNC
     );
   FilterOrderEVEX :=
     TZYInstructionFilterList.Create(

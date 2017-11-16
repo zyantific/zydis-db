@@ -233,11 +233,12 @@ type
     function GetEvexB: TZYFilterEvexB; inline;
     function GetMvexE: TZYFilterMvexE; inline;
 
-    function GetFeatureAMD: TZYFilterBoolean; inline;
-    function GetFeatureMPX: TZYFilterBoolean; inline;
-    function GetFeatureCET: TZYFilterBoolean; inline;
-    function GetFeatureLZCNT: TZYFilterBoolean; inline;
-    function GetFeatureTZCNT: TZYFilterBoolean; inline;
+    function GetModeAMD: TZYFilterBoolean; inline;
+    function GetModeKNC: TZYFilterBoolean; inline;
+    function GetModeMPX: TZYFilterBoolean; inline;
+    function GetModeCET: TZYFilterBoolean; inline;
+    function GetModeLZCNT: TZYFilterBoolean; inline;
+    function GetModeTZCNT: TZYFilterBoolean; inline;
   strict private
     procedure SetMode(Value: TZYFilterMode); inline;
     procedure SetModrmMod(Value: TZYFilterModrmMod); inline;
@@ -252,11 +253,12 @@ type
     procedure SetEvexB(Value: TZYFilterEvexB); inline;
     procedure SetMvexE(Value: TZYFilterMvexE); inline;
 
-    procedure SetFeatureAMD(Value: TZYFilterBoolean); inline;
-    procedure SetFeatureMPX(Value: TZYFilterBoolean); inline;
-    procedure SetFeatureCET(Value: TZYFilterBoolean); inline;
-    procedure SetFeatureLZCNT(Value: TZYFilterBoolean); inline;
-    procedure SetFeatureTZCNT(Value: TZYFilterBoolean); inline;
+    procedure SetModeAMD(Value: TZYFilterBoolean); inline;
+    procedure SetModeKNC(Value: TZYFilterBoolean); inline;
+    procedure SetModeMPX(Value: TZYFilterBoolean); inline;
+    procedure SetModeCET(Value: TZYFilterBoolean); inline;
+    procedure SetModeLZCNT(Value: TZYFilterBoolean); inline;
+    procedure SetModeTZCNT(Value: TZYFilterBoolean); inline;
 
     procedure SetForceModrmReg(Value: Boolean); inline;
     procedure SetForceModrmRm(Value: Boolean); inline;
@@ -289,16 +291,12 @@ type
     property EvexB: TZYFilterEvexB read GetEvexB write SetEvexB default ebPlaceholder;
     property MvexE: TZYFilterMvexE read GetMvexE write SetMvexE default mePlaceholder;
 
-    property FeatureAMD: TZYFilterBoolean read GetFeatureAMD write SetFeatureAMD
-      default fbPlaceholder;
-    property FeatureMPX: TZYFilterBoolean read GetFeatureMPX write SetFeatureMPX
-      default fbPlaceholder;
-    property FeatureCET: TZYFilterBoolean read GetFeatureCET write SetFeatureCET
-      default fbPlaceholder;
-    property FeatureLZCNT: TZYFilterBoolean read GetFeatureLZCNT write SetFeatureLZCNT
-      default fbPlaceholder;
-    property FeatureTZCNT: TZYFilterBoolean read GetFeatureTZCNT write SetFeatureTZCNT
-      default fbPlaceholder;
+    property ModeAMD: TZYFilterBoolean read GetModeAMD write SetModeAMD default fbPlaceholder;
+    property ModeKNC: TZYFilterBoolean read GetModeKNC write SetModeKNC default fbPlaceholder;
+    property ModeMPX: TZYFilterBoolean read GetModeMPX write SetModeMPX default fbPlaceholder;
+    property ModeCET: TZYFilterBoolean read GetModeCET write SetModeCET default fbPlaceholder;
+    property ModeLZCNT: TZYFilterBoolean read GetModeLZCNT write SetModeLZCNT default fbPlaceholder;
+    property ModeTZCNT: TZYFilterBoolean read GetModeTZCNT write SetModeTZCNT default fbPlaceholder;
 
     property ForceModrmReg: Boolean read FForceModrmReg write SetForceModrmReg default false; // TODO: Move! Does not fit here. + rename (extends opcode)
     property ForceModrmRm: Boolean read FForceModrmRm write SetForceModrmRm default false;    // TODO: Move! Does not fit here. + rename (extends opcode)
@@ -1327,11 +1325,12 @@ begin
       D.SetEvexB(EvexB);
       D.SetMvexE(MvexE);
 
-      D.SetFeatureAMD(FeatureAMD);
-      D.SetFeatureMPX(FeatureMPX);
-      D.SetFeatureCET(FeatureCET);
-      D.SetFeatureLZCNT(FeatureLZCNT);
-      D.SetFeatureTZCNT(FeatureTZCNT);
+      D.SetModeAMD(ModeAMD);
+      D.SetModeKNC(ModeKNC);
+      D.SetModeMPX(ModeMPX);
+      D.SetModeCET(ModeCET);
+      D.SetModeLZCNT(ModeLZCNT);
+      D.SetModeTZCNT(ModeTZCNT);
 
       D.SetForceModrmReg(FForceModrmReg);
       D.SetForceModrmRm(FForceModrmRm);
@@ -1374,11 +1373,12 @@ begin
       (EvexB = O.EvexB) and
       (MvexE = O.MvexE) and
 
-      (FeatureAMD = O.FeatureAMD) and
-      (FeatureMPX = O.FeatureMPX) and
-      (FeatureCET = O.FeatureCET) and
-      (FeatureLZCNT = O.FeatureLZCNT) and
-      (FeatureTZCNT = O.FeatureTZCNT) and
+      (ModeAMD = O.ModeAMD) and
+      (ModeKNC = O.ModeKNC) and
+      (ModeMPX = O.ModeMPX) and
+      (ModeCET = O.ModeCET) and
+      (ModeLZCNT = O.ModeLZCNT) and
+      (ModeTZCNT = O.ModeTZCNT) and
 
       (FForceModrmReg = O.FForceModrmReg) and
       (FForceModrmRm = O.FForceModrmRm);
@@ -1395,27 +1395,32 @@ begin
   Result := TZYFilterEvexB(Definition.FilterIndex[ifcEvexB]);
 end;
 
-function TZYInstructionFilters.GetFeatureAMD: TZYFilterBoolean;
+function TZYInstructionFilters.GetModeAMD: TZYFilterBoolean;
 begin
   Result := TZYFilterBoolean(Definition.FilterIndex[ifcModeAMD]);
 end;
 
-function TZYInstructionFilters.GetFeatureCET: TZYFilterBoolean;
+function TZYInstructionFilters.GetModeCET: TZYFilterBoolean;
 begin
   Result := TZYFilterBoolean(Definition.FilterIndex[ifcModeCET]);
 end;
 
-function TZYInstructionFilters.GetFeatureLZCNT: TZYFilterBoolean;
+function TZYInstructionFilters.GetModeKNC: TZYFilterBoolean;
+begin
+  Result := TZYFilterBoolean(Definition.FilterIndex[ifcModeKNC]);
+end;
+
+function TZYInstructionFilters.GetModeLZCNT: TZYFilterBoolean;
 begin
   Result := TZYFilterBoolean(Definition.FilterIndex[ifcModeLZCNT]);
 end;
 
-function TZYInstructionFilters.GetFeatureMPX: TZYFilterBoolean;
+function TZYInstructionFilters.GetModeMPX: TZYFilterBoolean;
 begin
   Result := TZYFilterBoolean(Definition.FilterIndex[ifcModeMPX]);
 end;
 
-function TZYInstructionFilters.GetFeatureTZCNT: TZYFilterBoolean;
+function TZYInstructionFilters.GetModeTZCNT: TZYFilterBoolean;
 begin
   Result := TZYFilterBoolean(Definition.FilterIndex[ifcModeTZCNT]);
 end;
@@ -1494,15 +1499,17 @@ begin
     SetEvexB(JSON.Reader.ReadEnum('evex_b', ebPlaceholder, TZYEnumFilterEvexB.JSONStrings));
     SetMvexE(JSON.Reader.ReadEnum('mvex_e', mePlaceholder, TZYEnumFilterMvexE.JSONStrings));
 
-    SetFeatureAMD(JSON.Reader.ReadEnum(
+    SetModeAMD(JSON.Reader.ReadEnum(
       'feature_amd', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
-    SetFeatureMPX(JSON.Reader.ReadEnum(
+    SetModeKNC(JSON.Reader.ReadEnum(
+      'feature_knc', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
+    SetModeMPX(JSON.Reader.ReadEnum(
       'feature_mpx', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
-    SetFeatureCET(JSON.Reader.ReadEnum(
+    SetModeCET(JSON.Reader.ReadEnum(
       'feature_cet', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
-    SetFeatureLZCNT(JSON.Reader.ReadEnum(
+    SetModeLZCNT(JSON.Reader.ReadEnum(
       'feature_lzcnt', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
-    SetFeatureTZCNT(JSON.Reader.ReadEnum(
+    SetModeTZCNT(JSON.Reader.ReadEnum(
       'feature_tzcnt', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
 
     SetForceModrmReg(JSON.ReadBoolean('force_modrm_reg', false));
@@ -1540,16 +1547,18 @@ begin
   if (MvexE <> mePlaceholder) then
     JSON.Writer.WriteEnum('mvex_e', MvexE, TZYEnumFilterMvexE.JSONStrings);
 
-  if (FeatureAMD <> fbPlaceholder) then
-    JSON.Writer.WriteEnum('feature_amd', FeatureAMD, TZYEnumFilterBoolean.JSONStrings);
-  if (FeatureMPX <> fbPlaceholder) then
-    JSON.Writer.WriteEnum('feature_mpx', FeatureMPX, TZYEnumFilterBoolean.JSONStrings);
-  if (FeatureCET <> fbPlaceholder) then
-    JSON.Writer.WriteEnum('feature_cet', FeatureCET, TZYEnumFilterBoolean.JSONStrings);
-  if (FeatureLZCNT <> fbPlaceholder) then
-    JSON.Writer.WriteEnum('feature_lzcnt', FeatureLZCNT, TZYEnumFilterBoolean.JSONStrings);
-  if (FeatureTZCNT <> fbPlaceholder) then
-    JSON.Writer.WriteEnum('feature_tzcnt', FeatureTZCNT, TZYEnumFilterBoolean.JSONStrings);
+  if (ModeAMD <> fbPlaceholder) then
+    JSON.Writer.WriteEnum('feature_amd', ModeAMD, TZYEnumFilterBoolean.JSONStrings);
+  if (ModeKNC <> fbPlaceholder) then
+    JSON.Writer.WriteEnum('feature_knc', ModeKNC, TZYEnumFilterBoolean.JSONStrings);
+  if (ModeMPX <> fbPlaceholder) then
+    JSON.Writer.WriteEnum('feature_mpx', ModeMPX, TZYEnumFilterBoolean.JSONStrings);
+  if (ModeCET <> fbPlaceholder) then
+    JSON.Writer.WriteEnum('feature_cet', ModeCET, TZYEnumFilterBoolean.JSONStrings);
+  if (ModeLZCNT <> fbPlaceholder) then
+    JSON.Writer.WriteEnum('feature_lzcnt', ModeLZCNT, TZYEnumFilterBoolean.JSONStrings);
+  if (ModeTZCNT <> fbPlaceholder) then
+    JSON.Writer.WriteEnum('feature_tzcnt', ModeTZCNT, TZYEnumFilterBoolean.JSONStrings);
 
   if (FForceModrmReg <> false) then
     JSON.WriteBoolean('force_modrm_reg', FForceModrmReg);
@@ -1576,27 +1585,32 @@ begin
   end;
 end;
 
-procedure TZYInstructionFilters.SetFeatureAMD(Value: TZYFilterBoolean);
+procedure TZYInstructionFilters.SetModeAMD(Value: TZYFilterBoolean);
 begin
   Definition.FilterIndex[ifcModeAMD] := Ord(Value);
 end;
 
-procedure TZYInstructionFilters.SetFeatureCET(Value: TZYFilterBoolean);
+procedure TZYInstructionFilters.SetModeCET(Value: TZYFilterBoolean);
 begin
   Definition.FilterIndex[ifcModeCET] := Ord(Value);
 end;
 
-procedure TZYInstructionFilters.SetFeatureLZCNT(Value: TZYFilterBoolean);
+procedure TZYInstructionFilters.SetModeKNC(Value: TZYFilterBoolean);
+begin
+  Definition.FilterIndex[ifcModeKNC] := Ord(Value);
+end;
+
+procedure TZYInstructionFilters.SetModeLZCNT(Value: TZYFilterBoolean);
 begin
   Definition.FilterIndex[ifcModeLZCNT] := Ord(Value);
 end;
 
-procedure TZYInstructionFilters.SetFeatureMPX(Value: TZYFilterBoolean);
+procedure TZYInstructionFilters.SetModeMPX(Value: TZYFilterBoolean);
 begin
   Definition.FilterIndex[ifcModeMPX] := Ord(Value);
 end;
 
-procedure TZYInstructionFilters.SetFeatureTZCNT(Value: TZYFilterBoolean);
+procedure TZYInstructionFilters.SetModeTZCNT(Value: TZYFilterBoolean);
 begin
   Definition.FilterIndex[ifcModeTZCNT] := Ord(Value);
 end;
