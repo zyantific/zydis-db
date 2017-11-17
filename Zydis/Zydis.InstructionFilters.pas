@@ -343,6 +343,7 @@ begin
       ifcRexW,
       ifcRexB,
       ifcModeAMD,
+      ifcModeKNC,
       ifcModeCET,
       ifcModeLZCNT,
       ifcModeTZCNT
