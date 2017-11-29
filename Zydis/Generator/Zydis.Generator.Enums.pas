@@ -129,7 +129,7 @@ begin
     W.NewLine := sLineBreak;
     W.Write('/**%s * @brief   Defines the `Zydis%s` datatype.%s */%s',
       [sLineBreak, EnumName, sLineBreak, sLineBreak]);
-    W.Write('typedef uint%d_t Zydis%s;', [Y, EnumName]);
+    W.Write('typedef ZydisU%d Zydis%s;', [Y, EnumName]);
     W.WriteLine;
     W.WriteLine;
     W.Write('/**%s * @brief   Values that represent `Zydis%s` elements.%s */%s',

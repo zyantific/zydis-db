@@ -257,8 +257,16 @@ begin
     Assert(Length(A) = 2);
     R := A[0];
     U := '[' + A[1];
+    SetLength(A, 0);
   end;
-  Writer.Write('%sconst %s %s[]%s =', [S, R, TableName, U]);
+  A := TableName.Split(['.']);
+  Assert((Length(A) = 1) or (Length(A) = 2));
+  if (Length(A) = 2) then
+  begin
+    Writer.Write('#' + A[1]);
+    Writer.WriteLine;
+  end;
+  Writer.Write('%sconst %s %s[]%s =', [S, R, A[0], U]);
   Writer.WriteLine;
   Writer.Write('{');
   Writer.WriteLine;
@@ -282,6 +290,11 @@ begin
   end;
   Writer.Write('};');
   Writer.WriteLine;
+  if (Length(A) = 2) then
+  begin
+    Writer.Write('#endif');
+    Writer.WriteLine;
+  end;
 end;
 
 class procedure TZYTableGenerator<T>.Generate(Generator: TZYCodeGenerator; const Filename,
@@ -387,6 +400,10 @@ begin
     Tables[Ord(E)].Name     := 'instructionDefinitions'     + TABLE_NAMES[E];
     Tables[Ord(E)].ItemType := 'ZydisInstructionDefinition' + TABLE_NAMES[E];
     Tables[Ord(E)].Items    := @Definitions.UniqueItems[E];
+    case E of
+      iencEVEX: Tables[Ord(E)].Name := Tables[Ord(E)].Name + '.ifndef ZYDIS_DISABLE_EVEX';
+      iencMVEX: Tables[Ord(E)].Name := Tables[Ord(E)].Name + '.ifndef ZYDIS_DISABLE_MVEX';
+    end;
   end;
   TZYTableGenerator<TZYInstructionDefinition>.Generate(Generator, Filename, Tables,
     procedure(Writer: TZYTableItemWriter; Index: Integer; const Item: TZYInstructionDefinition)
@@ -787,6 +804,12 @@ begin
     Tables[High(Tables)].Name     := 'filters' + TABLE_NAMES[C];
     Tables[High(Tables)].ItemType := 'ZydisDecoderTreeNode[' + F.NumberOfValues.ToString + ']';
     Tables[High(Tables)].Items    := @TreeSnapshot.Filters[C];
+    case C of
+      ifcEvexB:
+        Tables[High(Tables)].Name := Tables[High(Tables)].Name + '.ifndef ZYDIS_DISABLE_EVEX';
+      ifcMvexE:
+        Tables[High(Tables)].Name := Tables[High(Tables)].Name + '.ifndef ZYDIS_DISABLE_MVEX';
+    end;
   end;
   TZYTableGenerator<PZYTreeItem>.Generate(Generator, Filename, Tables,
     procedure(Writer: TZYTableItemWriter; Index: Integer; const Item: PZYTreeItem)
