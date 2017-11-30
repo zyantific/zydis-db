@@ -694,7 +694,9 @@ begin
       begin
         // Use binary search to get the insert position and add the items, if it's not already in
         // the list
-        if (N = 1) and (EqualityComparer.Equals(V, Default(T))) then
+        if (N = 1) and (
+          (EqualityComparer.Equals(V, Default(T))) or
+          (EqualityComparer.Equals(V, FItems[0]))) then
         begin
           Continue;
         end;
@@ -709,7 +711,9 @@ begin
         end;
       end else
       begin
-        if (N = 1) and (EqualityComparer.Equals(V, Default(T))) then
+        if (N = 1) and (
+          (EqualityComparer.Equals(V, Default(T))) or
+          (EqualityComparer.Equals(V, FItems[0]))) then
         begin
           FMapping[E][I] := 0;
           Continue;
@@ -744,7 +748,9 @@ begin
       begin
         D := Definitions.UniqueItems[E][I];
         V := GetPropertyValue(D);
-        if (N = 1) and (EqualityComparer.Equals(V, Default(T))) then
+        if (N = 1) and (
+          (EqualityComparer.Equals(V, Default(T))) or
+          (EqualityComparer.Equals(V, FItems[0]))) then
         begin
           FMapping[E][I] := 0;
           Continue;
