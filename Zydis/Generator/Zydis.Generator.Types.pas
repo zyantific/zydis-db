@@ -732,8 +732,8 @@ begin
           Inc(C);
         end;
       end;
+      WorkStep(Generator);
     end;
-    WorkStep(Generator);
   end;
   SetLength(FItems, C);
   if (HasAbsoluteOrder) then
