@@ -1222,10 +1222,8 @@ begin
         B := (C > 1);
         if (C = 1) then
         begin
-          {$WARNINGS OFF}
-          B := not ((FChildCount = 2) and
-            Assigned(FChilds[V - TZYInstructionFilterInfo.Info[FFilterClass].NumberOfValues]));
-          {$WARNINGS ON}
+          B := not ((FChildCount = 2) and Assigned(
+            FChilds[V - Integer(TZYInstructionFilterInfo.Info[FFilterClass].NumberOfValues)]));
         end;
       end;
       if (B) then

@@ -384,9 +384,7 @@ begin
         end;
         for I := Filter.IndexValueLo to Filter.IndexValueHi do
         begin
-          {$WARNINGS OFF}
-          if (I = V - Filter.NumberOfValues) then
-          {$WARNINGS ON}
+          if (I = V - Integer(Filter.NumberOfValues)) then
           begin
             if (Assigned(Node.Childs[I])) then
             begin
@@ -499,7 +497,7 @@ begin
       FDefaultFilter[C].ItemType := TZYTreeItemType.Filter;
       FDefaultFilter[C].FilterClass := C;
       SetLength(FDefaultFilter[C].Childs, F.NumberOfValues);
-      for I := 0 to F.NumberOfValues - 1 do
+      for I := 0 to Integer(F.NumberOfValues) - 1 do
       begin
         FDefaultFilter[C].Childs[I] := FDefaultItem;
       end;
@@ -755,7 +753,11 @@ begin
           FMapping[E][I] := 0;
           Continue;
         end;
+{$IFOPT C+}
         Assert(TArray.BinarySearch<T>(FItems, V, J, Comparer, N, Length(Items) - N));
+{$ELSE}
+        TArray.BinarySearch<T>(FItems, V, J, Comparer, N, Length(Items) - N);
+{$ENDIF}
         FMapping[E][I] := J;
         WorkStep(Generator);
       end;

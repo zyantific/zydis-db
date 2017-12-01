@@ -251,7 +251,11 @@ begin
 
   FIndexPlaceholder := -1;
   FIndexValueLo := 0;
-  FIndexValueHi := FNumberOfValues - 1;
+  FIndexValueHi := 0;
+  if (FNumberOfValues > 0) then
+  begin
+    FIndexValueHi := FNumberOfValues - 1;
+  end;
   FIndexNegatedValueLo := -1;
   FIndexNegatedValueHi := -1;
   FTotalCapacity := NumberOfValues;
