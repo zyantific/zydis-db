@@ -533,8 +533,14 @@ begin
       opeModrmRm:
         begin
           Inc(EncRm);
-          if (EncRm = 2) then
+          if (EncRm >= 2) then
           begin
+            if (Definition.Mnemonic = 'nop') and (Definition.Encoding = iencDefault) and
+              (Definition.OpcodeMap = omap0F) and (Definition.Opcode in [$1A, $1B]) then
+            begin
+              // These WIDENOP instructions are using multiple operands with MODRM.RM encoding
+              Continue;
+            end;
             if (GenerateErrorMessages) then
             begin
               ErrorMessages.Add('Multiple operands are using the MODRM.RM encoding.');
