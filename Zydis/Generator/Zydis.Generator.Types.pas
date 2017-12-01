@@ -325,7 +325,7 @@ begin
   if (itnfIsLeafNode in Node.Flags) then
   begin
     Assert(Node.FilterClass = ifcInvalid);
-    //Assert(Node.DefinitionCount = 1);
+    Assert(Node.DefinitionCount = 1);
     Item.ItemType := TZYTreeItemType.Definition;
     Item.DefinitionId := Definitions.FindUnique(Node.Definitions[0]);
     Item.DefinitionEncoding := Node.Definitions[0].Encoding;
