@@ -399,16 +399,20 @@ begin
     FCurrentModuleId := 3; // Generating enums
     FCurrentTaskId   := 0; // Generating mnemonic enum
     TZYEnumGenerator.Generate(Self, RootDirectory, 'Mnemonic',
-      'MNEMONIC_', Enums[0], [TZYEnumGeneratorFlag.GenerateNativeStrings]);
+      'MNEMONIC_', Enums[0],
+      [TZYEnumGeneratorFlag.GenerateNativeStrings, TZYEnumGeneratorFlag.ZydisString]);
     FCurrentTaskId   := 1; // Generating category enum
     TZYEnumGenerator.Generate(Self, RootDirectory, 'InstructionCategory',
-      'CATEGORY_', Enums[1], [TZYEnumGeneratorFlag.GenerateNativeStrings]);
+      'CATEGORY_', Enums[1],
+      [TZYEnumGeneratorFlag.GenerateNativeStrings]);
     FCurrentTaskId   := 2; // Generating isa-set enum
     TZYEnumGenerator.Generate(Self, RootDirectory, 'ISASet',
-      'ISA_SET_' , Enums[2], [TZYEnumGeneratorFlag.GenerateNativeStrings]);
+      'ISA_SET_' , Enums[2],
+      [TZYEnumGeneratorFlag.GenerateNativeStrings]);
     FCurrentTaskId   := 3; // Generating isa-extension enum
     TZYEnumGenerator.Generate(Self, RootDirectory, 'ISAExt',
-      'ISA_EXT_' , Enums[3], [TZYEnumGeneratorFlag.GenerateNativeStrings]);
+      'ISA_EXT_' , Enums[3],
+      [TZYEnumGeneratorFlag.GenerateNativeStrings]);
 
     {Report.Clear;
     S := 0;

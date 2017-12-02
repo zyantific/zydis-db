@@ -35,9 +35,22 @@ uses
 
 type
   TZYEnumGeneratorFlag = (
+    {**
+     * @brief Generates this enum in a private namespace.
+     * }
     PrivateEnum,
+    {**
+     * @brief Generates internal string arrays for the native library enum.
+     * }
     GenerateNativeStrings,
-    GenerateBindingStrings
+    {**
+     * @brief Generates string arrays for the language bindings.
+     * }
+    GenerateBindingStrings,
+    {**
+     * @brief Uses the `ZydisString` datatype instead of the default `char*`.
+     * }
+    ZydisString
   );
   TZYEnumGeneratorFlags = set of TZYEnumGeneratorFlag;
 
@@ -66,8 +79,8 @@ type
     class function GetMaxWorkCount(Enum: TZYGeneratorEnum;
       GenerateStrings: Boolean): Integer; virtual;
     class procedure Generate(Generator: TZYCodeGenerator;
-      const RootDirectory, EnumName, ItemPrefix: String;
-      Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings: Boolean); virtual; abstract;
+      const RootDirectory, EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum;
+      PrivateEnum, GenerateStrings, UseZydisString: Boolean); virtual; abstract;
   end;
 
 implementation
@@ -85,15 +98,16 @@ type
     class function IsNativeLanguage: Boolean; override;
     class procedure Generate(Generator: TZYCodeGenerator;
       const RootDirectory, EnumName, ItemPrefix: String;
-      Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings: Boolean); override;
+      Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings, UseZydisString: Boolean); override;
   end;
 
 { TZYEnumGeneratorC }
 
 class procedure TZYEnumGeneratorC.Generate(Generator: TZYCodeGenerator; const RootDirectory,
-  EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings: Boolean);
+  EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings,
+  UseZydisString: Boolean);
 var
-  F, N, S, T: String;
+  F, N, S, T, U: String;
   W: TStreamWriter;
   I, X, Y: Integer;
 begin
@@ -169,11 +183,16 @@ begin
   F := IncludeTrailingPathDelimiter(RootDirectory) +
     IncludeTrailingPathDelimiter(TZYGeneratorConsts.PathSourceC) + 'Enum' + EnumName + '.inc';
   S := ',';
+  U := 'char*';
+  if (UseZydisString) then
+  begin
+    U := 'ZydisGeneratedString';
+  end;
   W := TStreamWriter.Create(F);
   try
     W.AutoFlush := true;
     W.NewLine := sLineBreak;
-    W.Write('static const char* %s[] =', [N]);
+    W.Write('static const %s %s[] =', [U, N]);
     W.WriteLine;
     W.Write('{');
     W.WriteLine;
@@ -183,7 +202,13 @@ begin
       begin
         S := '';
       end;
-      W.Write('    "%s"%s%s', [Enum.Items[I], S, sLineBreak]);
+      if (UseZydisString) then
+      begin
+        W.Write('    ZYDIS_MAKE_GENERATED_STRING("%s")%s%s', [Enum.Items[I], S, sLineBreak]);
+      end else
+      begin
+        W.Write('    "%s"%s%s', [Enum.Items[I], S, sLineBreak]);
+      end;
       WorkStep(Generator);
     end;
     W.Write('};');
@@ -253,13 +278,14 @@ type
     class function GetName: String; override;
     class procedure Generate(Generator: TZYCodeGenerator;
       const RootDirectory, EnumName, ItemPrefix: String;
-      Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings: Boolean); override;
+      Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings, UseZydisString: Boolean); override;
   end;
 
 { TZYEnumGeneratorCPP }
 
 class procedure TZYEnumGeneratorCPP.Generate(Generator: TZYCodeGenerator; const RootDirectory,
-  EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings: Boolean);
+  EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings,
+  UseZydisString: Boolean);
 begin
   // TODO:
 end;
@@ -285,13 +311,14 @@ type
     class function GetName: String; override;
     class procedure Generate(Generator: TZYCodeGenerator;
       const RootDirectory, EnumName, ItemPrefix: String;
-      Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings: Boolean); override;
+      Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings, UseZydisString: Boolean); override;
   end;
 
 { TZYEnumGeneratorJava }
 
 class procedure TZYEnumGeneratorJava.Generate(Generator: TZYCodeGenerator; const RootDirectory,
-  EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings: Boolean);
+  EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings,
+  UseZydisString: Boolean);
 begin
   // TODO:
 end;
@@ -317,13 +344,14 @@ type
     class function GetName: String; override;
     class procedure Generate(Generator: TZYCodeGenerator;
       const RootDirectory, EnumName, ItemPrefix: String;
-      Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings: Boolean); override;
+      Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings, UseZydisString: Boolean); override;
   end;
 
 { TZYEnumGeneratorPascal }
 
 class procedure TZYEnumGeneratorPascal.Generate(Generator: TZYCodeGenerator; const RootDirectory,
-  EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings: Boolean);
+  EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings,
+  UseZydisString: Boolean);
 var
   F, N, S, T: String;
   W: TStreamWriter;
@@ -521,13 +549,14 @@ type
     class function GetName: String; override;
     class procedure Generate(Generator: TZYCodeGenerator;
       const RootDirectory, EnumName, ItemPrefix: String;
-      Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings: Boolean); override;
+      Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings, UseZydisString: Boolean); override;
   end;
 
 { TZYEnumGeneratorPython }
 
 class procedure TZYEnumGeneratorPython.Generate(Generator: TZYCodeGenerator; const RootDirectory,
-  EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings: Boolean);
+  EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings,
+  UseZydisString: Boolean);
 begin
   // TODO:
 end;
@@ -553,13 +582,14 @@ type
     class function GetName: String; override;
     class procedure Generate(Generator: TZYCodeGenerator;
       const RootDirectory, EnumName, ItemPrefix: String;
-      Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings: Boolean); override;
+      Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings, UseZydisString: Boolean); override;
   end;
 
 { TZYEnumGeneratorRust }
 
 class procedure TZYEnumGeneratorRust.Generate(Generator: TZYCodeGenerator; const RootDirectory,
-  EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings: Boolean);
+  EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum; PrivateEnum, GenerateStrings,
+  UseZydisString: Boolean);
 begin
   // TODO:
 end;
@@ -581,7 +611,7 @@ class procedure TZYEnumGenerator.Generate(Generator: TZYCodeGenerator; const Roo
   EnumName, ItemPrefix: String; Enum: TZYGeneratorEnum; Flags: TZYEnumGeneratorFlags);
 var
   I, N: Integer;
-  B, C: Boolean;
+  B, C, D: Boolean;
 begin
   N := 0;
   for I := Low(Languages) to High(Languages) do
@@ -603,7 +633,8 @@ begin
       ((not Languages[I].IsNativeLanguage) and
       (TZYEnumGeneratorFlag.GenerateBindingStrings in Flags));
     Assert(Languages[I].IsNativeLanguage or (not B));
-    Languages[I].Generate(Generator, RootDirectory, EnumName, ItemPrefix, Enum, B, C);
+    D := (TZYEnumGeneratorFlag.ZydisString in Flags);
+    Languages[I].Generate(Generator, RootDirectory, EnumName, ItemPrefix, Enum, B, C, D);
   end;
   WorkEnd(Generator);
 end;
