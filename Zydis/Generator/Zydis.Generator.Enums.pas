@@ -186,7 +186,7 @@ begin
   U := 'char*';
   if (UseZydisString) then
   begin
-    U := 'ZydisGeneratedString';
+    U := 'ZydisStaticString';
   end;
   W := TStreamWriter.Create(F);
   try
@@ -204,7 +204,7 @@ begin
       end;
       if (UseZydisString) then
       begin
-        W.Write('    ZYDIS_MAKE_GENERATED_STRING("%s")%s%s', [Enum.Items[I], S, sLineBreak]);
+        W.Write('    ZYDIS_MAKE_STATIC_STRING("%s")%s%s', [Enum.Items[I], S, sLineBreak]);
       end else
       begin
         W.Write('    "%s"%s%s', [Enum.Items[I], S, sLineBreak]);
