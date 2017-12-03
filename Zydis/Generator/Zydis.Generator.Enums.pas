@@ -130,7 +130,6 @@ begin
   begin
     N := N + 's';
   end;
-  S := ',';
   X := Floor(Log2(High(Enum.Items))) + 1;
   Y := 8;
   if (X > 64) then Assert(false) else
@@ -154,23 +153,20 @@ begin
     W.WriteLine;
     for I := Low(Enum.Items) to High(Enum.Items) do
     begin
-      if (I = High(Enum.Items)) then
-      begin
-        S := '';
-      end;
       T := Enum.Items[I].ToUpper;
       if (IsKeyword(T)) then
       begin
         Assert(false);
         T := '_' + T;
       end;
-      W.Write('    %s%s%s%s%s', ['ZYDIS_', ItemPrefix, T, S, sLineBreak]);
+      W.Write('    %s%s%s,%s', ['ZYDIS_', ItemPrefix, T, sLineBreak]);
       WorkStep(Generator);
     end;
-    W.Write('};' + sLineBreak + sLineBreak);
-    W.Write('#define %s%sMAX_VALUE %s%s%s%s', [
-      'ZYDIS_', ItemPrefix, 'ZYDIS_', ItemPrefix, T, sLineBreak]);
-    W.Write('#define %s%sMAX_BITS  0x%.4X', ['ZYDIS_', ItemPrefix, X]);
+    W.Write('    %s%sMAX_VALUE = %s%s%s,', ['ZYDIS_', ItemPrefix, 'ZYDIS_', ItemPrefix, T]);
+    W.WriteLine;
+    W.Write('    %s%sMIN_BITS  = 0x%.4X', ['ZYDIS_', ItemPrefix, X]);
+    W.WriteLine;
+    W.Write('};');
     W.WriteLine;
   finally
     W.Free;
