@@ -29,7 +29,7 @@ unit Zydis.Generator.Types;
 interface
 
 uses
-  System.SysUtils, System.Generics.Collections, System.Generics.Defaults, Zydis.Generator,
+  System.SysUtils, System.Generics.Collections, System.Generics.Defaults, Zydis.Generator.Base,
   Zydis.InstructionEditor, Zydis.InstructionFilters, Zydis.Enums.Filters;
 
 {$SCOPEDENUMS ON}
@@ -46,12 +46,12 @@ type
     FUniqueItemCount: Integer;
     FMapping: TZYDefinitionMapping;
   strict private
-    procedure Initialize(Generator: TZYCodeGenerator; Editor: TZYInstructionEditor);
+    procedure Initialize(Generator: TZYBaseGenerator; Editor: TZYInstructionEditor);
   public
     function Find(Definition: TZYInstructionDefinition): Integer; inline;
     function FindUnique(Definition: TZYInstructionDefinition): Integer; inline;
   public
-    constructor Create(Generator: TZYCodeGenerator; Editor: TZYInstructionEditor);
+    constructor Create(Generator: TZYBaseGenerator; Editor: TZYInstructionEditor);
   public
     property Items: TZYDefinitionLists read FItems;
     property ItemCount: Integer read FItemCount;
@@ -82,7 +82,7 @@ type
 
   TZYTreeSnapshot = class sealed(TZYGeneratorTask)
   strict private
-    FGenerator: TZYCodeGenerator;
+    FGenerator: TZYBaseGenerator;
     FRoot: TZYTreeItem;
     FFilters: TZYFilterLists;
     FFilterCount: Integer;
@@ -103,7 +103,7 @@ type
     procedure CreateFilterListsRecursive(const Item: TZYTreeItem);
     procedure Initialize(Editor: TZYInstructionEditor; Definitions: TZYDefinitionList);
   public
-    constructor Create(Generator: TZYCodeGenerator; Editor: TZYInstructionEditor;
+    constructor Create(Generator: TZYBaseGenerator; Editor: TZYInstructionEditor;
       Definitions: TZYDefinitionList);
   public
     property Root: PZYTreeItem read GetRoot;
@@ -122,9 +122,9 @@ type
     class function IndexOfOperands(List: TList<TZYInstructionOperand>;
       Operands: TZYInstructionOperands): Integer; inline; static;
   strict private
-    procedure Initialize(Generator: TZYCodeGenerator; Definitions: TZYDefinitionList); inline;
+    procedure Initialize(Generator: TZYBaseGenerator; Definitions: TZYDefinitionList); inline;
   public
-    constructor Create(Generator: TZYCodeGenerator; Definitions: TZYDefinitionList);
+    constructor Create(Generator: TZYBaseGenerator; Definitions: TZYDefinitionList);
   public
     property Items: TArray<TZYInstructionOperand> read FItems;
     property Mapping: TZYDefinitionMapping read FMapping;
@@ -135,16 +135,16 @@ type
     FItems: TArray<T>;
     FMapping: TZYDefinitionMapping;
   strict private
-    procedure Initialize(Generator: TZYCodeGenerator; Definitions: TZYDefinitionList;
+    procedure Initialize(Generator: TZYBaseGenerator; Definitions: TZYDefinitionList;
       const GetPropertyValue: TFunc<TZYInstructionDefinition, T>; HasAbsoluteOrder: Boolean;
       const EqualityComparer: IEqualityComparer<T>; const Comparer: IComparer<T>); inline;
   strict protected
     procedure SetDefaultValue(const Value: T); inline;
   public
-    constructor Create(Generator: TZYCodeGenerator; Definitions: TZYDefinitionList;
+    constructor Create(Generator: TZYBaseGenerator; Definitions: TZYDefinitionList;
       const GetPropertyValue: TFunc<TZYInstructionDefinition, T>;
       HasAbsoluteOrder: Boolean); overload;
-    constructor Create(Generator: TZYCodeGenerator; Definitions: TZYDefinitionList;
+    constructor Create(Generator: TZYBaseGenerator; Definitions: TZYDefinitionList;
       const GetPropertyValue: TFunc<TZYInstructionDefinition, T>; HasAbsoluteOrder: Boolean;
       const EqualityComparer: IEqualityComparer<T>; const Comparer: IComparer<T>); overload;
   public
@@ -154,9 +154,9 @@ type
 
   TZYUniqueDefinitionEnumPropertyList = class sealed(TZYUniqueDefinitionPropertyList<String>)
   public
-    constructor Create(Generator: TZYCodeGenerator; Definitions: TZYDefinitionList;
+    constructor Create(Generator: TZYBaseGenerator; Definitions: TZYDefinitionList;
       const GetPropertyValue: TFunc<TZYInstructionDefinition, String>); overload;
-    constructor Create(Generator: TZYCodeGenerator; Definitions: TZYDefinitionList;
+    constructor Create(Generator: TZYBaseGenerator; Definitions: TZYDefinitionList;
       const GetPropertyValue: TFunc<TZYInstructionDefinition, String>;
       const DefaultValue: String); overload;
   end;
@@ -168,7 +168,7 @@ uses
   Utils.Comparator, Zydis.Enums;
 
 {$REGION 'Class: TZYDefinitionList'}
-constructor TZYDefinitionList.Create(Generator: TZYCodeGenerator; Editor: TZYInstructionEditor);
+constructor TZYDefinitionList.Create(Generator: TZYBaseGenerator; Editor: TZYInstructionEditor);
 begin
   inherited Create;
   Initialize(Generator, Editor);
@@ -204,7 +204,7 @@ begin
   end;
 end;
 
-procedure TZYDefinitionList.Initialize(Generator: TZYCodeGenerator; Editor: TZYInstructionEditor);
+procedure TZYDefinitionList.Initialize(Generator: TZYBaseGenerator; Editor: TZYInstructionEditor);
 var
   I, J: Integer;
   N, U: array[TZYInstructionEncoding] of Integer;
@@ -287,7 +287,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'Class: TZYTreeSnapshot'}
-constructor TZYTreeSnapshot.Create(Generator: TZYCodeGenerator; Editor: TZYInstructionEditor;
+constructor TZYTreeSnapshot.Create(Generator: TZYBaseGenerator; Editor: TZYInstructionEditor;
   Definitions: TZYDefinitionList);
 begin
   inherited Create;
@@ -529,7 +529,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'Class: TZYUniqueOperandList'}
-constructor TZYUniqueOperandList.Create(Generator: TZYCodeGenerator;
+constructor TZYUniqueOperandList.Create(Generator: TZYBaseGenerator;
   Definitions: TZYDefinitionList);
 begin
   inherited Create;
@@ -586,7 +586,7 @@ begin
   end;
 end;
 
-procedure TZYUniqueOperandList.Initialize(Generator: TZYCodeGenerator;
+procedure TZYUniqueOperandList.Initialize(Generator: TZYBaseGenerator;
   Definitions: TZYDefinitionList);
 var
   L: TList<TZYInstructionOperand>;
@@ -642,7 +642,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'Class: TZYUniqueDefinitionPropertyList'}
-constructor TZYUniqueDefinitionPropertyList<T>.Create(Generator: TZYCodeGenerator;
+constructor TZYUniqueDefinitionPropertyList<T>.Create(Generator: TZYBaseGenerator;
   Definitions: TZYDefinitionList; const GetPropertyValue: TFunc<TZYInstructionDefinition, T>;
   HasAbsoluteOrder: Boolean; const EqualityComparer: IEqualityComparer<T>;
   const Comparer: IComparer<T>);
@@ -652,7 +652,7 @@ begin
     Generator, Definitions, GetPropertyValue, HasAbsoluteOrder, EqualityComparer, Comparer);
 end;
 
-constructor TZYUniqueDefinitionPropertyList<T>.Create(Generator: TZYCodeGenerator;
+constructor TZYUniqueDefinitionPropertyList<T>.Create(Generator: TZYBaseGenerator;
   Definitions: TZYDefinitionList; const GetPropertyValue: TFunc<TZYInstructionDefinition, T>;
   HasAbsoluteOrder: Boolean);
 begin
@@ -660,7 +660,7 @@ begin
     TComparer<T>.Default);
 end;
 
-procedure TZYUniqueDefinitionPropertyList<T>.Initialize(Generator: TZYCodeGenerator;
+procedure TZYUniqueDefinitionPropertyList<T>.Initialize(Generator: TZYBaseGenerator;
   Definitions: TZYDefinitionList; const GetPropertyValue: TFunc<TZYInstructionDefinition, T>;
   HasAbsoluteOrder: Boolean; const EqualityComparer: IEqualityComparer<T>;
   const Comparer: IComparer<T>);
@@ -774,14 +774,14 @@ end;
 {$ENDREGION}
 
 {$REGION 'Class: TZYUniqueDefinitionEnumPropertyList'}
-constructor TZYUniqueDefinitionEnumPropertyList.Create(Generator: TZYCodeGenerator;
+constructor TZYUniqueDefinitionEnumPropertyList.Create(Generator: TZYBaseGenerator;
   Definitions: TZYDefinitionList;
   const GetPropertyValue: TFunc<TZYInstructionDefinition, String>);
 begin
   inherited Create(Generator, Definitions, GetPropertyValue, true);
 end;
 
-constructor TZYUniqueDefinitionEnumPropertyList.Create(Generator: TZYCodeGenerator;
+constructor TZYUniqueDefinitionEnumPropertyList.Create(Generator: TZYBaseGenerator;
   Definitions: TZYDefinitionList;
   const GetPropertyValue: TFunc<TZYInstructionDefinition, String>; const DefaultValue: String);
 begin

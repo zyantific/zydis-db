@@ -29,7 +29,7 @@ unit Zydis.Generator.Tables;
 interface
 
 uses
-  System.Classes, System.Generics.Collections, Zydis.InstructionEditor, Zydis.Generator,
+  System.Classes, System.Generics.Collections, Zydis.InstructionEditor, Zydis.Generator.Base,
   Zydis.Generator.Types;
 
 {$SCOPEDENUMS ON}
@@ -70,14 +70,14 @@ type
 
   TZYTableGenerator<T> = class sealed(TZYGeneratorTask)
   strict private
-    class procedure Generate(Generator: TZYCodeGenerator; Writer: TStreamWriter;
+    class procedure Generate(Generator: TZYBaseGenerator; Writer: TStreamWriter;
       const TableName, TableItemType: String; const Items: TArray<T>;
       const WriteProc: TZYTableItemWriteProc<T>; const StorageClass: String); overload; static;
   public
-    class procedure Generate(Generator: TZYCodeGenerator; const Filename: String;
+    class procedure Generate(Generator: TZYBaseGenerator; const Filename: String;
       const TableName, TableItemType: String; const Items: TArray<T>;
       const WriteProc: TZYTableItemWriteProc<T>; const StorageClass: String = ''); overload; static;
-    class procedure Generate(Generator: TZYCodeGenerator; const Filename: String;
+    class procedure Generate(Generator: TZYBaseGenerator; const Filename: String;
       const Tables: TArray<TZYTableTemplate<T>>;
       const WriteProc: TZYTableItemWriteProc<T>; const StorageClass: String = ''); overload; static;
   end;
@@ -91,7 +91,7 @@ type
     class function HasNDSNDDOperand(Definition: TZYInstructionDefinition): Boolean; static; inline;
     class function HasVSIB(Definition: TZYInstructionDefinition): Boolean; static; inline;
   public
-    class procedure Generate(Generator: TZYCodeGenerator; const Filename: String;
+    class procedure Generate(Generator: TZYBaseGenerator; const Filename: String;
       Definitions: TZYDefinitionList; Operands: TZYUniqueOperandList;
       Category, ISASet, ISAExtension: TZYGeneratorEnum;
       AccessedFlags: TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>); static;
@@ -99,32 +99,32 @@ type
 
   TZYOperandTableGenerator = record
   public
-    class procedure Generate(Generator: TZYCodeGenerator; const Filename: String;
+    class procedure Generate(Generator: TZYBaseGenerator; const Filename: String;
       Operands: TZYUniqueOperandList); static;
   end;
 
   TZYEncodingTableGenerator = record
   public
-    class procedure Generate(Generator: TZYCodeGenerator; const Filename: String;
+    class procedure Generate(Generator: TZYBaseGenerator; const Filename: String;
       Encodings: TZYUniqueDefinitionPropertyList<TZYInstructionPartInfo>); static;
   end;
 
   TZYAccessedFlagsTableGenerator = record
   public
-    class procedure Generate(Generator: TZYCodeGenerator; const Filename: String;
+    class procedure Generate(Generator: TZYBaseGenerator; const Filename: String;
       AccessedFlags: TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>); static;
   end;
 
   TZYDecoderTableGenerator = record
   public
-    class procedure Generate(Generator: TZYCodeGenerator; const Filename: String;
+    class procedure Generate(Generator: TZYBaseGenerator; const Filename: String;
       TreeSnapshot: TZYTreeSnapshot;
       Encodings: TZYUniqueDefinitionPropertyList<TZYInstructionPartInfo>); static;
   end;
 
   TZYEncoderTableGenerator = record
   public
-    class procedure Generate(Generator: TZYCodeGenerator; const Filename: String;
+    class procedure Generate(Generator: TZYBaseGenerator; const Filename: String;
       Definitions: TZYDefinitionList; Mnemonics: TZYGeneratorEnum); static;
   end;
 
@@ -234,7 +234,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'Class: TZYTableGenerator<T>'}
-class procedure TZYTableGenerator<T>.Generate(Generator: TZYCodeGenerator; Writer: TStreamWriter;
+class procedure TZYTableGenerator<T>.Generate(Generator: TZYBaseGenerator; Writer: TStreamWriter;
   const TableName, TableItemType: String; const Items: TArray<T>;
   const WriteProc: TZYTableItemWriteProc<T>; const StorageClass: String);
 var
@@ -297,7 +297,7 @@ begin
   end;
 end;
 
-class procedure TZYTableGenerator<T>.Generate(Generator: TZYCodeGenerator; const Filename,
+class procedure TZYTableGenerator<T>.Generate(Generator: TZYBaseGenerator; const Filename,
   TableName, TableItemType: String; const Items: TArray<T>;
   const WriteProc: TZYTableItemWriteProc<T>; const StorageClass: String);
 var
@@ -315,7 +315,7 @@ begin
   end;
 end;
 
-class procedure TZYTableGenerator<T>.Generate(Generator: TZYCodeGenerator; const Filename: String;
+class procedure TZYTableGenerator<T>.Generate(Generator: TZYBaseGenerator; const Filename: String;
   const Tables: TArray<TZYTableTemplate<T>>; const WriteProc: TZYTableItemWriteProc<T>;
   const StorageClass: String);
 var
@@ -377,7 +377,7 @@ begin
   end;
 end;
 
-class procedure TZYDefinitionTableGenerator.Generate(Generator: TZYCodeGenerator;
+class procedure TZYDefinitionTableGenerator.Generate(Generator: TZYBaseGenerator;
   const Filename: String; Definitions: TZYDefinitionList; Operands: TZYUniqueOperandList;
   Category, ISASet, ISAExtension: TZYGeneratorEnum;
   AccessedFlags: TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>);
@@ -556,7 +556,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'Class: TZYOperandTableGenerator'}
-class procedure TZYOperandTableGenerator.Generate(Generator: TZYCodeGenerator;
+class procedure TZYOperandTableGenerator.Generate(Generator: TZYBaseGenerator;
   const Filename: String; Operands: TZYUniqueOperandList);
 begin
   TZYTableGenerator<TZYInstructionOperand>.Generate(Generator, Filename, 'operandDefinitions',
@@ -639,7 +639,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'Class: TZYEncodingTableGenerator'}
-class procedure TZYEncodingTableGenerator.Generate(Generator: TZYCodeGenerator;
+class procedure TZYEncodingTableGenerator.Generate(Generator: TZYBaseGenerator;
   const Filename: String; Encodings: TZYUniqueDefinitionPropertyList<TZYInstructionPartInfo>);
 begin
   TZYTableGenerator<TZYInstructionPartInfo>.Generate(Generator, Filename, 'instructionEncodings',
@@ -708,7 +708,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'Class: TZYAccessedFlagsTableGenerator'}
-class procedure TZYAccessedFlagsTableGenerator.Generate(Generator: TZYCodeGenerator;
+class procedure TZYAccessedFlagsTableGenerator.Generate(Generator: TZYBaseGenerator;
   const Filename: String; AccessedFlags: TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>);
 begin
   TZYTableGenerator<TZYInstructionFlagsInfo>.Generate(Generator, Filename, 'accessedFlags',
@@ -729,7 +729,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'Class: TZYDecoderTableGenerator'}
-class procedure TZYDecoderTableGenerator.Generate(Generator: TZYCodeGenerator;
+class procedure TZYDecoderTableGenerator.Generate(Generator: TZYBaseGenerator;
   const Filename: String; TreeSnapshot: TZYTreeSnapshot;
   Encodings: TZYUniqueDefinitionPropertyList<TZYInstructionPartInfo>);
 const
@@ -853,7 +853,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'Class: TZYEncoderTableGenerator'}
-class procedure TZYEncoderTableGenerator.Generate(Generator: TZYCodeGenerator;
+class procedure TZYEncoderTableGenerator.Generate(Generator: TZYBaseGenerator;
   const Filename: String; Definitions: TZYDefinitionList; Mnemonics: TZYGeneratorEnum);
 begin
 

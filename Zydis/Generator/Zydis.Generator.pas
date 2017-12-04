@@ -29,18 +29,9 @@ unit Zydis.Generator;
 interface
 
 uses
-  System.Classes, Zydis.InstructionEditor;
+  System.Classes, Zydis.Generator.Base, Zydis.InstructionEditor;
 
 type
-  TZYCodeGenerator = class;
-
-  TZYGeneratorTask = class abstract(TObject)
-  strict protected
-    class procedure WorkStart(Generator: TZYCodeGenerator; TotalWorkCount: Integer); static;
-    class procedure WorkStep(Generator: TZYCodeGenerator); static;
-    class procedure WorkEnd(Generator: TZYCodeGenerator); static;
-  end;
-
   PZYGeneratorReport = ^TZYGeneratorReport;
   TZYGeneratorReport = record
   public type
@@ -63,29 +54,9 @@ type
     property Entries[Index: Integer]: TEntry read GetEntry;
   end;
 
-  TZYGeneratorWorkStartEvent = procedure(Sender: TObject; ModuleId, TaskId: Integer;
-    TotalWorkCount: Integer) of Object;
-  TZYGeneratorWorkEvent      = procedure(Sender: TObject; WorkCount: Integer) of Object;
-  TZYGeneratorWorkEndEvent   = TNotifyEvent;
-
-  TZYCodeGenerator = class sealed(TObject)
-  strict private
-    FCurrentModuleId: Integer;
-    FCurrentTaskId: Integer;
-    FCurrentWorkCount: Integer;
-  strict private
-    FOnWorkStart: TZYGeneratorWorkStartEvent;
-    FOnWork: TZYGeneratorWorkEvent;
-    FOnWorkEnd: TZYGeneratorWorkEndEvent;
-  strict private
-    class function GetModuleDescription(ModuleId: Integer): String; inline; static;
-    class function GetModuleCount: Integer; inline; static;
-    class function GetTaskDescription(ModuleId, TaskId: Integer): String; inline; static;
-    class function GetTaskCount(ModuleId: Integer): Integer; inline; static;
-  private
-    procedure WorkStart(TotalWorkCount: Integer); inline;
-    procedure WorkStep; inline;
-    procedure WorkEnd; inline;
+  TZYCodeGenerator = class sealed(TZYBaseGenerator)
+  strict protected
+    procedure InitGenerator(var ModuleInfo: TArray<TZYGeneratorModuleInfo>); override;
   public
     procedure GenerateCodeFiles(Editor: TZYInstructionEditor;
       const RootDirectory: String); overload; inline;
@@ -97,14 +68,7 @@ type
       const RootDirectory: String; const ISASets: array of String;
       var Report: TZYGeneratorReport); overload;
   public
-    class property ModuleDescriptions[ModuleId: Integer]: String read GetModuleDescription;
-    class property ModuleCount: Integer read GetModuleCount;
-    class property TaskDescriptions[ModuleId, TaskId: Integer]: String read GetTaskDescription;
-    class property TaskCount[ModuleId: Integer]: Integer read GetTaskCount;
-  public
-    property OnWorkStart: TZYGeneratorWorkStartEvent read FOnWorkStart write FOnWorkStart;
-    property OnWork: TZYGeneratorWorkEvent read FOnWork write FOnWork;
-    property OnWorkEnd: TZYGeneratorWorkEndEvent read FOnWorkEnd write FOnWorkEnd;
+    constructor Create;
   end;
 
 implementation
@@ -141,23 +105,6 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION 'Class: TZYGeneratorTask'}
-class procedure TZYGeneratorTask.WorkEnd(Generator: TZYCodeGenerator);
-begin
-  Generator.WorkEnd;
-end;
-
-class procedure TZYGeneratorTask.WorkStart(Generator: TZYCodeGenerator; TotalWorkCount: Integer);
-begin
-  Generator.WorkStart(TotalWorkCount);
-end;
-
-class procedure TZYGeneratorTask.WorkStep(Generator: TZYCodeGenerator);
-begin
-  Generator.WorkStep;
-end;
-{$ENDREGION}
-
 {$REGION 'Class: TZYCodeGenerator'}
 procedure TZYCodeGenerator.GenerateCodeFiles(Editor: TZYInstructionEditor;
   const RootDirectory: String);
@@ -179,6 +126,11 @@ procedure TZYCodeGenerator.GenerateCodeFiles(Editor: TZYInstructionEditor;
   const RootDirectory: String; var Report: TZYGeneratorReport);
 begin
   GenerateCodeFiles(Editor, RootDirectory, [], Report);
+end;
+
+constructor TZYCodeGenerator.Create;
+begin
+  inherited Create;
 end;
 
 procedure TZYCodeGenerator.GenerateCodeFiles(Editor: TZYInstructionEditor;
@@ -272,6 +224,7 @@ begin
     raise Exception.Create('Database has unresolved conflicts.');
   end;
 
+  Reset;
   Definitions := nil;
   Snapshot    := nil;
   Operands    := nil;
@@ -281,16 +234,15 @@ begin
 
   E := TZYInstructionEditor.Create;
   try
-    FCurrentModuleId := 0; // Preparing data tables
-    FCurrentTaskId   := 0; // Selecting desired definitions
+    // Selecting desired definitions
     DuplicateDefinitions(Editor, E, ISASets);
-    FCurrentTaskId   := 1; // Creating definition list
+    // Creating definition list
     Definitions := TZYDefinitionList.Create(Self, E);
-    FCurrentTaskId   := 2; // Creating instruction tree
+    // Creating instruction tree
     Snapshot := TZYTreeSnapshot.Create(Self, E, Definitions);
-    FCurrentTaskId   := 3; // Creating operand list
+    // Creating operand list
     Operands := TZYUniqueOperandList.Create(Self, Definitions);
-    FCurrentTaskId   := 4; // Gathering physical encodings
+    // Gathering physical encodings
     // We don't need a custom equality comparator, because all of the zydis classes override
     // `TObject.Equals`, but we have to implement a custom comparator in order to support objects
     // with absolute order.
@@ -332,7 +284,7 @@ begin
               .Comparing(Left.ImmediateB.Width64, Right.ImmediateB.Width64)
               .Compare;
           end));
-    FCurrentTaskId   := 5; // Gathering accessed flags
+    // Gathering accessed flags
     // We don't need a custom equality comparator, because all of the zydis classes override
     // `TObject.Equals`
     Flags :=
@@ -342,76 +294,75 @@ begin
           Result := D.AffectedFlags;
         end, false);
 
-    FCurrentModuleId := 1; // Preparing enums
-    FCurrentTaskId   := 0; // Creating mnemonic enum
+    // Creating mnemonic enum
     Enums[0] := TZYGeneratorEnum.Create(Self, Definitions,
       function(D: TZYInstructionDefinition): String
       begin
         Result := D.Mnemonic;
       end, 'invalid');
-    FCurrentTaskId   := 1; // Creating category enum
+    // Creating category enum
     Enums[1] := TZYGeneratorEnum.Create(Self, Definitions,
       function(D: TZYInstructionDefinition): String
       begin
         Result := D.Meta.Category;
       end, 'INVALID');
-    FCurrentTaskId   := 2; // Creating isa-set enum
+    // Creating isa-set enum
     Enums[2] := TZYGeneratorEnum.Create(Self, Definitions,
       function(D: TZYInstructionDefinition): String
       begin
         Result := D.Meta.Extension;
       end, 'INVALID');
-    FCurrentTaskId   := 3; // Creating isa-extension enum
+    // Creating isa-extension enum
     Enums[3] := TZYGeneratorEnum.Create(Self, Definitions,
       function(D: TZYInstructionDefinition): String
       begin
         Result := D.Meta.ISASet;
       end, 'INVALID');
 
-    FCurrentModuleId := 2; // Generating data tables
-    FCurrentTaskId   := 0; // Generating definition list
+    // Generating definition list
     TZYDefinitionTableGenerator.Generate(
       Self, IncludeTrailingPathDelimiter(RootDirectory) +
       IncludeTrailingPathDelimiter(TZYGeneratorConsts.PathSource) +
       TZYGeneratorConsts.FilenameInstructions,
       Definitions, Operands, Enums[1], Enums[2], Enums[3], Flags);
-    FCurrentTaskId   := 1; // Generating operand list
+    // Generating operand list
     TZYOperandTableGenerator.Generate(
       Self, IncludeTrailingPathDelimiter(RootDirectory) +
       IncludeTrailingPathDelimiter(TZYGeneratorConsts.PathSource) +
       TZYGeneratorConsts.FilenameOperands, Operands);
-    FCurrentTaskId   := 2; // Generating physical encoding list
+    // Generating physical encoding list
     TZYEncodingTableGenerator.Generate(
       Self, IncludeTrailingPathDelimiter(RootDirectory) +
       IncludeTrailingPathDelimiter(TZYGeneratorConsts.PathSource) +
       TZYGeneratorConsts.FilenameEncodings, Encodings);
-    FCurrentTaskId   := 3; // Generating accessed flags list
+    // Generating accessed flags list
     TZYAccessedFlagsTableGenerator.Generate(
       Self, IncludeTrailingPathDelimiter(RootDirectory) +
       IncludeTrailingPathDelimiter(TZYGeneratorConsts.PathSource) +
       TZYGeneratorConsts.FilenameAccessedFlags, Flags);
-    FCurrentTaskId   := 4; // Generating decoder tables
+    // Generating decoder tables
     TZYDecoderTableGenerator.Generate(
       Self, IncludeTrailingPathDelimiter(RootDirectory) +
       IncludeTrailingPathDelimiter(TZYGeneratorConsts.PathSource) +
       TZYGeneratorConsts.FilenameDecoderTables, Snapshot, Encodings);
+    // Generating encoder tables
+    SkipTask;
 
-    FCurrentModuleId := 3; // Generating enums
-    FCurrentTaskId   := 0; // Generating mnemonic enum
+    // Generating mnemonic enum
     TZYEnumGenerator.Generate(Self, RootDirectory, 'Mnemonic',
-      'MNEMONIC_', Enums[0],
+      'MNEMONIC_', Enums[0].Items,
       [TZYEnumGeneratorFlag.GenerateNativeStrings, TZYEnumGeneratorFlag.ZydisString]);
-    FCurrentTaskId   := 1; // Generating category enum
+    // Generating category enum
     TZYEnumGenerator.Generate(Self, RootDirectory, 'InstructionCategory',
-      'CATEGORY_', Enums[1],
+      'CATEGORY_', Enums[1].Items,
       [TZYEnumGeneratorFlag.GenerateNativeStrings]);
-    FCurrentTaskId   := 2; // Generating isa-set enum
+    // Generating isa-set enum
     TZYEnumGenerator.Generate(Self, RootDirectory, 'ISASet',
-      'ISA_SET_' , Enums[2],
+      'ISA_SET_' , Enums[2].Items,
       [TZYEnumGeneratorFlag.GenerateNativeStrings]);
-    FCurrentTaskId   := 3; // Generating isa-extension enum
+    // Generating isa-extension enum
     TZYEnumGenerator.Generate(Self, RootDirectory, 'ISAExt',
-      'ISA_EXT_' , Enums[3],
+      'ISA_EXT_' , Enums[3].Items,
       [TZYEnumGeneratorFlag.GenerateNativeStrings]);
 
     {Report.Clear;
@@ -438,99 +389,53 @@ begin
   end;
 end;
 
-class function TZYCodeGenerator.GetModuleCount: Integer;
-begin
-  Result := 4;
-end;
+procedure TZYCodeGenerator.InitGenerator(var ModuleInfo: TArray<TZYGeneratorModuleInfo>);
 
-class function TZYCodeGenerator.GetModuleDescription(ModuleId: Integer): String;
+procedure RegisterModule(const Description: String; const TaskDescriptions: array of String);
+var
+  I: Integer;
 begin
-  case ModuleId of
-    0: Result := 'Preparing data tables';
-    1: Result := 'Preparing enums';
-    2: Result := 'Generating data tables';
-    3: Result := 'Generating enums'
-      else raise EListError.CreateFmt('Index out of bounds (%d)', [ModuleId]);
-  end;
-end;
-
-class function TZYCodeGenerator.GetTaskCount(ModuleId: Integer): Integer;
-begin
-  case ModuleId of
-    0: Result := 6;
-    1: Result := 4;
-    2: Result := 6;
-    3: Result := 4
-      else raise EListError.CreateFmt('Index out of bounds (%d)', [ModuleId]);
-  end;
-end;
-
-class function TZYCodeGenerator.GetTaskDescription(ModuleId, TaskId: Integer): String;
-begin
-  case ModuleId of
-    0:
-      case TaskId of
-        0: Result := 'Selecting desired definitions';
-        1: Result := 'Creating definition list';
-        2: Result := 'Creating instruction tree';
-        3: Result := 'Creating operand list';
-        4: Result := 'Gathering physical encodings';
-        5: Result := 'Gathering accessed flags'
-          else raise EListError.CreateFmt('Index out of bounds (%d)', [TaskId]);
-      end;
-    1:
-      case TaskId of
-        0: Result := 'Creating mnemonic enum';
-        1: Result := 'Creating category enum';
-        2: Result := 'Creating isa-set enum';
-        3: Result := 'Creating isa-extension enum'
-          else raise EListError.CreateFmt('Index out of bounds (%d)', [TaskId]);
-      end;
-    2:
-      case TaskId of
-        0: Result := 'Generating definition list';
-        1: Result := 'Generating operand list';
-        2: Result := 'Generating physical encoding list';
-        3: Result := 'Generating accessed flags list';
-        4: Result := 'Generating decoder tables';
-        5: Result := 'Generating encoder tables'
-          else raise EListError.CreateFmt('Index out of bounds (%d)', [TaskId]);
-      end;
-    3:
-      case TaskId of
-        0: Result := 'Generating mnemonic enum';
-        1: Result := 'Generating category enum';
-        2: Result := 'Generating isa-set enum';
-        3: Result := 'Generating isa-extension enum'
-          else raise EListError.CreateFmt('Index out of bounds (%d)', [TaskId]);
-      end else raise EListError.CreateFmt('Index out of bounds (%d)', [ModuleId]);
-  end;
-end;
-
-procedure TZYCodeGenerator.WorkEnd;
-begin
-  if Assigned(FOnWorkEnd) then
+  SetLength(ModuleInfo, Length(ModuleInfo) + 1);
+  SetLength(ModuleInfo[High(ModuleInfo)].Tasks, Length(TaskDescriptions));
+  for I := Low(TaskDescriptions) to High(TaskDescriptions) do
   begin
-    FOnWorkEnd(Self);
+    ModuleInfo[High(ModuleInfo)].Tasks[I].Description := TaskDescriptions[I];
   end;
 end;
 
-procedure TZYCodeGenerator.WorkStart(TotalWorkCount: Integer);
 begin
-  FCurrentWorkCount := 0;
-  if Assigned(FOnWorkStart) then
-  begin
-    FOnWorkStart(Self, FCurrentModuleId, FCurrentTaskId, TotalWorkCount);
-  end;
-end;
-
-procedure TZYCodeGenerator.WorkStep;
-begin
-  Inc(FCurrentWorkCount);
-  if Assigned(FOnWork) then
-  begin
-    FOnWork(Self, FCurrentWorkCount);
-  end;
+  RegisterModule('Preparing data tables',
+  [
+    'Selecting desired definitions',
+    'Creating definition list',
+    'Creating instruction tree',
+    'Creating operand list',
+    'Gathering physical encodings',
+    'Gathering accessed flags'
+  ]);
+  RegisterModule('Preparing enums',
+  [
+    'Creating mnemonic enum',
+    'Creating category enum',
+    'Creating isa-set enum',
+    'Creating isa-extension enum'
+  ]);
+  RegisterModule('Generating data tables',
+  [
+    'Generating definition list',
+    'Generating operand list',
+    'Generating physical encoding list',
+    'Generating accessed flags list',
+    'Generating decoder tables',
+    'Generating encoder tables'
+  ]);
+  RegisterModule('Generating enums',
+  [
+    'Generating mnemonic enum',
+    'Generating category enum',
+    'Generating isa-set enum',
+    'Generating isa-extension enum'
+  ]);
 end;
 {$ENDREGION}
 
