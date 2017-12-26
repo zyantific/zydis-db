@@ -3127,11 +3127,15 @@ begin
       begin
         Result := 0;
         F := ifcMode;
-        while (Result = 0) and (F <= High(TZYInstructionFilterClass)) do
+        while (Result = 0) do
         begin
           if (F <> ifcMandatoryPrefix) then
           begin
             Result := Left.FilterIndex[F] - Right.FilterIndex[F];
+          end;
+          if (F = High(TZYInstructionFilterClass)) then
+          begin
+            Break;
           end;
           Inc(F);
         end;

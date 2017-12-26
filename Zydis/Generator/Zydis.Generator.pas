@@ -31,6 +31,8 @@ interface
 uses
   System.Classes, Zydis.Generator.Base, Zydis.InstructionEditor;
 
+{$SCOPEDENUMS ON}
+
 type
   PZYGeneratorReport = ^TZYGeneratorReport;
   TZYGeneratorReport = record
@@ -75,8 +77,8 @@ implementation
 
 uses
   System.SysUtils, System.Generics.Collections, System.Generics.Defaults, Utils.Comparator,
-  Utils.Container, Zydis.Enums, Zydis.Enums.Filters, Zydis.InstructionFilters,
-  Zydis.Generator.Types, Zydis.Generator.Tables, Zydis.Generator.Enums, Zydis.Generator.Consts;
+  Utils.Container, Zydis.Generator.Enums, Zydis.Enums, Zydis.Enums.Filters,
+  Zydis.InstructionFilters, Zydis.Generator.Types, Zydis.Generator.Tables, Zydis.Generator.Consts;
 
 {$REGION 'Class: TZYGeneratorReport'}
 procedure TZYGeneratorReport.Clear;
@@ -207,6 +209,33 @@ begin
     Target.EndUpdate;
   end;
   WorkEnd;
+end;
+
+type
+  TZYEnumOption = (Native, Bindings);
+  TZYEnumOptionScope = set of TZYEnumOption;
+
+function MakeEnumGeneratorTaskList(const AEnumName, AItemPrefix: String;
+  FlagsNative, FlagsBindings: TZYEnumGeneratorFlags): TZYEnumGeneratorTaskItems;
+begin
+  Result := [
+    TZYEnumGeneratorTaskItem.Create(
+      TZYEnumGeneratorC,
+      TZYGeneratorConsts.PathIncludeC,
+      TZYGeneratorConsts.PathSourceC,
+      AEnumName,
+      AItemPrefix,
+      FlagsNative
+    ),
+    TZYEnumGeneratorTaskItem.Create(
+      TZYEnumGeneratorPascal,
+      TZYGeneratorConsts.PathIncludePascal,
+      TZYGeneratorConsts.PathSourcePascal,
+      AEnumName,
+      AItemPrefix,
+      FlagsBindings
+    )
+  ];
 end;
 
 var
@@ -349,21 +378,33 @@ begin
     SkipTask;
 
     // Generating mnemonic enum
-    TZYEnumGenerator.Generate(Self, RootDirectory, 'Mnemonic',
-      'MNEMONIC_', Enums[0].Items,
-      [TZYEnumGeneratorFlag.GenerateNativeStrings, TZYEnumGeneratorFlag.ZydisString]);
+    TZYEnumGeneratorTask.Generate(Self, RootDirectory, MakeEnumGeneratorTaskList(
+      'Mnemonic',
+      'MNEMONIC_',
+      [TZYEnumGeneratorFlag.GenerateStrings, TZYEnumGeneratorFlag.UseCustomStringType],
+      []),
+      Enums[0].Items);
     // Generating category enum
-    TZYEnumGenerator.Generate(Self, RootDirectory, 'InstructionCategory',
-      'CATEGORY_', Enums[1].Items,
-      [TZYEnumGeneratorFlag.GenerateNativeStrings]);
+    TZYEnumGeneratorTask.Generate(Self, RootDirectory, MakeEnumGeneratorTaskList(
+      'InstructionCategory',
+      'CATEGORY_',
+      [TZYEnumGeneratorFlag.GenerateStrings],
+      []),
+      Enums[1].Items);
     // Generating isa-set enum
-    TZYEnumGenerator.Generate(Self, RootDirectory, 'ISASet',
-      'ISA_SET_' , Enums[2].Items,
-      [TZYEnumGeneratorFlag.GenerateNativeStrings]);
+    TZYEnumGeneratorTask.Generate(Self, RootDirectory, MakeEnumGeneratorTaskList(
+      'ISASet',
+      'ISA_SET_',
+      [TZYEnumGeneratorFlag.GenerateStrings],
+      []),
+      Enums[2].Items);
     // Generating isa-extension enum
-    TZYEnumGenerator.Generate(Self, RootDirectory, 'ISAExt',
-      'ISA_EXT_' , Enums[3].Items,
-      [TZYEnumGeneratorFlag.GenerateNativeStrings]);
+    TZYEnumGeneratorTask.Generate(Self, RootDirectory, MakeEnumGeneratorTaskList(
+      'ISAExt',
+      'ISA_EXT_',
+      [TZYEnumGeneratorFlag.GenerateStrings],
+      []),
+      Enums[3].Items);
 
     {Report.Clear;
     S := 0;

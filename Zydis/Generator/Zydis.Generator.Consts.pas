@@ -45,7 +45,7 @@ type
     PathIncludePython       = 'zydis-py\Generated';
     PathSourcePython        = 'zydis-py\Generated';
     PathIncludeRust         = 'zydis-rs\Generated';
-    PathSourceRus           = 'zydis-rs\Generated';
+    PathSourceRust          = 'zydis-rs\Generated';
     PathInclude             = PathIncludeC;
     PathSource              = PathSourceC;
   public const

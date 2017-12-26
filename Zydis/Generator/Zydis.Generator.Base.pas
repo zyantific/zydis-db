@@ -1,3 +1,29 @@
+{***************************************************************************************************
+
+  Zydis Code Generator
+
+  Original Author : Florian Bernd
+
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+
+***************************************************************************************************}
+
 unit Zydis.Generator.Base;
 
 interface
@@ -10,9 +36,9 @@ type
 
   TZYGeneratorTask = class abstract(TObject)
   strict protected
-    class procedure WorkStart(Generator: TZYBaseGenerator; TotalWorkCount: Integer); static;
-    class procedure WorkStep(Generator: TZYBaseGenerator); static;
-    class procedure WorkEnd(Generator: TZYBaseGenerator); static;
+    class procedure WorkStart(AGenerator: TZYBaseGenerator; ATotalWorkCount: Integer); static;
+    class procedure WorkStep(AGenerator: TZYBaseGenerator); static;
+    class procedure WorkEnd(AGenerator: TZYBaseGenerator); static;
   strict protected
     constructor Create;
   end;
@@ -28,9 +54,9 @@ type
     Tasks: TArray<TZYGeneratorTaskInfo>;
   end;
 
-  TZYGeneratorWorkStartEvent = procedure(Sender: TObject; ModuleId, TaskId: Integer;
+  TZYGeneratorWorkStartEvent = procedure(Sender: TObject; AModuleId, ATaskId: Integer;
     TotalWorkCount: Integer) of Object;
-  TZYGeneratorWorkEvent      = procedure(Sender: TObject; WorkCount: Integer) of Object;
+  TZYGeneratorWorkEvent      = procedure(Sender: TObject; AWorkCount: Integer) of Object;
   TZYGeneratorWorkEndEvent   = TNotifyEvent;
 
   TZYBaseGenerator = class abstract(TObject)
@@ -44,17 +70,17 @@ type
     FOnWork: TZYGeneratorWorkEvent;
     FOnWorkEnd: TZYGeneratorWorkEndEvent;
   strict private
-    function GetModule(Index: Integer): TZYGeneratorModuleInfo; inline;
+    function GetModule(AIndex: Integer): TZYGeneratorModuleInfo; inline;
     function GetModuleCount: Integer; inline;
   strict protected
-    procedure InitGenerator(var ModuleInfo: TArray<TZYGeneratorModuleInfo>); virtual; abstract;
+    procedure InitGenerator(var AModuleInfo: TArray<TZYGeneratorModuleInfo>); virtual; abstract;
   strict protected
     procedure Reset; inline;
   strict protected
     constructor Create;
   protected
     procedure SkipTask; inline;
-    procedure WorkStart(TotalWorkCount: Integer); inline;
+    procedure WorkStart(ATotalWorkCount: Integer); inline;
     procedure WorkStep; inline;
     procedure WorkEnd; inline;
   public
@@ -77,19 +103,19 @@ begin
   inherited Create;
 end;
 
-class procedure TZYGeneratorTask.WorkEnd(Generator: TZYBaseGenerator);
+class procedure TZYGeneratorTask.WorkEnd(AGenerator: TZYBaseGenerator);
 begin
-  Generator.WorkEnd;
+  AGenerator.WorkEnd;
 end;
 
-class procedure TZYGeneratorTask.WorkStart(Generator: TZYBaseGenerator; TotalWorkCount: Integer);
+class procedure TZYGeneratorTask.WorkStart(AGenerator: TZYBaseGenerator; ATotalWorkCount: Integer);
 begin
-  Generator.WorkStart(TotalWorkCount);
+  AGenerator.WorkStart(ATotalWorkCount);
 end;
 
-class procedure TZYGeneratorTask.WorkStep(Generator: TZYBaseGenerator);
+class procedure TZYGeneratorTask.WorkStep(AGenerator: TZYBaseGenerator);
 begin
-  Generator.WorkStep;
+  AGenerator.WorkStep;
 end;
 {$ENDREGION}
 
@@ -104,9 +130,9 @@ begin
   end;
 end;
 
-function TZYBaseGenerator.GetModule(Index: Integer): TZYGeneratorModuleInfo;
+function TZYBaseGenerator.GetModule(AIndex: Integer): TZYGeneratorModuleInfo;
 begin
-  Result := FModuleInfo[Index];
+  Result := FModuleInfo[AIndex];
 end;
 
 function TZYBaseGenerator.GetModuleCount: Integer;
@@ -152,12 +178,12 @@ begin
   end;
 end;
 
-procedure TZYBaseGenerator.WorkStart(TotalWorkCount: Integer);
+procedure TZYBaseGenerator.WorkStart(ATotalWorkCount: Integer);
 begin
   FCurrentWorkCount := 0;
   if Assigned(FOnWorkStart) then
   begin
-    FOnWorkStart(Self, FCurrentModuleId, FCurrentTaskId, TotalWorkCount);
+    FOnWorkStart(Self, FCurrentModuleId, FCurrentTaskId, ATotalWorkCount);
   end;
 end;
 
