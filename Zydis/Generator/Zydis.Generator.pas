@@ -29,7 +29,8 @@ unit Zydis.Generator;
 interface
 
 uses
-  System.Classes, Zydis.Generator.Base, Zydis.InstructionEditor;
+  System.Generics.Collections, System.Classes, Zydis.Generator.Base, Zydis.Generator.Types,
+  Zydis.InstructionEditor;
 
 {$SCOPEDENUMS ON}
 
@@ -57,6 +58,15 @@ type
   end;
 
   TZYCodeGenerator = class sealed(TZYBaseGenerator)
+  strict private type
+    PZYGeneratorEnum = ^TZYGeneratorEnum;
+  strict private
+    class procedure GenerateReport(var Report: TZYGeneratorReport;
+      const Definitions: TZYDefinitionList; const Snapshot: TZYTreeSnapshot;
+      const Operands: TZYUniqueOperandList;
+      const Encodings: TZYUniqueDefinitionPropertyList<TZYInstructionPartInfo>;
+      const Flags: TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>;
+      const Enums: array of TPair<String, PZYGeneratorEnum>); static;
   strict protected
     procedure InitGenerator(var ModuleInfo: TArray<TZYGeneratorModuleInfo>); override;
   public
@@ -76,9 +86,9 @@ type
 implementation
 
 uses
-  System.SysUtils, System.Generics.Collections, System.Generics.Defaults, Utils.Comparator,
-  Utils.Container, Zydis.Generator.Enums, Zydis.Enums, Zydis.Enums.Filters,
-  Zydis.InstructionFilters, Zydis.Generator.Types, Zydis.Generator.Tables, Zydis.Generator.Consts;
+  System.SysUtils, System.Generics.Defaults, Utils.Comparator, Utils.Container,
+  Zydis.Generator.Enums, Zydis.Enums, Zydis.Enums.Filters, Zydis.InstructionFilters,
+  Zydis.Generator.Tables, Zydis.Generator.Consts;
 
 {$REGION 'Class: TZYGeneratorReport'}
 procedure TZYGeneratorReport.Clear;
@@ -406,16 +416,13 @@ begin
       []),
       Enums[3].Items);
 
-    {Report.Clear;
-    S := 0;
-    for E := Low(TZYInstructionEncoding) to High(TZYInstructionEncoding) do
-    begin
-      Inc(S, Length(Definitions.UniqueItems[E]) *
-        TZYGeneratorConsts.SIZEOF_INSTRUCTION_DEFINITION[E]);
-    end;
-    Report.CreateEntry('Basic."Instruction definitions"', Definitions.UniqueItemCount, S);
-    Report.CreateEntry('Basic."Operand definitions"'    , Length(Operands.Items),
-      Length(Operands.Items) * TZYGeneratorConsts.SIZEOF_OPERAND_DEFINITION);}
+    // Create report
+    Report.Clear;
+    GenerateReport(Report, Definitions, Snapshot, Operands, Encodings, Flags,
+      [TPair<String, PZYGeneratorEnum>.Create('Mnemonic'           , @Enums[0]),
+       TPair<String, PZYGeneratorEnum>.Create('InstructionCategory', @Enums[1]),
+       TPair<String, PZYGeneratorEnum>.Create('ISASet'             , @Enums[2]),
+       TPair<String, PZYGeneratorEnum>.Create('ISAExt'             , @Enums[3])]);
   finally
     Definitions.Free;
     Snapshot.Free;
@@ -427,6 +434,112 @@ begin
       Enums[I].Free;
     end;
     E.Free;
+  end;
+end;
+
+class procedure TZYCodeGenerator.GenerateReport(var Report: TZYGeneratorReport;
+  const Definitions: TZYDefinitionList; const Snapshot: TZYTreeSnapshot;
+  const Operands: TZYUniqueOperandList;
+  const Encodings: TZYUniqueDefinitionPropertyList<TZYInstructionPartInfo>;
+  const Flags: TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>;
+  const Enums: array of TPair<String, PZYGeneratorEnum>);
+const
+  TABLE_NAMES: array[TZYInstructionFilterClass] of String = (
+    '',
+    'XOP',
+    'VEX',
+    'EMVEX',
+    'Opcode',
+    'Mode',
+    'ModeCompact',
+    'ModrmMod',
+    'ModrmModCompact',
+    'ModrmReg',
+    'ModrmRm',
+    'MandatoryPrefix',
+    'OperandSize',
+    'AddressSize',
+    'VectorLength',
+    'REXW',
+    'REXB',
+    'EVEXB',
+    'MVEXE',
+    'ModeAMD',
+    'ModeKNC',
+    'ModeMPX',
+    'ModeCET',
+    'ModeLZCNT',
+    'ModeTZCNT'
+  );
+var
+  S, T: Cardinal;
+  I, J: Integer;
+  E: TZYInstructionEncoding;
+  F: TZYInstructionFilterClass;
+  X: TZYInstructionFilter;
+begin
+  S := 0;
+  for E := Low(TZYInstructionEncoding) to High(TZYInstructionEncoding) do
+  begin
+    Inc(S, Length(Definitions.UniqueItems[E]) * TZYGeneratorConsts.SizeOfInstructionDefinition[E]);
+  end;
+  T := S;
+  for F := Low(TZYInstructionFilterClass) to High(TZYInstructionFilterClass) do
+  begin
+    if (F = ifcInvalid) then
+    begin
+      Continue;
+    end;
+    X := TZYInstructionFilterInfo.Info[F];
+    Inc(T, Length(Snapshot.Filters[F]) * X.TotalCapacity *
+      TZYGeneratorConsts.SizeOfDecoderTreeNode);
+  end;
+  Inc(T, Length(Operands.Items) * TZYGeneratorConsts.SizeOfOperandDefinition);
+  Inc(T, Length(Encodings.Items) * TZYGeneratorConsts.SizeOfInstructionEncoding);
+  Inc(T, Length(Flags.Items) * TZYGeneratorConsts.SizeOfAccessedFlags);
+  for I := Low(Enums) to High(Enums) do
+  begin
+    for J := Low(Enums[I].Value^.Items) to High(Enums[I].Value^.Items) do
+    begin
+      Inc(T, Length(Enums[I].Value^.Items[J]));
+    end;
+  end;
+
+  Report.CreateEntry('Overview.Total Size', 0, T);
+  Report.CreateEntry('Overview.Instruction Definitions', Definitions.UniqueItemCount, S);
+  Report.CreateEntry('Overview.Operand Definitions', Length(Operands.Items),
+    Length(Operands.Items) * TZYGeneratorConsts.SizeOfOperandDefinition);
+  Report.CreateEntry('Overview.Instruction Encodings', Length(Encodings.Items),
+    Length(Encodings.Items) * TZYGeneratorConsts.SizeOfInstructionEncoding);
+  Report.CreateEntry('Overview.Accessed Flags', Length(Flags.Items),
+    Length(Flags.Items) * TZYGeneratorConsts.SizeOfAccessedFlags);
+
+  for E := Low(TZYInstructionEncoding) to High(TZYInstructionEncoding) do
+  begin
+    Report.CreateEntry('Instruction Definitions.' + TZYEnumInstructionEncoding.ZydisStrings[E],
+      Length(Definitions.UniqueItems[E]),
+      Length(Definitions.UniqueItems[E]) * TZYGeneratorConsts.SizeOfInstructionDefinition[E]);
+  end;
+
+  for F := Low(TZYInstructionFilterClass) to High(TZYInstructionFilterClass) do
+  begin
+    if (F = ifcInvalid) then
+    begin
+      Continue;
+    end;
+    X := TZYInstructionFilterInfo.Info[F];
+    Report.CreateEntry('Filters.' + TABLE_NAMES[F], Length(Snapshot.Filters[F]),
+      Length(Snapshot.Filters[F]) * X.TotalCapacity * TZYGeneratorConsts.SizeOfDecoderTreeNode);
+  end;
+
+  for I := Low(Enums) to High(Enums) do
+  begin
+    S := 0;
+    for J := Low(Enums[I].Value^.Items) to High(Enums[I].Value^.Items) do
+    begin
+      Inc(S, Length(Enums[I].Value^.Items[J]));
+    end;
+    Report.CreateEntry('Enums.' + Enums[I].Key, Length(Enums[I].Value^.Items), S);
   end;
 end;
 
