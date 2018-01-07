@@ -472,8 +472,8 @@ const
     'ModeTZCNT'
   );
 var
-  S, T: Cardinal;
-  I, J: Integer;
+  S, T, Y, Z: Cardinal;
+  I, J, K: Integer;
   E: TZYInstructionEncoding;
   F: TZYInstructionFilterClass;
   X: TZYInstructionFilter;
@@ -484,6 +484,7 @@ begin
     Inc(S, Length(Definitions.UniqueItems[E]) * TZYGeneratorConsts.SizeOfInstructionDefinition[E]);
   end;
   T := S;
+  Y := 0;
   for F := Low(TZYInstructionFilterClass) to High(TZYInstructionFilterClass) do
   begin
     if (F = ifcInvalid) then
@@ -491,28 +492,36 @@ begin
       Continue;
     end;
     X := TZYInstructionFilterInfo.Info[F];
+    Inc(Y, Length(Snapshot.Filters[F]) * X.TotalCapacity *
+      TZYGeneratorConsts.SizeOfDecoderTreeNode);
     Inc(T, Length(Snapshot.Filters[F]) * X.TotalCapacity *
       TZYGeneratorConsts.SizeOfDecoderTreeNode);
   end;
   Inc(T, Length(Operands.Items) * TZYGeneratorConsts.SizeOfOperandDefinition);
   Inc(T, Length(Encodings.Items) * TZYGeneratorConsts.SizeOfInstructionEncoding);
   Inc(T, Length(Flags.Items) * TZYGeneratorConsts.SizeOfAccessedFlags);
+  K := 0;
+  Z := 0;
   for I := Low(Enums) to High(Enums) do
   begin
+    Inc(K, Length(Enums[I].Value^.Items));
     for J := Low(Enums[I].Value^.Items) to High(Enums[I].Value^.Items) do
     begin
+      Inc(Z, Length(Enums[I].Value^.Items[J]));
       Inc(T, Length(Enums[I].Value^.Items[J]));
     end;
   end;
 
   Report.CreateEntry('Overview.Total Size', 0, T);
   Report.CreateEntry('Overview.Instruction Definitions', Definitions.UniqueItemCount, S);
+  Report.CreateEntry('Overview.Filters', Snapshot.FilterCount, Y);
   Report.CreateEntry('Overview.Operand Definitions', Length(Operands.Items),
     Length(Operands.Items) * TZYGeneratorConsts.SizeOfOperandDefinition);
   Report.CreateEntry('Overview.Instruction Encodings', Length(Encodings.Items),
     Length(Encodings.Items) * TZYGeneratorConsts.SizeOfInstructionEncoding);
   Report.CreateEntry('Overview.Accessed Flags', Length(Flags.Items),
     Length(Flags.Items) * TZYGeneratorConsts.SizeOfAccessedFlags);
+  Report.CreateEntry('Overview.Enums', Z, K);
 
   for E := Low(TZYInstructionEncoding) to High(TZYInstructionEncoding) do
   begin
