@@ -162,7 +162,7 @@ type
       { ifcInvalid }
       (FNumberOfValues:   0; FFlags: [iffIsEditorOnly]),
       { ifcXOP }
-      (FNumberOfValues:   4; FFlags: []),
+      (FNumberOfValues:  13; FFlags: []),
       { ifcVEX }
       (FNumberOfValues:  17; FFlags: []),
       { ifcEMVEX }
@@ -355,7 +355,6 @@ begin
   FilterOrderXOP :=
     TZYInstructionFilterList.Create(
       ifcOpcode,
-      ifcMandatoryPrefix,
       ifcModrmReg,
       ifcModrmRm,
       ifcVectorLength,

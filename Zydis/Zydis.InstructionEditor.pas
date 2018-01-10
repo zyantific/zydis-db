@@ -3673,12 +3673,22 @@ begin
         end;
       iencXOP    :
         begin
-          case FOpcodeMap of
-            omapXOP8: SetFilterIndex(ifcXOP, 1);
-            omapXOP9: SetFilterIndex(ifcXOP, 2);
-            omapXOPA: SetFilterIndex(ifcXOP, 3) else
+          V := -1;
+          case FFilters.MandatoryPrefix of
+            mpNone: V := 0 * 3;
+            mp66  : V := 1 * 3;
+            mpF3  : V := 2 * 3;
+            mpF2  : V := 3 * 3 else
               Assert(false);
           end;
+          case FOpcodeMap of
+            omapDEFAULT: ;
+            omapXOP8   : V := V + 0;
+            omapXOP9   : V := V + 1;
+            omapXOPA   : V := V + 2 else
+              Assert(false);
+          end;
+          SetFilterIndex(ifcXOP, V + 1);
         end;
       iencVEX    :
         begin
