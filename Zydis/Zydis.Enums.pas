@@ -1063,6 +1063,32 @@ type
   end;
   TZYElementType = TZYEnumElementType.Enum;
 
+  TZYRegisterConstraint = (
+    ocNone,
+    ocUnused,
+    ocGPR,
+    ocSRDest,
+    ocSR,
+    ocCR,
+    ocDR,
+    ocMASK,
+    ocBND
+  );
+  TZYRegisterConstraintHelper = record helper for TZYRegisterConstraint
+  public
+    const ZydisStrings: array[TZYRegisterConstraint] of String = (
+      'NONE',
+      'UNUSED',
+      'GPR',
+      'SR_DEST',
+      'SR',
+      'CR',
+      'DR',
+      'MASK',
+      'BND'
+    );
+  end;
+
   TZYEnumOperandType = record
   public
     type Enum = (

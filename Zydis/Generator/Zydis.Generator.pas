@@ -476,7 +476,6 @@ var
   I, J, K: Integer;
   E: TZYInstructionEncoding;
   F: TZYInstructionFilterClass;
-  X: TZYInstructionFilter;
 begin
   S := 0;
   for E := Low(TZYInstructionEncoding) to High(TZYInstructionEncoding) do
@@ -491,11 +490,9 @@ begin
     begin
       Continue;
     end;
-    X := TZYInstructionFilterInfo.Info[F];
-    Inc(Y, Length(Snapshot.Filters[F]) * X.TotalCapacity *
-      TZYGeneratorConsts.SizeOfDecoderTreeNode);
-    Inc(T, Length(Snapshot.Filters[F]) * X.TotalCapacity *
-      TZYGeneratorConsts.SizeOfDecoderTreeNode);
+    I := TZYInstructionFilterInfo.Info[F].NumberOfValues;
+    Inc(Y, Length(Snapshot.Filters[F]) * I * TZYGeneratorConsts.SizeOfDecoderTreeNode);
+    Inc(T, Length(Snapshot.Filters[F]) * I * TZYGeneratorConsts.SizeOfDecoderTreeNode);
   end;
   Inc(T, Length(Operands.Items) * TZYGeneratorConsts.SizeOfOperandDefinition);
   Inc(T, Length(Encodings.Items) * TZYGeneratorConsts.SizeOfInstructionEncoding);
@@ -521,7 +518,7 @@ begin
     Length(Encodings.Items) * TZYGeneratorConsts.SizeOfInstructionEncoding);
   Report.CreateEntry('Overview.Accessed Flags', Length(Flags.Items),
     Length(Flags.Items) * TZYGeneratorConsts.SizeOfAccessedFlags);
-  Report.CreateEntry('Overview.Enums', Z, K);
+  Report.CreateEntry('Overview.Enums', K, Z);
 
   for E := Low(TZYInstructionEncoding) to High(TZYInstructionEncoding) do
   begin
@@ -536,9 +533,9 @@ begin
     begin
       Continue;
     end;
-    X := TZYInstructionFilterInfo.Info[F];
     Report.CreateEntry('Filters.' + TABLE_NAMES[F], Length(Snapshot.Filters[F]),
-      Length(Snapshot.Filters[F]) * X.TotalCapacity * TZYGeneratorConsts.SizeOfDecoderTreeNode);
+      Length(Snapshot.Filters[F]) * TZYInstructionFilterInfo.Info[F].NumberOfValues *
+      TZYGeneratorConsts.SizeOfDecoderTreeNode);
   end;
 
   for I := Low(Enums) to High(Enums) do

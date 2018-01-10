@@ -575,13 +575,13 @@ begin
     end;
   end;
 
-  if (Operands.Definition.Filters.ModrmMod <> mdPlaceholder) and (EncReg > 0) and (EncRm = 0) then
+  {if (Operands.Definition.Filters.ModrmMod <> mdPlaceholder) and (EncReg > 0) and (EncRm = 0) then
   begin
     if (GenerateErrorMessages) then
     begin
       ErrorMessages.Add('TODO:');
     end else Exit;
-  end;
+  end;}
 
   // Validate individual operands
   for I := 0 to Operands.Count - 1 do

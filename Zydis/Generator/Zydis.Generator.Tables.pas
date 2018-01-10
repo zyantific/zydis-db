@@ -29,8 +29,8 @@ unit Zydis.Generator.Tables;
 interface
 
 uses
-  System.Classes, System.Generics.Collections, Zydis.InstructionEditor, Zydis.Generator.Base,
-  Zydis.Generator.Types;
+  System.Classes, System.Generics.Collections, Zydis.InstructionEditor, Zydis.Enums,
+  Zydis.Generator.Base, Zydis.Generator.Types;
 
 {$SCOPEDENUMS ON}
 
@@ -88,7 +88,8 @@ type
     class function AcceptsASZOverride(
       Definition: TZYInstructionDefinition): Boolean; static; inline;
     class function AcceptsSegment(Definition: TZYInstructionDefinition): Boolean; static; inline;
-    class function HasNDSNDDOperand(Definition: TZYInstructionDefinition): Boolean; static; inline;
+    class function GetRegisterConstraint(Operands: TZYInstructionOperands;
+      Encoding: TZYOperandEncoding): TZYRegisterConstraint; inline; static;
     class function HasVSIB(Definition: TZYInstructionDefinition): Boolean; static; inline;
   public
     class procedure Generate(Generator: TZYBaseGenerator; const Filename: String;
@@ -131,7 +132,7 @@ type
 implementation
 
 uses
-  System.SysUtils, Zydis.InstructionFilters, Zydis.Enums, Zydis.Enums.Filters;
+  System.SysUtils, Zydis.InstructionFilters, Zydis.Enums.Filters;
 
 const
   ZydisBool: array[Boolean] of String = ('ZYDIS_FALSE', 'ZYDIS_TRUE');
@@ -431,11 +432,21 @@ begin
       { exceptionClass              } Writer.WriteStr(
                                         'ZYDIS_EXCEPTION_CLASS_' +
                                         TZYExceptionClass.ZydisStrings[Item.ExceptionClass]);
+      { constrREG                   } Writer.WriteStr(
+                                        'ZYDIS_REG_CONSTRAINTS_' +
+                                        TZYRegisterConstraint.ZydisStrings[
+                                        GetRegisterConstraint(Item.Operands, opeModrmReg)]);
+      { constrRM                    } Writer.WriteStr(
+                                        'ZYDIS_REG_CONSTRAINTS_' +
+                                        TZYRegisterConstraint.ZydisStrings[
+                                        GetRegisterConstraint(Item.Operands, opeModrmRm)]);
 
       // ZYDIS_INSTRUCTION_DEFINITION_BASE_VECTOR
       if (Item.Encoding in [iencXOP, iencVEX, iencEVEX, iencMVEX]) then
       begin
-        { hasNDSNDDOperand } Writer.WriteStr(ZydisBool[HasNDSNDDOperand(Item)]);
+        { constrNDSNDD }  Writer.WriteStr('ZYDIS_REG_CONSTRAINTS_' +
+                            TZYRegisterConstraint.ZydisStrings[
+                            GetRegisterConstraint(Item.Operands, opeNDSNDD)]);
       end;
 
       // ZYDIS_INSTRUCTION_DEFINITION_BASE_VECTOR_EX
@@ -512,19 +523,66 @@ begin
     end);
 end;
 
-class function TZYDefinitionTableGenerator.HasNDSNDDOperand(
-  Definition: TZYInstructionDefinition): Boolean;
+class function TZYDefinitionTableGenerator.GetRegisterConstraint(Operands: TZYInstructionOperands;
+  Encoding: TZYOperandEncoding): TZYRegisterConstraint;
 var
   I: Integer;
+  O: TZYInstructionOperand;
 begin
-  Result := false;
-  for I := 0 to Definition.Operands.NumberOfUsedOperands - 1 do
+  Result := ocNone;
+  if (Encoding = opeNDSNDD) then
   begin
-    if (Definition.Operands.Items[I].Encoding = opeNDSNDD) then
+    // `.vvvv` and `.v'` is invalid, if the operand is not used by the instruction
+    Result := ocUnused;
+  end;
+  for I := 0 to Operands.NumberOfUsedOperands - 1 do
+  begin
+    O := Operands.Items[I];
+    if (O.Encoding <> Encoding) then
     begin
-      Result := true;
-      Break;
+      Continue;
     end;
+    case O.OperandType of
+      optGPR8         ,
+      optGPR16        ,
+      optGPR32        ,
+      optGPR64        ,
+      optGPR16_32_64  ,
+      optGPR32_32_64  ,
+      optGPR16_32_32  : Result := ocGPR; // `.R'` and `.V'` are invalid for GPR registers
+      optFPR          ,
+      optMMX          : Assert(Result = ocNone); // These ones can't be encoded in EVEX/MVEX; REX bits are ignored
+      optXMM          ,
+      optYMM          ,
+      optZMM          : Result := ocNone; // No constraints as all 5-bits are valid
+      optBND          :
+        begin
+          // Special case: BND registers should only use 2-bits (even with `modrm.rm` encoding)
+          Result := ocBND;
+          Break;
+        end;
+      optSREG         :
+        begin
+          Result := ocSR;
+          // `CS' is not allowed as destination for the `MOV` instruction
+          if (O.Index = 0) and (O.Action in [opaWrite]) then
+          begin
+            Result := ocSRDest;
+          end;
+        end;
+      optCR           : Result := ocCR;
+      optDR           : Result := ocDR;
+      optMASK         : Result := ocMASK;
+    end;
+    if (Encoding = opeModrmRm) then
+    begin
+      // `.B` is valid for GRP and XMM/YMM/ZMM registers and ignored for all other ones
+      // `.X` is valid for         XMM/YMM/ZMM registers and ignored for all other ones
+      // These rules are documented for XOP/VEX/EVEX/MVEX instructions, but can be applied to
+      // other instructions as well (with the exception of BND registers)
+      Result := ocNone;
+    end;
+    Break;
   end;
 end;
 
