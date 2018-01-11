@@ -452,7 +452,7 @@ begin
       // ZYDIS_INSTRUCTION_DEFINITION_BASE_VECTOR_INTEL
       if (Item.Encoding in [iencVEX, iencEVEX, iencMVEX]) then
       begin
-        { hasVSIB      } Writer.WriteStr(ZydisBool[HasVSIB(Item)]);
+        { isGather     } Writer.WriteStr(ZydisBool[Item.Meta.Category.ToUpper.Contains('GATHER')]);
       end;
 
       case Item.Encoding of
@@ -529,12 +529,8 @@ var
   I: Integer;
   O: TZYInstructionOperand;
 begin
-  Result := ocNone;
-  if (Encoding = opeNDSNDD) then
-  begin
-    // `.vvvv` and `.v'` is invalid, if the operand is not used by the instruction
-    Result := ocUnused;
-  end;
+  Assert(Encoding in [opeModrmReg, opeModrmRm, opeNDSNDD]);
+  Result := ocUnused;
   for I := 0 to Operands.NumberOfUsedOperands - 1 do
   begin
     O := Operands.Items[I];
@@ -543,46 +539,70 @@ begin
       Continue;
     end;
     case O.OperandType of
+      optImplicitReg  ,
+      optImplicitMem  ,
+      optImplicitImm1 : Result := ocNone;
       optGPR8         ,
       optGPR16        ,
       optGPR32        ,
       optGPR64        ,
       optGPR16_32_64  ,
       optGPR32_32_64  ,
-      optGPR16_32_32  : Result := ocGPR; // `.R'` and `.V'` are invalid for GPR registers
+      optGPR16_32_32  :
+        if (Operands.Definition.Encoding in [iencEVEX, iencMVEX]) then
+        begin
+          // `.R'` and `.V'` are invalid for GPR registers, but `.X` is valid (ignored)
+          case O.Encoding of
+            opeModrmReg,
+            opeNDSNDD  : Result := ocGPR;
+            opeModrmRm : Result := ocNone;
+          end;
+        end else
+        begin
+          // These encodings don't have the `.R'` and `.V'` fields
+          Result := ocNone;
+        end;
       optFPR          ,
-      optMMX          : Assert(Result = ocNone); // These ones can't be encoded in EVEX/MVEX; REX bits are ignored
+      optMMX          :
+        begin
+          // Never encoded in `EVEX`/`MVEX` or as `NDSNDD`. `.R` and `.B` are valid (ignored)
+          Assert(not (Operands.Definition.Encoding in [iencEVEX, iencMVEX]));
+          Assert(Encoding <> opeNDSNDD);
+          Result := ocNone;
+        end;
       optXMM          ,
       optYMM          ,
-      optZMM          : Result := ocNone; // No constraints as all 5-bits are valid
-      optBND          :
-        begin
-          // Special case: BND registers should only use 2-bits (even with `modrm.rm` encoding)
-          Result := ocBND;
-          Break;
-        end;
+      optZMM          : Result := ocNone;
+      optBND          : Result := ocBND;
       optSREG         :
+        if (O.Index = 0) and (O.Action in [opaWrite]) then
+        begin
+          // The `CS`-register is not allowed as destination for the `MOV` instruction
+          Result := ocSRDest;
+        end else
         begin
           Result := ocSR;
-          // `CS' is not allowed as destination for the `MOV` instruction
-          if (O.Index = 0) and (O.Action in [opaWrite]) then
-          begin
-            Result := ocSRDest;
-          end;
         end;
       optCR           : Result := ocCR;
       optDR           : Result := ocDR;
-      optMASK         : Result := ocMASK;
+      optMASK         :
+        // MASK-registers can only use 3-bits, but `.B` and `.X` are valid (ignored)
+        case O.Encoding of
+          opeModrmReg,
+          opeNDSNDD  : Result := ocMASK;
+          opeModrmRm : Result := ocNone;
+        end;
+      optMEM          ,
+      optAGEN         ,
+      optMIB          : Result := ocNone;
+      optMEMVSIBX     ,
+      optMEMVSIBY     ,
+      optMEMVSIBZ     : Result := ocVSIB;
+      optIMM          ,
+      optREL          ,
+      optPTR          ,
+      optMOFFS        : ;
     end;
-    if (Encoding = opeModrmRm) then
-    begin
-      // `.B` is valid for GRP and XMM/YMM/ZMM registers and ignored for all other ones
-      // `.X` is valid for         XMM/YMM/ZMM registers and ignored for all other ones
-      // These rules are documented for XOP/VEX/EVEX/MVEX instructions, but can be applied to
-      // other instructions as well (with the exception of BND registers)
-      Result := ocNone;
-    end;
-    Break;
   end;
 end;
 

@@ -1064,28 +1064,30 @@ type
   TZYElementType = TZYEnumElementType.Enum;
 
   TZYRegisterConstraint = (
-    ocNone,
     ocUnused,
+    ocNone,
     ocGPR,
     ocSRDest,
     ocSR,
     ocCR,
     ocDR,
     ocMASK,
-    ocBND
+    ocBND,
+    ocVSIB
   );
   TZYRegisterConstraintHelper = record helper for TZYRegisterConstraint
   public
     const ZydisStrings: array[TZYRegisterConstraint] of String = (
-      'NONE',
       'UNUSED',
+      'NONE',
       'GPR',
       'SR_DEST',
       'SR',
       'CR',
       'DR',
       'MASK',
-      'BND'
+      'BND',
+      'VSIB'
     );
   end;
 
