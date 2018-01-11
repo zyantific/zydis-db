@@ -57,12 +57,12 @@ type
     FilenameEncoderTables   = 'EncoderTables.inc';
   public const
     SizeOfInstructionDefinition: array[TZYInstructionEncoding] of Cardinal = (
-      { DEFAULT } 13,
-      { 3DNOW   } 11,
-      { XOP     } 11,
-      { VEX     } 12,
-      { EVEX    } 14,
-      { MVEX    } 13
+      { DEFAULT } 14,
+      { 3DNOW   } 12,
+      { XOP     } 13,
+      { VEX     } 13,
+      { EVEX    } 16,
+      { MVEX    } 15
     );
     SizeOfOperandDefinition   = 11;
     SizeOfInstructionEncoding = 14;

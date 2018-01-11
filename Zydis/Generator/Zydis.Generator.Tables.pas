@@ -449,10 +449,10 @@ begin
                             GetRegisterConstraint(Item.Operands, opeNDSNDD)]);
       end;
 
-      // ZYDIS_INSTRUCTION_DEFINITION_BASE_VECTOR_EX
-      if (Item.Encoding in [iencEVEX, iencMVEX]) then
+      // ZYDIS_INSTRUCTION_DEFINITION_BASE_VECTOR_INTEL
+      if (Item.Encoding in [iencVEX, iencEVEX, iencMVEX]) then
       begin
-        { hasVSIB          } Writer.WriteStr(ZydisBool[HasVSIB(Item)]);
+        { hasVSIB      } Writer.WriteStr(ZydisBool[HasVSIB(Item)]);
       end;
 
       case Item.Encoding of
