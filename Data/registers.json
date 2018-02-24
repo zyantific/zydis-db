@@ -441,7 +441,7 @@
         "BND2",
         "BND3"
       ],
-      "registers": [
+      "unique": [
         "BNDCFG",
         "BNDSTATUS"
       ],

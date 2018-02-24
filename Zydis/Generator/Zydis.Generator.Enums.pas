@@ -436,7 +436,8 @@ class procedure TZYEnumGeneratorPascal.Generate(AGenerator: TZYBaseGenerator;
   const ARootDirectory: String; const ATask: TZYEnumGeneratorTaskItem;
   const AItems: array of String);
 var
-  F, N, S, T: String;
+  F, N, S: String;
+  X, Y: Integer;
   W: TStreamWriter;
   I: Integer;
 begin
@@ -444,12 +445,24 @@ begin
     IncludeTrailingPathDelimiter(ATask.PathInclude) + 'Zydis.Enum.' + ATask.EnumName + '.inc';
   N := 'TZydis' + ATask.EnumName;
   S := ',';
+  X := 0;
+  for I := Low(AItems) to High(AItems)  do
+  begin
+    if (not AItems[I].StartsWith('//')) then Inc(X);
+  end;
+  X := Floor(Log2(X - 1)) + 1;
+  Y := 1;
+  if (X > 64) then Assert(false) else
+  if (X > 32) then Y := 8 else
+  if (X > 16) then Y := 4 else
+  if (X >  8) then Y := 2;
   W := TStreamWriter.Create(F);
   try
     W.AutoFlush := true;
     W.NewLine := sLineBreak;
     W.Write('type');
     W.WriteLine;
+    W.Write('  {$Z%d}%s', [Y, sLineBreak]);
     W.Write('  %s = (', [N]);
     W.WriteLine;
     for I := Low(AItems) to High(AItems)  do
@@ -458,14 +471,18 @@ begin
       begin
         S := '';
       end;
-      T := AItems[I].ToUpper;
-      if (IsKeyword(T)) then
+      if (AItems[I].StartsWith('//')) then
       begin
-        T := '&' + T;
+        W.Write('    %s%s', [AItems[I], sLineBreak]);
+      end else
+      begin
+        W.Write('    ZYDIS_%s%s,%s', [ATask.ItemPrefix, AItems[I].ToUpper, sLineBreak]);
       end;
-      W.Write('    %s%s%s', [T, S, sLineBreak]);
       WorkStep(AGenerator);
     end;
+    W.WriteLine;
+    W.Write('    ZYDIS_%sMAX_VALUE = ZYDIS_%s%s%s', [ATask.ItemPrefix, ATask.ItemPrefix,
+      AItems[High(AItems)].ToUpper, sLineBreak]);
     W.Write('  );');
     W.WriteLine;
   finally

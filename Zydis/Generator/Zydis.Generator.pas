@@ -68,7 +68,7 @@ type
       const Flags: TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>;
       const Enums: array of TPair<String, PZYGeneratorEnum>); static;
   strict protected
-    procedure InitGenerator(var ModuleInfo: TArray<TZYGeneratorModuleInfo>); override;
+    procedure InitGenerator(var AModuleInfo: TArray<TZYGeneratorModuleInfo>); override;
   public
     procedure GenerateCodeFiles(Editor: TZYInstructionEditor;
       const RootDirectory: String); overload; inline;
@@ -143,6 +143,7 @@ end;
 constructor TZYCodeGenerator.Create;
 begin
   inherited Create;
+
 end;
 
 procedure TZYCodeGenerator.GenerateCodeFiles(Editor: TZYInstructionEditor;
@@ -469,7 +470,8 @@ const
     'ModeMPX',
     'ModeCET',
     'ModeLZCNT',
-    'ModeTZCNT'
+    'ModeTZCNT',
+    'ModeWBNOINVD'
   );
 var
   S, T, Y, Z: Cardinal;
@@ -549,17 +551,17 @@ begin
   end;
 end;
 
-procedure TZYCodeGenerator.InitGenerator(var ModuleInfo: TArray<TZYGeneratorModuleInfo>);
+procedure TZYCodeGenerator.InitGenerator(var AModuleInfo: TArray<TZYGeneratorModuleInfo>);
 
 procedure RegisterModule(const Description: String; const TaskDescriptions: array of String);
 var
   I: Integer;
 begin
-  SetLength(ModuleInfo, Length(ModuleInfo) + 1);
-  SetLength(ModuleInfo[High(ModuleInfo)].Tasks, Length(TaskDescriptions));
+  SetLength(AModuleInfo, Length(AModuleInfo) + 1);
+  SetLength(AModuleInfo[High(AModuleInfo)].Tasks, Length(TaskDescriptions));
   for I := Low(TaskDescriptions) to High(TaskDescriptions) do
   begin
-    ModuleInfo[High(ModuleInfo)].Tasks[I].Description := TaskDescriptions[I];
+    AModuleInfo[High(AModuleInfo)].Tasks[I].Description := TaskDescriptions[I];
   end;
 end;
 

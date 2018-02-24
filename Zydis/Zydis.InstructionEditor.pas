@@ -239,6 +239,7 @@ type
     function GetModeCET: TZYFilterBoolean; inline;
     function GetModeLZCNT: TZYFilterBoolean; inline;
     function GetModeTZCNT: TZYFilterBoolean; inline;
+    function GetModeWBNOINVD: TZYFilterBoolean; inline;
   strict private
     procedure SetMode(Value: TZYFilterMode); inline;
     procedure SetModrmMod(Value: TZYFilterModrmMod); inline;
@@ -259,6 +260,7 @@ type
     procedure SetModeCET(Value: TZYFilterBoolean); inline;
     procedure SetModeLZCNT(Value: TZYFilterBoolean); inline;
     procedure SetModeTZCNT(Value: TZYFilterBoolean); inline;
+    procedure SetModeWBNOINVD(Value: TZYFilterBoolean); inline;
 
     procedure SetForceModrmReg(Value: Boolean); inline;
     procedure SetForceModrmRm(Value: Boolean); inline;
@@ -297,6 +299,8 @@ type
     property ModeCET: TZYFilterBoolean read GetModeCET write SetModeCET default fbPlaceholder;
     property ModeLZCNT: TZYFilterBoolean read GetModeLZCNT write SetModeLZCNT default fbPlaceholder;
     property ModeTZCNT: TZYFilterBoolean read GetModeTZCNT write SetModeTZCNT default fbPlaceholder;
+    property ModeWBNOINVD: TZYFilterBoolean read GetModeWBNOINVD write SetModeWBNOINVD
+      default fbPlaceholder;
 
     property ForceModrmReg: Boolean read FForceModrmReg write SetForceModrmReg default false; // TODO: Move! Does not fit here. + rename (extends opcode)
     property ForceModrmRm: Boolean read FForceModrmRm write SetForceModrmRm default false;    // TODO: Move! Does not fit here. + rename (extends opcode)
@@ -1423,6 +1427,11 @@ begin
   Result := TZYFilterBoolean(Definition.FilterIndex[ifcModeTZCNT]);
 end;
 
+function TZYInstructionFilters.GetModeWBNOINVD: TZYFilterBoolean;
+begin
+  Result := TZYFilterBoolean(Definition.FilterIndex[ifcModeWBNOINVD]);
+end;
+
 function TZYInstructionFilters.GetMandatoryPrefix: TZYFilterMandatoryPrefix;
 begin
   Result := TZYFilterMandatoryPrefix(Definition.FilterIndex[ifcMandatoryPrefix]);
@@ -1611,6 +1620,11 @@ end;
 procedure TZYInstructionFilters.SetModeTZCNT(Value: TZYFilterBoolean);
 begin
   Definition.FilterIndex[ifcModeTZCNT] := Ord(Value);
+end;
+
+procedure TZYInstructionFilters.SetModeWBNOINVD(Value: TZYFilterBoolean);
+begin
+  Definition.FilterIndex[ifcModeWBNOINVD] := Ord(Value);
 end;
 
 procedure TZYInstructionFilters.SetForceModrmReg(Value: Boolean);

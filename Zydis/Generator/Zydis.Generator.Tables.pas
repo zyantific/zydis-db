@@ -836,7 +836,8 @@ const
     'ModeMPX',
     'ModeCET',
     'ModeLZCNT',
-    'ModeTZCNT'
+    'ModeTZCNT',
+    'ModeWBNOINVD'
   );
   NODE_NAMES: array[TZYInstructionFilterClass] of String =
   (
@@ -864,7 +865,8 @@ const
     'MODE_MPX',
     'MODE_CET',
     'MODE_LZCNT',
-    'MODE_TZCNT'
+    'MODE_TZCNT',
+    'MODE_WBNOINVD'
   );
 var
   Tables: TArray<TZYTableTemplate<PZYTreeItem>>;

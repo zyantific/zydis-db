@@ -40,8 +40,8 @@ type
     PathSourceCPP           = 'zydis-cpp\src\Generated';
     PathIncludeJava         = 'zydis-java\Generated';
     PathSourceJava          = 'zydis-java\Generated';
-    PathIncludePascal       = 'zydis-pascal\Generated';
-    PathSourcePascal        = 'zydis-pascal\Generated';
+    PathIncludePascal       = 'zydis-pascal\Zydis\Generated';
+    PathSourcePascal        = 'zydis-pascal\Zydis\Generated';
     PathIncludePython       = 'zydis-py\Generated';
     PathSourcePython        = 'zydis-py\Generated';
     PathIncludeRust         = 'zydis-rs\Generated';
