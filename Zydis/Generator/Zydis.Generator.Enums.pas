@@ -273,10 +273,7 @@ begin
     begin
       if (AItems[I].StartsWith('//')) then
       begin
-        if (AItems[I] = '//') then
-        begin
-          W.WriteLine;
-        end else
+        if (AItems[I] <> '//') then
         begin
           W.Write('    %s,', [AItems[I]]);
         end;
