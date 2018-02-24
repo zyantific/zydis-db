@@ -275,7 +275,7 @@ begin
       begin
         if (AItems[I] <> '//') then
         begin
-          W.Write('    %s,', [AItems[I]]);
+          W.Write('    %s', [AItems[I]]);
         end;
       end else
       begin
@@ -332,7 +332,7 @@ begin
       begin
         if (AItems[I] <> '//') then
         begin
-          W.Write('    %s%s', [AItems[I], S]);
+          W.Write('    %s', [AItems[I]]);
         end;
       end else
       begin
