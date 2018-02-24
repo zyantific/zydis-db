@@ -243,7 +243,12 @@ begin
   begin
     N := N + 's';
   end;
-  X := Floor(Log2(High(AItems))) + 1;
+  X := 0;
+  for I := Low(AItems) to High(AItems)  do
+  begin
+    if (not AItems[I].StartsWith('//')) then Inc(X);
+  end;
+  X := Floor(Log2(X - 1)) + 1;
   Y := 8;
   if (X > 64) then Assert(false) else
   if (X > 32) then Y := 64 else
@@ -268,24 +273,29 @@ begin
     begin
       if (AItems[I].StartsWith('//')) then
       begin
-        W.Write('    %s,', [AItems[I]]);
+        if (AItems[I] = '//') then
+        begin
+          W.WriteLine;
+        end else
+        begin
+          W.Write('    %s,', [AItems[I]]);
+        end;
       end else
       begin
         T := AItems[I].ToUpper;
-        {if (IsKeyword(T)) then
-        begin
-          Assert(false);
-          T := '_' + T;
-        end;}
         W.Write('    %s%s%s,', ['ZYDIS_', ATask.ItemPrefix, T]);
       end;
       W.WriteLine;
       WorkStep(AGenerator);
     end;
     Assert(not T.StartsWith('//'));
-    W.Write('    %s%sMAX_VALUE = %s%s%s,',
-      ['ZYDIS_', ATask.ItemPrefix, 'ZYDIS_', ATask.ItemPrefix, T]);
     W.WriteLine;
+    W.Write('    /**%s     * @brief   Maximum value of this enum.%s     */%s',
+      [sLineBreak, sLineBreak, sLineBreak]);
+    W.Write('    %s%sMAX_VALUE = %s%s%s,%s',
+      ['ZYDIS_', ATask.ItemPrefix, 'ZYDIS_', ATask.ItemPrefix, T, sLineBreak]);
+    W.Write('    /**%s     * @brief   Minimum amount of bits required to store a value of this ' +
+      'enum.%s     */%s', [sLineBreak, sLineBreak, sLineBreak]);
     W.Write('    %s%sMIN_BITS  = 0x%.4X',
       ['ZYDIS_', ATask.ItemPrefix, X]);
     W.WriteLine;
@@ -323,7 +333,10 @@ begin
       end;
       if (AItems[I].StartsWith('//')) then
       begin
-        W.Write('    %s%s', [AItems[I], S]);
+        if (AItems[I] <> '//') then
+        begin
+          W.Write('    %s%s', [AItems[I], S]);
+        end;
       end else
       begin
         if (TZYEnumGeneratorFlag.UseCustomStringType in ATask.Flags) then
@@ -473,7 +486,13 @@ begin
       end;
       if (AItems[I].StartsWith('//')) then
       begin
-        W.Write('    %s%s', [AItems[I], sLineBreak]);
+        if (AItems[I] = '//') then
+        begin
+          W.WriteLine;
+        end else
+        begin
+          W.Write('    %s%s', [AItems[I], sLineBreak]);
+        end;
       end else
       begin
         W.Write('    ZYDIS_%s%s,%s', [ATask.ItemPrefix, AItems[I].ToUpper, sLineBreak]);
