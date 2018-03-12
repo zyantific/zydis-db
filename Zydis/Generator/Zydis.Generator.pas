@@ -350,13 +350,13 @@ begin
     Enums[2] := TZYGeneratorEnum.Create(Self, Definitions,
       function(D: TZYInstructionDefinition): String
       begin
-        Result := D.Meta.Extension;
+        Result := D.Meta.ISASet;
       end, 'INVALID');
     // Creating isa-extension enum
     Enums[3] := TZYGeneratorEnum.Create(Self, Definitions,
       function(D: TZYInstructionDefinition): String
       begin
-        Result := D.Meta.ISASet;
+        Result := D.Meta.Extension;
       end, 'INVALID');
 
     // Generating definition list
