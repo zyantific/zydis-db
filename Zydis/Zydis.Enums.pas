@@ -72,6 +72,7 @@ type
       // Floating point legacy registers
       regST0,       regST1,       regST2,       regST3,
       regST4,       regST5,       regST6,       regST7,
+      regX87CONTROL,regX87STATUS, regX87TAG,
       // Floating point multimedia registers
       regMM0,       regMM1,       regMM2,       regMM3,
       regMM4,       regMM5,       regMM6,       regMM7,
@@ -172,6 +173,7 @@ type
       // Floating point legacy registers
       'st0',        'st1',        'st2',        'st3',
       'st4',        'st5',        'st6',        'st7',
+      'x87control', 'x87status',  'x87tag',
       // Floating point multimedia registers
       'mm0',        'mm1',        'mm2',        'mm3',
       'mm4',        'mm5',        'mm6',        'mm7',

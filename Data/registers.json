@@ -152,6 +152,11 @@
         "ST6",
         "ST7"
       ],
+      "unique": [
+        "X87CONTROL",
+        "X87STATUS",
+        "X87TAG"
+      ],
       "width": 80,
       "width_64": 80
     },
