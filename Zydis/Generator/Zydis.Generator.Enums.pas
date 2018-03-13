@@ -235,14 +235,6 @@ begin
     F := F + IncludeTrailingPathDelimiter(ATask.PathInclude) + 'Enum' + ATask.EnumName + '.h';
   end;
   N := 'Zydis' + ATask.EnumName;
-  if (N.EndsWith('y')) then
-  begin
-    Delete(N, Length(N), 1);
-    N := N + 'ies';
-  end else
-  begin
-    N := N + 's';
-  end;
   X := 0;
   for I := Low(AItems) to High(AItems)  do
   begin
@@ -258,14 +250,9 @@ begin
   try
     W.AutoFlush := true;
     W.NewLine := sLineBreak;
-    W.Write('/**%s * @brief   Defines the `Zydis%s` datatype.%s */%s',
-      [sLineBreak, ATask.EnumName, sLineBreak, sLineBreak]);
-    W.Write('typedef ZydisU%d Zydis%s;', [Y, ATask.EnumName]);
-    W.WriteLine;
-    W.WriteLine;
-    W.Write('/**%s * @brief   Values that represent `Zydis%s` elements.%s */%s',
-      [sLineBreak, ATask.EnumName, sLineBreak, sLineBreak]);
-    W.Write('enum %s', [N]);
+    W.Write('/**%s * @brief   Defines the `%s` enum.%s */%s',
+      [sLineBreak, N, sLineBreak, sLineBreak]);
+    W.Write('typedef enum %s_', [N]);
     W.WriteLine;
     W.Write('{');
     W.WriteLine;
@@ -291,12 +278,12 @@ begin
       [sLineBreak, sLineBreak, sLineBreak]);
     W.Write('    %s%sMAX_VALUE = %s%s%s,%s',
       ['ZYDIS_', ATask.ItemPrefix, 'ZYDIS_', ATask.ItemPrefix, T, sLineBreak]);
-    W.Write('    /**%s     * @brief   Minimum amount of bits required to store a value of this ' +
-      'enum.%s     */%s', [sLineBreak, sLineBreak, sLineBreak]);
-    W.Write('    %s%sMIN_BITS  = 0x%.4X',
-      ['ZYDIS_', ATask.ItemPrefix, X]);
+    W.Write('    /**%s     * @brief   The minimum number of bits required to represent all ' +
+      'values of this enum.%s     */%s', [sLineBreak, sLineBreak, sLineBreak]);
+    W.Write('    %s%sREQUIRED_BITS = ZYDIS_BITS_TO_REPRESENT(%s%sMAX_VALUE)',
+      ['ZYDIS_', ATask.ItemPrefix, 'ZYDIS_', ATask.ItemPrefix]);
     W.WriteLine;
-    W.Write('};');
+    W.Write('} %s;', [N]);
     W.WriteLine;
   finally
     W.Free;
