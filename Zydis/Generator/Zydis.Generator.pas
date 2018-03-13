@@ -332,7 +332,13 @@ begin
         function(D: TZYInstructionDefinition): TZYInstructionFlagsInfo
         begin
           Result := D.AffectedFlags;
-        end, false);
+        end, true,
+        TEqualityComparer<TZYInstructionFlagsInfo>.Default,
+        TComparer<TZYInstructionFlagsInfo>.Construct(
+          function(const Left, Right: TZYInstructionFlagsInfo): Integer
+          begin
+            Result := Left.CompareTo(Right);
+          end));
 
     // Creating mnemonic enum
     Enums[0] := TZYGeneratorEnum.Create(Self, Definitions,

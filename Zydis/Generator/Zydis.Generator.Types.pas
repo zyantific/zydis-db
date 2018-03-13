@@ -539,15 +539,37 @@ end;
 class function TZYUniqueOperandList.GetOperand(Operands: TZYInstructionOperands;
   Index: Integer): TZYInstructionOperand;
 begin
+
+  if (Index < Operands.NumberOfUsedOperands) then
+  begin
+    Exit(Operands.Items[Index]);
+  end;
+  if (Index = Operands.NumberOfUsedOperands + 0) then
+  begin
+    if (Operands.Definition.AffectedFlags.AutomaticOperand0.OperandType = optUnused) then
+    begin
+      Inc(Index);
+    end else
+    begin
+      Assert(Operands.Definition.AffectedFlags.AutomaticOperand0.OperandType <> optUnused);
+      Exit(Operands.Definition.AffectedFlags.AutomaticOperand0);
+    end;
+  end;
+  if (Index = Operands.NumberOfUsedOperands + 1) then
+  begin
+    Assert(Operands.Definition.AffectedFlags.AutomaticOperand1.OperandType <> optUnused);
+    Exit(Operands.Definition.AffectedFlags.AutomaticOperand1);
+  end;
+
   // This wrapper function takes care of the automatically generated FLAGS-register operand
-  if (Index = Operands.NumberOfUsedOperands) and
+  {if (Index = Operands.NumberOfUsedOperands) and
     (Operands.Definition.AffectedFlags.AutomaticOperand.OperandType <> optUnused) then
   begin
     Result := Operands.Definition.AffectedFlags.AutomaticOperand;
   end else
   begin
     Result := Operands.Items[Index];
-  end;
+  end;}
 end;
 
 class function TZYUniqueOperandList.IndexOfOperands(List: TList<TZYInstructionOperand>;
@@ -634,7 +656,11 @@ class function TZYUniqueOperandList.NumberOfUsedOperands(Operands: TZYInstructio
 begin
   // This wrapper function takes care of the automatically generated FLAGS-register operand
   Result := Operands.NumberOfUsedOperands;
-  if (Operands.Definition.AffectedFlags.AutomaticOperand.OperandType <> optUnused) then
+  if (Operands.Definition.AffectedFlags.AutomaticOperand0.OperandType <> optUnused) then
+  begin
+    Inc(Result);
+  end;
+  if (Operands.Definition.AffectedFlags.AutomaticOperand1.OperandType <> optUnused) then
   begin
     Inc(Result);
   end;

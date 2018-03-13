@@ -439,15 +439,16 @@ type
   strict private
     FAccess: TZYFlagsAccess;
     FFlags: array[0..20] of TZYFlagOperation;
-    FManagedOperand: TZYInstructionOperand;
+    FManagedOperands: array[0..1] of TZYInstructionOperand;
   strict private
+    function GetManagedOperand(Index: Integer): TZYInstructionOperand; inline;
     function GetFlagOperation(Index: Integer): TZYFlagOperation; inline;
     function GetFlagCount: Integer; inline;
   strict private
     procedure SetAccess(Value: TZYFlagsAccess); inline;
     procedure SetFlagOperation(Index: Integer; Value: TZYFlagOperation); inline;
   strict private
-    procedure UpdateManagedOperand; inline;
+    procedure UpdateManagedOperands; inline;
   protected
     procedure AssignTo(Dest: TPersistent); override;
   protected
@@ -458,11 +459,13 @@ type
     procedure LoadFromJSON(const JSON: IJSONObjectReader); override;
     procedure SaveToJSON(const JSON: IJSONObjectWriter); override;
   public
+    function CompareTo(Other: TZYInstructionFlagsInfo): Integer;
     function Equals(Obj: TObject): Boolean; override;
   public
     destructor Destroy; override;
   public
-    property AutomaticOperand: TZYInstructionOperand read FManagedOperand;
+    property AutomaticOperand0: TZYInstructionOperand index 0 read GetManagedOperand;
+    property AutomaticOperand1: TZYInstructionOperand index 1 read GetManagedOperand;
     property Flags[Index: Integer]: TZYFlagOperation read GetFlagOperation;
     property Count: Integer read GetFlagCount;
   published
@@ -2378,20 +2381,35 @@ end;
 
 procedure TZYInstructionFlagsInfo.Changed;
 begin
-  UpdateManagedOperand;
+  UpdateManagedOperands;
   inherited;
+end;
+
+function TZYInstructionFlagsInfo.CompareTo(Other: TZYInstructionFlagsInfo): Integer;
+var
+  I: Integer;
+begin
+  // Access does not have any effect to the generated flags array
+  for I := Low(FFlags) to High(FFlags) do
+  begin
+    Result := CompareValue(Ord(FFlags[I]), Ord(Other.FFlags[I]));
+    if Result <> 0 then Break;
+  end;
 end;
 
 constructor TZYInstructionFlagsInfo.Create(Definition: TZYInstructionDefinition);
 begin
   inherited Create(Definition);
-  FManagedOperand := TZYInstructionOperand.Create(nil, 0);
-  FManagedOperand.Register := regSSZFlags;
+  FManagedOperands[0] := TZYInstructionOperand.Create(nil, 0);
+  FManagedOperands[0].Register := regSSZFlags;
+  FManagedOperands[1] := TZYInstructionOperand.Create(nil, 0);
+  FManagedOperands[1].Register := regX87STATUS;
 end;
 
 destructor TZYInstructionFlagsInfo.Destroy;
 begin
-  FManagedOperand.Free;
+  FManagedOperands[0].Free;
+  FManagedOperands[1].Free;
   inherited;
 end;
 
@@ -2404,6 +2422,12 @@ begin
   if (Obj is TZYInstructionFlagsInfo) then
   begin
     O := TZYInstructionFlagsInfo(Obj);
+    Result := (FAccess = O.FAccess);
+    if (not Result) then
+    begin
+      Exit;
+    end;
+    Result := true;
     for I := Low(FFlags) to High(FFlags) do
     begin
       if (O.FFlags[I] <> FFlags[I]) then
@@ -2411,7 +2435,6 @@ begin
         Exit(false);
       end;
     end;
-    Result := (O.FManagedOperand.Equals(FManagedOperand));
   end;
 end;
 
@@ -2424,6 +2447,12 @@ function TZYInstructionFlagsInfo.GetFlagOperation(Index: Integer): TZYFlagOperat
 begin
   Assert((Index >= Low(FFlags)) and (Index <= High(FFlags)));
   Result := FFlags[Index];
+end;
+
+function TZYInstructionFlagsInfo.GetManagedOperand(Index: Integer): TZYInstructionOperand;
+begin
+  Assert((Index >= Low(FManagedOperands)) and (Index <= High(FManagedOperands)));
+  Result := FManagedOperands[Index];
 end;
 
 procedure TZYInstructionFlagsInfo.LoadFromJSON(const JSON: IJSONObjectReader);
@@ -2489,52 +2518,91 @@ begin
   end;
 end;
 
-procedure TZYInstructionFlagsInfo.UpdateManagedOperand;
+procedure TZYInstructionFlagsInfo.UpdateManagedOperands;
 var
   I: Integer;
-  R, W: Boolean;
+  R0, W0, R1, W1: Boolean;
 begin
-  R := false;
-  W := false;
+  R0 := false; W0 := false; R1 := false; W1 := false;
   for I := Low(FFlags) to High(FFlags) do
   begin
-    if (FFlags[I] = foTested) then
+    if (I in [17..20] {C0..C3}) then
     begin
-      R := true;
+      if (FFlags[I] = foTested) then
+      begin
+        R1 := true;
+      end else
+      if (FFlags[I] in [foModified, foSet0, foSet1, foUndefined]) then
+      begin
+        W1 := true;
+      end;
     end else
-    if (FFlags[I] in [foModified, foSet0, foSet1, foUndefined]) then
     begin
-      W := true;
+      if (FFlags[I] = foTested) then
+      begin
+        R0 := true;
+      end else
+      if (FFlags[I] in [foModified, foSet0, foSet1, foUndefined]) then
+      begin
+        W0 := true;
+      end;
     end;
   end;
-  if (R or W) then
+  if (R0 or W0) then
   begin
-    FManagedOperand.OperandType := optImplicitReg;
-    FManagedOperand.Visible := false;
+    FManagedOperands[0].OperandType := optImplicitReg;
+    FManagedOperands[0].Visible := false;
+    if (R0 and W0) then
+    begin
+      FManagedOperands[0].Action := opaReadWrite;
+      if (FAccess = faMayWrite) then
+      begin
+        FManagedOperands[0].Action := opaReadCondWrite;
+      end;
+    end else
+    if (R0) then
+    begin
+      FManagedOperands[0].Action := opaRead;
+    end else
+    if (W0) then
+    begin
+      FManagedOperands[0].Action := opaWrite;
+      if (FAccess = faMayWrite) then
+      begin
+        FManagedOperands[0].Action := opaCondWrite;
+      end;
+    end;
   end else
   begin
-    FManagedOperand.OperandType := optUnused;
-    Exit;
+    FManagedOperands[0].OperandType := optUnused;
   end;
-  if (R and W) then
+  if (R1 or W1) then
   begin
-    FManagedOperand.Action := opaReadWrite;
-    if (FAccess = faMayWrite) then
+    FManagedOperands[1].OperandType := optImplicitReg;
+    FManagedOperands[1].Visible := false;
+    if (R1 and W1) then
     begin
-      FManagedOperand.Action := opaReadCondWrite;
+      FManagedOperands[1].Action := opaReadWrite;
+      if (FAccess = faMayWrite) then
+      begin
+        FManagedOperands[1].Action := opaReadCondWrite;
+      end;
+    end else
+    if (R1) then
+    begin
+      FManagedOperands[1].Action := opaRead;
+    end else
+    if (W1) then
+    begin
+      FManagedOperands[1].Action := opaWrite;
+      if (FAccess = faMayWrite) then
+      begin
+        FManagedOperands[1].Action := opaCondWrite;
+      end;
     end;
   end else
-  if (R) then
   begin
-    FManagedOperand.Action := opaRead;
-  end else
-  if (W) then
-  begin
-    FManagedOperand.Action := opaWrite;
-    if (FAccess = faMayWrite) then
-    begin
-      FManagedOperand.Action := opaCondWrite;
-    end;
+    FManagedOperands[1].OperandType := optUnused;
   end;
 end;
 {$ENDREGION}

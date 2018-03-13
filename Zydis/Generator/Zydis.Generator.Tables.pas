@@ -626,7 +626,11 @@ class function TZYDefinitionTableGenerator.NumberOfUsedOperands(
 begin
   // This wrapper function takes care of the automatically generated FLAGS-register operand
   Result := Operands.NumberOfUsedOperands;
-  if (Operands.Definition.AffectedFlags.AutomaticOperand.OperandType <> optUnused) then
+  if (Operands.Definition.AffectedFlags.AutomaticOperand0.OperandType <> optUnused) then
+  begin
+    Inc(Result);
+  end;
+  if (Operands.Definition.AffectedFlags.AutomaticOperand1.OperandType <> optUnused) then
   begin
     Inc(Result);
   end;
