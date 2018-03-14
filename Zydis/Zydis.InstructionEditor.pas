@@ -2402,8 +2402,10 @@ begin
   inherited Create(Definition);
   FManagedOperands[0] := TZYInstructionOperand.Create(nil, 0);
   FManagedOperands[0].Register := regSSZFlags;
+  FManagedOperands[0].ElementType := emtINT1;
   FManagedOperands[1] := TZYInstructionOperand.Create(nil, 0);
   FManagedOperands[1].Register := regX87STATUS;
+  FManagedOperands[1].ElementType := emtSTRUCT;
 end;
 
 destructor TZYInstructionFlagsInfo.Destroy;
