@@ -49,11 +49,11 @@ type
   public
     function WriteLine: TZYTableItemWriter; inline;
     function WriteStr(const Value: String;
-      const ExplicitName: String = ''): TZYTableItemWriter; inline;
+      const ExplicitName: String = ''; MinimalMode: Boolean = true): TZYTableItemWriter; inline;
     function WriteDec(const Value: Integer;
-      const ExplicitName: String = ''): TZYTableItemWriter; inline;
+      const ExplicitName: String = ''; MinimalMode: Boolean = true): TZYTableItemWriter; inline;
     function WriteHex(const Value: Integer;
-      const ExplicitName: String = ''): TZYTableItemWriter; inline;
+      const ExplicitName: String = ''; MinimalMode: Boolean = true): TZYTableItemWriter; inline;
     function StructBegin(const ExplicitName: String = ''):TZYTableItemWriter; inline;
     function StructEnd: TZYTableItemWriter; inline;
   end;
@@ -172,16 +172,26 @@ begin
 end;
 
 function TZYTableItemWriter.WriteDec(const Value: Integer;
-  const ExplicitName: String): TZYTableItemWriter;
+  const ExplicitName: String; MinimalMode: Boolean): TZYTableItemWriter;
 begin
   Result := Self;
-  WriteDelimiter;
+  if (not MinimalMode) then
+  begin
+    FWriter.Write(' ZYDIS_NOTMIN(');
+  end else
+  begin
+    WriteDelimiter;
+  end;
   if (ExplicitName <> '') then
   begin
     FWriter.Write('.%s = %d', [ExplicitName, Value]);
   end else
   begin
     FWriter.Write(Value);
+  end;
+  if (not MinimalMode) then
+  begin
+    FWriter.Write(')');
   end;
 end;
 
@@ -200,16 +210,26 @@ begin
 end;
 
 function TZYTableItemWriter.WriteHex(const Value: Integer;
-  const ExplicitName: String): TZYTableItemWriter;
+  const ExplicitName: String; MinimalMode: Boolean): TZYTableItemWriter;
 begin
   Result := Self;
-  WriteDelimiter;
+  if (not MinimalMode) then
+  begin
+    FWriter.Write(' ZYDIS_NOTMIN(');
+  end else
+  begin
+    WriteDelimiter;
+  end;
   if (ExplicitName <> '') then
   begin
     FWriter.Write('.%s = 0x%X', [ExplicitName, Value]);
   end else
   begin
     FWriter.Write('0x%X', [Value]);
+  end;
+  if (not MinimalMode) then
+  begin
+    FWriter.Write(')');
   end;
 end;
 
@@ -220,16 +240,26 @@ begin
 end;
 
 function TZYTableItemWriter.WriteStr(const Value: String;
-  const ExplicitName: String): TZYTableItemWriter;
+  const ExplicitName: String; MinimalMode: Boolean): TZYTableItemWriter;
 begin
   Result := Self;
-  WriteDelimiter;
+  if (not MinimalMode) then
+  begin
+    FWriter.Write(' ZYDIS_NOTMIN(');
+  end else
+  begin
+    WriteDelimiter;
+  end;
   if (ExplicitName <> '') then
   begin
     FWriter.Write('.%s = %s', [ExplicitName, Value]);
   end else
   begin
     FWriter.Write(Value);
+  end;
+  if (not MinimalMode) then
+  begin
+    FWriter.Write(')');
   end;
 end;
 {$ENDREGION}
@@ -412,26 +442,31 @@ begin
       // ZYDIS_INSTRUCTION_DEFINITION_BASE
       { mnemonic                    } Writer.WriteStr(
                                         'ZYDIS_MNEMONIC_' + AnsiUpperCase(Item.Mnemonic));
-      { operandCount                } Writer.WriteDec(NumberOfUsedOperands(Item.Operands));
-      { operandReference            } Writer.WriteHex(Operands.Mapping[Item.Encoding][Index]);
+      { operandCount                } Writer.WriteDec(
+                                        NumberOfUsedOperands(Item.Operands), '', false);
+      { operandReference            } Writer.WriteHex(
+                                        Operands.Mapping[Item.Encoding][Index], '', false);
       { operandSizeMapping          } Writer.WriteDec(Ord(Item.OperandSizeMap));
-      { flagsReference              } Writer.WriteHex(AccessedFlags.Mapping[Item.Encoding][Index]);
+      { flagsReference              } Writer.WriteHex(
+                                        AccessedFlags.Mapping[Item.Encoding][Index], '', false);
       { requiresProtectedMode       } Writer.WriteStr(ZydisBool[dfProtectedMode in Item.Flags]);
       { acceptsAddressSizeOverride  } Writer.WriteStr(ZydisBool[AcceptsASZOverride(Item)]);
       { category                    } Writer.WriteStr(
                                         'ZYDIS_CATEGORY_' +
                                         Category.Items[
-                                        Category.Mapping[Item.Encoding][Index]].ToUpper);
+                                        Category.Mapping[Item.Encoding][Index]].ToUpper, '', false);
       { isaSet                      } Writer.WriteStr(
                                         'ZYDIS_ISA_SET_' +
                                         ISASet.Items[
-                                        ISASet.Mapping[Item.Encoding][Index]].ToUpper);
+                                        ISASet.Mapping[Item.Encoding][Index]].ToUpper, '', false);
       { isaExt                      } Writer.WriteStr(
                                         'ZYDIS_ISA_EXT_' + ISAExtension.Items[
-                                        ISAExtension.Mapping[Item.Encoding][Index]].ToUpper);
+                                        ISAExtension.Mapping[Item.Encoding][Index]].ToUpper, '',
+                                        false);
       { exceptionClass              } Writer.WriteStr(
                                         'ZYDIS_EXCEPTION_CLASS_' +
-                                        TZYExceptionClass.ZydisStrings[Item.ExceptionClass]);
+                                        TZYExceptionClass.ZydisStrings[Item.ExceptionClass], '',
+                                        false);
       { constrREG                   } Writer.WriteStr(
                                         'ZYDIS_REG_CONSTRAINTS_' +
                                         TZYRegisterConstraint.ZydisStrings[
@@ -459,54 +494,69 @@ begin
         iencDEFAULT:
           begin
             // ZydisInstructionDefinitionDEFAULT
-            { isPrivileged          } Writer.WriteStr(ZydisBool[Item.PrivilegeLevel = 0]);
-            { isFarBranch           } Writer.WriteStr(ZydisBool[dfIsFarBranch in Item.Flags]);
+            { isPrivileged          } Writer.WriteStr(
+                                        ZydisBool[Item.PrivilegeLevel = 0], '', false);
+            { isFarBranch           } Writer.WriteStr(
+                                        ZydisBool[dfIsFarBranch in Item.Flags], '', false);
             { acceptsLock           } Writer.WriteStr(
                                         ZydisBool[pfAcceptsLOCK in Item.PrefixFlags]);
             { acceptsREP            } Writer.WriteStr(
-                                        ZydisBool[pfAcceptsREP in Item.PrefixFlags]);
+                                        ZydisBool[pfAcceptsREP in Item.PrefixFlags], '', false);
             { acceptsREPEREPZ       } Writer.WriteStr(
-                                        ZydisBool[pfAcceptsREPEREPZ in Item.PrefixFlags]);
+                                        ZydisBool[pfAcceptsREPEREPZ in Item.PrefixFlags], '',
+                                        false);
             { acceptsREPNEREPNZ     } Writer.WriteStr(
-                                        ZydisBool[pfAcceptsREPNEREPNZ in Item.PrefixFlags]);
+                                        ZydisBool[pfAcceptsREPNEREPNZ in Item.PrefixFlags], '',
+                                        false);
             { acceptsBOUND          } Writer.WriteStr(
-                                        ZydisBool[pfAcceptsBOUND in Item.PrefixFlags]);
+                                        ZydisBool[pfAcceptsBOUND in Item.PrefixFlags], '', false);
             { acceptsXACQUIRE       } Writer.WriteStr(
-                                        ZydisBool[pfAcceptsXACQUIRE in Item.PrefixFlags]);
+                                        ZydisBool[pfAcceptsXACQUIRE in Item.PrefixFlags], '',
+                                        false);
             { acceptsXRELEASE       } Writer.WriteStr(
-                                        ZydisBool[pfAcceptsXRELEASE in Item.PrefixFlags]);
+                                        ZydisBool[pfAcceptsXRELEASE in Item.PrefixFlags], '',
+                                        false);
             { acceptsHLEWithoutLock } Writer.WriteStr(
-                                        ZydisBool[pfAcceptsLocklessHLE in Item.PrefixFlags]);
+                                        ZydisBool[pfAcceptsLocklessHLE in Item.PrefixFlags], '',
+                                        false);
             { acceptsBranchHints    } Writer.WriteStr(
-                                        ZydisBool[pfAcceptsBranchHints in Item.PrefixFlags]);
+                                        ZydisBool[pfAcceptsBranchHints in Item.PrefixFlags], '',
+                                        false);
             { acceptsSegment        } Writer.WriteStr(
-                                        ZydisBool[AcceptsSegment(Item)]);
+                                        ZydisBool[AcceptsSegment(Item)], '', false);
           end;
         iencVEX:
           begin
             // ZydisInstructionDefinitionVEX
             { broadcast             } Writer.WriteStr('ZYDIS_VEX_STATIC_BROADCAST_' +
-                                        TZYStaticBroadcast.ZydisStrings[Item.VEX.StaticBroadcast]);
+                                        TZYStaticBroadcast.ZydisStrings[Item.VEX.StaticBroadcast],
+                                        '', false);
           end;
         iencEVEX:
           begin
             // ZydisInstructionDefinitionEVEX
             { vectorLength          } Writer.WriteStr('ZYDIS_IVECTOR_LENGTH_' +
-                                        TZYVectorLength.ZydisStrings[Item.EVEX.VectorLength]);
+                                        TZYVectorLength.ZydisStrings[Item.EVEX.VectorLength],
+                                        '', false);
             { tupleType             } Writer.WriteStr('ZYDIS_TUPLETYPE_' +
-                                        TZYEVEXTupleType.ZydisStrings[Item.EVEX.TupleType]);
+                                        TZYEVEXTupleType.ZydisStrings[Item.EVEX.TupleType], '',
+                                        false);
             { elementSize           } Writer.WriteStr('ZYDIS_IELEMENT_SIZE_' +
-                                        TZYEVEXElementSize.ZydisStrings[Item.EVEX.ElementSize]);
+                                        TZYEVEXElementSize.ZydisStrings[Item.EVEX.ElementSize], '',
+                                        false);
             { functionality         } Writer.WriteStr('ZYDIS_EVEX_FUNC_' +
-                                        TZYEVEXFunctionality.ZydisStrings[Item.EVEX.Functionality]);
+                                        TZYEVEXFunctionality.ZydisStrings[Item.EVEX.Functionality],
+                                        '', false);
             { maskPolicy            } Writer.WriteStr('ZYDIS_MASK_POLICY_' +
                                         TZYMEVEXMaskMode.ZydisStrings[Item.EVEX.MaskMode]);
             { acceptsZeroMask       } Writer.WriteStr(
                                         ZydisBool[mfAcceptsZeroMask in Item.EVEX.MaskFlags]);
             { isControlMask         } Writer.WriteStr(
-                                        ZydisBool[mfIsControlMask in Item.EVEX.MaskFlags]);
+                                        ZydisBool[mfIsControlMask in Item.EVEX.MaskFlags], '',
+                                        false);
             { broadcast             } Writer.WriteStr('ZYDIS_EVEX_STATIC_BROADCAST_' +
-                                        TZYStaticBroadcast.ZydisStrings[Item.EVEX.StaticBroadcast]);
+                                        TZYStaticBroadcast.ZydisStrings[Item.EVEX.StaticBroadcast],
+                                        '', false);
           end;
         iencMVEX:
           begin
@@ -515,9 +565,11 @@ begin
                                         TZYMVEXFunctionality.ZydisStrings[Item.MVEX.Functionality]);
             { maskPolicy            } Writer.WriteStr('ZYDIS_MASK_POLICY_' +
                                         TZYMEVEXMaskMode.ZydisStrings[Item.MVEX.MaskMode]);
-            { hasElementGranularity } Writer.WriteStr(ZydisBool[Item.MVEX.HasElementGranularity]);
+            { hasElementGranularity } Writer.WriteStr(ZydisBool[Item.MVEX.HasElementGranularity],
+                                        '', false);
             { broadcast             } Writer.WriteStr('ZYDIS_MVEX_STATIC_BROADCAST_' +
-                                        TZYStaticBroadcast.ZydisStrings[Item.MVEX.StaticBroadcast]);
+                                        TZYStaticBroadcast.ZydisStrings[Item.MVEX.StaticBroadcast],
+                                        '', false);
           end;
       end;
     end);
@@ -641,8 +693,8 @@ end;
 class procedure TZYOperandTableGenerator.Generate(Generator: TZYBaseGenerator;
   const Filename: String; Operands: TZYUniqueOperandList);
 begin
-  TZYTableGenerator<TZYInstructionOperand>.Generate(Generator, Filename, 'operandDefinitions',
-    'ZydisOperandDefinition', Operands.Items,
+  TZYTableGenerator<TZYInstructionOperand>.Generate(Generator, Filename,
+    'operandDefinitions.ifndef ZYDIS_MINIMAL_MODE', 'ZydisOperandDefinition', Operands.Items,
     procedure(Writer: TZYTableItemWriter; Index: Integer; const Item: TZYInstructionOperand)
     var
       C: TZYRegisterClass;
@@ -793,8 +845,8 @@ end;
 class procedure TZYAccessedFlagsTableGenerator.Generate(Generator: TZYBaseGenerator;
   const Filename: String; AccessedFlags: TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>);
 begin
-  TZYTableGenerator<TZYInstructionFlagsInfo>.Generate(Generator, Filename, 'accessedFlags',
-    'ZydisAccessedFlags', AccessedFlags.Items,
+  TZYTableGenerator<TZYInstructionFlagsInfo>.Generate(Generator, Filename,
+    'accessedFlags.ifndef ZYDIS_MINIMAL_MODE', 'ZydisAccessedFlags', AccessedFlags.Items,
     procedure(Writer: TZYTableItemWriter; Index: Integer; const Item: TZYInstructionFlagsInfo)
     var
       I: Integer;
