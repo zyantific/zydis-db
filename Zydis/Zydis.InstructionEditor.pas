@@ -1340,6 +1340,8 @@ begin
       D.SetModeCET(ModeCET);
       D.SetModeLZCNT(ModeLZCNT);
       D.SetModeTZCNT(ModeTZCNT);
+      D.SetModeWBNOINVD(ModeWBNOINVD);
+      D.SetModeCLDEMOTE(ModeCLDEMOTE);
 
       D.SetForceModrmReg(FForceModrmReg);
       D.SetForceModrmRm(FForceModrmRm);
@@ -1388,6 +1390,8 @@ begin
       (ModeCET = O.ModeCET) and
       (ModeLZCNT = O.ModeLZCNT) and
       (ModeTZCNT = O.ModeTZCNT) and
+      (ModeWBNOINVD = O.ModeWBNOINVD) and
+      (ModeCLDEMOTE = O.ModeCLDEMOTE) and
 
       (FForceModrmReg = O.FForceModrmReg) and
       (FForceModrmRm = O.FForceModrmRm);
@@ -1530,6 +1534,10 @@ begin
       'feature_lzcnt', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
     SetModeTZCNT(JSON.Reader.ReadEnum(
       'feature_tzcnt', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
+    SetModeWBNOINVD(JSON.Reader.ReadEnum(
+      'feature_wbnoinvd', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
+    SetModeCLDEMOTE(JSON.Reader.ReadEnum(
+      'feature_cldemote', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
 
     SetForceModrmReg(JSON.ReadBoolean('force_modrm_reg', false));
     SetForceModrmRm(JSON.ReadBoolean('force_modrm_rm', false));
@@ -1578,6 +1586,10 @@ begin
     JSON.Writer.WriteEnum('feature_lzcnt', ModeLZCNT, TZYEnumFilterBoolean.JSONStrings);
   if (ModeTZCNT <> fbPlaceholder) then
     JSON.Writer.WriteEnum('feature_tzcnt', ModeTZCNT, TZYEnumFilterBoolean.JSONStrings);
+  if (ModeWBNOINVD <> fbPlaceholder) then
+    JSON.Writer.WriteEnum('feature_wbnoinvd', ModeWBNOINVD, TZYEnumFilterBoolean.JSONStrings);
+  if (ModeCLDEMOTE <> fbPlaceholder) then
+    JSON.Writer.WriteEnum('feature_cldemote', ModeCLDEMOTE, TZYEnumFilterBoolean.JSONStrings);
 
   if (FForceModrmReg <> false) then
     JSON.WriteBoolean('force_modrm_reg', FForceModrmReg);
