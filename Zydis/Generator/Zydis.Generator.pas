@@ -477,7 +477,8 @@ const
     'ModeCET',
     'ModeLZCNT',
     'ModeTZCNT',
-    'ModeWBNOINVD'
+    'ModeWBNOINVD',
+    'ModeCLDEMOTE'
   );
 var
   S, T, Y, Z: Cardinal;

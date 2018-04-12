@@ -313,6 +313,8 @@ type
 
   TZYBaseRegister = (
     bregNone,
+    bregAGPR_REG,
+    bregAGPR_RM,
     bregABX,
     bregASP,
     bregABP,
@@ -322,11 +324,13 @@ type
   TZYBaseRegisterHelper = record helper for TZYBaseRegister
   public
     const JSONStrings: array[TZYBaseRegister] of String = (
-      'none', 'bx', 'sp', 'bp', 'si', 'di'
+      'none', 'agpr_reg', 'agpr_rm', 'bx', 'sp', 'bp', 'si', 'di'
     );
   public
     const ZydisStrings: array[TZYBaseRegister] of String = (
       'NONE',
+      'AGPR_REG',
+      'AGPR_RM',
       'ABX',
       'ASP',
       'ABP',
@@ -1107,6 +1111,7 @@ type
       optGPR16_32_64, // GPRv
       optGPR32_32_64, // GPRy
       optGPR16_32_32, // GPRz
+      optGPRASZ,
       optFPR,
       optMMX,
       optXMM,
@@ -1145,6 +1150,7 @@ type
       'gpr16_32_64',
       'gpr32_32_64',
       'gpr16_32_32',
+      'gpr_asz',
       'fpr',
       'mmx',
       'xmm',
@@ -1179,6 +1185,7 @@ type
       'GPR16_32_64',
       'GPR32_32_64',
       'GPR16_32_32',
+      'GPR_ASZ',
       'FPR',
       'MMX',
       'XMM',

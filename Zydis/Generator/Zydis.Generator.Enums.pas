@@ -280,7 +280,7 @@ begin
       ['ZYDIS_', ATask.ItemPrefix, 'ZYDIS_', ATask.ItemPrefix, T, sLineBreak]);
     W.Write('    /**%s     * @brief   The minimum number of bits required to represent all ' +
       'values of this enum.%s     */%s', [sLineBreak, sLineBreak, sLineBreak]);
-    W.Write('    %s%sREQUIRED_BITS = ZYDIS_BITS_TO_REPRESENT(%s%sMAX_VALUE)',
+    W.Write('    %s%sREQUIRED_BITS = ZYAN_BITS_TO_REPRESENT(%s%sMAX_VALUE)',
       ['ZYDIS_', ATask.ItemPrefix, 'ZYDIS_', ATask.ItemPrefix]);
     W.WriteLine;
     W.Write('} %s;', [N]);

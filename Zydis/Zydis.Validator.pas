@@ -248,6 +248,8 @@ const
     [opeModrmReg, opeModrmRm, opeNDSNDD, opeOpcodeBits],
     { optGPR16_32_32 }
     [opeModrmReg, opeModrmRm, opeNDSNDD, opeOpcodeBits],
+    { optGPRASZ }
+    [opeModrmReg, opeModrmRm],
     { optFPR }
     [opeModrmRm],
     { optMMX }

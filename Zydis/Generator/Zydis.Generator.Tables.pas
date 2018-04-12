@@ -135,7 +135,7 @@ uses
   System.SysUtils, Zydis.InstructionFilters, Zydis.Enums.Filters;
 
 const
-  ZydisBool: array[Boolean] of String = ('ZYDIS_FALSE', 'ZYDIS_TRUE');
+  ZydisBool: array[Boolean] of String = ('ZYAN_FALSE', 'ZYAN_TRUE');
 
 {$REGION 'Class: TZYTableItemWriter'}
 constructor TZYTableItemWriter.Create(Writer: TStreamWriter);
@@ -893,7 +893,8 @@ const
     'ModeCET',
     'ModeLZCNT',
     'ModeTZCNT',
-    'ModeWBNOINVD'
+    'ModeWBNOINVD',
+    'ModeCLDEMOTE'
   );
   NODE_NAMES: array[TZYInstructionFilterClass] of String =
   (
@@ -922,7 +923,8 @@ const
     'MODE_CET',
     'MODE_LZCNT',
     'MODE_TZCNT',
-    'MODE_WBNOINVD'
+    'MODE_WBNOINVD',
+    'MODE_CLDEMOTE'
   );
 var
   Tables: TArray<TZYTableTemplate<PZYTreeItem>>;
