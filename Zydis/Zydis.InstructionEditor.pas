@@ -2556,21 +2556,21 @@ begin
   begin
     if (I in [17..20] {C0..C3}) then
     begin
-      if (FFlags[I] = foTested) then
+      if (FFlags[I] in [foTested, foTestedModified]) then
       begin
         R1 := true;
       end else
-      if (FFlags[I] in [foModified, foSet0, foSet1, foUndefined]) then
+      if (FFlags[I] in [foTestedModified, foModified, foSet0, foSet1, foUndefined]) then
       begin
         W1 := true;
       end;
     end else
     begin
-      if (FFlags[I] = foTested) then
+      if (FFlags[I] in [foTested, foTestedModified]) then
       begin
         R0 := true;
       end else
-      if (FFlags[I] in [foModified, foSet0, foSet1, foUndefined]) then
+      if (FFlags[I] in [foTestedModified, foModified, foSet0, foSet1, foUndefined]) then
       begin
         W0 := true;
       end;

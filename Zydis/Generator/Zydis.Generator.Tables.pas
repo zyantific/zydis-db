@@ -869,32 +869,32 @@ class procedure TZYDecoderTableGenerator.Generate(Generator: TZYBaseGenerator;
 const
   TABLE_NAMES: array[TZYInstructionFilterClass] of String = (
     '',
-    'XOP',
-    'VEX',
-    'EMVEX',
-    'Opcode',
-    'Mode',
-    'ModeCompact',
-    'ModrmMod',
-    'ModrmModCompact',
-    'ModrmReg',
-    'ModrmRm',
-    'MandatoryPrefix',
-    'OperandSize',
-    'AddressSize',
-    'VectorLength',
-    'REXW',
-    'REXB',
-    'EVEXB',
-    'MVEXE',
-    'ModeAMD',
-    'ModeKNC',
-    'ModeMPX',
-    'ModeCET',
-    'ModeLZCNT',
-    'ModeTZCNT',
-    'ModeWBNOINVD',
-    'ModeCLDEMOTE'
+    'xop',
+    'vex',
+    'emvex',
+    'opcode',
+    'mode',
+    'mode_compact',
+    'modrm_mod',
+    'modrm_mod_compact',
+    'modrm_reg',
+    'modrm_rm',
+    'mandatory_prefix',
+    'operand_size',
+    'address_size',
+    'vector_length',
+    'rex_w',
+    'rex_b',
+    'evex_b',
+    'mvex_e',
+    'mode_AMD',
+    'mode_KNC',
+    'mode_MPX',
+    'mode_CET',
+    'mode_LZCNT',
+    'mode_TZCNT',
+    'mode_WBNOINVD',
+    'mode_CLDEMOTE'
   );
   NODE_NAMES: array[TZYInstructionFilterClass] of String =
   (
@@ -939,7 +939,7 @@ begin
       Continue;
     end;
     SetLength(Tables, Length(Tables) + 1);
-    Tables[High(Tables)].Name     := 'filters' + TABLE_NAMES[C];
+    Tables[High(Tables)].Name     := 'filters_' + TABLE_NAMES[C];
     Tables[High(Tables)].ItemType := 'ZydisDecoderTreeNode[' + F.NumberOfValues.ToString + ']';
     Tables[High(Tables)].Items    := @TreeSnapshot.Filters[C];
     case C of
