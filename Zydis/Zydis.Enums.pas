@@ -1440,6 +1440,7 @@ type
   TZYFlagOperation = (
     foNone,
     foTested,
+    foTestedModified,
     foModified,
     foSet0,
     foSet1,
@@ -1450,6 +1451,7 @@ type
     const JSONStrings: array[TZYFlagOperation] of String = (
       'none',
       't',
+      't_m',
       'm',
       '0',
       '1',
@@ -1459,6 +1461,7 @@ type
     const ZydisStrings: array[TZYFlagOperation] of String = (
       'NONE',
       'TESTED',
+      'TESTED_MODIFIED',
       'MODIFIED',
       'SET_0',
       'SET_1',
