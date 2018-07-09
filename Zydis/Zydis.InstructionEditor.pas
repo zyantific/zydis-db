@@ -2498,11 +2498,11 @@ begin
   W := false;
   for I := Low(FFlags) to High(FFlags) do
   begin
-    if (FFlags[I] = foTested) then
+    if (FFlags[I] in [foTested, foTestedModified]) then
     begin
       R := true;
     end else
-    if (FFlags[I] in [foModified, foSet0, foSet1, foUndefined]) then
+    if (FFlags[I] in [foTestedModified, foModified, foSet0, foSet1, foUndefined]) then
     begin
       W := true;
     end;
