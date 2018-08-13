@@ -44,9 +44,9 @@ type
      * }
     GenerateStrings,
     {**
-     * @brief Uses the custom `ZydisStaticString` datatype instead of the default string type.
+     * @brief Uses the custom `ZydisShortString` datatype instead of the default string type.
      * }
-    UseCustomStringType
+    UseInternalStringType
   );
   TZYEnumGeneratorFlags = set of TZYEnumGeneratorFlag;
 
@@ -297,9 +297,9 @@ begin
     IncludeTrailingPathDelimiter(ATask.PathSource) + 'Enum' + ATask.EnumName + '.inc';
   S := ',';
   U := 'char*';
-  if (TZYEnumGeneratorFlag.UseCustomStringType in ATask.Flags) then
+  if (TZYEnumGeneratorFlag.UseInternalStringType in ATask.Flags) then
   begin
-    U := 'ZydisStaticString';
+    U := 'ZydisShortString';
   end;
   W := TStreamWriter.Create(F);
   try
@@ -323,9 +323,9 @@ begin
         end;
       end else
       begin
-        if (TZYEnumGeneratorFlag.UseCustomStringType in ATask.Flags) then
+        if (TZYEnumGeneratorFlag.UseInternalStringType in ATask.Flags) then
         begin
-          W.Write('    ZYDIS_MAKE_STATIC_STRING("%s")%s', [AItems[I], S]);
+          W.Write('    ZYDIS_MAKE_SHORTSTRING("%s")%s', [AItems[I], S]);
         end else
         begin
           W.Write('    "%s"%s', [AItems[I], S]);

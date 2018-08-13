@@ -398,7 +398,7 @@ begin
     TZYEnumGeneratorTask.Generate(Self, RootDirectory, MakeEnumGeneratorTaskList(
       'Mnemonic',
       'MNEMONIC_',
-      [TZYEnumGeneratorFlag.GenerateStrings, TZYEnumGeneratorFlag.UseCustomStringType],
+      [TZYEnumGeneratorFlag.GenerateStrings, TZYEnumGeneratorFlag.UseInternalStringType],
       []),
       Enums[0].Items);
     // Generating category enum
