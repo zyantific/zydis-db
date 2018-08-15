@@ -660,13 +660,15 @@ type
 
   TZYEVEXMaskFlag = (
     mfIsControlMask,
-    mfAcceptsZeroMask
+    mfAcceptsZeroMask,
+    mfForceZeroMask
   );
   TZYEVEXMaskFlagHelper = record helper for TZYEVEXMaskFlag
   public
     const JSONStrings: array[TZYEVEXMaskFlag] of String = (
       'is_control_mask',
-      'accepts_zero_mask'
+      'accepts_zero_mask',
+      'force_zero_mask'
     );
   end;
   TZYEVEXMaskFlags = set of TZYEVEXMaskFlag;

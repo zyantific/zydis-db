@@ -551,9 +551,23 @@ begin
                                         TZYMEVEXMaskMode.ZydisStrings[Item.EVEX.MaskMode]);
             { acceptsZeroMask       } Writer.WriteStr(
                                         ZydisBool[mfAcceptsZeroMask in Item.EVEX.MaskFlags]);
-            { isControlMask         } Writer.WriteStr(
-                                        ZydisBool[mfIsControlMask in Item.EVEX.MaskFlags], '',
-                                        false);
+
+            { mask_override         }
+            Assert(not ((mfIsControlMask in Item.EVEX.MaskFlags) and
+                        (mfForceZeroMask in Item.EVEX.MaskFlags)));
+            if (mfIsControlMask in Item.EVEX.MaskFlags) then
+            begin
+              Writer.WriteStr('ZYDIS_MASK_OVERRIDE_CONTROL', '', false);
+            end else
+            if (mfForceZeroMask in Item.EVEX.MaskFlags) then
+            begin
+              Writer.WriteStr('ZYDIS_MASK_OVERRIDE_ZEROING', '', false);
+            end else
+            begin
+              Writer.WriteStr('ZYDIS_MASK_OVERRIDE_DEFAULT', '', false);
+            end;
+
+
             { broadcast             } Writer.WriteStr('ZYDIS_EVEX_STATIC_BROADCAST_' +
                                         TZYStaticBroadcast.ZydisStrings[Item.EVEX.StaticBroadcast],
                                         '', false);
