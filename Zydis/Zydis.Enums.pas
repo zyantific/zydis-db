@@ -946,7 +946,9 @@ type
       emtFLOAT32,
       emtFLOAT64,
       emtFLOAT80,
-      emtBCD80
+      emtBCD80,
+      emtCC3,
+      emtCC5
     );
   public
     const Names: array[Enum] of String = (
@@ -970,7 +972,9 @@ type
       'emtFLOAT32',
       'emtFLOAT64',
       'emtFLOAT80',
-      'emtBCD80'
+      'emtBCD80',
+      'emtCC3',
+      'emtCC5'
     );
   public
     const JSONStrings: array[Enum] of String = (
@@ -994,7 +998,9 @@ type
       'float32',
       'float64',
       'float80',
-      'bcd80'
+      'bcd80',
+      'cc3',
+      'cc5'
     );
   public
     const ZydisStrings: array[Enum] of String = (
@@ -1018,7 +1024,9 @@ type
       'FLOAT32',
       'FLOAT64',
       'FLOAT80',
-      'BCD80'
+      'BCD80',
+      'CC3',
+      'CC5'
     );
   public
     const Types: array[Enum] of String = (
@@ -1042,7 +1050,9 @@ type
       'FLOAT32',
       'FLOAT64',
       'FLOAT80',
-      'LONGBCD'
+      'LONGBCD',
+      'CC',
+      'CC'
     );
   public
     const Size: array[Enum] of Integer = (
@@ -1066,7 +1076,9 @@ type
       32,
       64,
       80,
-      80
+      80,
+      3,
+      5
     );
   end;
   TZYElementType = TZYEnumElementType.Enum;
