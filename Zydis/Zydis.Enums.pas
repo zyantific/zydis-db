@@ -429,6 +429,20 @@ type
     );
   end;
 
+  TZYAddressSizeMap = ( // TODO: Make this dynamic
+    asmDefault,
+    asmIgnored,
+    asmForce32Or64
+  );
+  TZYAddressSizeMapMapHelper = record helper for TZYAddressSizeMap
+  public
+    const JSONStrings: array[TZYAddressSizeMap] of String = (
+      'default',
+      'ignored',
+      'force32_or_64'
+    );
+  end;
+
   TZYEnumDefinitionFlag = record
   public  // TODO: Find better names
     type Enum = (

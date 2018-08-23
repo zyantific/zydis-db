@@ -683,6 +683,7 @@ type
     FFilters: TZYInstructionFilters;
     FOperands: TZYInstructionOperands;
     FOperandSizeMap: TZYOperandSizeMap;
+    FAddressSizeMap: TZYAddressSizeMap;
     FPrivilegeLevel: TZYCPUPrivilegeLevel;
     FFlags: TZYDefinitionFlags;
     FMetaInfo: TZYInstructionMetaInfo;
@@ -705,6 +706,7 @@ type
     procedure SetOpcodeMap(Value: TZYOpcodeMap); inline;
     procedure SetOpcode(Value: TZYOpcode); inline;
     procedure SetOperandSizeMap(Value: TZYOperandSizeMap); inline;
+    procedure SetAddressSizeMap(Value: TZYAddressSizeMap); inline;
     procedure SetPrivilegeLevel(Value: TZYCPUPrivilegeLevel); inline;
     procedure SetFlags(Value: TZYDefinitionFlags); inline;
     procedure SetPrefixFlags(Value: TZYPrefixFlags); inline;
@@ -761,6 +763,8 @@ type
     property Operands: TZYInstructionOperands read FOperands;
     property OperandSizeMap: TZYOperandSizeMap read FOperandSizeMap write SetOperandSizeMap
       default osmDefault;
+    property AddressSizeMap: TZYAddressSizeMap read FAddressSizeMap write SetAddressSizeMap
+      default asmDefault;
     property PrivilegeLevel: TZYCPUPrivilegeLevel read FPrivilegeLevel write SetPrivilegeLevel
       default 3;
     property Flags: TZYDefinitionFlags read FFlags write SetFlags default [];
@@ -3143,6 +3147,7 @@ begin
       D.FFilters.Assign(FFilters);
       D.FOperands.Assign(FOperands);
       D.SetOperandSizeMap(FOperandSizeMap);
+      D.SetAddressSizeMap(FAddressSizeMap);
       D.SetPrivilegeLevel(FPrivilegeLevel);
       D.SetFlags(FFlags);
       D.FMetaInfo.Assign(FMetaInfo);
@@ -3340,6 +3345,7 @@ begin
     (FMnemonic = Definition.FMnemonic) and
     (FOperands.Equals(Definition.FOperands)) and
     (FOperandSizeMap = Definition.FOperandSizeMap) and
+    (FAddressSizeMap = Definition.FAddressSizeMap) and
     (FPrivilegeLevel = Definition.FPrivilegeLevel) and
     (FFlags = Definition.FFlags) and
     (FMetaInfo.Equals(Definition.FMetaInfo)) and
@@ -3430,6 +3436,8 @@ begin
     end;
     SetOperandSizeMap(JSON.Reader.ReadEnum<TZYOperandSizeMap>(
       'opsize_map', osmDefault, TZYOperandSizeMap.JSONStrings));
+    SetAddressSizeMap(JSON.Reader.ReadEnum<TZYAddressSizeMap>(
+      'adsize_map', asmDefault, TZYAddressSizeMap.JSONStrings));
     SetPrivilegeLevel(JSON.ReadInteger('cpl', 3));
     SetFlags(JSON.Reader.ReadSet<TZYDefinitionFlags>(
       'flags', [], TZYEnumDefinitionFlag.JSONStrings));
@@ -3496,6 +3504,8 @@ begin
     end);
   if (FOperandSizeMap <> osmDefault) then JSON.Writer.WriteEnum(
     'opsize_map', FOperandSizeMap, TZYOperandSizeMap.JSONStrings);
+  if (FAddressSizeMap <> asmDefault) then JSON.Writer.WriteEnum(
+    'adsize_map', FAddressSizeMap, TZYAddressSizeMap.JSONStrings);
   if (FPrivilegeLevel <> 3) then JSON.WriteInteger(
     'cpl', FPrivilegeLevel);
   if (FFlags <> []) then JSON.Writer.WriteSet(
@@ -3537,6 +3547,15 @@ begin
 
   if (FComment <> '') then JSON.WriteString('comment',
     StringReplace(TNetEncoding.Base64.Encode(FComment), sLineBreak, '', [rfReplaceAll]));
+end;
+
+procedure TZYInstructionDefinition.SetAddressSizeMap(Value: TZYAddressSizeMap);
+begin
+  if (FAddressSizeMap <> Value) then
+  begin
+    FAddressSizeMap := Value;
+    UpdateProperties;
+  end;
 end;
 
 procedure TZYInstructionDefinition.SetComment(const Value: String);

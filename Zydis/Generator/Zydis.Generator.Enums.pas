@@ -292,7 +292,7 @@ begin
   begin
     Exit;
   end;
-  N := 'zydis' + ATask.EnumName + 'Strings';
+  N := 'STR_' + ATask.EnumName.ToUpper;
   F := IncludeTrailingPathDelimiter(ARootDirectory) +
     IncludeTrailingPathDelimiter(ATask.PathSource) + 'Enum' + ATask.EnumName + '.inc';
   S := ',';

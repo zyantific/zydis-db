@@ -447,10 +447,10 @@ begin
       { operandReference            } Writer.WriteHex(
                                         Operands.Mapping[Item.Encoding][Index], '', false);
       { operandSizeMapping          } Writer.WriteDec(Ord(Item.OperandSizeMap));
+      { address_size_map            } Writer.WriteDec(Ord(Item.AddressSizeMap));
       { flagsReference              } Writer.WriteHex(
                                         AccessedFlags.Mapping[Item.Encoding][Index], '', false);
       { requiresProtectedMode       } Writer.WriteStr(ZydisBool[dfProtectedMode in Item.Flags]);
-      { acceptsAddressSizeOverride  } Writer.WriteStr(ZydisBool[AcceptsASZOverride(Item)]);
       { category                    } Writer.WriteStr(
                                         'ZYDIS_CATEGORY_' +
                                         Category.Items[
