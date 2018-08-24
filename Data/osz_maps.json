@@ -1,0 +1,114 @@
+[
+  {
+    "name": "default",
+    "description": "Default for most instructions",
+    "values": [
+      16,
+      32,
+      32,
+      16,
+      32,
+      16,
+      64,
+      64
+    ]
+  },
+  {
+    "name": "ignored",
+    "description": "The operand-size override (`0x66`) is ignored",
+    "values": [
+      16,
+      16,
+      32,
+      32,
+      32,
+      32,
+      64,
+      64
+    ]
+  },
+  {
+    "name": "default_xx_xx_64_xx",
+    "description": "The operand size defaults to 64-bit in 64-bit mode",
+    "values": [
+      16,
+      32,
+      32,
+      16,
+      64,
+      16,
+      64,
+      64
+    ]
+  },
+  {
+    "name": "force_08_08_08_08",
+    "description": "The operand size is forced to 8-bit",
+    "values": [
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8
+    ]
+  },
+  {
+    "name": "force_xx_xx_xx_32",
+    "description": "`REX.W` promotes to 32-bit instead of 64-bit",
+    "values": [
+      16,
+      32,
+      32,
+      16,
+      32,
+      16,
+      32,
+      32
+    ]
+  },
+  {
+    "name": "force_xx_xx_64_xx",
+    "description": "The operand size is forced to 64-bit in 64-bit mode",
+    "values": [
+      16,
+      32,
+      32,
+      16,
+      64,
+      64,
+      64,
+      64
+    ]
+  },
+  {
+    "name": "force_32_32_32_xx",
+    "description": "The operand size is forced to 32-bit, if no `REX.W` is present",
+    "values": [
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      64,
+      64
+    ]
+  },
+  {
+    "name": "force_32_32_64_64",
+    "description": "The operand size is forced to 64-bit in 64-bit mode and forced to 32-bit in all other modes (used by e.g. `mov CR, GPR` and `mov GPR, CR`)",
+    "values": [
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      64,
+      64
+    ]
+  }
+]

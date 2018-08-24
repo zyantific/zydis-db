@@ -1,0 +1,38 @@
+[
+  {
+    "name": "default",
+    "description": "Default for most instructions",
+    "values": [
+      16,
+      32,
+      32,
+      16,
+      64,
+      32
+    ]
+  },
+  {
+    "name": "ignored",
+    "description": "The address-size override is ignored",
+    "values": [
+      16,
+      16,
+      32,
+      32,
+      64,
+      64
+    ]
+  },
+  {
+    "name": "force_32_32_64",
+    "description": "The address-size is forced to 64-bit in 64-bit mode and 32-bit in non 64-bit mode (used by e.g. `ENCLS`, `ENCLV`, `ENCLU`)",
+    "values": [
+      32,
+      32,
+      32,
+      32,
+      64,
+      64
+    ]
+  }
+]
