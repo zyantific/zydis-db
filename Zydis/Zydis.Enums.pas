@@ -449,14 +449,30 @@ type
       dfForceConflict,  // Forces a conflict
       dfForceRegForm,   // Forces the instruction to allways assume "reg, reg" form (modrm.mod = 3)
       dfProtectedMode,  // Instruction is invalid in real and 8086 mode
-      dfIsFarBranch
+      dfIsShortBranch,
+      dfIsNearBranch,
+      dfIsFarBranch,
+      dfStateCPU_CR,
+      dfStateCPU_CW,
+      dfStateFPU_CR,
+      dfStateFPU_CW,
+      dfStateXMM_CR,
+      dfStateXMM_CW
     );
   public
     const JSONStrings: array[Enum] of String = (
       'force_conflict',
       'ignore_modrm_mod',
       'protected_mode',
-      'far_branch'
+      'short_branch',
+      'near_branch',
+      'far_branch',
+      'cpu_state_cr',
+      'cpu_state_cw',
+      'fpu_state_cr',
+      'fpu_state_cw',
+      'xmm_state_cr',
+      'xmm_state_cw'
     );
   end;
   TZYDefinitionFlag = TZYEnumDefinitionFlag.Enum;
@@ -474,8 +490,7 @@ type
       pfAcceptsXRELEASE,
       pfAcceptsLocklessHLE,
       pfAcceptsBranchHints,
-      pfRemoveSegment,
-      pfIgnoreASZOverride
+      pfRemoveSegment
     );
   public
     const JSONStrings: array[Enum] of String = (
@@ -488,8 +503,7 @@ type
       'accepts_xrelease',
       'accepts_lockless_hle',
       'accepts_branch_hints',
-      'remove_segment',
-      'ignore_asz_override'
+      'remove_segment'
     );
   end;
   TZYPrefixFlag = TZYEnumPrefixFlag.Enum;

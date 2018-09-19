@@ -665,8 +665,90 @@ end;
 class procedure TZYEnumGeneratorRust.Generate(AGenerator: TZYBaseGenerator;
   const ARootDirectory: String; const ATask: TZYEnumGeneratorTaskItem;
   const AItems: array of String);
+var
+  F, N, S: String;
+  W: TStreamWriter;
+  I, V: Integer;
 begin
-  // TODO:
+  F := IncludeTrailingPathDelimiter(ARootDirectory) +
+    IncludeTrailingPathDelimiter(ATask.PathInclude) + 'enums\' + ATask.EnumName.ToLower + '.rs';
+  N := ATask.EnumName;
+  S := ',';
+  V := 0;
+  W := TStreamWriter.Create(F);
+  try
+    W.AutoFlush := true;
+    W.NewLine := sLineBreak;
+    W.Write('/// Defines the `%s` enum%s', [N, sLineBreak]);
+    W.Write('#[derive(Clone, Copy, Debug, Eq, PartialEq)]');
+    W.WriteLine;
+    W.Write('#[repr(C)]');
+    W.WriteLine;
+    W.Write('pub enum %s {%s', [N, sLineBreak]);
+    for I := Low(AItems) to High(AItems)  do
+    begin
+      if (I = High(AItems)) then
+      begin
+        S := '';
+      end;
+      if (AItems[I].StartsWith('//')) then
+      begin
+        if (AItems[I] = '//') then
+        begin
+          W.WriteLine;
+        end else
+        begin
+          W.Write('    %s%s', [AItems[I], sLineBreak]);
+        end;
+      end else
+      begin
+        W.Write('    %s%s%s', [AItems[I].ToUpper, S, sLineBreak]);
+        Inc(V);
+      end;
+      WorkStep(AGenerator);
+    end;
+    W.Write('}');
+    W.WriteLine;
+    W.WriteLine;
+    W.Write('/// The last value of the `%s` enum%s', [N, sLineBreak]);
+    W.Write('pub const %sMAX_VALUE: %s = %s::%s;%s',
+      [ATask.ItemPrefix, N, N, AItems[High(AItems)].ToUpper, sLineBreak]);
+    W.WriteLine;
+    W.Write('/// The number of values in the `%s` enum%s', [N, sLineBreak]);
+    W.Write('pub const %sCOUNT: usize = %d;%s', [ATask.ItemPrefix, V, sLineBreak]);
+  finally
+    W.Free;
+  end;
+  if (not (TZYEnumGeneratorFlag.GenerateStrings in ATask.Flags)) then
+  begin
+    Exit;
+  end;
+  (*F := IncludeTrailingPathDelimiter(ARootDirectory) +
+    IncludeTrailingPathDelimiter(ATask.PathInclude) + 'Zydis.Strings.' + ATask.EnumName + '.inc';
+  N := ATask.EnumName + 'Strings';
+  S := ',';
+  W := TStreamWriter.Create(F);
+  try
+    W.AutoFlush := true;
+    W.NewLine := sLineBreak;
+    W.Write('const');
+    W.WriteLine;
+    W.Write('  %s = (', [N]);
+    W.WriteLine;
+    for I := Low(AItems) to High(AItems) do
+    begin
+      if (I = High(AItems)) then
+      begin
+        S := '';
+      end;
+      W.Write('    ''%s''%s%s', [AItems[I], S, sLineBreak]);
+      WorkStep(AGenerator);
+    end;
+    W.Write('  );');
+    W.WriteLine;
+  finally
+    W.Free;
+  end;*)
 end;
 
 class function TZYEnumGeneratorRust.GetName: String;

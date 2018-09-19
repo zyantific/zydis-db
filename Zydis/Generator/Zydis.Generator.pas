@@ -245,6 +245,14 @@ begin
       AEnumName,
       AItemPrefix,
       FlagsBindings
+    ),
+    TZYEnumGeneratorTaskItem.Create(
+      TZYEnumGeneratorRust,
+      TZYGeneratorConsts.PathIncludeRust,
+      TZYGeneratorConsts.PathSourceRust,
+      AEnumName,
+      AItemPrefix,
+      FlagsBindings
     )
   ];
 end;

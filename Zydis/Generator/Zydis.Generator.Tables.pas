@@ -85,8 +85,6 @@ type
   TZYDefinitionTableGenerator = record
   strict private
     class function NumberOfUsedOperands(Operands: TZYInstructionOperands): Integer; static; inline;
-    class function AcceptsASZOverride(
-      Definition: TZYInstructionDefinition): Boolean; static; inline;
     class function AcceptsSegment(Definition: TZYInstructionDefinition): Boolean; static; inline;
     class function GetRegisterConstraint(Operands: TZYInstructionOperands;
       Encoding: TZYOperandEncoding): TZYRegisterConstraint; inline; static;
@@ -380,12 +378,6 @@ end;
 {$ENDREGION}
 
 {$REGION 'Class: TZYDefinitionTableGenerator'}
-class function TZYDefinitionTableGenerator.AcceptsASZOverride(
-  Definition: TZYInstructionDefinition): Boolean;
-begin
-  Result := not (pfIgnoreASZOverride in Definition.PrefixFlags);
-end;
-
 class function TZYDefinitionTableGenerator.AcceptsSegment(
   Definition: TZYInstructionDefinition): Boolean;
 var
@@ -414,7 +406,7 @@ class procedure TZYDefinitionTableGenerator.Generate(Generator: TZYBaseGenerator
   AccessedFlags: TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>);
 const
   TABLE_NAMES: array[TZYInstructionEncoding] of String = (
-    'DEFAULT',
+    'LEGACY',
     '3DNOW',
     'XOP',
     'VEX',
@@ -428,7 +420,7 @@ begin
   SetLength(Tables, Ord(High(TZYInstructionEncoding)) + 1);
   for E := Low(TZYInstructionEncoding) to High(TZYInstructionEncoding) do
   begin
-    Tables[Ord(E)].Name     := 'instructionDefinitions'     + TABLE_NAMES[E];
+    Tables[Ord(E)].Name     := 'ISTR_DEFINITIONS_'     + TABLE_NAMES[E];
     Tables[Ord(E)].ItemType := 'ZydisInstructionDefinition' + TABLE_NAMES[E];
     Tables[Ord(E)].Items    := @Definitions.UniqueItems[E];
     case E of
@@ -463,6 +455,22 @@ begin
                                         'ZYDIS_ISA_EXT_' + ISAExtension.Items[
                                         ISAExtension.Mapping[Item.Encoding][Index]].ToUpper, '',
                                         false);
+      { branch_type                 }
+      if (dfIsFarBranch in Item.Flags) then
+      begin
+        Writer.WriteStr('ZYDIS_BRANCH_TYPE_FAR', '', false);
+      end else
+      if (dfIsNearBranch in Item.Flags) then
+      begin
+        Writer.WriteStr('ZYDIS_BRANCH_TYPE_NEAR', '', false);
+      end else
+      if (dfIsShortBranch in Item.Flags) then
+      begin
+        Writer.WriteStr('ZYDIS_BRANCH_TYPE_SHORT', '', false);
+      end else
+      begin
+        Writer.WriteStr('ZYDIS_BRANCH_TYPE_NONE', '', false);
+      end;
       { exceptionClass              } Writer.WriteStr(
                                         'ZYDIS_EXCEPTION_CLASS_' +
                                         TZYExceptionClass.ZydisStrings[Item.ExceptionClass], '',
@@ -475,6 +483,57 @@ begin
                                         'ZYDIS_REG_CONSTRAINTS_' +
                                         TZYRegisterConstraint.ZydisStrings[
                                         GetRegisterConstraint(Item.Operands, opeModrmRm)]);
+
+      { cpu_state                   }
+      if ((dfStateCPU_CR in Item.Flags) and (dfStateCPU_CW in Item.Flags)) then
+      begin
+        Writer.WriteStr('ZYDIS_RW_ACTION_READWRITE', '', false);
+      end else
+      if (dfStateCPU_CR in Item.Flags) then
+      begin
+        Writer.WriteStr('ZYDIS_RW_ACTION_READ', '', false);
+      end else
+      if (dfStateCPU_CW in Item.Flags) then
+      begin
+        Writer.WriteStr('ZYDIS_RW_ACTION_WRITE', '', false);
+      end else
+      begin
+        Writer.WriteStr('ZYDIS_RW_ACTION_NONE', '', false);
+      end;
+
+      { fpu_state                   }
+      if ((dfStateFPU_CR in Item.Flags) and (dfStateFPU_CW in Item.Flags)) then
+      begin
+        Writer.WriteStr('ZYDIS_RW_ACTION_READWRITE', '', false);
+      end else
+      if (dfStateFPU_CR in Item.Flags) then
+      begin
+        Writer.WriteStr('ZYDIS_RW_ACTION_READ', '', false);
+      end else
+      if (dfStateFPU_CW in Item.Flags) then
+      begin
+        Writer.WriteStr('ZYDIS_RW_ACTION_WRITE', '', false);
+      end else
+      begin
+        Writer.WriteStr('ZYDIS_RW_ACTION_NONE', '', false);
+      end;
+
+      { xmm_state                   }
+      if ((dfStateXMM_CR in Item.Flags) and (dfStateXMM_CW in Item.Flags)) then
+      begin
+        Writer.WriteStr('ZYDIS_RW_ACTION_READWRITE', '', false);
+      end else
+      if (dfStateXMM_CR in Item.Flags) then
+      begin
+        Writer.WriteStr('ZYDIS_RW_ACTION_READ', '', false);
+      end else
+      if (dfStateXMM_CW in Item.Flags) then
+      begin
+        Writer.WriteStr('ZYDIS_RW_ACTION_WRITE', '', false);
+      end else
+      begin
+        Writer.WriteStr('ZYDIS_RW_ACTION_NONE', '', false);
+      end;
 
       // ZYDIS_INSTRUCTION_DEFINITION_BASE_VECTOR
       if (Item.Encoding in [iencXOP, iencVEX, iencEVEX, iencMVEX]) then
@@ -496,8 +555,6 @@ begin
             // ZydisInstructionDefinitionDEFAULT
             { isPrivileged          } Writer.WriteStr(
                                         ZydisBool[Item.PrivilegeLevel = 0], '', false);
-            { isFarBranch           } Writer.WriteStr(
-                                        ZydisBool[dfIsFarBranch in Item.Flags], '', false);
             { acceptsLock           } Writer.WriteStr(
                                         ZydisBool[pfAcceptsLOCK in Item.PrefixFlags]);
             { acceptsREP            } Writer.WriteStr(
@@ -708,7 +765,7 @@ class procedure TZYOperandTableGenerator.Generate(Generator: TZYBaseGenerator;
   const Filename: String; Operands: TZYUniqueOperandList);
 begin
   TZYTableGenerator<TZYInstructionOperand>.Generate(Generator, Filename,
-    'operandDefinitions.ifndef ZYDIS_MINIMAL_MODE', 'ZydisOperandDefinition', Operands.Items,
+    'OPERAND_DEFINITIONS.ifndef ZYDIS_MINIMAL_MODE', 'ZydisOperandDefinition', Operands.Items,
     procedure(Writer: TZYTableItemWriter; Index: Integer; const Item: TZYInstructionOperand)
     var
       C: TZYRegisterClass;
@@ -790,7 +847,7 @@ end;
 class procedure TZYEncodingTableGenerator.Generate(Generator: TZYBaseGenerator;
   const Filename: String; Encodings: TZYUniqueDefinitionPropertyList<TZYInstructionPartInfo>);
 begin
-  TZYTableGenerator<TZYInstructionPartInfo>.Generate(Generator, Filename, 'instructionEncodings',
+  TZYTableGenerator<TZYInstructionPartInfo>.Generate(Generator, Filename, 'INSTR_ENCODINGS',
     'ZydisInstructionEncodingInfo', Encodings.Items,
     procedure(Writer: TZYTableItemWriter; Index: Integer; const Item: TZYInstructionPartInfo)
     var
@@ -860,7 +917,7 @@ class procedure TZYAccessedFlagsTableGenerator.Generate(Generator: TZYBaseGenera
   const Filename: String; AccessedFlags: TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>);
 begin
   TZYTableGenerator<TZYInstructionFlagsInfo>.Generate(Generator, Filename,
-    'accessedFlags.ifndef ZYDIS_MINIMAL_MODE', 'ZydisAccessedFlags', AccessedFlags.Items,
+    'ACCESSED_FLAGS.ifndef ZYDIS_MINIMAL_MODE', 'ZydisAccessedFlags', AccessedFlags.Items,
     procedure(Writer: TZYTableItemWriter; Index: Integer; const Item: TZYInstructionFlagsInfo)
     var
       I: Integer;
@@ -883,32 +940,32 @@ class procedure TZYDecoderTableGenerator.Generate(Generator: TZYBaseGenerator;
 const
   TABLE_NAMES: array[TZYInstructionFilterClass] of String = (
     '',
-    'xop',
-    'vex',
-    'emvex',
-    'opcode',
-    'mode',
-    'mode_compact',
-    'modrm_mod',
-    'modrm_mod_compact',
-    'modrm_reg',
-    'modrm_rm',
-    'mandatory_prefix',
-    'operand_size',
-    'address_size',
-    'vector_length',
-    'rex_w',
-    'rex_b',
-    'evex_b',
-    'mvex_e',
-    'mode_AMD',
-    'mode_KNC',
-    'mode_MPX',
-    'mode_CET',
-    'mode_LZCNT',
-    'mode_TZCNT',
-    'mode_WBNOINVD',
-    'mode_CLDEMOTE'
+    'XOP',
+    'VEX',
+    'EMVEX',
+    'OPCODE',
+    'MODE',
+    'MODE_COMPACT',
+    'MODRM_MOD',
+    'MODRM_MOD_COMPACT',
+    'MODRM_REG',
+    'MODRM_RM',
+    'MANDATORY_PREFIX',
+    'OPERAND_SIZE',
+    'ADDRESS_SIZE',
+    'VECTOR_LENGTH',
+    'REX_W',
+    'REX_B',
+    'EVEX_B',
+    'MVEX_E',
+    'MODE_AMD',
+    'MODE_KNC',
+    'MODE_MPX',
+    'MODE_CET',
+    'MODE_LZCNT',
+    'MODE_TZCNT',
+    'MODE_WBNOINVD',
+    'MODE_CLDEMOTE'
   );
   NODE_NAMES: array[TZYInstructionFilterClass] of String =
   (
@@ -953,7 +1010,7 @@ begin
       Continue;
     end;
     SetLength(Tables, Length(Tables) + 1);
-    Tables[High(Tables)].Name     := 'filters_' + TABLE_NAMES[C];
+    Tables[High(Tables)].Name     := 'FILTERS_' + TABLE_NAMES[C];
     Tables[High(Tables)].ItemType := 'ZydisDecoderTreeNode[' + F.NumberOfValues.ToString + ']';
     Tables[High(Tables)].Items    := @TreeSnapshot.Filters[C];
     case C of
