@@ -680,6 +680,8 @@ begin
     W.AutoFlush := true;
     W.NewLine := sLineBreak;
     W.Write('/// Defines the `%s` enum%s', [N, sLineBreak]);
+    W.Write('#[cfg_attr(feature = "serialization", derive(Deserialize, Serialize))]');
+    W.WriteLine;
     W.Write('#[derive(Clone, Copy, Debug, Eq, PartialEq)]');
     W.WriteLine;
     W.Write('#[repr(C)]');
