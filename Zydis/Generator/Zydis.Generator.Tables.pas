@@ -424,8 +424,8 @@ begin
     Tables[Ord(E)].ItemType := 'ZydisInstructionDefinition' + TABLE_NAMES[E];
     Tables[Ord(E)].Items    := @Definitions.UniqueItems[E];
     case E of
-      iencEVEX: Tables[Ord(E)].Name := Tables[Ord(E)].Name + '.ifndef ZYDIS_DISABLE_EVEX';
-      iencMVEX: Tables[Ord(E)].Name := Tables[Ord(E)].Name + '.ifndef ZYDIS_DISABLE_MVEX';
+      iencEVEX: Tables[Ord(E)].Name := Tables[Ord(E)].Name + '.ifndef ZYDIS_DISABLE_AVX512';
+      iencMVEX: Tables[Ord(E)].Name := Tables[Ord(E)].Name + '.ifndef ZYDIS_DISABLE_KNC';
     end;
   end;
   TZYTableGenerator<TZYInstructionDefinition>.Generate(Generator, Filename, Tables,
@@ -965,7 +965,8 @@ const
     'MODE_LZCNT',
     'MODE_TZCNT',
     'MODE_WBNOINVD',
-    'MODE_CLDEMOTE'
+    'MODE_CLDEMOTE',
+    'MODE_CENTAUR'
   );
   NODE_NAMES: array[TZYInstructionFilterClass] of String =
   (
@@ -995,7 +996,8 @@ const
     'MODE_LZCNT',
     'MODE_TZCNT',
     'MODE_WBNOINVD',
-    'MODE_CLDEMOTE'
+    'MODE_CLDEMOTE',
+    'MODE_CENTAUR'
   );
 var
   Tables: TArray<TZYTableTemplate<PZYTreeItem>>;
@@ -1015,9 +1017,9 @@ begin
     Tables[High(Tables)].Items    := @TreeSnapshot.Filters[C];
     case C of
       ifcEvexB:
-        Tables[High(Tables)].Name := Tables[High(Tables)].Name + '.ifndef ZYDIS_DISABLE_EVEX';
+        Tables[High(Tables)].Name := Tables[High(Tables)].Name + '.ifndef ZYDIS_DISABLE_AVX512';
       ifcMvexE:
-        Tables[High(Tables)].Name := Tables[High(Tables)].Name + '.ifndef ZYDIS_DISABLE_MVEX';
+        Tables[High(Tables)].Name := Tables[High(Tables)].Name + '.ifndef ZYDIS_DISABLE_KNC';
     end;
   end;
   TZYTableGenerator<PZYTreeItem>.Generate(Generator, Filename, Tables,
