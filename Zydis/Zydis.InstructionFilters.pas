@@ -40,6 +40,7 @@ type
     ifcOpcode,
     ifcMode,
     ifcModeCompact,
+    ifcPrefixGroup1,
     ifcModrmMod,
     ifcModrmModCompact,
     ifcModrmReg,
@@ -59,7 +60,8 @@ type
     ifcModeLZCNT,
     ifcModeTZCNT,
     ifcModeWBNOINVD,
-    ifcModeCLDEMOTE
+    ifcModeCLDEMOTE,
+    ifcModeCentaur
   );
 
   TZYInstructionFilterFlag = (
@@ -176,6 +178,8 @@ type
        FCompactFilterClass: ifcModeCompact    ; FCompactFilterValue: 2),
       { ifcModeCompact }
       (FNumberOfValues:   2; FFlags: [iffIsCodeGenOnly]),
+      { ifcPrefixGroup1 }
+      (FNumberOfValues:   2; FFlags: [iffIsOptional, iffNegatedValues]),
       { ifcModrmMod }
       (FNumberOfValues:   4; FFlags: [iffIsOptional, iffNegatedValues, iffIsCompactable];
        FCompactFilterClass: ifcModrmModCompact; FCompactFilterValue: 3),
@@ -216,6 +220,8 @@ type
       { ifcModeWBNOINVD }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcModeCLDEMOTE }
+      (FNumberOfValues:   2; FFlags: [iffIsOptional]),
+      { ifcModeCentaur }
       (FNumberOfValues:   2; FFlags: [iffIsOptional])
     );
   strict private
@@ -345,6 +351,7 @@ begin
       ifcModeMPX,
       ifcModrmMod,
       ifcModeCLDEMOTE,
+      ifcPrefixGroup1,
       ifcMandatoryPrefix,
       ifcModrmReg,
       ifcModrmRm,
@@ -358,7 +365,8 @@ begin
       ifcModeCET,
       ifcModeLZCNT,
       ifcModeTZCNT,
-      ifcModeWBNOINVD
+      ifcModeWBNOINVD,
+      ifcModeCentaur
     );
   FilterOrderXOP :=
     TZYInstructionFilterList.Create(

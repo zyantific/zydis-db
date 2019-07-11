@@ -67,6 +67,9 @@ type
       const Encodings: TZYUniqueDefinitionPropertyList<TZYInstructionPartInfo>;
       const Flags: TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>;
       const Enums: array of TPair<String, PZYGeneratorEnum>); static;
+  strict private
+    class function GenerateInstructionIdEnum(
+      const Definitions: TZYDefinitionList): TZYGeneratorEnum; static;
   strict protected
     procedure InitGenerator(var AModuleInfo: TArray<TZYGeneratorModuleInfo>); override;
   public
@@ -259,13 +262,13 @@ end;
 
 var
   E: TZYInstructionEditor;
-  I: Integer;
+  I, X: Integer;
   Definitions: TZYDefinitionList;
   Snapshot   : TZYTreeSnapshot;
   Operands   : TZYUniqueOperandList;
   Encodings  : TZYUniqueDefinitionPropertyList<TZYInstructionPartInfo>;
   Flags      : TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>;
-  Enums      : array[0..3] of TZYGeneratorEnum;
+  Enums      : array[0..4] of TZYGeneratorEnum;
 begin
   if (Editor.RootNode.HasConflicts) then
   begin
@@ -372,6 +375,8 @@ begin
       begin
         Result := D.Meta.Extension;
       end, 'INVALID');
+    // Creating instruction-id enum
+    // Enums[4] := GenerateInstructionIdEnum(Definitions);
 
     // Generating definition list
     TZYDefinitionTableGenerator.Generate(
@@ -430,6 +435,13 @@ begin
       [TZYEnumGeneratorFlag.GenerateStrings],
       []),
       Enums[3].Items);
+    // Generating instruction-id enum
+    {TZYEnumGeneratorTask.Generate(Self, RootDirectory, MakeEnumGeneratorTaskList(
+      'InstructionId',
+      'IID_',
+      [],
+      []),
+      Enums[4].Items);}
 
     // Create report
     Report.Clear;
@@ -437,7 +449,8 @@ begin
       [TPair<String, PZYGeneratorEnum>.Create('Mnemonic'           , @Enums[0]),
        TPair<String, PZYGeneratorEnum>.Create('InstructionCategory', @Enums[1]),
        TPair<String, PZYGeneratorEnum>.Create('ISASet'             , @Enums[2]),
-       TPair<String, PZYGeneratorEnum>.Create('ISAExt'             , @Enums[3])]);
+       TPair<String, PZYGeneratorEnum>.Create('ISAExt'             , @Enums[3]){,
+       TPair<String, PZYGeneratorEnum>.Create('InstructionId'      , @Enums[4])}]);
   finally
     Definitions.Free;
     Snapshot.Free;
@@ -449,6 +462,54 @@ begin
       Enums[I].Free;
     end;
     E.Free;
+  end;
+end;
+
+class function TZYCodeGenerator.GenerateInstructionIdEnum(
+  const Definitions: TZYDefinitionList): TZYGeneratorEnum;
+var
+  A: TArray<String>;
+  S: String;
+  I, J, K, C: Integer;
+  E: TZYInstructionEncoding;
+  D: TZYInstructionDefinition;
+  O: TZYInstructionOperand;
+  L: TStringList;
+begin
+  SetLength(A, Definitions.UniqueItemCount);
+  C := 0;
+  for E := Low(TZYInstructionEncoding) to High(TZYInstructionEncoding) do
+  begin
+    for I := Low(Definitions.UniqueItems[E]) to High(Definitions.UniqueItems[E]) do
+    begin
+      D := Definitions.UniqueItems[E][I];
+      S := String(D.Mnemonic).ToUpper{ + '_' + TZYEnumInstructionEncoding.ZydisStrings[D.Encoding]};
+      for J := 0 to D.Operands.NumberOfUsedOperands - 1 do
+      begin
+        O := D.Operands.Items[J];
+        if (not O.Visible) then
+        begin
+          Break;
+        end;
+        case (O.OperandType) of
+          optImplicitReg: S := S + '_' + TZYEnumRegister.JSONStrings[O.Register].ToUpper;
+          optImplicitMem: Assert(false)
+          else
+          S := S + '_' + TZYEnumOperandType.ZydisStrings[O.OperandType];
+        end;
+      end;
+      A[C] := S;
+      Inc(C);
+    end;
+  end;
+
+  L := TStringList.Create;
+  try
+    for I := Low(A) to High(A) do
+      L.Add(A[I]);
+    L.SaveToFile('C:\Users\Zacherl\Desktop\list.txt');
+  finally
+    L.Free;
   end;
 end;
 
@@ -467,6 +528,7 @@ const
     'Opcode',
     'Mode',
     'ModeCompact',
+    'PrefixGroup1',
     'ModrmMod',
     'ModrmModCompact',
     'ModrmReg',
@@ -486,7 +548,8 @@ const
     'ModeLZCNT',
     'ModeTZCNT',
     'ModeWBNOINVD',
-    'ModeCLDEMOTE'
+    'ModeCLDEMOTE',
+    'ModeCentaur'
   );
 var
   S, T, Y, Z: Cardinal;
@@ -595,7 +658,8 @@ begin
     'Creating mnemonic enum',
     'Creating category enum',
     'Creating isa-set enum',
-    'Creating isa-extension enum'
+    'Creating isa-extension enum',
+    'Creating instruction-id enum'
   ]);
   RegisterModule('Generating data tables',
   [
@@ -611,7 +675,8 @@ begin
     'Generating mnemonic enum',
     'Generating category enum',
     'Generating isa-set enum',
-    'Generating isa-extension enum'
+    'Generating isa-extension enum',
+    'Generating instruction-id enum'
   ]);
 end;
 {$ENDREGION}
