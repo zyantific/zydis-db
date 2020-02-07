@@ -1125,7 +1125,8 @@ type
     ocDR,
     ocMASK,
     ocBND,
-    ocVSIB
+    ocVSIB,
+    ocNoRel
   );
   TZYRegisterConstraintHelper = record helper for TZYRegisterConstraint
   public
@@ -1139,7 +1140,8 @@ type
       'DR',
       'MASK',
       'BND',
-      'VSIB'
+      'VSIB',
+      'NO_REL'
     );
   end;
 

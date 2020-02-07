@@ -716,8 +716,8 @@ begin
           opeModrmRm : Result := ocNone;
         end;
       optMEM          ,
-      optAGEN         ,
-      optMIB          : Result := ocNone;
+      optAGEN         : Result := ocNone;
+      optMIB          : Result := ocNoRel;
       optMEMVSIBX     ,
       optMEMVSIBY     ,
       optMEMVSIBZ     : Result := ocVSIB;
