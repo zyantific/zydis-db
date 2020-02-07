@@ -180,7 +180,7 @@ begin
         B := (Definition.Filters.EvexB <> ebB0) or (Definition.Filters.VectorLength <> vl128);
       ecE10,
       ecE10NF:
-        B := (Definition.Filters.EvexB <> ebB0);
+        B := false;
       ecE12,
       ecE12NP:
         B := (Definition.Filters.EvexB <> ebB0);
