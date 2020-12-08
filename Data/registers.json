@@ -301,6 +301,23 @@
       "width_64": 512
     },
     {
+      "name_zydis": "TMM",
+      "name_editor": "TMM",
+      "description": "Matrix registers",
+      "encodable": [
+        "TMM0",
+        "TMM1",
+        "TMM2",
+        "TMM3",
+        "TMM4",
+        "TMM5",
+        "TMM6",
+        "TMM7"
+      ],
+      "width": 8192,
+      "width_64": 8192
+    },
+    {
       "name_zydis": "FLAGS",
       "name_editor": "FLAGS",
       "description": "Flags registers",

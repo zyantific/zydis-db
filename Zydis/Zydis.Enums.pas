@@ -103,6 +103,9 @@ type
       regZMM20,     regZMM21,     regZMM22,     regZMM23,
       regZMM24,     regZMM25,     regZMM26,     regZMM27,
       regZMM28,     regZMM29,     regZMM30,     regZMM31,
+      // Matrix registers
+      regTMM0,      regTMM1,      regTMM2,      regTMM3,
+      regTMM4,      regTMM5,      regTMM6,      regTMM7,
       // Flags registers
       regFLAGS,     regEFLAGS,    regRFLAGS,
       // Instruction-pointer registers
@@ -204,6 +207,9 @@ type
       'zmm20',      'zmm21',      'zmm22',      'zmm23',
       'zmm24',      'zmm25',      'zmm26',      'zmm27',
       'zmm28',      'zmm29',      'zmm30',      'zmm31',
+      // Matrix registers
+      'tmm0',       'tmm1',       'tmm2',       'tmm3',
+      'tmm4',       'tmm5',       'tmm6',       'tmm7',
       // Flags registers
       'flags',      'eflags',     'rflags',
       // Instruction-pointer registers
@@ -253,6 +259,7 @@ type
       regcXMM,
       regcYMM,
       regcZMM,
+      regcTMM,
       regcFLAGS,
       regcIP,
       regcSEGMENT,
@@ -277,6 +284,7 @@ type
       'XMM',
       'YMM',
       'ZMM',
+      'TMM',
       'FLAGS',
       'IP',
       'SEGMENT',
@@ -553,7 +561,13 @@ type
     ecE12,
     ecE12NP,
     ecK20,
-    ecK21
+    ecK21,
+    ecAMXE1,
+    ecAMXE2,
+    ecAMXE3,
+    ecAMXE4,
+    ecAMXE5,
+    ecAMXE6
   );
   TZYExceptionClassHelper = record helper for TZYExceptionClass
   public
@@ -597,7 +611,13 @@ type
       'e12',
       'e12np',
       'k20',
-      'k21'
+      'k21',
+      'amxe1',
+      'amxe2',
+      'amxe3',
+      'amxe4',
+      'amxe5',
+      'amxe6'
     );
   public
     const ZydisStrings: array[TZYExceptionClass] of String = (
@@ -640,7 +660,13 @@ type
       'E12',
       'E12NP',
       'K20',
-      'K21'
+      'K21',
+      'AMXE1',
+      'AMXE2',
+      'AMXE3',
+      'AMXE4',
+      'AMXE5',
+      'AMXE6'
     );
   end;
 
@@ -1165,6 +1191,7 @@ type
       optXMM,
       optYMM,
       optZMM,
+      optTMM,
       optBND,
       optSREG, // TODO: CS is not allowed as move target
       optCR,
@@ -1204,6 +1231,7 @@ type
       'xmm',
       'ymm',
       'zmm',
+      'tmm',
       'bnd',
       'sreg',
       'cr',
@@ -1239,6 +1267,7 @@ type
       'XMM',
       'YMM',
       'ZMM',
+      'TMM',
       'BND',
       'SREG',
       'CR',
@@ -1550,6 +1579,7 @@ const
     (Lo: regXMM0   ; Hi: regXMM31  ),
     (Lo: regYMM0   ; Hi: regYMM31  ),
     (Lo: regZMM0   ; Hi: regZMM31  ),
+    (Lo: regTMM0   ; Hi: regTMM7   ),
     (Lo: regFLAGS  ; Hi: regRFLAGS ),
     (Lo: regIP     ; Hi: regRIP    ),
     (Lo: regES     ; Hi: regGS     ),

@@ -159,6 +159,17 @@ begin
     end else Exit;
   end;
 
+  B := (Definition.Encoding = iencEVEX) and (Definition.Filters.VectorLength = vlPlaceholder) and
+    (Definition.EVEX.VectorLength = vlDefault);
+  if (B) then
+  begin
+    Result := false;
+    if (GenerateErrorMessages) then
+    begin
+      ErrorMessages.Add('vsdfsdf');
+    end else Exit;
+  end;
+
   if (Definition.Encoding = iencEVEX) then
   begin
     B := false;
@@ -259,6 +270,8 @@ const
     { optYMM }
     [opeModrmReg, opeModrmRm, opeNDSNDD, opeIS4],
     { optZMM }
+    [opeModrmReg, opeModrmRm, opeNDSNDD],
+    { optTMM }
     [opeModrmReg, opeModrmRm, opeNDSNDD],
     { optBND }
     [opeModrmReg, opeModrmRm],

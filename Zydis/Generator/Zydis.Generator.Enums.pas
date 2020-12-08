@@ -250,7 +250,7 @@ begin
   try
     W.AutoFlush := true;
     W.NewLine := sLineBreak;
-    W.Write('/**%s * @brief   Defines the `%s` enum.%s */%s',
+    W.Write('/**%s * Defines the `%s` enum.%s */%s',
       [sLineBreak, N, sLineBreak, sLineBreak]);
     W.Write('typedef enum %s_', [N]);
     W.WriteLine;
@@ -274,11 +274,11 @@ begin
     end;
     Assert(not T.StartsWith('//'));
     W.WriteLine;
-    W.Write('    /**%s     * @brief   Maximum value of this enum.%s     */%s',
+    W.Write('    /**%s     * Maximum value of this enum.%s     */%s',
       [sLineBreak, sLineBreak, sLineBreak]);
     W.Write('    %s%sMAX_VALUE = %s%s%s,%s',
       ['ZYDIS_', ATask.ItemPrefix, 'ZYDIS_', ATask.ItemPrefix, T, sLineBreak]);
-    W.Write('    /**%s     * @brief   The minimum number of bits required to represent all ' +
+    W.Write('    /**%s     * The minimum number of bits required to represent all ' +
       'values of this enum.%s     */%s', [sLineBreak, sLineBreak, sLineBreak]);
     W.Write('    %s%sREQUIRED_BITS = ZYAN_BITS_TO_REPRESENT(%s%sMAX_VALUE)',
       ['ZYDIS_', ATask.ItemPrefix, 'ZYDIS_', ATask.ItemPrefix]);
