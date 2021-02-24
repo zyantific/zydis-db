@@ -476,6 +476,8 @@ type
   public
     destructor Destroy; override;
   public
+    function ToMask(AOperation: TZYFlagOperation): UInt32;
+  public
     property AutomaticOperand0: TZYInstructionOperand index 0 read GetManagedOperand;
     property AutomaticOperand1: TZYInstructionOperand index 1 read GetManagedOperand;
     property Flags[Index: Integer]: TZYFlagOperation read GetFlagOperation;
@@ -2587,6 +2589,30 @@ begin
   begin
     FFlags[Index] := Value;
     Update;
+  end;
+end;
+
+function TZYInstructionFlagsInfo.ToMask(AOperation: TZYFlagOperation): UInt32;
+const
+  Map: array[0..20] of Integer = (0, 2, 4, 6, 7, 8, 9, 10, 11, 12, 14, 16, 17, 18, 19, 20, 21, -1, -1, -1, -1);
+var
+  I, N: Integer;
+begin
+  Result := 0;
+  for I := Low(FFlags) to High(FFlags) do
+  begin
+    if (FFlags[I] <> AOperation) then
+    begin
+      continue;
+    end;
+
+    N := Map[I];
+    if (N < 0) then
+    begin
+      continue;
+    end;
+
+    Result := Result or (1 shl N);
   end;
 end;
 

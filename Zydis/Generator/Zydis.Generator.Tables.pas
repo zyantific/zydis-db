@@ -929,6 +929,15 @@ begin
                   TZYFlagOperation.ZydisStrings[Item.Flags[I]]);
       end;
       { actions } Writer.StructEnd;
+      { flags_read } Writer.WriteHex(
+        Item.ToMask(foTested) or
+        Item.ToMask(foTestedModified));
+      { flags_written } Writer.WriteHex(
+        Item.ToMask(foModified) or
+        Item.ToMask(foTestedModified)or
+        Item.ToMask(foSet0)or
+        Item.ToMask(foSet1)or
+        Item.ToMask(foUndefined));
     end, 'static');
 end;
 {$ENDREGION}
