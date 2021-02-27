@@ -915,29 +915,40 @@ end;
 {$REGION 'Class: TZYAccessedFlagsTableGenerator'}
 class procedure TZYAccessedFlagsTableGenerator.Generate(Generator: TZYBaseGenerator;
   const Filename: String; AccessedFlags: TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>);
+const
+  Map: array[0..25] of Integer = (0, -1, 1, -1, 2, -1, 3, 4, 5, 6, 7, 8, 9, -1, 10, -1, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
 begin
   TZYTableGenerator<TZYInstructionFlagsInfo>.Generate(Generator, Filename,
     'ACCESSED_FLAGS.ifndef ZYDIS_MINIMAL_MODE', 'ZydisAccessedFlags', AccessedFlags.Items,
     procedure(Writer: TZYTableItemWriter; Index: Integer; const Item: TZYInstructionFlagsInfo)
     var
-      I: Integer;
+      I, N: Integer;
+      MaskRead, MaskWritten: UInt32;
     begin
       { actions } Writer.StructBegin;
-      for I := 0 to Item.Count - 1 do
+      for I := Low(Map) to High(Map) do
       begin
-        { [I] } Writer.WriteStr('ZYDIS_CPUFLAG_ACTION_' +
-                  TZYFlagOperation.ZydisStrings[Item.Flags[I]]);
+        N := Map[I];
+        if (N = -1) then
+        begin
+          { [I] } Writer.WriteStr('ZYDIS_CPUFLAG_ACTION_NONE');
+        end else
+        begin
+          { [I] } Writer.WriteStr('ZYDIS_CPUFLAG_ACTION_' +
+                    TZYFlagOperation.ZydisStrings[Item.Flags[N]]);
+        end;
       end;
       { actions } Writer.StructEnd;
-      { flags_read } Writer.WriteHex(
-        Item.ToMask(foTested) or
-        Item.ToMask(foTestedModified));
-      { flags_written } Writer.WriteHex(
-        Item.ToMask(foModified) or
+      MaskRead := Item.ToMask(foTested) or Item.ToMask(foTestedModified);
+      MaskWritten := Item.ToMask(foModified) or
         Item.ToMask(foTestedModified)or
         Item.ToMask(foSet0)or
         Item.ToMask(foSet1)or
-        Item.ToMask(foUndefined));
+        Item.ToMask(foUndefined);
+      { cpu_flags_read } Writer.WriteHex(MaskRead and $003FFFFF);
+      { cpu_flags_written } Writer.WriteHex(MaskWritten and $003FFFFF);
+      { fpu_flags_read } Writer.WriteHex((MaskRead and $03C00000) shr 22);
+      { fpu_flags_written } Writer.WriteHex((MaskWritten and $03C00000) shr 22);
     end, 'static');
 end;
 {$ENDREGION}
