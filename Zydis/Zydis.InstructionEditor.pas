@@ -376,6 +376,7 @@ type
     FScaleFactor: TZYScaleFactor;
     FWidth: array[1..3] of TZYSemanticOperandWidth;
     FVisible: Boolean;
+    FIsMultisource4: Boolean;
   strict private
     function GetWidth(Index: Integer): TZYSemanticOperandWidth; inline;
     function GetVisibility: TZYOperandVisibility; inline;
@@ -390,6 +391,7 @@ type
     procedure SetScaleFactor(const Value: TZYScaleFactor); inline;
     procedure SetWidth(Index: Integer; const Value: TZYSemanticOperandWidth); inline;
     procedure SetVisible(const Value: Boolean); inline;
+    procedure SetIsMultisource4(const Value: Boolean); inline;
   protected
     procedure AssignTo(Dest: TPersistent); override;
   protected
@@ -419,6 +421,7 @@ type
     property Width64: TZYSemanticOperandWidth index 3 read GetWidth write SetWidth default 0;
     property Visible: Boolean read FVisible write SetVisible default true;
     property Visibility: TZYOperandVisibility read GetVisibility;
+    property IsMultisource4: Boolean read FIsMultisource4 write SetIsMultisource4 default false;
   end;
 
   TZYInstructionMetaInfo = class sealed(TZYJSONODefinitionComposite)
@@ -1958,6 +1961,7 @@ begin
         D.SetWidth(I, FWidth[I]);
       end;
       D.SetVisible(FVisible);
+      D.SetIsMultisource4(FIsMultisource4);
     finally
       D.EndUpdate;
     end;
@@ -2007,7 +2011,8 @@ begin
       (O.FWidth[1] = FWidth[1]) and
       (O.FWidth[2] = FWidth[2]) and
       (O.FWidth[3] = FWidth[3]) and
-      (O.FVisible = FVisible);
+      (O.FVisible = FVisible) and
+      (O.FIsMultisource4 = FIsMultisource4);
   end;
 end;
 
@@ -2064,6 +2069,7 @@ begin
     SetWidth(2, JSON.ReadInteger('width32', 0));
     SetWidth(3, JSON.ReadInteger('width64', 0));
     SetVisible(JSON.ReadBoolean('visible', true));
+    SetIsMultisource4(JSON.ReadBoolean('is_multisource4', false));
   finally
     EndUpdate;
   end;
@@ -2091,6 +2097,7 @@ begin
   if (FWidth[2] <> 0) then JSON.WriteInteger('width32', FWidth[2]);
   if (FWidth[3] <> 0) then JSON.WriteInteger('width64', FWidth[3]);
   if (not FVisible) then JSON.WriteBoolean('visible', FVisible);
+  if (FIsMultisource4) then JSON.WriteBoolean('is_multisource4', FIsMultisource4);
 end;
 
 procedure TZYInstructionOperand.SetAction(const Value: TZYOperandAction);
@@ -2116,6 +2123,15 @@ begin
   if (FEncoding <> Value) then
   begin
     FEncoding := Value;
+    Update;
+  end;
+end;
+
+procedure TZYInstructionOperand.SetIsMultisource4(const Value: Boolean);
+begin
+  if (FIsMultisource4 <> Value) then
+  begin
+    FIsMultisource4 := Value;
     Update;
   end;
 end;

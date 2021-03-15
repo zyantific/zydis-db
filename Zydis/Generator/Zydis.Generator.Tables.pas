@@ -839,6 +839,7 @@ begin
             { op  } Writer.StructEnd;
           end;
       end;
+      { is_multisource4 } Writer.WriteStr(ZydisBool[Item.IsMultisource4]);
     end);
 end;
 {$ENDREGION}
