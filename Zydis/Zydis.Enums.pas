@@ -306,8 +306,8 @@ type
   TZYSegmentRegister = (
     sregNone,
     sregES,
-    sregSS,
     sregCS,
+    sregSS,
     sregDS,
     sregFS,
     sregGS
@@ -315,7 +315,7 @@ type
   TZYSegmentRegisterHelper = record helper for TZYSegmentRegister
   public
     const JSONStrings: array[TZYSegmentRegister] of String = (
-      'none', 'es', 'ss', 'cs', 'ds', 'fs', 'gs'
+      'none', 'es', 'cs', 'ss', 'ds', 'fs', 'gs'
     );
   end;
 
