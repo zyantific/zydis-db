@@ -394,6 +394,11 @@ begin
       [optImplicitMem, optMEM, optMEMVSIBX, optMEMVSIBY, optMEMVSIBZ, optPTR, optAGEN,
        optMOFFS, optMIB]) then
     begin
+      if (Definition.Operands.Items[I].IgnoreSegmentOverride) then
+      begin
+        Continue;
+      end;
+
       Result := true;
       Break;
     end;
@@ -840,6 +845,7 @@ begin
           end;
       end;
       { is_multisource4 } Writer.WriteStr(ZydisBool[Item.IsMultisource4]);
+      { ignore_seg_override } Writer.WriteStr(ZydisBool[Item.IgnoreSegmentOverride]);
     end);
 end;
 {$ENDREGION}
