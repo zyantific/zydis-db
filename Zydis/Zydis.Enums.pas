@@ -500,6 +500,7 @@ type
       pfAcceptsBOUND,
       pfAcceptsXACQUIRE,
       pfAcceptsXRELEASE,
+      pfAcceptsNOTRACK,
       pfAcceptsLocklessHLE,
       pfAcceptsBranchHints,
       pfRemoveSegment
@@ -513,6 +514,7 @@ type
       'accepts_bound',
       'accepts_xacquire',
       'accepts_xrelease',
+      'accepts_notrack',
       'accepts_lockless_hle',
       'accepts_branch_hints',
       'remove_segment'

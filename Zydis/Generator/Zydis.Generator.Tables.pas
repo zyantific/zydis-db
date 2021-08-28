@@ -578,6 +578,9 @@ begin
             { acceptsXRELEASE       } Writer.WriteStr(
                                         ZydisBool[pfAcceptsXRELEASE in Item.PrefixFlags], '',
                                         false);
+            { acceptsNOTRACK        } Writer.WriteStr(
+                                        ZydisBool[pfAcceptsNOTRACK in Item.PrefixFlags], '',
+                                        false);
             { acceptsHLEWithoutLock } Writer.WriteStr(
                                         ZydisBool[pfAcceptsLocklessHLE in Item.PrefixFlags], '',
                                         false);
