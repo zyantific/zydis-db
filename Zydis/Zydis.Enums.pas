@@ -1211,6 +1211,7 @@ type
       optREL,
       optPTR,
       optAGEN,
+      optAGENNoRel,   // RIP rel invalid
       optMOFFS,
       optMIB          // MPX Memory Operand
     );
@@ -1247,6 +1248,7 @@ type
       'rel',
       'ptr',
       'agen',
+      'agen_norel',
       'moffs',
       'mib'
     );
@@ -1282,6 +1284,7 @@ type
       'IMM',
       'REL',
       'PTR',
+      'AGEN',
       'AGEN',
       'MOFFS',
       'MIB'

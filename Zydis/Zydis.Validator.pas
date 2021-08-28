@@ -310,6 +310,8 @@ const
     [opeNone],
     { optAGEN }
     [opeModrmRm],
+    { optAGENNoRel }
+    [opeModrmRm],
     { optMOFFS }
     [opeDisp16_32_64],
     { optMIB }

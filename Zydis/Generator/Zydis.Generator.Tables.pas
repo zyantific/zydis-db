@@ -725,6 +725,7 @@ begin
         end;
       optMEM          ,
       optAGEN         : Result := ocNone;
+      optAGENNoRel    ,
       optMIB          : Result := ocNoRel;
       optMEMVSIBX     ,
       optMEMVSIBY     ,
