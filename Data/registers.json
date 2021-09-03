@@ -474,6 +474,7 @@
   "uncategorized": [
     "MXCSR",
     "PKRU",
-    "XCR0"
+    "XCR0",
+    "UIF"
   ]
 }
