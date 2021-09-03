@@ -134,7 +134,7 @@ type
       // Misc registers
       regMXCSR,     regPKRU,      regXCR0,      regGDTR,
       regLDTR,      regIDTR,      regTR,        regBNDCFG,
-      regBNDSTATUS
+      regBNDSTATUS, regUIF
     );
   public
     const JSONStrings: array[Enum] of String = (
@@ -238,7 +238,7 @@ type
       // Misc registers
       'mxcsr',      'pkru',       'xcr0',       'gdtr',
       'ldtr',       'idtr',       'tr',         'bndcfg',
-      'bndstatus'
+      'bndstatus',  'uif'
     );
   end;
   TZYRegister = TZYEnumRegister.Enum;
@@ -749,7 +749,8 @@ type
     ttOVM,
     ttM128,
     ttDUP,
-    ttT14X
+    ttT14X,
+    ttQUARTER
   );
   TZYEVEXTupleTypeHelper = record helper for TZYEVEXTupleType
   public
@@ -769,7 +770,8 @@ type
       'ovm',
       'm128',
       'dup',
-      't1_4x'
+      't1_4x',
+      'quarter'
     );
   public
     const ZydisStrings: array[TZYEVEXTupleType] of String = (
@@ -788,7 +790,8 @@ type
       'OVM',
       'M128',
       'DUP',
-      'T1_4X'
+      'T1_4X',
+      'QUARTER'
     );
   end;
 
@@ -1003,6 +1006,7 @@ type
       emtUINT128,
       emtUINT256,
       emtFLOAT16,
+      emtFLOAT16X2,
       emtFLOAT32,
       emtFLOAT64,
       emtFLOAT80,
@@ -1029,6 +1033,7 @@ type
       'emtUINT128',
       'emtUINT256',
       'emtFLOAT16',
+      'emtFLOAT16X2',
       'emtFLOAT32',
       'emtFLOAT64',
       'emtFLOAT80',
@@ -1055,6 +1060,7 @@ type
       'uint128',
       'uint256',
       'float16',
+      'float16x2',
       'float32',
       'float64',
       'float80',
@@ -1081,6 +1087,7 @@ type
       'UINT128',
       'UINT256',
       'FLOAT16',
+      'FLOAT16X2',
       'FLOAT32',
       'FLOAT64',
       'FLOAT80',
@@ -1107,6 +1114,7 @@ type
       'UINT',
       'UINT',
       'FLOAT16',
+      'FLOAT16X2',
       'FLOAT32',
       'FLOAT64',
       'FLOAT80',
@@ -1133,6 +1141,7 @@ type
       128,
       256,
       16,
+      32,
       32,
       64,
       80,
