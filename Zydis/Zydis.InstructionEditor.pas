@@ -3175,7 +3175,7 @@ begin
     if (O.OperandType = optPTR) then
     begin
       Assert(I = 0);
-      SetImmediate(N, 16, 32, 32, true , true );
+      SetImmediate(N, 16, 32, 32, false, false);
       SetImmediate(N, 16, 16, 16, false, false);
       Break;
     end;
