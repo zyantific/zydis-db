@@ -469,7 +469,8 @@ type
       dfStateFPU_CR,
       dfStateFPU_CW,
       dfStateXMM_CR,
-      dfStateXMM_CW
+      dfStateXMM_CW,
+      dfNoSourceDestMatch // UD if the dst register matches any of the source regs
     );
   public
     const JSONStrings: array[Enum] of String = (
@@ -484,7 +485,8 @@ type
       'fpu_state_cr',
       'fpu_state_cw',
       'xmm_state_cr',
-      'xmm_state_cw'
+      'xmm_state_cw',
+      'no_source_dest_match'
     );
   end;
   TZYDefinitionFlag = TZYEnumDefinitionFlag.Enum;

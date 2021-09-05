@@ -3678,10 +3678,20 @@ begin
             FOpcodeMap := omapDefault;
           end;
         iencVEX,
-        iencEVEX,
         iencMVEX:
           begin
             if (not (FOpcodeMap in [omapDefault, omap0F, omap0F38, omap0F3A])) then
+            begin
+              FOpcodeMap := omapDefault;
+            end;
+            if (FFilters.MandatoryPrefix = mpPlaceholder) then
+            begin
+              FFilters.MandatoryPrefix := mpNone;
+            end;
+          end;
+        iencEVEX:
+          begin
+            if (not (FOpcodeMap in [omapDefault, omap0F, omap0F38, omap0F3A, omapMAP5, omapMAP6])) then
             begin
               FOpcodeMap := omapDefault;
             end;
@@ -3765,8 +3775,8 @@ begin
     case FEncoding of
       iencDEFAULT,
       iencVEX,
-      iencEVEX,
       iencMVEX : B := (Value in [omapDefault, omap0F, omap0F38, omap0F3A]);
+      iencEVEX : B := (Value in [omapDefault, omap0F, omap0F38, omap0F3A, omapMAP5, omapMAP6]);
       ienc3DNOW: B := (Value in [omap0F0F]);
       iencXOP  : B := (Value in [omapXOP8, omapXOP9, omapXOPA]);
     end;
@@ -3936,7 +3946,32 @@ begin
           end;
           SetFilterIndex(ifcVEX, V + 1);
         end;
-      iencEVEX   ,
+      iencEVEX   :
+        begin
+          V := -1;
+          case FFilters.MandatoryPrefix of
+            mpNone: V := 0 * 8;
+            mp66  : V := 1 * 8;
+            mpF3  : V := 2 * 8;
+            mpF2  : V := 3 * 8 else
+              Assert(false);
+          end;
+          case FOpcodeMap of
+            omapDEFAULT: ;
+            omap0F     : V := V + 1;
+            omap0F38   : V := V + 2;
+            omap0F3A   : V := V + 3;
+            omapMAP4   : V := V + 4;
+            omapMAP5   : V := V + 5;
+            omapMAP6   : V := V + 6;
+            omapMAP7   : V := V + 7 else
+              Assert(false);
+          end;
+          case FEncoding of
+            iencEVEX: V := V + 1;
+          end;
+          SetFilterIndex(ifcEMVEX, V);
+        end;
       iencMVEX   :
         begin
           V := -1;
@@ -3955,8 +3990,7 @@ begin
               Assert(false);
           end;
           case FEncoding of
-            iencEVEX: V := V + 1;
-            iencMVEX: V := V + 17 else
+            iencMVEX: V := V + 33 else
               Assert(false);
           end;
           SetFilterIndex(ifcEMVEX, V);

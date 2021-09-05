@@ -170,7 +170,7 @@ type
       { ifcVEX }
       (FNumberOfValues:  17; FFlags: []),
       { ifcEMVEX }
-      (FNumberOfValues:  33; FFlags: []),
+      (FNumberOfValues:  49; FFlags: []),
       { ifcOpcode }
       (FNumberOfValues: 256; FFlags: []),
       { ifcMode }
