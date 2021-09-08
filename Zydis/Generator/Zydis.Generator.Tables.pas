@@ -448,6 +448,7 @@ begin
       { flagsReference              } Writer.WriteHex(
                                         AccessedFlags.Mapping[Item.Encoding][Index], '', false);
       { requiresProtectedMode       } Writer.WriteStr(ZydisBool[dfProtectedMode in Item.Flags]);
+      { no_compat_mode              } Writer.WriteStr(ZydisBool[dfNoCompatMode in Item.Flags]);
       { category                    } Writer.WriteStr(
                                         'ZYDIS_CATEGORY_' +
                                         Category.Items[

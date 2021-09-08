@@ -461,6 +461,7 @@ type
       dfForceConflict,  // Forces a conflict
       dfForceRegForm,   // Forces the instruction to allways assume "reg, reg" form (modrm.mod = 3)
       dfProtectedMode,  // Instruction is invalid in real and 8086 mode
+      dfNoCompatMode,   // Instruction is invalid incompatibility mode
       dfIsShortBranch,
       dfIsNearBranch,
       dfIsFarBranch,
@@ -477,6 +478,7 @@ type
       'force_conflict',
       'ignore_modrm_mod',
       'protected_mode',
+      'no_compat_mode',
       'short_branch',
       'near_branch',
       'far_branch',
