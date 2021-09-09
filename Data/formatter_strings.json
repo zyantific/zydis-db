@@ -1,0 +1,1399 @@
+[
+  {
+    "name": "add",
+    "tokens": [
+      {
+        "value": "+",
+        "type": "delimiter"
+      }
+    ]
+  },
+  {
+    "name": "addr_relative",
+    "tokens": [
+      {
+        "value": "$",
+        "type": "address_rel"
+      }
+    ]
+  },
+  {
+    "name": "deco_1to2",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "1to2",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_1to4",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "1to4",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_1to8",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "1to8",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_1to16",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "1to16",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_1to32",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "1to32",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_1to64",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "1to64",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_4to8",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "4to8",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_4to16",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "4to16",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_8to16",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "8to16",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_aaaa",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "aaaa",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_badc",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "badc",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_bbbb",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "bbbb",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_begin",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      }
+    ]
+  },
+  {
+    "name": "deco_cccc",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "cccc",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_cdab",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "cdab",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dacb",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dacb",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dddd",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dddd",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_eh",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "eh",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_end",
+    "tokens": [
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_float16",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "float16",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_rd",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "rd",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_rd_sae",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "rd-sae",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_rn",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "rn",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_rn_sae",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "rn-sae",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_ru",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "ru",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_ru_sae",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "ru-sae",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_rz",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "rz",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_rz_sae",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "rz-sae",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_sae",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "sae",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_sint8",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "sint8",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_sint16",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "sint16",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_uint8",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "uint8",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_uint16",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "uint16",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_zero",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "z",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "delim_memory",
+    "tokens": [
+      {
+        "value": ",",
+        "type": "delimiter"
+      }
+    ]
+  },
+  {
+    "name": "delim_mnemonic",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "delim_operand",
+    "tokens": [
+      {
+        "value": ",",
+        "type": "delimiter"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "delim_segment",
+    "tokens": [
+      {
+        "value": ":",
+        "type": "delimiter"
+      }
+    ]
+  },
+  {
+    "name": "far",
+    "string": " far"
+  },
+  {
+    "name": "far_att",
+    "string": "l"
+  },
+  {
+    "name": "immediate",
+    "tokens": [
+      {
+        "value": "$",
+        "type": "immediate"
+      }
+    ]
+  },
+  {
+    "name": "invalid_mnemonic",
+    "tokens": [
+      {
+        "value": "invalid",
+        "type": "mnemonic"
+      }
+    ]
+  },
+  {
+    "name": "invalid_reg",
+    "tokens": [
+      {
+        "value": "invalid",
+        "type": "register"
+      }
+    ]
+  },
+  {
+    "name": "memory_begin_att",
+    "tokens": [
+      {
+        "value": "(",
+        "type": "parenthesis_open"
+      }
+    ]
+  },
+  {
+    "name": "memory_begin_intel",
+    "tokens": [
+      {
+        "value": "[",
+        "type": "parenthesis_open"
+      }
+    ]
+  },
+  {
+    "name": "memory_end_att",
+    "tokens": [
+      {
+        "value": ")",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "memory_end_intel",
+    "tokens": [
+      {
+        "value": "]",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "mul",
+    "tokens": [
+      {
+        "value": "*",
+        "type": "delimiter"
+      }
+    ]
+  },
+  {
+    "name": "near",
+    "string": " near"
+  },
+  {
+    "name": "pref_bnd",
+    "tokens": [
+      {
+        "value": "bnd",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_lock",
+    "tokens": [
+      {
+        "value": "lock",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rep",
+    "tokens": [
+      {
+        "value": "rep",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_repe",
+    "tokens": [
+      {
+        "value": "repe",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_repne",
+    "tokens": [
+      {
+        "value": "repne",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_4A",
+    "tokens": [
+      {
+        "value": "rex.wx",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_4B",
+    "tokens": [
+      {
+        "value": "rex.wxb",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_4C",
+    "tokens": [
+      {
+        "value": "rex.wr",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_4D",
+    "tokens": [
+      {
+        "value": "rex.wrb",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_4E",
+    "tokens": [
+      {
+        "value": "rex.wrx",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_4F",
+    "tokens": [
+      {
+        "value": "rex.wrxb",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_40",
+    "tokens": [
+      {
+        "value": "rex",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_41",
+    "tokens": [
+      {
+        "value": "rex.b",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_42",
+    "tokens": [
+      {
+        "value": "rex.x",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_43",
+    "tokens": [
+      {
+        "value": "rex.xb",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_44",
+    "tokens": [
+      {
+        "value": "rex.r",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_45",
+    "tokens": [
+      {
+        "value": "rex.rb",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_46",
+    "tokens": [
+      {
+        "value": "rex.rx",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_47",
+    "tokens": [
+      {
+        "value": "rex.rxb",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_48",
+    "tokens": [
+      {
+        "value": "rex.w",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_rex_49",
+    "tokens": [
+      {
+        "value": "rex.wb",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_seg_cs",
+    "tokens": [
+      {
+        "value": "cs",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_seg_ds",
+    "tokens": [
+      {
+        "value": "ds",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_seg_es",
+    "tokens": [
+      {
+        "value": "es",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_seg_fs",
+    "tokens": [
+      {
+        "value": "fs",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_seg_gs",
+    "tokens": [
+      {
+        "value": "gs",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_seg_ss",
+    "tokens": [
+      {
+        "value": "ss",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_xacquire",
+    "tokens": [
+      {
+        "value": "xacquire",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_xrelease",
+    "tokens": [
+      {
+        "value": "xrelease",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "pref_notrack",
+    "tokens": [
+      {
+        "value": "notrack",
+        "type": "prefix"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "register",
+    "tokens": [
+      {
+        "value": "%",
+        "type": "register"
+      }
+    ]
+  },
+  {
+    "name": "short",
+    "string": " short"
+  },
+  {
+    "name": "size_8_att",
+    "string": "b"
+  },
+  {
+    "name": "size_8_intel",
+    "tokens": [
+      {
+        "value": "byte ptr",
+        "type": "typecast"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "size_16_att",
+    "string": "w"
+  },
+  {
+    "name": "size_16_intel",
+    "tokens": [
+      {
+        "value": "word ptr",
+        "type": "typecast"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "size_32_att",
+    "string": "l"
+  },
+  {
+    "name": "size_32_intel",
+    "tokens": [
+      {
+        "value": "dword ptr",
+        "type": "typecast"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "size_48",
+    "tokens": [
+      {
+        "value": "fword ptr",
+        "type": "typecast"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "size_64_att",
+    "string": "q"
+  },
+  {
+    "name": "size_64_intel",
+    "tokens": [
+      {
+        "value": "qword ptr",
+        "type": "typecast"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "size_80",
+    "tokens": [
+      {
+        "value": "tbyte ptr",
+        "type": "typecast"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "size_128_att",
+    "string": "x"
+  },
+  {
+    "name": "size_128_intel",
+    "tokens": [
+      {
+        "value": "xmmword ptr",
+        "type": "typecast"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "size_256_att",
+    "string": "y"
+  },
+  {
+    "name": "size_256_intel",
+    "tokens": [
+      {
+        "value": "ymmword ptr",
+        "type": "typecast"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "size_512_att",
+    "string": "z"
+  },
+  {
+    "name": "size_512_intel",
+    "tokens": [
+      {
+        "value": "zmmword ptr",
+        "type": "typecast"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "sub",
+    "tokens": [
+      {
+        "value": "-",
+        "type": "delimiter"
+      }
+    ]
+  },
+  {
+    "name": "whitespace",
+    "string": " "
+  }
+]
