@@ -2087,21 +2087,69 @@ begin
     'action', FAction, TZYEnumOperandAction.JSONStrings);
   if (FOperandType <> optUnused) then JSON.Writer.WriteEnum(
     'operand_type', FOperandType, TZYEnumOperandType.JSONStrings);
-  if (FEncoding <> opeNone) then JSON.Writer.WriteEnum(
-    'encoding', FEncoding, TZYEnumOperandEncoding.JSONStrings);
-  if (FRegister <> regNone) then JSON.Writer.WriteEnum(
-    'register', FRegister, TZYEnumRegister.JSONStrings);
-  if (FMemorySegment <> sregNone) then JSON.Writer.WriteEnum(
-    'mem_segment', FMemorySegment, TZYSegmentRegister.JSONStrings);
-  if (FMemoryBase <> bregNone) then JSON.Writer.WriteEnum(
-    'mem_base', FMemoryBase, TZYBaseRegister.JSONStrings);
-  if (FElementType <> emtInvalid) then JSON.Writer.WriteEnum(
-    'element_type', FElementType, TZYEnumElementType.JSONStrings);
-  if (FScaleFactor <> sfStatic) then JSON.Writer.WriteEnum(
-    'scale_factor', FScaleFactor, TZYEnumScaleFactor.JSONStrings);
-  if (FWidth[1] <> 0) then JSON.WriteInteger('width16', FWidth[1]);
-  if (FWidth[2] <> 0) then JSON.WriteInteger('width32', FWidth[2]);
-  if (FWidth[3] <> 0) then JSON.WriteInteger('width64', FWidth[3]);
+
+  case FOperandType of
+    optImplicitReg:
+      begin
+        if (FRegister <> regNone) then JSON.Writer.WriteEnum(
+          'register', FRegister, TZYEnumRegister.JSONStrings);
+      end;
+    optImplicitMem:
+      begin
+        if (FMemorySegment <> sregNone) then JSON.Writer.WriteEnum(
+          'mem_segment', FMemorySegment, TZYSegmentRegister.JSONStrings);
+        if (FMemoryBase <> bregNone) then JSON.Writer.WriteEnum(
+          'mem_base', FMemoryBase, TZYBaseRegister.JSONStrings);
+      end;
+    optGPR8,
+    optGPR16,
+    optGPR32,
+    optGPR64,
+    optGPR16_32_64,
+    optGPR32_32_64,
+    optGPR16_32_32,
+    optGPRASZ,
+    optFPR,
+    optMMX,
+    optXMM,
+    optYMM,
+    optZMM,
+    optTMM,
+    optBND,
+    optSREG,
+    optCR,
+    optDR,
+    optMASK,
+    optMEM,
+    optMEMVSIBX,
+    optMEMVSIBY,
+    optMEMVSIBZ,
+    optAGEN,
+    optAGENNoRel,
+    optMIB,
+    optIMM,
+    optREL,
+    optMOFFS:
+      begin
+        if (FEncoding <> opeNone) then JSON.Writer.WriteEnum(
+          'encoding', FEncoding, TZYEnumOperandEncoding.JSONStrings);
+      end;
+    optPTR: ;
+    optUnused: ;
+    optImplicitImm1: ;
+  end;
+
+  if (FElementType <> emtInvalid) then
+  begin
+    if (FElementType <> emtInvalid) then JSON.Writer.WriteEnum(
+      'element_type', FElementType, TZYEnumElementType.JSONStrings);
+    if (FScaleFactor <> sfStatic) then JSON.Writer.WriteEnum(
+      'scale_factor', FScaleFactor, TZYEnumScaleFactor.JSONStrings);
+    if (FWidth[1] <> 0) then JSON.WriteInteger('width16', FWidth[1]);
+    if (FWidth[2] <> 0) then JSON.WriteInteger('width32', FWidth[2]);
+    if (FWidth[3] <> 0) then JSON.WriteInteger('width64', FWidth[3]);
+  end;
+
   if (not FVisible) then JSON.WriteBoolean('visible', FVisible);
   if (FIsMultisource4) then JSON.WriteBoolean('is_multisource4', FIsMultisource4);
   if (FIgnoreSegmentOverride) then JSON.WriteBoolean('ignore_seg_override', FIgnoreSegmentOverride);
@@ -3624,24 +3672,30 @@ begin
       FAffectedFlags.SaveToJSON(JSON);
       Result := (JSON.InnerObject.Count > 0);
     end);
-  JSON.WriteObject('vex',
-    function(JSON: TJSONObjectWriter): Boolean
-    begin
-      FVEXInfo.SaveToJSON(JSON);
-      Result := (JSON.InnerObject.Count > 0);
-    end);
-  JSON.WriteObject('evex',
-    function(JSON: TJSONObjectWriter): Boolean
-    begin
-      FEVEXInfo.SaveToJSON(JSON);
-      Result := (JSON.InnerObject.Count > 0);
-    end);
-  JSON.WriteObject('mvex',
-    function(JSON: TJSONObjectWriter): Boolean
-    begin
-      FMVEXInfo.SaveToJSON(JSON);
-      Result := (JSON.InnerObject.Count > 0);
-    end);
+
+  case FEncoding of
+    iencVEX:
+      JSON.WriteObject('vex',
+        function(JSON: TJSONObjectWriter): Boolean
+        begin
+          FVEXInfo.SaveToJSON(JSON);
+          Result := (JSON.InnerObject.Count > 0);
+        end);
+    iencEVEX:
+      JSON.WriteObject('evex',
+        function(JSON: TJSONObjectWriter): Boolean
+        begin
+          FEVEXInfo.SaveToJSON(JSON);
+          Result := (JSON.InnerObject.Count > 0);
+        end);
+    iencMVEX:
+      JSON.WriteObject('mvex',
+        function(JSON: TJSONObjectWriter): Boolean
+        begin
+          FMVEXInfo.SaveToJSON(JSON);
+          Result := (JSON.InnerObject.Count > 0);
+        end);
+  end;
 
   if (FComment <> '') then JSON.WriteString('comment',
     StringReplace(TNetEncoding.Base64.Encode(FComment), sLineBreak, '', [rfReplaceAll]));
