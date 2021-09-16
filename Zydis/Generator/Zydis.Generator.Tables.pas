@@ -391,7 +391,7 @@ begin
   for I := 0 to Definition.Operands.NumberOfUsedOperands - 1 do
   begin
     if (Definition.Operands.Items[I].OperandType in
-      [optImplicitMem, optMEM, optMEMVSIBX, optMEMVSIBY, optMEMVSIBZ, optPTR, optAGEN,
+      [optImplicitMem, optMEM, optMEMVSIBX, optMEMVSIBY, optMEMVSIBZ, optPTR,
        optMOFFS, optMIB]) then
     begin
       if (Definition.Operands.Items[I].IgnoreSegmentOverride) then
