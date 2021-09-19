@@ -326,15 +326,15 @@ type
     bregAAX,
     bregADX,
     bregABX,
-    bregASP,
-    bregABP,
     bregASI,
-    bregADI
+    bregADI,
+    bregSSP,
+    bregSBP
   );
   TZYBaseRegisterHelper = record helper for TZYBaseRegister
   public
     const JSONStrings: array[TZYBaseRegister] of String = (
-      'none', 'agpr_reg', 'agpr_rm', 'ax', 'dx', 'bx', 'sp', 'bp', 'si', 'di'
+      'none', 'agpr_reg', 'agpr_rm', 'ax', 'dx', 'bx', 'si', 'di', 'sp', 'bp'
     );
   public
     const ZydisStrings: array[TZYBaseRegister] of String = (
@@ -344,10 +344,10 @@ type
       'AAX',
       'ADX',
       'ABX',
-      'ASP',
-      'ABP',
       'ASI',
-      'ADI'
+      'ADI',
+      'SSP',
+      'SBP'
     );
   end;
 
