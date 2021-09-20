@@ -506,8 +506,7 @@ type
       pfAcceptsXRELEASE,
       pfAcceptsNOTRACK,
       pfAcceptsLocklessHLE,
-      pfAcceptsBranchHints,
-      pfRemoveSegment
+      pfAcceptsBranchHints
     );
   public
     const JSONStrings: array[Enum] of String = (
@@ -520,8 +519,7 @@ type
       'accepts_xrelease',
       'accepts_notrack',
       'accepts_lockless_hle',
-      'accepts_branch_hints',
-      'remove_segment'
+      'accepts_branch_hints'
     );
   end;
   TZYPrefixFlag = TZYEnumPrefixFlag.Enum;

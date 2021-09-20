@@ -384,10 +384,6 @@ var
   I: Integer;
 begin
   Result := false;
-  if (pfRemoveSegment in Definition.PrefixFlags) then
-  begin
-    Exit;
-  end;
   for I := 0 to Definition.Operands.NumberOfUsedOperands - 1 do
   begin
     if (Definition.Operands.Items[I].OperandType in
