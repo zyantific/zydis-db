@@ -537,6 +537,8 @@ begin
         Writer.WriteStr('ZYDIS_RW_ACTION_NONE', '', false);
       end;
 
+      { acceptsSegment } Writer.WriteStr(ZydisBool[AcceptsSegment(Item)], '', false);
+
       // ZYDIS_INSTRUCTION_DEFINITION_BASE_VECTOR
       if (Item.Encoding in [iencXOP, iencVEX, iencEVEX, iencMVEX]) then
       begin
@@ -585,8 +587,6 @@ begin
             { acceptsBranchHints    } Writer.WriteStr(
                                         ZydisBool[pfAcceptsBranchHints in Item.PrefixFlags], '',
                                         false);
-            { acceptsSegment        } Writer.WriteStr(
-                                        ZydisBool[AcceptsSegment(Item)], '', false);
           end;
         iencVEX:
           begin
