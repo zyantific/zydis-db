@@ -169,6 +169,31 @@ def get_size_hint(insn):
     return 'ZYDIS_SIZE_HINT_NONE'
 
 
+def get_operand_mask(insn):
+    operands = get_operands(insn, False)
+    if len(operands) > 5:
+        raise InvalidInstructionException('Max allowed operand count is 5')
+    op_mask = len(operands)
+    bit_offset = 3
+    for op in operands:
+        op_type = op['operand_type']
+        if op_type in ['implicit_reg', 'gpr8', 'gpr16', 'gpr32', 'gpr64', 'gpr16_32_64', 'gpr32_32_64', 'gpr16_32_32', 'gpr_asz',
+                       'fpr', 'mmx', 'xmm', 'ymm', 'zmm', 'tmm', 'bnd', 'sreg', 'cr', 'dr', 'mask']:
+            op_type_value = 0
+        elif op_type in ['implicit_mem', 'mem', 'mem_vsibx', 'mem_vsiby', 'mem_vsibz', 'agen', 'agen_norel', 'mib', 'moffs']:
+            op_type_value = 1
+        elif op_type == 'ptr':
+            op_type_value = 2
+        elif op_type in ['implicit_imm1', 'imm', 'rel',]:
+            op_type_value = 3
+        else:
+            raise InvalidInstructionException('Invalid operand_type: ' + op_type)
+        op_mask |= op_type_value << bit_offset
+        bit_offset += 2
+
+    return op_mask
+
+
 def generate_encoder_lookup_table(instructions):
     lookup_entries = []
     last_mnemonic = 'invalid'
@@ -193,6 +218,7 @@ def generate_encoder_table(instructions):
     for insn in instructions:
         table += '    { '
         table += '0x%04X, ' % insn['instruction_table_index']
+        table += '0x%04X, ' % get_operand_mask(insn)
         table += '0x%s, ' % insn['opcode']
         table += '0x%02X, ' % get_modrm(insn)
         table += 'ZYDIS_INSTRUCTION_ENCODING_%s, ' % zydis_instruction_encoding(insn.get('encoding', 'default'))
@@ -371,6 +397,34 @@ class MergabilityDetector(InstructionManipulator):
         insn2['mergable'] = True
 
 
+class Is4Detector(InstructionManipulator):
+
+    def get_encoding(self, insn):
+        is4_detected = False
+        encoding = copy.deepcopy(get_basic_encoding(insn))
+        if 'operands' in encoding:
+            for op in encoding['operands']:
+                is4_detected |= op.get('encoding', '') == 'is4'
+            if is4_detected:
+                for op in encoding['operands']:
+                    if op.get('encoding', '') not in ['is4', 'modrm_rm']:
+                        continue
+                    del op['encoding']
+                    del op['element_type']
+                    del op['width16']
+                    del op['width32']
+                    del op['width64']
+        if is4_detected and 'comment' in encoding:
+            del encoding['comment']
+        if insn['mnemonic'] == 'vfmaddpd':
+            print('>>>' + str(encoding))
+        return encoding
+
+    def update(self, insn1, insn2):
+        insn1['is4_swappable'] = True
+        insn2['is4_swappable'] = True
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generates tables needed for encoder')
     parser.add_argument('--mode', choices=['generate-tables', 'instruction-order-test', 'stats', 'print', 'print-all', 'encodings', 'filters'], default='generate-tables')
@@ -450,6 +504,7 @@ if __name__ == "__main__":
             operand_encodings[op_type].add(op.get('encoding', 'none'))
 
     #MergabilityDetector(filter(lambda insn: insn['encodable'], unique_instructions)).transform()
+    #Is4Detector(filter(lambda insn: insn['encodable'], unique_instructions)).transform()
     PrefixEliminator(filter(lambda insn: insn['encodable'], unique_instructions)).transform()
     ForceHiddenOperandSizes(filter(lambda insn: insn['encodable'] and not insn['redundant'], unique_instructions)).transform()
     if args.mode == 'generate-tables':
@@ -500,4 +555,5 @@ if __name__ == "__main__":
             redundant = '' if not insn['redundant'] else 'REDUNDANT.'
             mergable = '' if not insn.get('mergable', False) else 'MERGABLE.'
             non_encodable = '' if insn['encodable'] else 'NE.'
-            print(non_encodable + mergable + redundant + scaling + prefix + get_full_instruction(insn, args.mode == 'print-all'))
+            is4_swappable = '' if not insn.get('is4_swappable', False) else 'IS4S.'
+            print(is4_swappable + non_encodable + mergable + redundant + scaling + prefix + get_full_instruction(insn, args.mode == 'print-all'))
