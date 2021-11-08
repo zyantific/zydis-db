@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 import json
 import argparse
-import copy
-from utils import *
 from zydis_types import *
+from instruction_manipulators import *
 from instruction_order import generate_instruction_order_test_table
-from abc import ABC, abstractmethod
 
 
 class InvalidInstructionException(Exception):
@@ -194,6 +192,84 @@ def get_operand_mask(insn):
     return op_mask
 
 
+def get_estimated_size(insn):
+    minimal_len = 1
+    filters = insn.get('filters', {})
+    rex_w = filters.get('rex_w', 'placeholder')
+    encoding = insn.get('encoding', 'default')
+    opcode_map = insn.get('opcode_map', 'default')
+    if encoding not in ['xop', 'vex', 'evex', 'mvex'] and get_mandatory_prefix(insn) != 'ZYDIS_MANDATORY_PREFIX_NONE':
+        minimal_len += 1
+    if encoding in ['default', '3dnow']:
+        if opcode_map == 'default':
+            pass
+        elif opcode_map == '0f':
+            minimal_len += 1
+        elif opcode_map in ['0f0f', '0f38', '0f3a']:
+            minimal_len += 2
+        else:
+            raise InvalidInstructionException('Invalid opcode map: ' + opcode_map)
+        if rex_w == '1':
+            minimal_len += 1
+    elif encoding == 'xop':
+        minimal_len += 3
+    elif encoding == 'vex':
+        minimal_len += 2
+        if rex_w == '1' or opcode_map != '0f':
+            minimal_len += 1
+    elif encoding in ['evex', 'mvex']:
+        minimal_len += 4
+    else:
+        raise InvalidInstructionException('Invalid encoding: ' + encoding)
+
+    overhead = 0
+    has_sib = False
+    has_mem = False
+    has_modrm = False
+    for op in get_operands(insn, False):
+        op_encoding = op.get('encoding', 'none')
+        if op_encoding in ['modrm_reg', 'modrm_rm']:
+            has_modrm = True
+            """
+            elif op_encoding == 'disp16_32_64':
+                minimal_len += 2
+                overhead += 2
+            """
+        elif op_encoding in ['uimm8', 'simm8', 'jimm8']:
+            minimal_len += 1
+        elif op_encoding in ['uimm16', 'simm16', 'jimm16', 'uimm16_32_64', 'uimm16_32_32', 'simm16_32_64', 'simm16_32_32', 'jimm16_32_64', 'jimm16_32_32']:
+            minimal_len += 2
+            if op_encoding in ['uimm16_32_64', 'simm16_32_64', 'jimm16_32_64']:
+                overhead += 6
+            elif op_encoding in ['uimm16_32_32', 'simm16_32_32', 'jimm16_32_32']:
+                overhead += 2
+        elif op_encoding in ['uimm32', 'simm32', 'jimm32', 'uimm32_32_64', 'simm32_32_64', 'jimm32_32_64']:
+            minimal_len += 4
+            if op_encoding in ['uimm32_32_64', 'simm32_32_64', 'jimm32_32_64']:
+                minimal_len += 4
+        elif op_encoding in ['uimm64', 'simm64', 'jimm64']:
+            minimal_len += 8
+
+        op_type = op['operand_type']
+        if op_type in ['implicit_mem', 'mem', 'agen', 'agen_norel']:
+            has_mem = True
+        elif op_type in ['mem_vsibx', 'mem_vsiby', 'mem_vsibz', 'mib']:
+            has_mem = True
+            has_sib = True
+    if has_modrm or get_modrm(insn):
+        minimal_len += 1
+    if has_sib or (has_mem and int(filters.get('modrm_rm', '0')) == 4):
+        minimal_len += 1
+
+    return minimal_len, minimal_len + overhead
+
+
+def is_swappable(insn):
+    if 'swappable' not in insn:
+        return False
+    return (insn['swappable'] & 1) != 0
+
+
 def generate_encoder_lookup_table(instructions):
     lookup_entries = []
     last_mnemonic = 'invalid'
@@ -216,21 +292,23 @@ def generate_encoder_lookup_table(instructions):
 def generate_encoder_table(instructions):
     table = 'const ZydisEncodableInstruction encoder_instructions[] =\n{\n'
     for insn in instructions:
-        table += '    { '
-        table += '0x%04X, ' % insn['instruction_table_index']
-        table += '0x%04X, ' % get_operand_mask(insn)
-        table += '0x%s, ' % insn['opcode']
-        table += '0x%02X, ' % get_modrm(insn)
-        table += 'ZYDIS_INSTRUCTION_ENCODING_%s, ' % zydis_instruction_encoding(insn.get('encoding', 'default'))
-        table += 'ZYDIS_OPCODE_MAP_%s, ' % insn.get('opcode_map', 'default').upper()
-        table += '%s, ' % get_width_flags(insn['allowed_modes'])
-        table += '%s, ' % get_width_flags(get_effective_address_size(insn))
-        table += '%s, ' % get_width_flags(insn['operand_size'])
-        table += '%s, ' % get_mandatory_prefix(insn)
-        table += '%s, ' % zydis_bool(insn.get('filters', {}).get('rex_w', 'placeholder') == '1')
-        table += '%s, ' % get_vector_length(insn)
-        table += '%s ' % get_size_hint(insn)
-        table += '},\n'
+        members = [
+            '0x%04X' % insn['instruction_table_index'],
+            '0x%04X' % get_operand_mask(insn),
+            '0x%s' % insn['opcode'],
+            '0x%02X' % get_modrm(insn),
+            'ZYDIS_INSTRUCTION_ENCODING_%s' % zydis_instruction_encoding(insn.get('encoding', 'default')),
+            'ZYDIS_OPCODE_MAP_%s' % insn.get('opcode_map', 'default').upper(),
+            get_width_flags(insn['allowed_modes']),
+            get_width_flags(get_effective_address_size(insn)),
+            get_width_flags(insn['operand_size']),
+            get_mandatory_prefix(insn),
+            zydis_bool(insn.get('filters', {}).get('rex_w', 'placeholder') == '1'),
+            get_vector_length(insn),
+            get_size_hint(insn),
+            zydis_bool(is_swappable(insn)),
+        ]
+        table += '    { %s },\n' % ', '.join(members)
     table += '};\n'
     return table
 
@@ -246,185 +324,6 @@ def get_filters(insn):
     return 'mode=%s,rex_w=%s,operand_size=%s,address_size=%s' % important_filters
 
 
-def get_osz(insn):
-    return insn.get('filters', {}).get('operand_size', 'placeholder').replace('!', '')
-
-
-def get_basic_encoding(insn):
-    encoding = {}
-    dict_append(encoding, insn, 'operands')
-    dict_append(encoding, insn, 'opsize_map')
-    dict_append(encoding, insn, 'adsize_map')
-    dict_append(encoding, insn, 'cpl')
-    dict_append(encoding, insn, 'flags')
-    dict_append(encoding, insn, 'meta_info')
-    dict_append(encoding, insn, 'prefix_flags')
-    dict_append(encoding, insn, 'exception_class')
-    dict_append(encoding, insn, 'affected_flags')
-    dict_append(encoding, insn, 'vex')
-    dict_append(encoding, insn, 'evex')
-    dict_append(encoding, insn, 'mvex')
-    dict_append(encoding, insn, 'comment')
-    return encoding
-
-
-def merge_instruction_features(dest, src):
-    dest['allowed_modes'] |= src['allowed_modes']
-    if dest['address_size'] != src['address_size']:
-        raise ValueError('Invalid duplicate (address size): ' + get_full_instruction(src))
-    if dest['operand_size'] != src['operand_size']:
-        if dest['operand_size_no_concat'] or src['operand_size_no_concat']:
-            if get_osz(dest) != get_osz(src):
-                raise ValueError('Invalid duplicate (operand size): ' + get_full_instruction(src))
-            dest['forced_hint'] = True
-        dest['operand_size'] |= src['operand_size']
-
-
-class InstructionManipulator(ABC):
-
-    def __init__(self, instructions):
-        self.insn_db = instructions
-
-    @abstractmethod
-    def get_encoding(self, insn):
-        pass
-
-    @abstractmethod
-    def update(self, insn1, insn2):
-        pass
-
-    def transform(self):
-        last_mnemonic = ''
-        encoding_list = []
-        insn_list = []
-        for insn in self.insn_db:
-            mnemonic = insn['mnemonic']
-            if mnemonic != last_mnemonic:
-                last_mnemonic = mnemonic
-                encoding_list = []
-                insn_list = []
-            encoding = self.get_encoding(insn)
-            if encoding not in encoding_list:
-                encoding_list.append(encoding)
-                insn_list.append(insn)
-                continue
-            self.update(insn_list[encoding_list.index(encoding)], insn)
-
-
-class PrefixEliminator(InstructionManipulator):
-
-    def get_encoding(self, insn):
-        encoding = copy.deepcopy(get_basic_encoding(insn))
-        if 'operands' in encoding:
-            del encoding['operands']
-            encoding['operands'] = copy.deepcopy(get_operands(insn))
-        if 'comment' in encoding:
-            del encoding['comment']
-        if 'affected_flags' in encoding:
-            del encoding['affected_flags']
-        if 'filters' in insn:
-            filters = copy.deepcopy(insn['filters'])
-            encoding['filters'] = filters
-            if 'operand_size' in filters:
-                del filters['operand_size']
-            mandatory_prefix = filters.get('mandatory_prefix', 'none').upper()
-            if 'mandatory_prefix' in filters and mandatory_prefix in ['NONE', 'IGNORE']:
-                del filters['mandatory_prefix']
-            prefix_flags = encoding.get('prefix_flags', [])
-            if mandatory_prefix == 'F2' and 'accepts_repnerepnz' in prefix_flags:
-                del filters['mandatory_prefix']
-            if mandatory_prefix == 'F3' and ('accepts_rep' in prefix_flags or 'accepts_reperepz' in prefix_flags):
-                del filters['mandatory_prefix']
-        return encoding
-
-    def update(self, insn1, insn2):
-        merge_instruction_features(insn1, insn2)
-        insn2['redundant'] = True
-
-
-class ForceHiddenOperandSizes(InstructionManipulator):
-
-    def get_encoding(self, insn):
-        encoding = copy.deepcopy(get_basic_encoding(insn))
-        if 'operands' in encoding:
-            for op in encoding['operands']:
-                if op['operand_type'] == 'implicit_reg' and not op.get('visible', True) and op['register'][0] in ['r', 'e']:
-                    op['register'] = op['register'][1:]
-        if 'comment' in encoding:
-            del encoding['comment']
-        if 'affected_flags' in encoding:
-            del encoding['affected_flags']
-        if 'filters' in insn:
-            filters = copy.deepcopy(insn['filters'])
-            encoding['filters'] = filters
-            if 'rex_w' in filters:
-                del filters['rex_w']
-        return encoding
-
-    def update(self, insn1, insn2):
-        insn1['forced_hint'] = True
-        insn2['redundant'] = True
-
-
-class MergabilityDetector(InstructionManipulator):
-
-    def get_encoding(self, insn):
-        encoding = copy.deepcopy(get_basic_encoding(insn))
-        if 'operands' in encoding:
-            for op in encoding['operands']:
-                if op['operand_type'] in ['gpr16', 'gpr32', 'gpr64', 'gpr32_32_64', 'gpr16_32_32']:
-                    if 'element_type' in op:
-                        del op['element_type']
-                    if 'width16' in op:
-                        del op['width16']
-                    if 'width32' in op:
-                        del op['width32']
-                    if 'width64' in op:
-                        del op['width64']
-                    op['operand_type'] = 'mergable'
-        if 'filters' in insn:
-            filters = copy.deepcopy(insn['filters'])
-            encoding['filters'] = filters
-            if 'rex_w' in filters:
-                del filters['rex_w']
-            if 'mode' in filters:
-                del filters['mode']
-        if 'comment' in encoding:
-            del encoding['comment']
-        return encoding
-
-    def update(self, insn1, insn2):
-        insn2['mergable'] = True
-
-
-class Is4Detector(InstructionManipulator):
-
-    def get_encoding(self, insn):
-        is4_detected = False
-        encoding = copy.deepcopy(get_basic_encoding(insn))
-        if 'operands' in encoding:
-            for op in encoding['operands']:
-                is4_detected |= op.get('encoding', '') == 'is4'
-            if is4_detected:
-                for op in encoding['operands']:
-                    if op.get('encoding', '') not in ['is4', 'modrm_rm']:
-                        continue
-                    del op['encoding']
-                    del op['element_type']
-                    del op['width16']
-                    del op['width32']
-                    del op['width64']
-        if is4_detected and 'comment' in encoding:
-            del encoding['comment']
-        if insn['mnemonic'] == 'vfmaddpd':
-            print('>>>' + str(encoding))
-        return encoding
-
-    def update(self, insn1, insn2):
-        insn1['is4_swappable'] = True
-        insn2['is4_swappable'] = True
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generates tables needed for encoder')
     parser.add_argument('--mode', choices=['generate-tables', 'instruction-order-test', 'stats', 'print', 'print-all', 'encodings', 'filters'], default='generate-tables')
@@ -433,6 +332,7 @@ if __name__ == "__main__":
     with open('..\\Data\\instructions.json', 'r') as f:
         db = json.load(f)
 
+    # Gathering instructions
     max_args = 0
     max_visible_args = 0
     unique_instructions = []
@@ -452,6 +352,7 @@ if __name__ == "__main__":
         insn['address_size'] = get_address_size(insn)
         insn['operand_size'] = get_operand_size(insn)
         insn['operand_size_no_concat'] = insn.get('filters', {}).get('operand_size', 'placeholder')[0] == '!'
+        insn['min_size'], insn['max_size'] = get_estimated_size(insn)
 
         # Only unique signatures allowed
         # This logic MUST behave exactly as in Zydis generator to correctly reference instruction definitions from encoder's tables
@@ -503,10 +404,24 @@ if __name__ == "__main__":
                 operand_encodings[op_type] = set()
             operand_encodings[op_type].add(op.get('encoding', 'none'))
 
+    # Post-processing
+    get_unique_instructions = lambda insn: insn['encodable'] and not insn['redundant']
     #MergabilityDetector(filter(lambda insn: insn['encodable'], unique_instructions)).transform()
     #Is4Detector(filter(lambda insn: insn['encodable'], unique_instructions)).transform()
-    PrefixEliminator(filter(lambda insn: insn['encodable'], unique_instructions)).transform()
-    ForceHiddenOperandSizes(filter(lambda insn: insn['encodable'] and not insn['redundant'], unique_instructions)).transform()
+    PrefixEliminator(filter(get_unique_instructions, unique_instructions)).transform()
+    ForceHiddenOperandSizes(filter(get_unique_instructions, unique_instructions)).transform()
+    SwappableOperandDetector(filter(get_unique_instructions, unique_instructions)).transform()
+    for i, encoding_info in enumerate(unique_encodings['mov']['encodings']):
+        mov_insn = unique_instructions[unique_encodings['mov']['indexes'][i]]
+        dest = mov_insn['operands'][0]
+        src = mov_insn['operands'][1]
+        if dest['operand_type'] == 'gpr16_32_64' and dest['encoding'] == 'opcode' and \
+           src['operand_type'] == 'imm' and src['encoding'] == 'uimm16_32_64':
+            mov_insn['swappable'] = True
+            break
+    unique_instructions.sort(key=lambda insn: (insn['mnemonic'], insn['redundant'] or not insn['encodable'], insn['min_size'], insn['max_size'], insn.get('swappable', 0)))
+
+    # Execute requested actions
     if args.mode == 'generate-tables':
         def is_encodable(insn):
             if not insn['encodable']:
@@ -514,7 +429,6 @@ if __name__ == "__main__":
             if insn['redundant']:
                 return False
             if insn['allowed_modes'] == ZydisWidthFlag.w_invalid:
-                # print('Rejecting ignored instruction: ' + get_full_instruction(insn), file=sys.stderr)
                 return False
             return True
 
@@ -545,15 +459,23 @@ if __name__ == "__main__":
     else:
         for insn in unique_instructions:
             encoding = insn.get('encoding', 'default')
-            prefix = encoding.upper() + ':' if encoding != 'default' else ''
+            prefix = encoding.upper() + '.' if encoding != 'default' else ''
             hint = get_size_hint(insn)
             scaling = ''
             if hint == 'ZYDIS_SIZE_HINT_ASZ':
                 scaling = 'HASZ.'
             elif hint == 'ZYDIS_SIZE_HINT_OSZ':
                 scaling = 'HOSZ.'
-            redundant = '' if not insn['redundant'] else 'REDUNDANT.'
-            mergable = '' if not insn.get('mergable', False) else 'MERGABLE.'
-            non_encodable = '' if insn['encodable'] else 'NE.'
-            is4_swappable = '' if not insn.get('is4_swappable', False) else 'IS4S.'
-            print(is4_swappable + non_encodable + mergable + redundant + scaling + prefix + get_full_instruction(insn, args.mode == 'print-all'))
+            decorators = [
+                'MIN%02d.' % insn['min_size'],
+                'MAX%02d.' % insn['max_size'],
+                '' if insn['encodable'] else 'NE.',
+                '' if not insn.get('is4_swappable', False) else 'IS4S.',
+                '' if not insn.get('mergable', False) else 'MERGABLE.',
+                '' if not insn.get('redundant', False) else 'REDUNDANT.',
+                '' if not insn.get('swappable', False) else 'SWAPPABLE%d.' % insn['swappable'],
+                scaling,
+                prefix,
+                insn['opcode'].upper() + '.',
+            ]
+            print(''.join(decorators) + get_full_instruction(insn, args.mode == 'print-all'))

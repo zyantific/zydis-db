@@ -62,3 +62,37 @@ def get_accepts_segment(insn):
         return True
 
     return False
+
+
+def get_basic_encoding(insn):
+    encoding = {}
+    dict_append(encoding, insn, 'operands')
+    dict_append(encoding, insn, 'opsize_map')
+    dict_append(encoding, insn, 'adsize_map')
+    dict_append(encoding, insn, 'cpl')
+    dict_append(encoding, insn, 'flags')
+    dict_append(encoding, insn, 'meta_info')
+    dict_append(encoding, insn, 'prefix_flags')
+    dict_append(encoding, insn, 'exception_class')
+    dict_append(encoding, insn, 'affected_flags')
+    dict_append(encoding, insn, 'vex')
+    dict_append(encoding, insn, 'evex')
+    dict_append(encoding, insn, 'mvex')
+    dict_append(encoding, insn, 'comment')
+    return encoding
+
+
+def get_osz(insn):
+    return insn.get('filters', {}).get('operand_size', 'placeholder').replace('!', '')
+
+
+def merge_instruction_features(dest, src):
+    dest['allowed_modes'] |= src['allowed_modes']
+    if dest['address_size'] != src['address_size']:
+        raise ValueError('Invalid duplicate (address size): ' + get_full_instruction(src))
+    if dest['operand_size'] != src['operand_size']:
+        if dest['operand_size_no_concat'] or src['operand_size_no_concat']:
+            if get_osz(dest) != get_osz(src):
+                raise ValueError('Invalid duplicate (operand size): ' + get_full_instruction(src))
+            dest['forced_hint'] = True
+        dest['operand_size'] |= src['operand_size']
