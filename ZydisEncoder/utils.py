@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from enum import IntFlag
+
+
 def dict_append(dst_dict, src_dict, key):
     if key in src_dict:
         dst_dict[key] = src_dict[key]
@@ -96,3 +99,34 @@ def merge_instruction_features(dest, src):
                 raise ValueError('Invalid duplicate (operand size): ' + get_full_instruction(src))
             dest['forced_hint'] = True
         dest['operand_size'] |= src['operand_size']
+
+
+def zydis_bool(val):
+    return 'ZYAN_TRUE' if val else 'ZYAN_FALSE'
+
+
+def zydis_instruction_encoding(encoding):
+    encoding_name = encoding.upper()
+    if encoding_name == 'DEFAULT':
+        encoding_name = 'LEGACY'
+    return encoding_name
+
+
+def zydis_vector_length(length):
+    if length in ['default', 'placeholder']:
+        return 'ZYDIS_VECTOR_LENGTH_INVALID'
+    elif length == '128':
+        return 'ZYDIS_VECTOR_LENGTH_128'
+    elif length == '256':
+        return 'ZYDIS_VECTOR_LENGTH_256'
+    elif length == '512':
+        return 'ZYDIS_VECTOR_LENGTH_512'
+    else:
+        raise ValueError('Invalid vector length')
+
+
+class ZydisWidthFlag(IntFlag):
+    w_invalid = 0
+    w_16 = 1
+    w_32 = 2
+    w_64 = 4
