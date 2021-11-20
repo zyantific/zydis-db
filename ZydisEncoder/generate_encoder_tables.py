@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 import json
 import argparse
-from zydis_types import *
 from instruction_manipulators import *
-from instruction_order import generate_instruction_order_test_table
 
 
 class InvalidInstructionException(Exception):
@@ -326,7 +324,7 @@ def get_filters(insn):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generates tables needed for encoder')
-    parser.add_argument('--mode', choices=['generate-tables', 'instruction-order-test', 'stats', 'print', 'print-all', 'encodings', 'filters'], default='generate-tables')
+    parser.add_argument('--mode', choices=['generate-tables', 'stats', 'print', 'print-all', 'encodings', 'filters'], default='generate-tables')
     args = parser.parse_args()
 
     with open('..\\Data\\instructions.json', 'r') as f:
@@ -356,7 +354,6 @@ if __name__ == "__main__":
 
         # Only unique signatures allowed
         # This logic MUST behave exactly as in Zydis generator to correctly reference instruction definitions from encoder's tables
-        # instruction-order-test generates test tables which can be used to verify this critical assumption with C test tool
         mnemonic = insn['mnemonic']
         if mnemonic not in unique_encodings:
             unique_encodings[mnemonic] = { 'encodings': [], 'indexes': [] }
@@ -369,8 +366,7 @@ if __name__ == "__main__":
         unique_encodings[mnemonic]['encodings'].append(current_encoding)
         unique_encodings[mnemonic]['indexes'].append(len(unique_instructions))
 
-        # Unique instruction list and reverse lookup is required for encoder table
-        # Encoding-based lookup is needed for instruction order test tables
+        # Unique instruction list and reverse lookup is required for encoder tables
         encoding = insn.get('encoding', 'default')
         if encoding not in instructions_by_encoding:
             instructions_by_encoding[encoding] = []
@@ -435,9 +431,6 @@ if __name__ == "__main__":
         encodable_instructions = list(filter(is_encodable, unique_instructions))
         print(generate_encoder_lookup_table(encodable_instructions))
         print(generate_encoder_table(encodable_instructions))
-    elif args.mode == 'instruction-order-test':
-        for encoding, lookup in sorted(instructions_by_encoding.items()):
-            print(generate_instruction_order_test_table(zydis_instruction_encoding(encoding), get_instructions(unique_instructions, lookup)))
     elif args.mode == 'stats':
         print('max_args=%d' % max_args)
         print('max_visible_args=%d' % max_visible_args)
