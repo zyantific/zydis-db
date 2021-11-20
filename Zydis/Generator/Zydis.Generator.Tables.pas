@@ -550,7 +550,7 @@ begin
       // ZYDIS_INSTRUCTION_DEFINITION_BASE_VECTOR_INTEL
       if (Item.Encoding in [iencVEX, iencEVEX, iencMVEX]) then
       begin
-        { is_gather            } Writer.WriteStr(ZydisBool[Item.Meta.Category.ToUpper.Contains('GATHER')]);
+        { is_gather            } Writer.WriteStr(ZydisBool[dfIsGather in Item.Flags]);
         { no_source_dest_match } Writer.WriteStr(ZydisBool[dfNoSourceDestMatch in Item.Flags]);
       end;
 
