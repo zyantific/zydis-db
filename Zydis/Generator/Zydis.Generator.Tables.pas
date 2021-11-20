@@ -924,40 +924,44 @@ end;
 {$REGION 'Class: TZYAccessedFlagsTableGenerator'}
 class procedure TZYAccessedFlagsTableGenerator.Generate(Generator: TZYBaseGenerator;
   const Filename: String; AccessedFlags: TZYUniqueDefinitionPropertyList<TZYInstructionFlagsInfo>);
-const
-  Map: array[0..25] of Integer = (0, -1, 1, -1, 2, -1, 3, 4, 5, 6, 7, 8, 9, -1, 10, -1, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
 begin
   TZYTableGenerator<TZYInstructionFlagsInfo>.Generate(Generator, Filename,
-    'ACCESSED_FLAGS.ifndef ZYDIS_MINIMAL_MODE', 'ZydisAccessedFlags', AccessedFlags.Items,
+    'ACCESSED_FLAGS.ifndef ZYDIS_MINIMAL_MODE', 'ZydisDefinitionAccessedFlags', AccessedFlags.Items,
     procedure(Writer: TZYTableItemWriter; Index: Integer; const Item: TZYInstructionFlagsInfo)
     var
-      I, N: Integer;
-      MaskRead, MaskWritten: UInt32;
+      MaskTested,
+      MaskTestedModified,
+      MaskModified,
+      MaskSet0,
+      MaskSet1,
+      MaskUndefined,
+      MaskTestedComb,
+      MasModifiedComb: UInt32;
     begin
-      { actions } Writer.StructBegin;
-      for I := Low(Map) to High(Map) do
-      begin
-        N := Map[I];
-        if (N = -1) then
-        begin
-          { [I] } Writer.WriteStr('ZYDIS_CPUFLAG_ACTION_NONE');
-        end else
-        begin
-          { [I] } Writer.WriteStr('ZYDIS_CPUFLAG_ACTION_' +
-                    TZYFlagOperation.ZydisStrings[Item.Flags[N]]);
-        end;
-      end;
-      { actions } Writer.StructEnd;
-      MaskRead := Item.ToMask(foTested) or Item.ToMask(foTestedModified);
-      MaskWritten := Item.ToMask(foModified) or
-        Item.ToMask(foTestedModified)or
-        Item.ToMask(foSet0)or
-        Item.ToMask(foSet1)or
-        Item.ToMask(foUndefined);
-      { cpu_flags_read } Writer.WriteHex(MaskRead and $003FFFFF);
-      { cpu_flags_written } Writer.WriteHex(MaskWritten and $003FFFFF);
-      { fpu_flags_read } Writer.WriteHex((MaskRead and $03C00000) shr 22);
-      { fpu_flags_written } Writer.WriteHex((MaskWritten and $03C00000) shr 22);
+      MaskTested := Item.ToMask(foTested);
+      MaskTestedModified := Item.ToMask(foTestedModified);
+      MaskModified := Item.ToMask(foModified);
+      MaskSet0 := Item.ToMask(foSet0);
+      MaskSet1 := Item.ToMask(foSet1);
+      MaskUndefined := Item.ToMask(foUndefined);
+      MaskTestedComb := MaskTested or MaskTestedModified;
+      MasModifiedComb := MaskModified or MaskTestedModified;
+
+      Writer.StructBegin(); // cpu_flags
+      { tested    } Writer.WriteHex(MaskTestedComb     and $003FFFFF);
+      { modified  } Writer.WriteHex(MasModifiedComb    and $003FFFFF);
+      { set_0     } Writer.WriteHex(MaskSet0           and $003FFFFF);
+      { set_1     } Writer.WriteHex(MaskSet1           and $003FFFFF);
+      { undefined } Writer.WriteHex(MaskUndefined      and $003FFFFF);
+      Writer.StructEnd();
+
+      Writer.StructBegin(); // fpu_flags
+      { tested    } Writer.WriteHex((MaskTestedComb     and $03C00000) shr 22);
+      { modified  } Writer.WriteHex((MasModifiedComb    and $03C00000) shr 22);
+      { set_0     } Writer.WriteHex((MaskSet0           and $03C00000) shr 22);
+      { set_1     } Writer.WriteHex((MaskSet1           and $03C00000) shr 22);
+      { undefined } Writer.WriteHex((MaskUndefined      and $03C00000) shr 22);
+      Writer.StructEnd();
     end, 'static');
 end;
 {$ENDREGION}
