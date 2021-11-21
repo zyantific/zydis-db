@@ -701,7 +701,8 @@ begin
         end;
       optXMM          ,
       optYMM          ,
-      optZMM          : Result := ocNone;
+      optZMM          ,
+      optTMM          : Result := ocNone;
       optBND          : Result := ocBND;
       optSREG         :
         if (O.Index = 0) and (O.Action in [opaWrite]) then
