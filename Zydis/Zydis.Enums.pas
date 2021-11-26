@@ -297,10 +297,45 @@ type
   end;
   TZYRegisterClass = TZYEnumRegisterClass.Enum;
 
+  TZYEnumRegisterKind = record
+  public
+    type Enum = (
+      regkINVALID,
+      regkGPR,
+      regkX87,
+      regkMMX,
+      regkVR,
+      regkTMM,
+      regkSEGMENT,
+      regkTEST,
+      regkCONTROL,
+      regkDEBUG,
+      regkMASK,
+      regkBOUND
+    );
+  public
+    const ZydisStrings: array[Enum] of String = (
+      'INVALID',
+      'GPR',
+      'X87',
+      'MMX',
+      'VR',
+      'TMM',
+      'SEGMENT',
+      'TEST',
+      'CONTROL',
+      'DEBUG',
+      'MASK',
+      'BOUND'
+    );
+  end;
+  TZYRegisterKind = TZYEnumRegisterKind.Enum;
+
   TZYRegisterHelper = record helper for TZYRegister
   public
     function GetRegisterClass: TZYRegisterClass;
     function GetRegisterId: Integer;
+    function GetRegisterKind: TZYRegisterKind;
   end;
 
   TZYSegmentRegister = (
@@ -472,6 +507,7 @@ type
       dfStateXMM_CR,
       dfStateXMM_CW,
       dfNoSourceDestMatch, // UD if the dst register matches any of the source regs
+      dfNoSourceSourceMatch, // AMX-E4
       dfIsGather
     );
   public
@@ -490,6 +526,7 @@ type
       'xmm_state_cr',
       'xmm_state_cw',
       'no_source_dest_match',
+      'no_source_source_match',
       'is_gather'
     );
   end;
@@ -1166,6 +1203,7 @@ type
     ocDR,
     ocMASK,
     ocBND,
+    ocTMM,
     ocVSIB,
     ocNoRel
   );
@@ -1181,6 +1219,7 @@ type
       'DR',
       'MASK',
       'BND',
+      'TMM',
       'VSIB',
       'NO_REL'
     );
@@ -1641,6 +1680,36 @@ begin
       Result := Ord(Self) - Ord(RegisterMap[C].Lo);
       Break;
     end;
+  end;
+end;
+
+function TZYRegisterHelper.GetRegisterKind: TZYRegisterKind;
+var
+  C: TZYRegisterClass;
+begin
+  Result := regkINVALID;
+
+  C := Self.GetRegisterClass();
+  case C of
+    regcGPR8   ,
+    regcGPR16  ,
+    regcGPR32  ,
+    regcGPR64  ,
+    regcGPROSZ ,
+    regcGPRASZ ,
+    regcGPRSSZ : Result := regkGPR;
+    regcX87    : Result := regkX87;
+    regcMMX    : Result := regkMMX;
+    regcXMM    ,
+    regcYMM    ,
+    regcZMM    : Result := regkVR;
+    regcTMM    : Result := regkTMM;
+    regcSEGMENT: Result := regkSEGMENT;
+    regcTEST   : Result := regkTEST;
+    regcCONTROL: Result := regkCONTROL;
+    regcDEBUG  : Result := regkDEBUG;
+    regcMASK   : Result := regkMASK;
+    regcBOUND  : Result := regkBOUND;
   end;
 end;
 

@@ -87,7 +87,7 @@ type
     class function NumberOfUsedOperands(Operands: TZYInstructionOperands): Integer; static; inline;
     class function AcceptsSegment(Definition: TZYInstructionDefinition): Boolean; static; inline;
     class function GetRegisterConstraint(Operands: TZYInstructionOperands;
-      Encoding: TZYOperandEncoding): TZYRegisterConstraint; inline; static;
+      Encoding: TZYOperandEncoding): string; inline; static;
     class function HasVSIB(Definition: TZYInstructionDefinition): Boolean; static; inline;
   public
     class procedure Generate(Generator: TZYBaseGenerator; const Filename: String;
@@ -477,14 +477,8 @@ begin
                                         'ZYDIS_EXCEPTION_CLASS_' +
                                         TZYExceptionClass.ZydisStrings[Item.ExceptionClass], '',
                                         false);
-      { constrREG                   } Writer.WriteStr(
-                                        'ZYDIS_REG_CONSTRAINTS_' +
-                                        TZYRegisterConstraint.ZydisStrings[
-                                        GetRegisterConstraint(Item.Operands, opeModrmReg)]);
-      { constrRM                    } Writer.WriteStr(
-                                        'ZYDIS_REG_CONSTRAINTS_' +
-                                        TZYRegisterConstraint.ZydisStrings[
-                                        GetRegisterConstraint(Item.Operands, opeModrmRm)]);
+      { def_reg                     } Writer.WriteStr(GetRegisterConstraint(Item.Operands, opeModrmReg));
+      { def_rm                      } Writer.WriteStr(GetRegisterConstraint(Item.Operands, opeModrmRm));
 
       { cpu_state                   }
       if ((dfStateCPU_CR in Item.Flags) and (dfStateCPU_CW in Item.Flags)) then
@@ -542,16 +536,15 @@ begin
       // ZYDIS_INSTRUCTION_DEFINITION_BASE_VECTOR
       if (Item.Encoding in [iencXOP, iencVEX, iencEVEX, iencMVEX]) then
       begin
-        { constrNDSNDD }  Writer.WriteStr('ZYDIS_REG_CONSTRAINTS_' +
-                            TZYRegisterConstraint.ZydisStrings[
-                            GetRegisterConstraint(Item.Operands, opeNDSNDD)]);
+        { def_ndsndd }  Writer.WriteStr(GetRegisterConstraint(Item.Operands, opeNDSNDD));
       end;
 
       // ZYDIS_INSTRUCTION_DEFINITION_BASE_VECTOR_INTEL
       if (Item.Encoding in [iencVEX, iencEVEX, iencMVEX]) then
       begin
-        { is_gather            } Writer.WriteStr(ZydisBool[dfIsGather in Item.Flags]);
-        { no_source_dest_match } Writer.WriteStr(ZydisBool[dfNoSourceDestMatch in Item.Flags]);
+        { is_gather              } Writer.WriteStr(ZydisBool[dfIsGather in Item.Flags]);
+        { no_source_dest_match   } Writer.WriteStr(ZydisBool[dfNoSourceDestMatch in Item.Flags]);
+        { no_source_source_match } Writer.WriteStr(ZydisBool[dfNoSourceSourceMatch in Item.Flags]);
       end;
 
       case Item.Encoding of
@@ -653,13 +646,14 @@ begin
 end;
 
 class function TZYDefinitionTableGenerator.GetRegisterConstraint(Operands: TZYInstructionOperands;
-  Encoding: TZYOperandEncoding): TZYRegisterConstraint;
+  Encoding: TZYOperandEncoding): string;
 var
   I: Integer;
   O: TZYInstructionOperand;
 begin
   Assert(Encoding in [opeModrmReg, opeModrmRm, opeNDSNDD]);
-  Result := ocUnused;
+  Result := '0';
+
   for I := 0 to Operands.NumberOfUsedOperands - 1 do
   begin
     O := Operands.Items[I];
@@ -667,72 +661,51 @@ begin
     begin
       Continue;
     end;
+
     case O.OperandType of
-      optImplicitReg  ,
-      optImplicitMem  ,
-      optImplicitImm1 : Result := ocNone;
-      optGPR8         ,
-      optGPR16        ,
-      optGPR32        ,
-      optGPR64        ,
-      optGPR16_32_64  ,
-      optGPR32_32_64  ,
-      optGPR16_32_32  :
-        if (Operands.Definition.Encoding in [iencEVEX, iencMVEX]) then
+      optUnused      ,
+      optImplicitReg ,
+      optImplicitMem ,
+      optImplicitImm1,
+      optIMM         ,
+      optREL         ,
+      optPTR         ,
+      optMOFFS       : ;
+
+      optGPR8        ,
+      optGPR16       ,
+      optGPR32       ,
+      optGPR64       ,
+      optGPR16_32_64 ,
+      optGPR32_32_64 ,
+      optGPR16_32_32 ,
+      optGPRASZ      : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkGPR];
+      optFPR         : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkX87];
+      optMMX         : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkMMX];
+      optXMM         ,
+      optYMM         ,
+      optZMM         : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkVR];
+      optTMM         : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkTMM];
+      optBND         : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkBOUND];
+      optSREG        :
         begin
-          // `.R'` and `.V'` are invalid for GPR registers, but `.X` is valid (ignored)
-          case O.Encoding of
-            opeModrmReg,
-            opeNDSNDD  : Result := ocGPR;
-            opeModrmRm : Result := ocNone;
+          Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkSEGMENT];
+          if (O.Action = opaWrite) then
+          begin
+            Result := Result + ' | (1 << 4)';
           end;
-        end else
-        begin
-          // These encodings don't have the `.R'` and `.V'` fields
-          Result := ocNone;
         end;
-      optFPR          ,
-      optMMX          :
-        begin
-          // Never encoded in `EVEX`/`MVEX` or as `NDSNDD`. `.R` and `.B` are valid (ignored)
-          Assert(not (Operands.Definition.Encoding in [iencEVEX, iencMVEX]));
-          Assert(Encoding <> opeNDSNDD);
-          Result := ocNone;
-        end;
-      optXMM          ,
-      optYMM          ,
-      optZMM          ,
-      optTMM          : Result := ocNone;
-      optBND          : Result := ocBND;
-      optSREG         :
-        if (O.Index = 0) and (O.Action in [opaWrite]) then
-        begin
-          // The `CS`-register is not allowed as destination for the `MOV` instruction
-          Result := ocSRDest;
-        end else
-        begin
-          Result := ocSR;
-        end;
-      optCR           : Result := ocCR;
-      optDR           : Result := ocDR;
-      optMASK         :
-        // MASK-registers can only use 3-bits, but `.B` and `.X` are valid (ignored)
-        case O.Encoding of
-          opeModrmReg,
-          opeNDSNDD  : Result := ocMASK;
-          opeModrmRm : Result := ocNone;
-        end;
-      optMEM          ,
-      optAGEN         : Result := ocNone;
-      optAGENNoRel    ,
-      optMIB          : Result := ocNoRel;
-      optMEMVSIBX     ,
-      optMEMVSIBY     ,
-      optMEMVSIBZ     : Result := ocVSIB;
-      optIMM          ,
-      optREL          ,
-      optPTR          ,
-      optMOFFS        : ;
+      optCR          : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkCONTROL];
+      optDR          : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkDEBUG];
+      optMASK        : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkMASK];
+
+      optMEM         : Result := 'ZYDIS_MEMOP_TYPE_MEM';
+      optMEMVSIBX    ,
+      optMEMVSIBY    ,
+      optMEMVSIBZ    : Result := 'ZYDIS_MEMOP_TYPE_VSIB | (1 << 3)';
+      optAGEN        : Result := 'ZYDIS_MEMOP_TYPE_AGEN';
+      optAGENNoRel   : Result := 'ZYDIS_MEMOP_TYPE_AGEN | (1 << 3)';
+      optMIB         : Result := 'ZYDIS_MEMOP_TYPE_MIB | (1 << 3)';
     end;
   end;
 end;
