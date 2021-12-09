@@ -415,7 +415,23 @@ if __name__ == "__main__":
            src['operand_type'] == 'imm' and src['encoding'] == 'uimm16_32_64':
             mov_insn['swappable'] = True
             break
-    unique_instructions.sort(key=lambda insn: (insn['mnemonic'], insn['redundant'] or not insn['encodable'], insn['min_size'], insn['max_size'], insn.get('swappable', 0)))
+
+    def instrucion_sorter(insn):
+        flags = insn.get('flags', [])
+        branch_type = 0
+        if 'short_branch' in flags:
+            branch_type = 1
+        elif 'near_branch' in flags:
+            branch_type = 2
+        elif 'far_branch' in flags:
+            branch_type = 3
+        return (insn['mnemonic'],
+                insn['redundant'] or not insn['encodable'],
+                insn['min_size'],
+                insn['max_size'],
+                insn.get('swappable', 0),
+                branch_type)
+    unique_instructions.sort(key=instrucion_sorter)
 
     # Execute requested actions
     if args.mode == 'generate-tables':
