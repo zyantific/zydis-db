@@ -164,8 +164,9 @@ if __name__ == "__main__":
     enums = parser.get_enum_types([
         'ZydisMachineMode',
         'ZydisStackWidth',
+        'ZydisBranchType',
+        'ZydisBranchWidth',
         'ZydisEncodableEncoding',
-        'ZydisEncodableBranchType',
         'ZydisAddressSizeHint',
         'ZydisOperandSizeHint',
         'ZydisBroadcastMode',
