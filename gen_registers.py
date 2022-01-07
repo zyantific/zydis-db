@@ -4,22 +4,21 @@
 import json
 import os
 
-class _JsonRegisters():
+class _JsonRegisterClass():
 
-    def __init__(self, categorized, uncategorized):
-        self.categorized = list(map(lambda x: _JsonRegistersCategorized(**x), categorized))
-        self.uncategorized = uncategorized
-
-class _JsonRegistersCategorized():
-
-    def __init__(self, name_zydis, name_editor, description, width, width_64, **kwargs):
+    def __init__(self, name_zydis, name_editor, description, groups):
         self.name_zydis = name_zydis
         self.name_editor = name_editor
         self.description = description
-        self.encodable = kwargs.get('encodable', None)   
-        self.unique = kwargs.get('unique', None)  
+        self.groups = list(map(lambda x: _JsonRegisterGroup(**x), groups))
+
+class _JsonRegisterGroup():
+
+    def __init__(self, is_encodable, registers, width, width_64):
+        self.is_encodable = is_encodable
+        self.registers = registers
         self.width = width
-        self.width_64 = width_64
+        self.width_64 = width_64   
 
 class _ZydisEnumWriter():
 
@@ -184,19 +183,15 @@ class Generator():
     def __init__(self, input_file):
         with open(input_file) as f:
             dic = json.load(f)
-            self.__registers = _JsonRegisters(**dic)
+            self.__registers = list(map(lambda x: _JsonRegisterClass(**x), dic['classes']))
 
     def generate(self, output_dir):
-        categorized = self.__registers.categorized
-        uncategorized = self.__registers.uncategorized
-        if (not categorized) or (not uncategorized):
-            raise ValueError()
+        self.__generate_enum(self.__registers, output_dir)
+        self.__generate_reg_lookup(self.__registers, output_dir)
+        self.__generate_reg_class_lookup(self.__registers, output_dir)
 
-        self.__generate_enum(categorized, uncategorized, output_dir)
-        self.__generate_reg_lookup(categorized, uncategorized, output_dir)
-        self.__generate_reg_class_lookup(categorized, output_dir)
-
-    def __generate_enum(self, categorized, uncategorized, output_dir):
+    @staticmethod
+    def __generate_enum(reg_classes, output_dir):
         fn_enum = os.path.join(output_dir, 'include/Zydis/Generated/EnumRegister.h')
         fn_enum_strings = os.path.join(output_dir, 'src/Generated/EnumRegister.inc')
         with (
@@ -206,80 +201,72 @@ class Generator():
             w_enum.emit_value('none')
             w_enum_strings.emit_value('none')
 
-            for reg_class in categorized:
+            for reg_class in reg_classes:
                 if not reg_class.name_zydis:
+                    # This class is only used by the InstructionEditor
                     continue
-                w_enum.emit_newline()
-                w_enum.emit_comment(reg_class.description)
-                w_enum_strings.emit_comment(reg_class.description)
-                if reg_class.encodable:
-                    for reg in reg_class.encodable:
+                if reg_class.description:
+                    w_enum.emit_newline()
+                    w_enum.emit_comment(reg_class.description)
+                    w_enum_strings.emit_comment(reg_class.description)
+                for group in reg_class.groups:
+                    for reg in group.registers:
                         w_enum.emit_value(reg)
                         w_enum_strings.emit_value(reg)
-                if reg_class.unique:
-                    for reg in reg_class.unique:
-                        w_enum.emit_value(reg) 
-                        w_enum_strings.emit_value(reg)
 
-            w_enum.emit_newline()
-            w_enum.emit_comment("Uncategorized")
-            w_enum_strings.emit_comment("Uncategorized")
-            for reg in uncategorized:
-                w_enum.emit_value(reg)
-                w_enum_strings.emit_value(reg)
-
-    def __generate_reg_lookup(self, categorized, uncategorized, output_dir):
+    @staticmethod
+    def __generate_reg_lookup(reg_classes, output_dir):
         fn_table = os.path.join(output_dir, 'src/Generated/RegisterLookup.inc')
         with _ZydisTableWriter('REG_LOOKUP', 'ZydisRegisterLookupItem', fn_table) as w:
             w.emit_value('/* NONE       */ { ZYDIS_REGCLASS_INVALID, -1, 0, 0 }') # none
-            for reg_class in categorized:
+            for reg_class in reg_classes:
                 if not reg_class.name_zydis:
+                    # This class is only used by the InstructionEditor
                     continue
-                # w.emit_comment(reg_class.description)
-                if reg_class.encodable:
+                for reg_group in reg_class.groups:
                     i = 0
-                    for reg in reg_class.encodable:
+                    for reg in reg_group.registers:
                         w.emit_value('/* {reg} */ {{ ZYDIS_REGCLASS_{reg_class}, {id}, {width}, {width_64} }}'.format(
                             reg = reg.upper().ljust(10),
                             reg_class = reg_class.name_zydis,
-                            id = i,
-                            width = reg_class.width,
-                            width_64 = reg_class.width_64
+                            id = i if reg_group.is_encodable else -1,
+                            width = reg_group.width,
+                            width_64 = reg_group.width_64
                         ))
                         i += 1
-                if reg_class.unique:
-                    for reg in reg_class.unique:
-                        w.emit_value('/* {reg} */ {{ ZYDIS_REGCLASS_{reg_class}, -1, 0, 0 }}'.format(
-                            reg = reg.upper().ljust(10),
-                            reg_class = reg_class.name_zydis if not reg_class.encodable else 'INVALID'  
-                        ))
 
-            # w.emit_comment("Uncategorized")
-            for reg in uncategorized:
-                w.emit_value('/* {reg} */ {{ ZYDIS_REGCLASS_INVALID, -1, 0, 0 }}'.format(
-                    reg = reg.upper().ljust(10)   
-                ))
-
-    def __generate_reg_class_lookup(self, categorized, output_dir):
+    @staticmethod
+    def __generate_reg_class_lookup(reg_classes, output_dir):
         fn_table = os.path.join(output_dir, 'src/Generated/RegisterClassLookup.inc')
         with _ZydisTableWriter('REG_CLASS_LOOKUP', 'ZydisRegisterClassLookupItem', fn_table) as w:
             w.emit_value('/* INVALID */ { ZYDIS_REGISTER_NONE, ZYDIS_REGISTER_NONE, 0, 0 }') # none
-            for reg_class in categorized:
+            for reg_class in reg_classes:
                 if not reg_class.name_zydis:
+                    # This class is only used by the InstructionEditor
                     continue
-                # w.emit_comment(reg_class.description)
+                if reg_class.name_zydis == 'INVALID':
+                    # This class contains the assorted registers
+                    continue
                 lo = 'ZYDIS_REGISTER_NONE'
                 hi = 'ZYDIS_REGISTER_NONE'
-                if reg_class.encodable:
-                    lo = 'ZYDIS_REGISTER_' + reg_class.encodable[0]
-                    hi = 'ZYDIS_REGISTER_' + reg_class.encodable[len(reg_class.encodable) - 1]
+                width = 0
+                width_64 = 0
+                encodable_groups = list(filter(lambda x : x.is_encodable, reg_class.groups))
+                if len(encodable_groups) > 0:
+                    if len(encodable_groups) > 1:
+                        raise ValueError("multiple encodable groups in register class")
+                    encodable_group = encodable_groups[0]
+                    lo = 'ZYDIS_REGISTER_' + encodable_group.registers[0]
+                    hi = 'ZYDIS_REGISTER_' + encodable_group.registers[len(encodable_group.registers) - 1]
+                    width = encodable_group.width
+                    width_64 = encodable_group.width_64
                 w.emit_value('/* {reg_class} */ {{ {lo}, {hi}, {width}, {width_64} }}'.format(
                     reg_class = reg_class.name_zydis.ljust(7),
                     lo = lo,
                     hi = hi,
-                    width = reg_class.width,
-                    width_64 = reg_class.width_64
+                    width = width,
+                    width_64 = width_64
                 ))
               
 generator = Generator('./Data/registers.json')
-generator.generate('F:/Development/GitHub/zydis/')
+generator.generate('D:/Development/GitHub/zydis/')

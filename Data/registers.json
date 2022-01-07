@@ -1,480 +1,670 @@
 {
-  "categorized": [
+  "classes": [
     {
       "name_zydis": "GPR8",
       "name_editor": "GPR8",
       "description": "General purpose registers  8-bit",
-      "encodable": [
-        "AL",
-        "CL",
-        "DL",
-        "BL",
-        "AH",
-        "CH",
-        "DH",
-        "BH",
-        "SPL",
-        "BPL",
-        "SIL",
-        "DIL",
-        "R8B",
-        "R9B",
-        "R10B",
-        "R11B",
-        "R12B",
-        "R13B",
-        "R14B",
-        "R15B"
-      ],
-      "width": 8,
-      "width_64": 8
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "AL",
+            "CL",
+            "DL",
+            "BL",
+            "AH",
+            "CH",
+            "DH",
+            "BH",
+            "SPL",
+            "BPL",
+            "SIL",
+            "DIL",
+            "R8B",
+            "R9B",
+            "R10B",
+            "R11B",
+            "R12B",
+            "R13B",
+            "R14B",
+            "R15B"
+          ],
+          "width": 8,
+          "width_64": 8
+        }
+      ]
     },
     {
       "name_zydis": "GPR16",
       "name_editor": "GPR16",
       "description": "General purpose registers 16-bit",
-      "encodable": [
-        "AX",
-        "CX",
-        "DX",
-        "BX",
-        "SP",
-        "BP",
-        "SI",
-        "DI",
-        "R8W",
-        "R9W",
-        "R10W",
-        "R11W",
-        "R12W",
-        "R13W",
-        "R14W",
-        "R15W"
-      ],
-      "width": 16,
-      "width_64": 16
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "AX",
+            "CX",
+            "DX",
+            "BX",
+            "SP",
+            "BP",
+            "SI",
+            "DI",
+            "R8W",
+            "R9W",
+            "R10W",
+            "R11W",
+            "R12W",
+            "R13W",
+            "R14W",
+            "R15W"
+          ],
+          "width": 16,
+          "width_64": 16
+        }
+      ]
     },
     {
       "name_zydis": "GPR32",
       "name_editor": "GPR32",
       "description": "General purpose registers 32-bit",
-      "encodable": [
-        "EAX",
-        "ECX",
-        "EDX",
-        "EBX",
-        "ESP",
-        "EBP",
-        "ESI",
-        "EDI",
-        "R8D",
-        "R9D",
-        "R10D",
-        "R11D",
-        "R12D",
-        "R13D",
-        "R14D",
-        "R15D"
-      ],
-      "width": 32,
-      "width_64": 32
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "EAX",
+            "ECX",
+            "EDX",
+            "EBX",
+            "ESP",
+            "EBP",
+            "ESI",
+            "EDI",
+            "R8D",
+            "R9D",
+            "R10D",
+            "R11D",
+            "R12D",
+            "R13D",
+            "R14D",
+            "R15D"
+          ],
+          "width": 32,
+          "width_64": 32
+        }
+      ]
     },
     {
       "name_zydis": "GPR64",
       "name_editor": "GPR64",
       "description": "General purpose registers 64-bit",
-      "encodable": [
-        "RAX",
-        "RCX",
-        "RDX",
-        "RBX",
-        "RSP",
-        "RBP",
-        "RSI",
-        "RDI",
-        "R8",
-        "R9",
-        "R10",
-        "R11",
-        "R12",
-        "R13",
-        "R14",
-        "R15"
-      ],
-      "width": 0,
-      "width_64": 64
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "RAX",
+            "RCX",
+            "RDX",
+            "RBX",
+            "RSP",
+            "RBP",
+            "RSI",
+            "RDI",
+            "R8",
+            "R9",
+            "R10",
+            "R11",
+            "R12",
+            "R13",
+            "R14",
+            "R15"
+          ],
+          "width": 0,
+          "width_64": 64
+        }
+      ]
     },
     {
       "name_zydis": null,
       "name_editor": "GPRASZ",
       "description": "Address-size scaling general purpose pseudo-registers",
-      "encodable": [
-        "ASZAX",
-        "ASZCX",
-        "ASZDX",
-        "ASZBX",
-        "ASZSP",
-        "ASZBP",
-        "ASZSI",
-        "ASZDI"
-      ],
-      "width": 0,
-      "width_64": 0
+      "groups": [
+        {
+          "is_encodable": false,
+          "registers": [
+            "ASZAX",
+            "ASZCX",
+            "ASZDX",
+            "ASZBX",
+            "ASZSP",
+            "ASZBP",
+            "ASZSI",
+            "ASZDI"
+          ],
+          "width": 0,
+          "width_64": 0
+        }
+      ]
     },
     {
       "name_zydis": null,
       "name_editor": "GPRSSZ",
       "description": "Stack-size scaling general purpose pseudo-registers",
-      "encodable": [
-        "SSZAX",
-        "SSZCX",
-        "SSZDX",
-        "SSZBX",
-        "SSZSP",
-        "SSZBP",
-        "SSZSI",
-        "SSZDI"
-      ],
-      "width": 0,
-      "width_64": 0
+      "groups": [
+        {
+          "is_encodable": false,
+          "registers": [
+            "SSZAX",
+            "SSZCX",
+            "SSZDX",
+            "SSZBX",
+            "SSZSP",
+            "SSZBP",
+            "SSZSI",
+            "SSZDI"
+          ],
+          "width": 0,
+          "width_64": 0
+        }
+      ]
     },
     {
       "name_zydis": "X87",
       "name_editor": "X87",
       "description": "Floating point legacy registers",
-      "encodable": [
-        "ST0",
-        "ST1",
-        "ST2",
-        "ST3",
-        "ST4",
-        "ST5",
-        "ST6",
-        "ST7"
-      ],
-      "unique": [
-        "X87CONTROL",
-        "X87STATUS",
-        "X87TAG"
-      ],
-      "width": 80,
-      "width_64": 80
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "ST0",
+            "ST1",
+            "ST2",
+            "ST3",
+            "ST4",
+            "ST5",
+            "ST6",
+            "ST7"
+          ],
+          "width": 80,
+          "width_64": 80
+        }
+      ]
+    },
+    {
+      "name_zydis": "INVALID",
+      "name_editor": "INVALID",
+      "description": null,
+      "groups": [
+        {
+          "is_encodable": false,
+          "registers": [
+            "X87CONTROL",
+            "X87STATUS",
+            "X87TAG"
+          ],
+          "width": 16,
+          "width_64": 16
+        }
+      ]
     },
     {
       "name_zydis": "MMX",
       "name_editor": "MMX",
       "description": "Floating point multimedia registers",
-      "encodable": [
-        "MM0",
-        "MM1",
-        "MM2",
-        "MM3",
-        "MM4",
-        "MM5",
-        "MM6",
-        "MM7"
-      ],
-      "width": 64,
-      "width_64": 64
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "MM0",
+            "MM1",
+            "MM2",
+            "MM3",
+            "MM4",
+            "MM5",
+            "MM6",
+            "MM7"
+          ],
+          "width": 64,
+          "width_64": 64
+        }
+      ]
     },
     {
       "name_zydis": "XMM",
       "name_editor": "XMM",
       "description": "Floating point vector registers 128-bit",
-      "encodable": [
-        "XMM0",
-        "XMM1",
-        "XMM2",
-        "XMM3",
-        "XMM4",
-        "XMM5",
-        "XMM6",
-        "XMM7",
-        "XMM8",
-        "XMM9",
-        "XMM10",
-        "XMM11",
-        "XMM12",
-        "XMM13",
-        "XMM14",
-        "XMM15",
-        "XMM16",
-        "XMM17",
-        "XMM18",
-        "XMM19",
-        "XMM20",
-        "XMM21",
-        "XMM22",
-        "XMM23",
-        "XMM24",
-        "XMM25",
-        "XMM26",
-        "XMM27",
-        "XMM28",
-        "XMM29",
-        "XMM30",
-        "XMM31"
-      ],
-      "width": 128,
-      "width_64": 128
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "XMM0",
+            "XMM1",
+            "XMM2",
+            "XMM3",
+            "XMM4",
+            "XMM5",
+            "XMM6",
+            "XMM7",
+            "XMM8",
+            "XMM9",
+            "XMM10",
+            "XMM11",
+            "XMM12",
+            "XMM13",
+            "XMM14",
+            "XMM15",
+            "XMM16",
+            "XMM17",
+            "XMM18",
+            "XMM19",
+            "XMM20",
+            "XMM21",
+            "XMM22",
+            "XMM23",
+            "XMM24",
+            "XMM25",
+            "XMM26",
+            "XMM27",
+            "XMM28",
+            "XMM29",
+            "XMM30",
+            "XMM31"
+          ],
+          "width": 128,
+          "width_64": 128
+        }
+      ]
     },
     {
       "name_zydis": "YMM",
       "name_editor": "YMM",
       "description": "Floating point vector registers 256-bit",
-      "encodable": [
-        "YMM0",
-        "YMM1",
-        "YMM2",
-        "YMM3",
-        "YMM4",
-        "YMM5",
-        "YMM6",
-        "YMM7",
-        "YMM8",
-        "YMM9",
-        "YMM10",
-        "YMM11",
-        "YMM12",
-        "YMM13",
-        "YMM14",
-        "YMM15",
-        "YMM16",
-        "YMM17",
-        "YMM18",
-        "YMM19",
-        "YMM20",
-        "YMM21",
-        "YMM22",
-        "YMM23",
-        "YMM24",
-        "YMM25",
-        "YMM26",
-        "YMM27",
-        "YMM28",
-        "YMM29",
-        "YMM30",
-        "YMM31"
-      ],
-      "width": 256,
-      "width_64": 256
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "YMM0",
+            "YMM1",
+            "YMM2",
+            "YMM3",
+            "YMM4",
+            "YMM5",
+            "YMM6",
+            "YMM7",
+            "YMM8",
+            "YMM9",
+            "YMM10",
+            "YMM11",
+            "YMM12",
+            "YMM13",
+            "YMM14",
+            "YMM15",
+            "YMM16",
+            "YMM17",
+            "YMM18",
+            "YMM19",
+            "YMM20",
+            "YMM21",
+            "YMM22",
+            "YMM23",
+            "YMM24",
+            "YMM25",
+            "YMM26",
+            "YMM27",
+            "YMM28",
+            "YMM29",
+            "YMM30",
+            "YMM31"
+          ],
+          "width": 256,
+          "width_64": 256
+        }
+      ]
     },
     {
       "name_zydis": "ZMM",
       "name_editor": "ZMM",
       "description": "Floating point vector registers 512-bit",
-      "encodable": [
-        "ZMM0",
-        "ZMM1",
-        "ZMM2",
-        "ZMM3",
-        "ZMM4",
-        "ZMM5",
-        "ZMM6",
-        "ZMM7",
-        "ZMM8",
-        "ZMM9",
-        "ZMM10",
-        "ZMM11",
-        "ZMM12",
-        "ZMM13",
-        "ZMM14",
-        "ZMM15",
-        "ZMM16",
-        "ZMM17",
-        "ZMM18",
-        "ZMM19",
-        "ZMM20",
-        "ZMM21",
-        "ZMM22",
-        "ZMM23",
-        "ZMM24",
-        "ZMM25",
-        "ZMM26",
-        "ZMM27",
-        "ZMM28",
-        "ZMM29",
-        "ZMM30",
-        "ZMM31"
-      ],
-      "width": 512,
-      "width_64": 512
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "ZMM0",
+            "ZMM1",
+            "ZMM2",
+            "ZMM3",
+            "ZMM4",
+            "ZMM5",
+            "ZMM6",
+            "ZMM7",
+            "ZMM8",
+            "ZMM9",
+            "ZMM10",
+            "ZMM11",
+            "ZMM12",
+            "ZMM13",
+            "ZMM14",
+            "ZMM15",
+            "ZMM16",
+            "ZMM17",
+            "ZMM18",
+            "ZMM19",
+            "ZMM20",
+            "ZMM21",
+            "ZMM22",
+            "ZMM23",
+            "ZMM24",
+            "ZMM25",
+            "ZMM26",
+            "ZMM27",
+            "ZMM28",
+            "ZMM29",
+            "ZMM30",
+            "ZMM31"
+          ],
+          "width": 512,
+          "width_64": 512
+        }
+      ]
     },
     {
       "name_zydis": "TMM",
       "name_editor": "TMM",
       "description": "Matrix registers",
-      "encodable": [
-        "TMM0",
-        "TMM1",
-        "TMM2",
-        "TMM3",
-        "TMM4",
-        "TMM5",
-        "TMM6",
-        "TMM7"
-      ],
-      "width": 8192,
-      "width_64": 8192
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "TMM0",
+            "TMM1",
+            "TMM2",
+            "TMM3",
+            "TMM4",
+            "TMM5",
+            "TMM6",
+            "TMM7"
+          ],
+          "width": 8192,
+          "width_64": 8192
+        }
+      ]
     },
     {
       "name_zydis": "FLAGS",
       "name_editor": "FLAGS",
       "description": "Flags registers",
-      "unique": [
-        "FLAGS",
-        "EFLAGS",
-        "RFLAGS"
-      ],
-      "width": 0,
-      "width_64": 0
+      "groups": [
+        {
+          "is_encodable": false,
+          "registers": [
+            "FLAGS"
+          ],
+          "width": 16,
+          "width_64": 16
+        },
+        {
+          "is_encodable": false,
+          "registers": [
+            "EFLAGS"
+          ],
+          "width": 32,
+          "width_64": 32
+        },
+        {
+          "is_encodable": false,
+          "registers": [
+            "RFLAGS"
+          ],
+          "width": 0,
+          "width_64": 64
+        }
+      ]
     },
     {
       "name_zydis": "IP",
       "name_editor": "IP",
       "description": "Instruction-pointer registers",
-      "unique": [
-        "IP",
-        "EIP",
-        "RIP"
-      ],
-      "width": 0,
-      "width_64": 0
+      "groups": [
+        {
+          "is_encodable": false,
+          "registers": [
+            "IP"
+          ],
+          "width": 16,
+          "width_64": 16
+        },
+        {
+          "is_encodable": false,
+          "registers": [
+            "EIP"
+          ],
+          "width": 32,
+          "width_64": 32
+        },
+        {
+          "is_encodable": false,
+          "registers": [
+            "RIP"
+          ],
+          "width": 0,
+          "width_64": 64
+        }
+      ]
     },
     {
       "name_zydis": "SEGMENT",
       "name_editor": "SEGMENT",
       "description": "Segment registers",
-      "encodable": [
-        "ES",
-        "CS",
-        "SS",
-        "DS",
-        "FS",
-        "GS"
-      ],
-      "width": 16,
-      "width_64": 16
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "ES",
+            "CS",
+            "SS",
+            "DS",
+            "FS",
+            "GS"
+          ],
+          "width": 16,
+          "width_64": 16
+        }
+      ]
     },
     {
       "name_zydis": "TABLE",
       "name_editor": "TABLE",
       "description": "Table registers",
-      "unique": [
-        "GDTR",
-        "LDTR",
-        "IDTR",
-        "TR"
-      ],
-      "width": 0,
-      "width_64": 0
+      "groups": [
+        {
+          "is_encodable": false,
+          "registers": [
+            "GDTR",
+            "LDTR",
+            "IDTR",
+            "TR"
+          ],
+          "width": 0,
+          "width_64": 0
+        }
+      ]
     },
     {
       "name_zydis": "TEST",
       "name_editor": "TEST",
       "description": "Test registers",
-      "encodable": [
-        "TR0",
-        "TR1",
-        "TR2",
-        "TR3",
-        "TR4",
-        "TR5",
-        "TR6",
-        "TR7"
-      ],
-      "width": 32,
-      "width_64": 32
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "TR0",
+            "TR1",
+            "TR2",
+            "TR3",
+            "TR4",
+            "TR5",
+            "TR6",
+            "TR7"
+          ],
+          "width": 32,
+          "width_64": 32
+        }
+      ]
     },
     {
       "name_zydis": "CONTROL",
       "name_editor": "CONTROL",
       "description": "Control registers",
-      "encodable": [
-        "CR0",
-        "CR1",
-        "CR2",
-        "CR3",
-        "CR4",
-        "CR5",
-        "CR6",
-        "CR7",
-        "CR8",
-        "CR9",
-        "CR10",
-        "CR11",
-        "CR12",
-        "CR13",
-        "CR14",
-        "CR15"
-      ],
-      "width": 32,
-      "width_64": 64
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "CR0",
+            "CR1",
+            "CR2",
+            "CR3",
+            "CR4",
+            "CR5",
+            "CR6",
+            "CR7",
+            "CR8",
+            "CR9",
+            "CR10",
+            "CR11",
+            "CR12",
+            "CR13",
+            "CR14",
+            "CR15"
+          ],
+          "width": 32,
+          "width_64": 64
+        }
+      ]
     },
     {
       "name_zydis": "DEBUG",
       "name_editor": "DEBUG",
       "description": "Debug registers",
-      "encodable": [
-        "DR0",
-        "DR1",
-        "DR2",
-        "DR3",
-        "DR4",
-        "DR5",
-        "DR6",
-        "DR7",
-        "DR8",
-        "DR9",
-        "DR10",
-        "DR11",
-        "DR12",
-        "DR13",
-        "DR14",
-        "DR15"
-      ],
-      "width": 32,
-      "width_64": 64
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "DR0",
+            "DR1",
+            "DR2",
+            "DR3",
+            "DR4",
+            "DR5",
+            "DR6",
+            "DR7",
+            "DR8",
+            "DR9",
+            "DR10",
+            "DR11",
+            "DR12",
+            "DR13",
+            "DR14",
+            "DR15"
+          ],
+          "width": 32,
+          "width_64": 64
+        }
+      ]
     },
     {
       "name_zydis": "MASK",
       "name_editor": "MASK",
       "description": "Mask registers",
-      "encodable": [
-        "K0",
-        "K1",
-        "K2",
-        "K3",
-        "K4",
-        "K5",
-        "K6",
-        "K7"
-      ],
-      "width": 64,
-      "width_64": 64
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "K0",
+            "K1",
+            "K2",
+            "K3",
+            "K4",
+            "K5",
+            "K6",
+            "K7"
+          ],
+          "width": 64,
+          "width_64": 64
+        }
+      ]
     },
     {
       "name_zydis": "BOUND",
       "name_editor": "BOUND",
       "description": "Bound registers",
-      "encodable": [
-        "BND0",
-        "BND1",
-        "BND2",
-        "BND3"
-      ],
-      "unique": [
-        "BNDCFG",
-        "BNDSTATUS"
-      ],
-      "width": 128,
-      "width_64": 128
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "BND0",
+            "BND1",
+            "BND2",
+            "BND3"
+          ],
+          "width": 128,
+          "width_64": 128
+        }
+      ]
+    },
+    {
+      "name_zydis": "INVALID",
+      "name_editor": "INVALID",
+      "description": null,
+      "groups": [
+        {
+          "is_encodable": false,
+          "registers": [
+            "BNDCFG",
+            "BNDSTATUS"
+          ],
+          "width": 64,
+          "width_64": 64
+        }
+      ]
+    },
+    {
+      "name_zydis": "INVALID",
+      "name_editor": "INVALID",
+      "description": "Uncategorized",
+      "groups": [
+        {
+          "is_encodable": false,
+          "registers": [
+            "MXCSR"
+          ],
+          "width": 32,
+          "width_64": 32
+        },
+        {
+          "is_encodable": false,
+          "registers": [
+            "PKRU"
+          ],
+          "width": 32,
+          "width_64": 32
+        },
+        {
+          "is_encodable": false,
+          "registers": [
+            "XCR0"
+          ],
+          "width": 64,
+          "width_64": 64
+        },
+        {
+          "is_encodable": false,
+          "registers": [
+            "UIF"
+          ],
+          "width": 1,
+          "width_64": 1
+        }
+      ]
     }
-  ],
-  "uncategorized": [
-    "MXCSR",
-    "PKRU",
-    "XCR0",
-    "UIF"
   ]
 }
