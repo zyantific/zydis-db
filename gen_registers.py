@@ -196,7 +196,7 @@ class Generator():
         fn_enum_strings = os.path.join(output_dir, 'src/Generated/EnumRegister.inc')
         with (
             _ZydisEnumWriter('Register', 'REGISTER', fn_enum) as w_enum, 
-            _ZydisStringTableWriter('STR_REGISTER', True, fn_enum_strings) as w_enum_strings
+            _ZydisStringTableWriter('STR_REGISTERS', True, fn_enum_strings) as w_enum_strings
         ):
             w_enum.emit_value('none')
             w_enum_strings.emit_value('none')
