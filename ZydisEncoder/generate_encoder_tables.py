@@ -327,7 +327,7 @@ if __name__ == "__main__":
     parser.add_argument('--mode', choices=['generate-tables', 'stats', 'print', 'print-all', 'encodings', 'filters'], default='generate-tables')
     args = parser.parse_args()
 
-    with open('..\\Data\\instructions.json', 'r') as f:
+    with open('../Data/instructions.json', 'r') as f:
         db = json.load(f)
 
     # Gathering instructions
