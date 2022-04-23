@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import copy
 from abc import ABC, abstractmethod
 from utils import *
