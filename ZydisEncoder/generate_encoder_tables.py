@@ -412,7 +412,7 @@ if __name__ == "__main__":
         dest = mov_insn['operands'][0]
         src = mov_insn['operands'][1]
         if dest['operand_type'] == 'gpr16_32_64' and dest['encoding'] == 'opcode' and \
-           src['operand_type'] == 'imm' and src['encoding'] == 'uimm16_32_64':
+           src['operand_type'] == 'imm' and src['encoding'] == 'simm16_32_64':
             mov_insn['swappable'] = True
             break
 
