@@ -84,7 +84,7 @@ type
 
   TZYDefinitionTableGenerator = record
   strict private
-    class function NumberOfUsedOperands(Operands: TZYInstructionOperands): Integer; static; inline;
+    class function NumberOfUsedOperands(Operands: TZYInstructionOperands; VisibleOnly: Boolean = false): Integer; static; inline;
     class function AcceptsSegment(Definition: TZYInstructionDefinition): Boolean; static; inline;
     class function GetRegisterConstraint(Operands: TZYInstructionOperands;
       Encoding: TZYOperandEncoding): string; inline; static;
@@ -437,6 +437,8 @@ begin
                                         'ZYDIS_MNEMONIC_' + AnsiUpperCase(Item.Mnemonic));
       { operandCount                } Writer.WriteDec(
                                         NumberOfUsedOperands(Item.Operands), '', false);
+      { operand_count_visible       } Writer.WriteDec(
+                                        NumberOfUsedOperands(Item.Operands, true), '', false);
       { operandReference            } Writer.WriteHex(
                                         Operands.Mapping[Item.Encoding][Index], '', false);
       { operandSizeMapping          } Writer.WriteDec(Ord(Item.OperandSizeMap));
@@ -726,17 +728,23 @@ begin
 end;
 
 class function TZYDefinitionTableGenerator.NumberOfUsedOperands(
-  Operands: TZYInstructionOperands): Integer;
+  Operands: TZYInstructionOperands; VisibleOnly: Boolean = false): Integer;
 begin
   // This wrapper function takes care of the automatically generated FLAGS-register operand
-  Result := Operands.NumberOfUsedOperands;
-  if (Operands.Definition.AffectedFlags.AutomaticOperand0.OperandType <> optUnused) then
+  if (VisibleOnly) then
   begin
-    Inc(Result);
-  end;
-  if (Operands.Definition.AffectedFlags.AutomaticOperand1.OperandType <> optUnused) then
+    Result := Operands.NumberOfUsedOperandsVisible;
+  end else
   begin
-    Inc(Result);
+    Result := Operands.NumberOfUsedOperands;
+    if (Operands.Definition.AffectedFlags.AutomaticOperand0.OperandType <> optUnused) then
+    begin
+      Inc(Result);
+    end;
+    if (Operands.Definition.AffectedFlags.AutomaticOperand1.OperandType <> optUnused) then
+    begin
+      Inc(Result);
+    end;
   end;
 end;
 {$ENDREGION}

@@ -326,6 +326,7 @@ type
   strict private
     FOperands: array[0..MAX_OPERAND_COUNT - 1] of TZYInstructionOperand;
     FNumberOfUsedOperands: Integer;
+    FNumberOfUsedOperandsVisible: Integer;
   strict private
     class function GetOperandCount: Integer; static; inline;
     function GetOperand(Index: Integer): TZYInstructionOperand; inline;
@@ -348,6 +349,7 @@ type
     class property Count: Integer read GetOperandCount;
     property Items[Index: Integer]: TZYInstructionOperand read GetOperand;
     property NumberOfUsedOperands: Integer read FNumberOfUsedOperands;
+    property NumberOfUsedOperandsVisible: Integer read FNumberOfUsedOperandsVisible;
   published
     property OperandA: TZYInstructionOperand index 0 read GetOperand;
     property OperandB: TZYInstructionOperand index 1 read GetOperand;
@@ -1936,6 +1938,13 @@ begin
   begin
     if (FOperands[I].OperandType = optUnused) then Break;
     Inc(FNumberOfUsedOperands);
+  end;
+
+  FNumberOfUsedOperandsVisible := 0;
+  for I := Low(FOperands) to FNumberOfUsedOperands - 1 do
+  begin
+    if (not FOperands[I].Visible) then Break;
+    Inc(FNumberOfUsedOperandsVisible);
   end;
 end;
 {$ENDREGION}
