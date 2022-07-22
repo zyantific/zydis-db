@@ -311,6 +311,90 @@ def generate_encoder_table(instructions):
     return table
 
 
+def generate_rel_info(instructions):
+    rel_instructions = {}
+    for insn in instructions:
+        has_rel = False
+        has_imm = False
+        for op in get_operands(insn):
+            if op['operand_type'] == 'imm':
+                has_imm = True
+            if op['operand_type'] != 'rel':
+                continue
+            if has_rel:
+                raise InvalidInstructionException()
+            has_rel = True
+            mnemonic = insn['mnemonic']
+            if mnemonic not in rel_instructions:
+                rel_instructions[mnemonic] = {
+                    'size': [[0, 0, 0] for _ in range(3)],
+                    'scaling_hints': get_size_hint(insn),
+                    'branch_hits': zydis_bool('accepts_branch_hints' in insn.get('prefix_flags', []))
+                }
+            encoding = op['encoding']
+            mode_filter = insn.get('filters', {}).get('mode', 'all')
+            if mode_filter == '64':
+                modes = [2]
+            elif mode_filter == '!64':
+                modes = [0, 1]
+            elif mode_filter == 'all':
+                modes = [0, 1, 2]
+            else:
+                raise InvalidInstructionException()
+            scaling_type = 'osz'
+            address_size = insn.get('filters', {}).get('address_size', '0')
+            if address_size != '0':
+                scaling_type = 'asz'
+                address_size = int(address_size) >> 5
+            for mode in modes:
+                if encoding == 'jimm8':
+                    size = insn['min_size']
+                    if scaling_type == 'asz' and address_size != mode:
+                        size += 1
+                    rel_instructions[mnemonic]['size'][mode][0] = size
+                elif encoding == 'jimm32':
+                    size = insn['min_size']
+                    if scaling_type == 'osz' and mode == 0:
+                        size += 1
+                    rel_instructions[mnemonic]['size'][mode][2] = size
+                elif encoding == 'jimm16_32_32':
+                    size = insn['min_size']
+                    if scaling_type == 'osz' and mode != 0:
+                        size += 1
+                    rel_instructions[mnemonic]['size'][mode][1] = size
+                    size = insn['max_size']
+                    if scaling_type == 'osz' and mode == 0:
+                        size += 1
+                    rel_instructions[mnemonic]['size'][mode][2] = size
+                else:
+                    raise InvalidInstructionException()
+        if has_rel and has_imm:
+            raise InvalidInstructionException()
+
+    rel_info = []
+    rel_mnemonics = []
+    for mnemonic, info in rel_instructions.items():
+        try:
+            rel_mnemonics[rel_info.index(info)].append(mnemonic)
+        except ValueError:
+            rel_info.append(info)
+            rel_mnemonics.append([mnemonic])
+
+    func = 'const ZydisEncoderRelInfo *ZydisGetRelInfo(ZydisMnemonic mnemonic)\n{\n    static const ZydisEncoderRelInfo info_lookup[%d] =\n    {\n' % len(rel_info)
+    for info in rel_info:
+        lookup = ''
+        for i in range(3):
+            lookup += '{ %d, %d, %d }, ' % (info['size'][i][0], info['size'][i][1], info['size'][i][2])
+        func += '        { { %s }, %s, %s },\n' % (lookup[:-2], info['scaling_hints'], info['branch_hits'])
+    func += '    };\n\n    switch (mnemonic)\n    {\n'
+    for i, case in enumerate(rel_mnemonics):
+        for mnemonic in case:
+            func += '    case ZYDIS_MNEMONIC_%s:\n' % mnemonic.upper()
+        func += '        return &info_lookup[%d];\n' % i
+    func += '    default:\n        return ZYAN_NULL;\n    }\n}\n'
+    return func
+
+
 def get_filters(insn):
     filters = insn.get('filters', {})
     important_filters = (
@@ -324,7 +408,7 @@ def get_filters(insn):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generates tables needed for encoder')
-    parser.add_argument('--mode', choices=['generate-tables', 'stats', 'print', 'print-all', 'encodings', 'filters'], default='generate-tables')
+    parser.add_argument('--mode', choices=['generate-tables', 'generate-rel-info', 'stats', 'print', 'print-all', 'encodings', 'filters'], default='generate-tables')
     args = parser.parse_args()
 
     with open('../Data/instructions.json', 'r') as f:
@@ -434,7 +518,7 @@ if __name__ == "__main__":
     unique_instructions.sort(key=instrucion_sorter)
 
     # Execute requested actions
-    if args.mode == 'generate-tables':
+    if args.mode in ['generate-tables', 'generate-rel-info']:
         def is_encodable(insn):
             if not insn['encodable']:
                 return False
@@ -445,8 +529,11 @@ if __name__ == "__main__":
             return True
 
         encodable_instructions = list(filter(is_encodable, unique_instructions))
-        print(generate_encoder_lookup_table(encodable_instructions))
-        print(generate_encoder_table(encodable_instructions))
+        if args.mode == 'generate-tables':
+            print(generate_encoder_lookup_table(encodable_instructions))
+            print(generate_encoder_table(encodable_instructions))
+        else:
+            print(generate_rel_info(encodable_instructions))
     elif args.mode == 'stats':
         print('max_args=%d' % max_args)
         print('max_visible_args=%d' % max_visible_args)
