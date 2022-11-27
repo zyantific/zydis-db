@@ -1051,6 +1051,7 @@ type
       emtFLOAT32,
       emtFLOAT64,
       emtFLOAT80,
+      emtBFLOAT16X2,
       emtBCD80,
       emtCC3,
       emtCC5
@@ -1078,6 +1079,7 @@ type
       'emtFLOAT32',
       'emtFLOAT64',
       'emtFLOAT80',
+      'emtBFLOAT16X2',
       'emtBCD80',
       'emtCC3',
       'emtCC5'
@@ -1104,6 +1106,7 @@ type
       'float16x2',
       'float32',
       'float64',
+      'bfloat16x2',
       'float80',
       'bcd80',
       'cc3',
@@ -1132,6 +1135,7 @@ type
       'FLOAT32',
       'FLOAT64',
       'FLOAT80',
+      'BFLOAT16X2',
       'BCD80',
       'CC3',
       'CC5'
@@ -1159,6 +1163,7 @@ type
       'FLOAT32',
       'FLOAT64',
       'FLOAT80',
+      'BFLOAT16X2',
       'LONGBCD',
       'CC',
       'CC'
@@ -1186,6 +1191,7 @@ type
       32,
       64,
       80,
+      64,
       80,
       3,
       5
