@@ -38,6 +38,8 @@ type
     PathSourceC             = 'zydis\src\Generated';
     PathIncludeCPP          = 'zydis-cpp\include\Zydis\Generated';
     PathSourceCPP           = 'zydis-cpp\src\Generated';
+    PathIncludeCSharp       = 'zydis-cs\Zyantific.Zydis\Generated';
+    PathSourceCSharp        = '';
     PathIncludeJava         = 'zydis-java\Generated';
     PathSourceJava          = 'zydis-java\Generated';
     PathIncludePascal       = 'zydis-pascal\Zydis\Generated';
