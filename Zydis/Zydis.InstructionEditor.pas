@@ -243,6 +243,7 @@ type
     function GetModeWBNOINVD: TZYFilterBoolean; inline;
     function GetModeCLDEMOTE: TZYFilterBoolean; inline;
     function GetModeCentaur: TZYFilterBoolean; inline;
+    function GetModeIPREFETCH: TZYFilterBoolean; inline;
   strict private
     procedure SetMode(Value: TZYFilterMode); inline;
     procedure SetPrefixGroup1(Value: TZYFilterBoolean); inline;
@@ -267,6 +268,7 @@ type
     procedure SetModeWBNOINVD(Value: TZYFilterBoolean); inline;
     procedure SetModeCLDEMOTE(Value: TZYFilterBoolean); inline;
     procedure SetModeCentaur(Value: TZYFilterBoolean); inline;
+    procedure SetModeIPREFETCH(Value: TZYFilterBoolean); inline;
 
     procedure SetForceModrmReg(Value: Boolean); inline;
     procedure SetForceModrmRm(Value: Boolean); inline;
@@ -312,6 +314,8 @@ type
     property ModeCLDEMOTE: TZYFilterBoolean read GetModeCLDEMOTE write SetModeCLDEMOTE
       default fbPlaceholder;
     property ModeCentaur: TZYFilterBoolean read GetModeCentaur write SetModeCentaur
+      default fbPlaceholder;
+    property ModeIPREFETCH: TZYFilterBoolean read GetModeIPREFETCH write SetModeIPREFETCH
       default fbPlaceholder;
 
     property ForceModrmReg: Boolean read FForceModrmReg write SetForceModrmReg default false; // TODO: Move! Does not fit here. + rename (extends opcode)
@@ -1366,6 +1370,7 @@ begin
       D.SetModeWBNOINVD(ModeWBNOINVD);
       D.SetModeCLDEMOTE(ModeCLDEMOTE);
       D.SetModeCentaur(ModeCentaur);
+      D.SetModeIPREFETCH(ModeIPREFETCH);
 
       D.SetForceModrmReg(FForceModrmReg);
       D.SetForceModrmRm(FForceModrmRm);
@@ -1418,6 +1423,7 @@ begin
       (ModeWBNOINVD = O.ModeWBNOINVD) and
       (ModeCLDEMOTE = O.ModeCLDEMOTE) and
       (ModeCentaur = O.ModeCentaur) and
+      (ModeIPREFETCH = O.ModeIPREFETCH) and
 
       (FForceModrmReg = O.FForceModrmReg) and
       (FForceModrmRm = O.FForceModrmRm);
@@ -1452,6 +1458,11 @@ end;
 function TZYInstructionFilters.GetModeCLDEMOTE: TZYFilterBoolean;
 begin
   Result := TZYFilterBoolean(Definition.FilterIndex[ifcModeCLDEMOTE]);
+end;
+
+function TZYInstructionFilters.GetModeIPREFETCH: TZYFilterBoolean;
+begin
+  Result := TZYFilterBoolean(Definition.FilterIndex[ifcModeIPREFETCH]);
 end;
 
 function TZYInstructionFilters.GetModeKNC: TZYFilterBoolean;
@@ -1678,6 +1689,11 @@ end;
 procedure TZYInstructionFilters.SetModeCLDEMOTE(Value: TZYFilterBoolean);
 begin
   Definition.FilterIndex[ifcModeCLDEMOTE] := Ord(Value);
+end;
+
+procedure TZYInstructionFilters.SetModeIPREFETCH(Value: TZYFilterBoolean);
+begin
+
 end;
 
 procedure TZYInstructionFilters.SetModeKNC(Value: TZYFilterBoolean);
