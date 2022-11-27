@@ -982,7 +982,8 @@ const
     'MODE_TZCNT',
     'MODE_WBNOINVD',
     'MODE_CLDEMOTE',
-    'MODE_CENTAUR'
+    'MODE_CENTAUR',
+    'MODE_IPREFETCH'
   );
   NODE_NAMES: array[TZYInstructionFilterClass] of String =
   (
@@ -1014,7 +1015,8 @@ const
     'MODE_TZCNT',
     'MODE_WBNOINVD',
     'MODE_CLDEMOTE',
-    'MODE_CENTAUR'
+    'MODE_CENTAUR',
+    'MODE_IPREFETCH'
   );
 var
   Tables: TArray<TZYTableTemplate<PZYTreeItem>>;

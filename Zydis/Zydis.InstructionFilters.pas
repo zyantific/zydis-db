@@ -61,7 +61,8 @@ type
     ifcModeTZCNT,
     ifcModeWBNOINVD,
     ifcModeCLDEMOTE,
-    ifcModeCentaur
+    ifcModeCentaur,
+    ifcModeIPREFETCH
   );
 
   TZYInstructionFilterFlag = (
@@ -222,6 +223,8 @@ type
       { ifcModeCLDEMOTE }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcModeCentaur }
+      (FNumberOfValues:   2; FFlags: [iffIsOptional]),
+      { ifcModeIPREFETCH }
       (FNumberOfValues:   2; FFlags: [iffIsOptional])
     );
   strict private
@@ -366,7 +369,8 @@ begin
       ifcModeLZCNT,
       ifcModeTZCNT,
       ifcModeWBNOINVD,
-      ifcModeCentaur
+      ifcModeCentaur,
+      ifcModeIPREFETCH
     );
   FilterOrderXOP :=
     TZYInstructionFilterList.Create(
