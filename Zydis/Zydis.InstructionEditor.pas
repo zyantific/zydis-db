@@ -1589,6 +1589,8 @@ begin
       'feature_cldemote', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
     SetModeCentaur(JSON.Reader.ReadEnum(
       'feature_centaur', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
+    SetModeIPREFETCH(JSON.Reader.ReadEnum(
+      'feature_iprefetch', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
 
     SetForceModrmReg(JSON.ReadBoolean('force_modrm_reg', false));
     SetForceModrmRm(JSON.ReadBoolean('force_modrm_rm', false));
@@ -1645,6 +1647,8 @@ begin
     JSON.Writer.WriteEnum('feature_cldemote', ModeCLDEMOTE, TZYEnumFilterBoolean.JSONStrings);
   if (ModeCentaur <> fbPlaceholder) then
     JSON.Writer.WriteEnum('feature_centaur', ModeCentaur, TZYEnumFilterBoolean.JSONStrings);
+  if (ModeIPREFETCH <> fbPlaceholder) then
+    JSON.Writer.WriteEnum('feature_iprefetch', ModeIPREFETCH, TZYEnumFilterBoolean.JSONStrings);
 
   if (FForceModrmReg <> false) then
     JSON.WriteBoolean('force_modrm_reg', FForceModrmReg);
@@ -1693,7 +1697,7 @@ end;
 
 procedure TZYInstructionFilters.SetModeIPREFETCH(Value: TZYFilterBoolean);
 begin
-
+  Definition.FilterIndex[ifcModeIPREFETCH] := Ord(Value);
 end;
 
 procedure TZYInstructionFilters.SetModeKNC(Value: TZYFilterBoolean);
