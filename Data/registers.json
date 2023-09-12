@@ -628,6 +628,36 @@
       ]
     },
     {
+      "name_zydis": "DFV",
+      "name_editor": "DFV",
+      "description": "DFV pseudo registers",
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "DFV0",
+            "DFV1",
+            "DFV2",
+            "DFV3",
+            "DFV4",
+            "DFV5",
+            "DFV6",
+            "DFV7",
+            "DFV8",
+            "DFV9",
+            "DFV10",
+            "DFV11",
+            "DFV12",
+            "DFV13",
+            "DFV14",
+            "DFV15"
+          ],
+          "width": 4,
+          "width_64": 4
+        }
+      ]
+    },
+    {
       "name_zydis": "INVALID",
       "name_editor": "INVALID",
       "description": "Uncategorized",
