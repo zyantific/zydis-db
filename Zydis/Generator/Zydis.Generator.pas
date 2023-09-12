@@ -541,10 +541,6 @@ const
     'REX_B',
     'EVEX_B',
     'MVEX_E',
-    'EVEX_ND',
-    'EVEX_NF',
-    'EVEX_SCC',
-    'REX2',
     'ModeAMD',
     'ModeKNC',
     'ModeMPX',
@@ -554,7 +550,11 @@ const
     'ModeWBNOINVD',
     'ModeCLDEMOTE',
     'ModeCentaur',
-    'ModeIPREFETCH'
+    'ModeIPREFETCH',
+    'EVEX_ND',
+    'EVEX_NF',
+    'EVEX_SCC',
+    'REX2'
   );
 var
   S, T, Y, Z: Cardinal;

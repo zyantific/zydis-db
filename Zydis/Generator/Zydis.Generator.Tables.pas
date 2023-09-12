@@ -975,10 +975,6 @@ const
     'REX_B',
     'EVEX_B',
     'MVEX_E',
-    'EVEX_ND',
-    'EVEX_NF',
-    'EVEX_SCC',
-    'REX2',
     'MODE_AMD',
     'MODE_KNC',
     'MODE_MPX',
@@ -988,7 +984,11 @@ const
     'MODE_WBNOINVD',
     'MODE_CLDEMOTE',
     'MODE_CENTAUR',
-    'MODE_IPREFETCH'
+    'MODE_IPREFETCH',
+    'EVEX_ND',
+    'EVEX_NF',
+    'EVEX_SCC',
+    'REX2'
   );
   NODE_NAMES: array[TZYInstructionFilterClass] of String =
   (
@@ -1012,10 +1012,6 @@ const
     'REX_B',
     'EVEX_B',
     'MVEX_E',
-    'EVEX_ND',
-    'EVEX_NF',
-    'EVEX_SCC',
-    'REX2',
     'MODE_AMD',
     'MODE_KNC',
     'MODE_MPX',
@@ -1025,7 +1021,11 @@ const
     'MODE_WBNOINVD',
     'MODE_CLDEMOTE',
     'MODE_CENTAUR',
-    'MODE_IPREFETCH'
+    'MODE_IPREFETCH',
+    'EVEX_ND',
+    'EVEX_NF',
+    'EVEX_SCC',
+    'REX2'
   );
 var
   Tables: TArray<TZYTableTemplate<PZYTreeItem>>;
