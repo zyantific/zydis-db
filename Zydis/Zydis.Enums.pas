@@ -131,6 +131,11 @@ type
       regK4,        regK5,        regK6,        regK7,
       // Bound registers
       regBND0,      regBND1,      regBND2,      regBND3,
+      // DFV registers
+      regDFV0,      regDFV1,      regDFV2,      regDFV3,
+      regDFV4,      regDFV5,      regDFV6,      regDFV7,
+      regDFV8,      regDFV9,      regDFV10,     regDFV11,
+      regDFV12,     regDFV13,     regDFV14,     regDFV15,
       // Misc registers
       regMXCSR,     regPKRU,      regXCR0,      regGDTR,
       regLDTR,      regIDTR,      regTR,        regBNDCFG,
@@ -235,6 +240,11 @@ type
       'k4',         'k5',         'k6',         'k7',
       // Bound registers
       'bnd0',       'bnd1',       'bnd2',       'bnd3',
+      // DEV registers
+      'dfv0',       'dfv1',       'dfv2',       'dfv3',
+      'dfv4',       'dfv5',       'dfv6',       'dfv7',
+      'dfv8',       'dfv9',       'dfv10',      'dfv11',
+      'dfv12',      'dfv13',      'dfv14',      'dfv15',
       // Misc registers
       'mxcsr',      'pkru',       'xcr0',       'gdtr',
       'ldtr',       'idtr',       'tr',         'bndcfg',
@@ -267,7 +277,8 @@ type
       regcCONTROL,
       regcDEBUG,
       regcMASK,
-      regcBOUND
+      regcBOUND,
+      regcDFV
     );
   public
     const ZydisStrings: array[Enum] of String = (
@@ -292,7 +303,8 @@ type
       'CONTROL',
       'DEBUG',
       'MASK',
-      'BOUND'
+      'BOUND',
+      'DFV'
     );
   end;
   TZYRegisterClass = TZYEnumRegisterClass.Enum;
@@ -311,7 +323,8 @@ type
       regkCONTROL,
       regkDEBUG,
       regkMASK,
-      regkBOUND
+      regkBOUND,
+      regkDFV
     );
   public
     const ZydisStrings: array[Enum] of String = (
@@ -326,7 +339,8 @@ type
       'CONTROL',
       'DEBUG',
       'MASK',
-      'BOUND'
+      'BOUND',
+      'DFV'
     );
   end;
   TZYRegisterKind = TZYEnumRegisterKind.Enum;
@@ -610,7 +624,29 @@ type
     ecAMXE3,
     ecAMXE4,
     ecAMXE5,
-    ecAMXE6
+    ecAMXE6,
+    ecAMXE1EVEX,
+    ecAMXE2EVEX,
+    ecAMXE3EVEX,
+    ecAMXE4EVEX,
+    ecAMXE5EVEX,
+    ecAMXE6EVEX,
+    ecAPXEVEXINT,
+    ecAPXEVEXKEYLOCKER,
+    ecAPXEVEXBMI,
+    ecAPXEVEXCCMP,
+    ecAPXEVEXCFCMOV,
+    ecAPXEVEXCMPCCXADD,
+    ecAPXEVEXENQCMD,
+    ecAPXEVEXINVEPT,
+    ecAPXEVEXINVPCID,
+    ecAPXEVEXINVVPID,
+    ecAPXEVEXKMOV,
+    ecAPXEVEXPP2,
+    ecAPXEVEXSHA,
+    ecAPXEVEXCETWRSS,
+    ecAPXEVEXCETWRUSS,
+    ecAPXLEGACYJMPABS
   );
   TZYExceptionClassHelper = record helper for TZYExceptionClass
   public
@@ -660,7 +696,29 @@ type
       'amxe3',
       'amxe4',
       'amxe5',
-      'amxe6'
+      'amxe6',
+      'amxe1_evex',
+      'amxe2_evex',
+      'amxe3_evex',
+      'amxe4_evex',
+      'amxe5_evex',
+      'amxe6_evex',
+      'apx_evex_int',
+      'apx_evex_keylocker',
+      'apx_evex_bmi',
+      'apx_evex_ccmp',
+      'apx_evex_cfcmov',
+      'apx-evex-cmpccxadd',
+      'apx-evex-enqcmd',
+      'apx-evex-invept',
+      'apx-evex-invpcid',
+      'apx-evex-invvpid',
+      'apx-evex-kmov',
+      'apx-evex-pp2',
+      'apx-evex-sha',
+      'apx-evex-cet-wrss',
+      'apx-evex-cet-wruss',
+      'apx-legacy-jmpabs'
     );
   public
     const ZydisStrings: array[TZYExceptionClass] of String = (
@@ -709,7 +767,29 @@ type
       'AMXE3',
       'AMXE4',
       'AMXE5',
-      'AMXE6'
+      'AMXE6',
+      'AMXE1_EVEX',
+      'AMXE2_EVEX',
+      'AMXE3_EVEX',
+      'AMXE4_EVEX',
+      'AMXE5_EVEX',
+      'AMXE6_EVEX',
+      'APX_EVEX_INT',
+      'APX_EVEX_KEYLOCKER',
+      'APX_EVEX_BMI',
+      'APX_EVEX_CCMP',
+      'APX_EVEX_CFCMOV',
+      'APX_EVEX_CMPCCXADD',
+      'APX_EVEX_ENQCMD',
+      'APX_EVEX_INVEPT',
+      'APX_EVEX_INVPCID',
+      'APX_EVEX_INVVPID',
+      'APX_EVEX_KMOV',
+      'APX_EVEX_PP2',
+      'APX_EVEX_SHA',
+      'APX_EVEX_CET_WRSS',
+      'APX_EVEX_CET_WRUSS',
+      'APX_LEGACY_JMPABS'
     );
   end;
 
@@ -1042,6 +1122,7 @@ type
       emtINT16X2,
       emtINT32,
       emtINT64,
+      emtINT128,
       emtUINT8,
       emtUINT8X4,
       emtUINT16,
@@ -1074,6 +1155,7 @@ type
       'emtINT16X2',
       'emtINT32',
       'emtINT64',
+      'emtINT128',
       'emtUINT8',
       'emtUINT8X4',
       'emtUINT16',
@@ -1106,6 +1188,7 @@ type
       'int16x2',
       'int32',
       'int64',
+      'int128',
       'uint8',
       'uint8x4',
       'uint16',
@@ -1138,6 +1221,7 @@ type
       'INT16X2',
       'INT32',
       'INT64',
+      'INT128',
       'UINT8',
       'UINT8X4',
       'UINT16',
@@ -1163,6 +1247,7 @@ type
       'STRUCT',
       'INT',
       'UINT',
+      'INT',
       'INT',
       'INT',
       'INT',
@@ -1202,6 +1287,7 @@ type
       32,
       32,
       64,
+      128,
       8,
       32,
       16,
@@ -1295,7 +1381,8 @@ type
       optAGEN,
       optAGENNoRel,   // RIP rel invalid
       optMOFFS,
-      optMIB          // MPX Memory Operand
+      optMIB,         // MPX Memory Operand
+      optDFV
     );
   public
     const JSONStrings: array[Enum] of String = (
@@ -1332,7 +1419,8 @@ type
       'agen',
       'agen_norel',
       'moffs',
-      'mib'
+      'mib',
+      'dfv'
     );
   public
     const ZydisStrings: array[Enum] of String = (
@@ -1369,7 +1457,8 @@ type
       'AGEN',
       'AGEN',
       'MOFFS',
-      'MIB'
+      'MIB',
+      'DFV'
     );
   end;
   TZYOperandType = TZYEnumOperandType.Enum;
@@ -1674,7 +1763,8 @@ const
     (Lo: regCR0    ; Hi: regCR15   ),
     (Lo: regDR0    ; Hi: regDR15   ),
     (Lo: regK0     ; Hi: regK7     ),
-    (Lo: regBND0   ; Hi: regBND3   )
+    (Lo: regBND0   ; Hi: regBND3   ),
+    (Lo: regDFV0   ; Hi: regDFV15  )
   );
 
 { TZYRegisterHelper }
@@ -1740,6 +1830,7 @@ begin
     regcDEBUG  : Result := regkDEBUG;
     regcMASK   : Result := regkMASK;
     regcBOUND  : Result := regkBOUND;
+    regcDFV    : Result := regkDFV;
   end;
 end;
 

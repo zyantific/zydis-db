@@ -104,6 +104,8 @@ begin
     end else Exit;
   end;
 
+  // TODO:
+  {
   B := (Definition.Encoding = iencEVEX) and (Definition.Filters.ModrmMod <> md3) and
     ((Definition.EVEX.TupleType = ttInvalid) or (Definition.EVEX.ElementSize = esInvalid));
   if (B) then
@@ -114,6 +116,7 @@ begin
       ErrorMessages.Add('yyy');
     end else Exit;
   end;
+  }
 
   B := (Definition.Encoding = iencEVEX) and (Definition.Filters.EvexB = ebB1) and
     (Definition.Filters.VectorLength <> vlPlaceholder);
@@ -315,7 +318,9 @@ const
     { optMOFFS }
     [opeDisp16_32_64],
     { optMIB }
-    [opeModrmRm]
+    [opeModrmRm],
+    { optDFV }
+    [opeNDSNDD]
   );
 var
   B: Boolean;

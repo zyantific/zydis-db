@@ -700,6 +700,7 @@ begin
       optCR          : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkCONTROL];
       optDR          : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkDEBUG];
       optMASK        : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkMASK];
+      optDFV         : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkDFV];
 
       optMEM         : Result := 'ZYDIS_MEMOP_TYPE_MEM';
       optMEMVSIBX    ,
@@ -974,6 +975,10 @@ const
     'REX_B',
     'EVEX_B',
     'MVEX_E',
+    'EVEX_ND',
+    'EVEX_NF',
+    'EVEX_SCC',
+    'REX2',
     'MODE_AMD',
     'MODE_KNC',
     'MODE_MPX',
@@ -1007,6 +1012,10 @@ const
     'REX_B',
     'EVEX_B',
     'MVEX_E',
+    'EVEX_ND',
+    'EVEX_NF',
+    'EVEX_SCC',
+    'REX2',
     'MODE_AMD',
     'MODE_KNC',
     'MODE_MPX',

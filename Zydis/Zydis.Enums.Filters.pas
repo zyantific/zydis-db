@@ -605,6 +605,136 @@ type
   end;
   TZYFilterBoolean = TZYEnumFilterBoolean.Enum;
 
+  TZYEnumFilterEvexND = record
+  public
+    type Enum = (
+      ndPlaceholder,
+      ndND0,
+      ndND1
+    );
+  public
+    const Names: array[Enum] of String = (
+      'ndPlaceholder',
+      'ndND0',
+      'ndND1'
+    );
+  public
+    const JSONStrings: array[Enum] of String = (
+      'placeholder',
+      '0',
+      '1'
+    );
+  end;
+  TZYFilterEvexND = TZYEnumFilterEvexND.Enum;
+
+  TZYEnumFilterEvexNF = record
+  public
+    type Enum = (
+      nfPlaceholder,
+      nfNF0,
+      nfNF1
+    );
+  public
+    const Names: array[Enum] of String = (
+      'nfPlaceholder',
+      'nfNF0',
+      'nfNF1'
+    );
+  public
+    const JSONStrings: array[Enum] of String = (
+      'placeholder',
+      '0',
+      '1'
+    );
+  end;
+  TZYFilterEvexNF = TZYEnumFilterEvexNF.Enum;
+
+  TZYEnumFilterEvexSCC = record
+  public
+    type Enum = (
+      sccPlaceholder,
+      sccSCC0,
+      sccSCC1,
+      sccSCC2,
+      sccSCC3,
+      sccSCC4,
+      sccSCC5,
+      sccSCC6,
+      sccSCC7,
+      sccSCC8,
+      sccSCC9,
+      sccSCC10,
+      sccSCC11,
+      sccSCC12,
+      sccSCC13,
+      sccSCC14,
+      sccSCC15
+    );
+  public
+    const Names: array[Enum] of String = (
+      'sccPlaceholder',
+      'sccSCC0',
+      'sccSCC1',
+      'sccSCC2',
+      'sccSCC3',
+      'sccSCC4',
+      'sccSCC5',
+      'sccSCC6',
+      'sccSCC7',
+      'sccSCC8',
+      'sccSCC9',
+      'sccSCC10',
+      'sccSCC11',
+      'sccSCC12',
+      'sccSCC13',
+      'sccSCC14',
+      'sccSCC15'
+    );
+  public
+    const JSONStrings: array[Enum] of String = (
+      'placeholder',
+      '0',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+      '12',
+      '13',
+      '14',
+      '15'
+    );
+  end;
+  TZYFilterEvexSCC = TZYEnumFilterEvexSCC.Enum;
+
+  TZYEnumFilterRex2 = record
+  public
+    type Enum = (
+      r2Placeholder,
+      r2NoRex2,
+      r2Rex2
+    );
+  public
+    const Names: array[Enum] of String = (
+      'r2Placeholder',
+      'r2NoRex2',
+      'r2Rex2'
+    );
+  public
+    const JSONStrings: array[Enum] of String = (
+      'placeholder',
+      'no_rex2',
+      'rex2'
+    );
+  end;
+  TZYFilterRex2 = TZYEnumFilterRex2.Enum;
+
 implementation
 
 end.

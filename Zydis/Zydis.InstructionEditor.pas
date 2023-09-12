@@ -233,6 +233,10 @@ type
     function GetRexB: TZYFilterRexB; inline;
     function GetEvexB: TZYFilterEvexB; inline;
     function GetMvexE: TZYFilterMvexE; inline;
+    function GetEvexND: TZYFilterEvexND; inline;
+    function GetEvexNF: TZYFilterEvexNF; inline;
+    function GetEvexSCC: TZYFilterEvexSCC; inline;
+    function GetRex2: TZYFilterRex2;
 
     function GetModeAMD: TZYFilterBoolean; inline;
     function GetModeKNC: TZYFilterBoolean; inline;
@@ -258,6 +262,10 @@ type
     procedure SetRexB(Value: TZYFilterRexB); inline;
     procedure SetEvexB(Value: TZYFilterEvexB); inline;
     procedure SetMvexE(Value: TZYFilterMvexE); inline;
+    procedure SetEvexND(Value: TZYFilterEvexND); inline;
+    procedure SetEvexNF(Value: TZYFilterEvexNF); inline;
+    procedure SetEvexSCC(Value: TZYFilterEvexSCC); inline;
+    procedure SetRex2(const Value: TZYFilterRex2);
 
     procedure SetModeAMD(Value: TZYFilterBoolean); inline;
     procedure SetModeKNC(Value: TZYFilterBoolean); inline;
@@ -302,6 +310,10 @@ type
     property RexB: TZYFilterRexB read GetRexB write SetRexB default rbPlaceholder;
     property EvexB: TZYFilterEvexB read GetEvexB write SetEvexB default ebPlaceholder;
     property MvexE: TZYFilterMvexE read GetMvexE write SetMvexE default mePlaceholder;
+    property EvexND: TZYFilterEvexND read GetEvexND write SetEvexND default ndPlaceholder;
+    property EvexNF: TZYFilterEvexNF read GetEvexNF write SetEvexNF default nfPlaceholder;
+    property EvexSCC: TZYFilterEvexSCC read GetEvexSCC write SetEvexSCC default sccPlaceholder;
+    property Rex2: TZYFilterRex2 read GetRex2 write SetRex2 default r2Placeholder;
 
     property ModeAMD: TZYFilterBoolean read GetModeAMD write SetModeAMD default fbPlaceholder;
     property ModeKNC: TZYFilterBoolean read GetModeKNC write SetModeKNC default fbPlaceholder;
@@ -1360,6 +1372,10 @@ begin
       D.SetRexB(RexB);
       D.SetEvexB(EvexB);
       D.SetMvexE(MvexE);
+      D.SetEvexND(EvexND);
+      D.SetEvexNF(EvexNF);
+      D.SetEvexSCC(EvexSCC);
+      D.SetRex2(Rex2);
 
       D.SetModeAMD(ModeAMD);
       D.SetModeKNC(ModeKNC);
@@ -1413,6 +1429,10 @@ begin
       (RexB = O.RexB) and
       (EvexB = O.EvexB) and
       (MvexE = O.MvexE) and
+      (EvexND = O.EvexND) and
+      (EvexNF = O.EvexNF) and
+      (EvexSCC = O.EvexSCC) and
+      (Rex2 = O.Rex2) and
 
       (ModeAMD = O.ModeAMD) and
       (ModeKNC = O.ModeKNC) and
@@ -1438,6 +1458,21 @@ end;
 function TZYInstructionFilters.GetEvexB: TZYFilterEvexB;
 begin
   Result := TZYFilterEvexB(Definition.FilterIndex[ifcEvexB]);
+end;
+
+function TZYInstructionFilters.GetEvexND: TZYFilterEvexND;
+begin
+  Result := TZYFilterEvexND(Definition.FilterIndex[ifcEvexND]);
+end;
+
+function TZYInstructionFilters.GetEvexNF: TZYFilterEvexNF;
+begin
+  Result := TZYFilterEvexNF(Definition.FilterIndex[ifcEvexNF]);
+end;
+
+function TZYInstructionFilters.GetEvexSCC: TZYFilterEvexSCC;
+begin
+  Result := TZYFilterEvexSCC(Definition.FilterIndex[ifcEvexSCC]);
 end;
 
 function TZYInstructionFilters.GetModeAMD: TZYFilterBoolean;
@@ -1530,6 +1565,11 @@ begin
   Result := TZYFilterBoolean(Definition.FilterIndex[ifcPrefixGroup1]);
 end;
 
+function TZYInstructionFilters.GetRex2: TZYFilterRex2;
+begin
+  Result := TZYFilterRex2(Definition.FilterIndex[ifcRex2]);
+end;
+
 function TZYInstructionFilters.GetRexB: TZYFilterRexB;
 begin
   Result := TZYFilterRexB(Definition.FilterIndex[ifcRexB]);
@@ -1570,6 +1610,10 @@ begin
     SetRexB(JSON.Reader.ReadEnum('rex_b', rbPlaceholder, TZYEnumFilterRexB.JSONStrings));
     SetEvexB(JSON.Reader.ReadEnum('evex_b', ebPlaceholder, TZYEnumFilterEvexB.JSONStrings));
     SetMvexE(JSON.Reader.ReadEnum('mvex_e', mePlaceholder, TZYEnumFilterMvexE.JSONStrings));
+    SetEvexND(JSON.Reader.ReadEnum('evex_nd', ndPlaceholder, TZYEnumFilterEvexND.JSONStrings));
+    SetEvexNF(JSON.Reader.ReadEnum('evex_nf', nfPlaceholder, TZYEnumFilterEvexNF.JSONStrings));
+    SetEvexSCC(JSON.Reader.ReadEnum('evex_scc', sccPlaceholder, TZYEnumFilterEvexSCC.JSONStrings));
+    SetRex2(JSON.Reader.ReadEnum('rex_2', r2Placeholder, TZYEnumFilterRex2.JSONStrings));
 
     SetModeAMD(JSON.Reader.ReadEnum(
       'feature_amd', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
@@ -1628,6 +1672,14 @@ begin
     JSON.Writer.WriteEnum('evex_b', EvexB, TZYEnumFilterEvexB.JSONStrings);
   if (MvexE <> mePlaceholder) then
     JSON.Writer.WriteEnum('mvex_e', MvexE, TZYEnumFilterMvexE.JSONStrings);
+  if (EvexND <> ndPlaceholder) then
+    JSON.Writer.WriteEnum('evex_nd', EvexND, TZYEnumFilterEvexND.JSONStrings);
+  if (EvexNF <> nfPlaceholder) then
+    JSON.Writer.WriteEnum('evex_nf', EvexNF, TZYEnumFilterEvexNF.JSONStrings);
+  if (EvexSCC <> sccPlaceholder) then
+    JSON.Writer.WriteEnum('evex_scc', EvexSCC, TZYEnumFilterEvexSCC.JSONStrings);
+  if (Rex2 <> r2Placeholder) then
+    JSON.Writer.WriteEnum('rex_2', Rex2, TZYEnumFilterRex2.JSONStrings);
 
   if (ModeAMD <> fbPlaceholder) then
     JSON.Writer.WriteEnum('feature_amd', ModeAMD, TZYEnumFilterBoolean.JSONStrings);
@@ -1673,6 +1725,21 @@ begin
     end;
     Definition.FilterIndex[ifcEvexB] := Ord(Value);
   end;
+end;
+
+procedure TZYInstructionFilters.SetEvexND(Value: TZYFilterEvexND);
+begin
+  Definition.FilterIndex[ifcEvexND] := Ord(Value);
+end;
+
+procedure TZYInstructionFilters.SetEvexNF(Value: TZYFilterEvexNF);
+begin
+  Definition.FilterIndex[ifcEvexNF] := Ord(Value);
+end;
+
+procedure TZYInstructionFilters.SetEvexSCC(Value: TZYFilterEvexSCC);
+begin
+  Definition.FilterIndex[ifcEvexSCC] := Ord(Value);
 end;
 
 procedure TZYInstructionFilters.SetModeAMD(Value: TZYFilterBoolean);
@@ -1804,6 +1871,11 @@ end;
 procedure TZYInstructionFilters.SetPrefixGroup1(Value: TZYFilterBoolean);
 begin
   Definition.FilterIndex[ifcPrefixGroup1] := Ord(Value);
+end;
+
+procedure TZYInstructionFilters.SetRex2(const Value: TZYFilterRex2);
+begin
+  Definition.FilterIndex[ifcRex2] := Ord(Value);
 end;
 
 procedure TZYInstructionFilters.SetRexB(Value: TZYFilterRexB);
@@ -2158,7 +2230,8 @@ begin
     optMIB,
     optIMM,
     optREL,
-    optMOFFS:
+    optMOFFS,
+    optDFV:
       begin
         if (FEncoding <> opeNone) then JSON.Writer.WriteEnum(
           'encoding', FEncoding, TZYEnumOperandEncoding.JSONStrings);
@@ -3859,7 +3932,7 @@ begin
       iencDEFAULT,
       iencVEX,
       iencMVEX : B := (Value in [omapDefault, omap0F, omap0F38, omap0F3A]);
-      iencEVEX : B := (Value in [omapDefault, omap0F, omap0F38, omap0F3A, omapMAP5, omapMAP6]);
+      iencEVEX : B := (Value in [omapDefault, omap0F, omap0F38, omap0F3A, omapMAP4, omapMAP5, omapMAP6]);
       ienc3DNOW: B := (Value in [omap0F0F]);
       iencXOP  : B := (Value in [omapXOP8, omapXOP9, omapXOPA]);
     end;
