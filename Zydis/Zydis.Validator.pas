@@ -105,8 +105,8 @@ begin
   end;
 
   // TODO:
-  {
   B := (Definition.Encoding = iencEVEX) and (Definition.Filters.ModrmMod <> md3) and
+    (Definition.EVEX.TupleType <> ttNoScale) and
     ((Definition.EVEX.TupleType = ttInvalid) or (Definition.EVEX.ElementSize = esInvalid));
   if (B) then
   begin
@@ -116,7 +116,6 @@ begin
       ErrorMessages.Add('yyy');
     end else Exit;
   end;
-  }
 
   B := (Definition.Encoding = iencEVEX) and (Definition.Filters.EvexB = ebB1) and
     (Definition.Filters.VectorLength <> vlPlaceholder);
@@ -309,6 +308,8 @@ const
      opeJImm16_32_64,
      opeJImm32_32_64,
      opeJImm16_32_32],
+     { optABS }
+    [opeJImm64],
     { optPTR }
     [opeNone],
     { optAGEN }

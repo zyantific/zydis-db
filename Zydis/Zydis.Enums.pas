@@ -514,6 +514,7 @@ type
       dfIsShortBranch,
       dfIsNearBranch,
       dfIsFarBranch,
+      dfIsAbsoluteBranch,
       dfStateCPU_CR,
       dfStateCPU_CW,
       dfStateFPU_CR,
@@ -533,6 +534,7 @@ type
       'short_branch',
       'near_branch',
       'far_branch',
+      'abs_branch',
       'cpu_state_cr',
       'cpu_state_cw',
       'fpu_state_cr',
@@ -856,6 +858,7 @@ type
 
   TZYEVEXTupleType = ( // TODO: Reorder
     ttInvalid,
+    ttNoScale,
     ttFV,
     ttHV,
     ttFVM,
@@ -877,6 +880,7 @@ type
   public
     const JSONStrings: array[TZYEVEXTupleType] of String = (
       'invalid',
+      'no_scale',
       'fv',
       'hv',
       'fvm',
@@ -897,6 +901,7 @@ type
   public
     const ZydisStrings: array[TZYEVEXTupleType] of String = (
       'INVALID',
+      'NO_SCALE',
       'FV',
       'HV',
       'FVM',
@@ -1377,6 +1382,7 @@ type
       optMEMVSIBZ,
       optIMM,
       optREL,
+      optABS,
       optPTR,
       optAGEN,
       optAGENNoRel,   // RIP rel invalid
@@ -1415,6 +1421,7 @@ type
       'mem_vsibz',
       'imm',
       'rel',
+      'abs',
       'ptr',
       'agen',
       'agen_norel',
@@ -1453,6 +1460,7 @@ type
       'MEM_VSIBZ',
       'IMM',
       'REL',
+      'ABS',
       'PTR',
       'AGEN',
       'AGEN',

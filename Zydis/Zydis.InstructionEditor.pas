@@ -664,6 +664,7 @@ type
     Width32: Byte;
     Width64: Byte;
     IsSigned: Boolean;
+    IsAddress: Boolean;
     IsRelative: Boolean;
   end;
 
@@ -2230,6 +2231,7 @@ begin
     optMIB,
     optIMM,
     optREL,
+    optABS,
     optMOFFS,
     optDFV:
       begin
@@ -3287,7 +3289,7 @@ begin
 end;
 
 procedure SetImmediate(var Index: Integer; Width16, Width32, Width64: Integer;
-  IsSigned, IsRelative: Boolean);
+  IsSigned, IsAddress, IsRelative: Boolean);
 begin
   Assert((Index = 0) or (not (ipDisplacement in FParts)));
   case Index of
@@ -3299,6 +3301,7 @@ begin
   FImmediates[Index].Width32 := Width32;
   FImmediates[Index].Width64 := Width64;
   FImmediates[Index].IsSigned := IsSigned;
+  FImmediates[Index].IsAddress := IsAddress;
   FImmediates[Index].IsRelative := IsRelative;
   Inc(Index);
 end;
@@ -3325,8 +3328,8 @@ begin
     if (O.OperandType = optPTR) then
     begin
       Assert(I = 0);
-      SetImmediate(N, 16, 32, 32, false, false);
-      SetImmediate(N, 16, 16, 16, false, false);
+      SetImmediate(N, 16, 32, 32, false, true, false);
+      SetImmediate(N, 16, 16, 16, false, true, false);
       Break;
     end;
     case O.Encoding of
@@ -3337,7 +3340,7 @@ begin
           if (not HasIS4) then
           begin
             HasIS4 := true;
-            SetImmediate(N,  8,  8,  8, false, false);
+            SetImmediate(N,  8,  8,  8, false, false, false);
           end;
         end;
       opeDisp8       : SetDisplacement(8,  8,  8);
@@ -3347,27 +3350,27 @@ begin
       opeDisp16_32_64: SetDisplacement(16, 32, 64);
       opeDisp32_32_64: SetDisplacement(32, 32, 64);
       opeDisp16_32_32: SetDisplacement(16, 32, 32);
-      opeUImm8       : SetImmediate(N,  8,  8,  8, false, false);
-      opeUImm16      : SetImmediate(N, 16, 16, 16, false, false);
-      opeUImm32      : SetImmediate(N, 32, 32, 32, false, false);
-      opeUImm64      : SetImmediate(N, 64, 64, 64, false, false);
-      opeUImm16_32_64: SetImmediate(N, 16, 32, 64, false, false);
-      opeUImm32_32_64: SetImmediate(N, 32, 32, 64, false, false);
-      opeUImm16_32_32: SetImmediate(N, 16, 32, 32, false, false);
-      opeSImm8       : SetImmediate(N,  8,  8,  8, true , false);
-      opeSImm16      : SetImmediate(N, 16, 16, 16, true , false);
-      opeSImm32      : SetImmediate(N, 32, 32, 32, true , false);
-      opeSImm64      : SetImmediate(N, 64, 64, 64, true , false);
-      opeSImm16_32_64: SetImmediate(N, 16, 32, 64, true , false);
-      opeSImm32_32_64: SetImmediate(N, 32, 32, 64, true , false);
-      opeSImm16_32_32: SetImmediate(N, 16, 32, 32, true , false);
-      opeJImm8       : SetImmediate(N,  8,  8,  8, true , true );
-      opeJImm16      : SetImmediate(N, 16, 16, 16, true , true );
-      opeJImm32      : SetImmediate(N, 32, 32, 32, true , true );
-      opeJImm64      : SetImmediate(N, 64, 64, 64, true , true );
-      opeJImm16_32_64: SetImmediate(N, 16, 32, 64, true , true );
-      opeJImm32_32_64: SetImmediate(N, 32, 32, 64, true , true );
-      opeJImm16_32_32: SetImmediate(N, 16, 32, 32, true , true );
+      opeUImm8       : SetImmediate(N,  8,  8,  8, false, false, false);
+      opeUImm16      : SetImmediate(N, 16, 16, 16, false, false, false);
+      opeUImm32      : SetImmediate(N, 32, 32, 32, false, false, false);
+      opeUImm64      : SetImmediate(N, 64, 64, 64, false, false, false);
+      opeUImm16_32_64: SetImmediate(N, 16, 32, 64, false, false, false);
+      opeUImm32_32_64: SetImmediate(N, 32, 32, 64, false, false, false);
+      opeUImm16_32_32: SetImmediate(N, 16, 32, 32, false, false, false);
+      opeSImm8       : SetImmediate(N,  8,  8,  8, true , false, false);
+      opeSImm16      : SetImmediate(N, 16, 16, 16, true , false, false);
+      opeSImm32      : SetImmediate(N, 32, 32, 32, true , false, false);
+      opeSImm64      : SetImmediate(N, 64, 64, 64, true , false, false);
+      opeSImm16_32_64: SetImmediate(N, 16, 32, 64, true , false, false);
+      opeSImm32_32_64: SetImmediate(N, 32, 32, 64, true , false, false);
+      opeSImm16_32_32: SetImmediate(N, 16, 32, 32, true , false, false);
+      opeJImm8       : SetImmediate(N,  8,  8,  8, O.OperandType = optREL, true, O.OperandType = optREL );
+      opeJImm16      : SetImmediate(N, 16, 16, 16, O.OperandType = optREL, true, O.OperandType = optREL );
+      opeJImm32      : SetImmediate(N, 32, 32, 32, O.OperandType = optREL, true, O.OperandType = optREL );
+      opeJImm64      : SetImmediate(N, 64, 64, 64, O.OperandType = optREL, true, O.OperandType = optREL );
+      opeJImm16_32_64: SetImmediate(N, 16, 32, 64, O.OperandType = optREL, true, O.OperandType = optREL );
+      opeJImm32_32_64: SetImmediate(N, 32, 32, 64, O.OperandType = optREL, true, O.OperandType = optREL );
+      opeJImm16_32_32: SetImmediate(N, 16, 32, 32, O.OperandType = optREL, true, O.OperandType = optREL );
     end;
   end;
   if (dfForceRegForm in Definition.Flags) then

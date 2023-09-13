@@ -472,6 +472,10 @@ begin
       begin
         Writer.WriteStr('ZYDIS_BRANCH_TYPE_SHORT', '', false);
       end else
+      if (dfIsAbsoluteBranch in Item.Flags) then
+      begin
+        Writer.WriteStr('ZYDIS_BRANCH_TYPE_ABSOLUTE', '', false);
+      end else
       begin
         Writer.WriteStr('ZYDIS_BRANCH_TYPE_NONE', '', false);
       end;
@@ -888,6 +892,7 @@ begin
                                         { [2] } Writer.WriteDec(Item.ImmediateA.Width64);
                         { size        } Writer.StructEnd;
                         { isSigned    } Writer.WriteStr(ZydisBool[Item.ImmediateA.IsSigned]);
+                        { is_address  } Writer.WriteStr(ZydisBool[Item.ImmediateA.IsAddress]);
                         { isRelative  } Writer.WriteStr(ZydisBool[Item.ImmediateA.IsRelative]);
                 { [0] } Writer.StructEnd;
                 { [1] } Writer.StructBegin;
@@ -897,6 +902,7 @@ begin
                                         { [2] } Writer.WriteDec(Item.ImmediateB.Width64);
                         { size        } Writer.StructEnd;
                         { isSigned    } Writer.WriteStr(ZydisBool[Item.ImmediateB.IsSigned]);
+                        { is_address  } Writer.WriteStr(ZydisBool[Item.ImmediateB.IsAddress]);
                         { isRelative  } Writer.WriteStr(ZydisBool[Item.ImmediateB.IsRelative]);
                 { [2] } Writer.StructEnd;
       { imm   } Writer.StructEnd;
