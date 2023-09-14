@@ -236,7 +236,7 @@ type
     function GetEvexND: TZYFilterEvexND; inline;
     function GetEvexNF: TZYFilterEvexNF; inline;
     function GetEvexSCC: TZYFilterEvexSCC; inline;
-    function GetRex2: TZYFilterRex2;
+    function GetRex2Prefix: TZYFilterRex2Prefix;
 
     function GetModeAMD: TZYFilterBoolean; inline;
     function GetModeKNC: TZYFilterBoolean; inline;
@@ -265,7 +265,7 @@ type
     procedure SetEvexND(Value: TZYFilterEvexND); inline;
     procedure SetEvexNF(Value: TZYFilterEvexNF); inline;
     procedure SetEvexSCC(Value: TZYFilterEvexSCC); inline;
-    procedure SetRex2(const Value: TZYFilterRex2);
+    procedure SetRex2Prefix(const Value: TZYFilterRex2Prefix);
 
     procedure SetModeAMD(Value: TZYFilterBoolean); inline;
     procedure SetModeKNC(Value: TZYFilterBoolean); inline;
@@ -313,7 +313,7 @@ type
     property EvexND: TZYFilterEvexND read GetEvexND write SetEvexND default ndPlaceholder;
     property EvexNF: TZYFilterEvexNF read GetEvexNF write SetEvexNF default nfPlaceholder;
     property EvexSCC: TZYFilterEvexSCC read GetEvexSCC write SetEvexSCC default sccPlaceholder;
-    property Rex2: TZYFilterRex2 read GetRex2 write SetRex2 default r2Placeholder;
+    property Rex2Prefix: TZYFilterRex2Prefix read GetRex2Prefix write SetRex2Prefix default r2Placeholder;
 
     property ModeAMD: TZYFilterBoolean read GetModeAMD write SetModeAMD default fbPlaceholder;
     property ModeKNC: TZYFilterBoolean read GetModeKNC write SetModeKNC default fbPlaceholder;
@@ -1376,7 +1376,7 @@ begin
       D.SetEvexND(EvexND);
       D.SetEvexNF(EvexNF);
       D.SetEvexSCC(EvexSCC);
-      D.SetRex2(Rex2);
+      D.SetRex2Prefix(Rex2Prefix);
 
       D.SetModeAMD(ModeAMD);
       D.SetModeKNC(ModeKNC);
@@ -1433,7 +1433,7 @@ begin
       (EvexND = O.EvexND) and
       (EvexNF = O.EvexNF) and
       (EvexSCC = O.EvexSCC) and
-      (Rex2 = O.Rex2) and
+      (Rex2Prefix = O.Rex2Prefix) and
 
       (ModeAMD = O.ModeAMD) and
       (ModeKNC = O.ModeKNC) and
@@ -1566,9 +1566,9 @@ begin
   Result := TZYFilterBoolean(Definition.FilterIndex[ifcPrefixGroup1]);
 end;
 
-function TZYInstructionFilters.GetRex2: TZYFilterRex2;
+function TZYInstructionFilters.GetRex2Prefix: TZYFilterRex2Prefix;
 begin
-  Result := TZYFilterRex2(Definition.FilterIndex[ifcRex2]);
+  Result := TZYFilterRex2Prefix(Definition.FilterIndex[ifcRex2Prefix]);
 end;
 
 function TZYInstructionFilters.GetRexB: TZYFilterRexB;
@@ -1614,7 +1614,7 @@ begin
     SetEvexND(JSON.Reader.ReadEnum('evex_nd', ndPlaceholder, TZYEnumFilterEvexND.JSONStrings));
     SetEvexNF(JSON.Reader.ReadEnum('evex_nf', nfPlaceholder, TZYEnumFilterEvexNF.JSONStrings));
     SetEvexSCC(JSON.Reader.ReadEnum('evex_scc', sccPlaceholder, TZYEnumFilterEvexSCC.JSONStrings));
-    SetRex2(JSON.Reader.ReadEnum('rex_2', r2Placeholder, TZYEnumFilterRex2.JSONStrings));
+    SetRex2Prefix(JSON.Reader.ReadEnum('rex_2', r2Placeholder, TZYEnumFilterRex2Prefix.JSONStrings));
 
     SetModeAMD(JSON.Reader.ReadEnum(
       'feature_amd', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
@@ -1679,8 +1679,8 @@ begin
     JSON.Writer.WriteEnum('evex_nf', EvexNF, TZYEnumFilterEvexNF.JSONStrings);
   if (EvexSCC <> sccPlaceholder) then
     JSON.Writer.WriteEnum('evex_scc', EvexSCC, TZYEnumFilterEvexSCC.JSONStrings);
-  if (Rex2 <> r2Placeholder) then
-    JSON.Writer.WriteEnum('rex_2', Rex2, TZYEnumFilterRex2.JSONStrings);
+  if (Rex2Prefix <> r2Placeholder) then
+    JSON.Writer.WriteEnum('rex_2', Rex2Prefix, TZYEnumFilterRex2Prefix.JSONStrings);
 
   if (ModeAMD <> fbPlaceholder) then
     JSON.Writer.WriteEnum('feature_amd', ModeAMD, TZYEnumFilterBoolean.JSONStrings);
@@ -1874,9 +1874,9 @@ begin
   Definition.FilterIndex[ifcPrefixGroup1] := Ord(Value);
 end;
 
-procedure TZYInstructionFilters.SetRex2(const Value: TZYFilterRex2);
+procedure TZYInstructionFilters.SetRex2Prefix(const Value: TZYFilterRex2Prefix);
 begin
-  Definition.FilterIndex[ifcRex2] := Ord(Value);
+  Definition.FilterIndex[ifcRex2Prefix] := Ord(Value);
 end;
 
 procedure TZYInstructionFilters.SetRexB(Value: TZYFilterRexB);
@@ -4066,6 +4066,7 @@ begin
           SetFilterIndex(ifcXOP  , 0);
           SetFilterIndex(ifcVEX  , 0);
           SetFilterIndex(ifcEMVEX, 0);
+          SetFilterIndex(ifcREX2 , 0);
         end;
       iencXOP    :
         begin
@@ -4612,6 +4613,8 @@ begin
       FRootNode.CreateChildNodeAtIndex($8F, ifcXOP, false, true);
       // EVEX / MVEX Table
       FRootNode.CreateChildNodeAtIndex($62, ifcEMVEX, false, true);
+      // REX2 Table
+      FRootNode.CreateChildNodeAtIndex($D5, ifcREX2, false, true);
     end;
   finally
     EndUpdate;

@@ -713,7 +713,7 @@ type
   end;
   TZYFilterEvexSCC = TZYEnumFilterEvexSCC.Enum;
 
-  TZYEnumFilterRex2 = record
+  TZYEnumFilterRex2Prefix = record
   public
     type Enum = (
       r2Placeholder,
@@ -733,7 +733,7 @@ type
       'rex2'
     );
   end;
-  TZYFilterRex2 = TZYEnumFilterRex2.Enum;
+  TZYFilterRex2Prefix = TZYEnumFilterRex2Prefix.Enum;
 
 implementation
 

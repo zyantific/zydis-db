@@ -37,6 +37,7 @@ type
     ifcXOP,
     ifcVEX,
     ifcEMVEX,
+    ifcREX2,
     ifcOpcode,
     ifcMode,
     ifcModeCompact,
@@ -66,7 +67,7 @@ type
     ifcEvexND,
     ifcEvexNF,
     ifcEvexSCC,
-    ifcRex2
+    ifcRex2Prefix
   );
 
   TZYInstructionFilterFlag = (
@@ -176,6 +177,8 @@ type
       (FNumberOfValues:  17; FFlags: []),
       { ifcEMVEX }
       (FNumberOfValues:  49; FFlags: []),
+      { ifcREX2}
+      (FNumberOfValues:   3; FFlags: []),
       { ifcOpcode }
       (FNumberOfValues: 256; FFlags: []),
       { ifcMode }
@@ -363,7 +366,7 @@ begin
   end;
   FilterOrderDef :=
     TZYInstructionFilterList.Create(
-      ifcRex2,
+      ifcRex2Prefix,
       ifcModeMPX,
       ifcModrmMod,
       ifcModeCLDEMOTE,

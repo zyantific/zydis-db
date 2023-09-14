@@ -525,6 +525,7 @@ const
     'XOP',
     'VEX',
     'EMVEX',
+    'REX2',
     'Opcode',
     'Mode',
     'ModeCompact',
@@ -554,7 +555,7 @@ const
     'EVEX_ND',
     'EVEX_NF',
     'EVEX_SCC',
-    'REX2'
+    'REX2_PREFIX'
   );
 var
   S, T, Y, Z: Cardinal;

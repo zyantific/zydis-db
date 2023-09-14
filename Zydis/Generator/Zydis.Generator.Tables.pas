@@ -965,6 +965,7 @@ const
     'XOP',
     'VEX',
     'EMVEX',
+    'REX2',
     'OPCODE',
     'MODE',
     'MODE_COMPACT',
@@ -994,7 +995,7 @@ const
     'EVEX_ND',
     'EVEX_NF',
     'EVEX_SCC',
-    'REX2'
+    'REX2_PREFIX'
   );
   NODE_NAMES: array[TZYInstructionFilterClass] of String =
   (
@@ -1002,6 +1003,7 @@ const
     'XOP',
     'VEX',
     'EMVEX',
+    'REX2',
     'OPCODE',
     'MODE',
     'MODE_COMPACT',
@@ -1031,7 +1033,7 @@ const
     'EVEX_ND',
     'EVEX_NF',
     'EVEX_SCC',
-    'REX2'
+    'REX2_PREFIX'
   );
 var
   Tables: TArray<TZYTableTemplate<PZYTreeItem>>;
