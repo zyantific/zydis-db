@@ -325,12 +325,17 @@ def generate_rel_info(instructions):
                 raise InvalidInstructionException()
             has_rel = True
             mnemonic = insn['mnemonic']
+            prefix_flags = insn.get('prefix_flags', [])
+            accepts_bound = 'accepts_bound' in prefix_flags
             if mnemonic not in rel_instructions:
                 rel_instructions[mnemonic] = {
                     'size': [[0, 0, 0] for _ in range(3)],
                     'scaling_hints': get_size_hint(insn),
-                    'branch_hits': zydis_bool('accepts_branch_hints' in insn.get('prefix_flags', []))
+                    'branch_hits': zydis_bool('accepts_branch_hints' in prefix_flags),
+                    'bound': zydis_bool(accepts_bound)
                 }
+            if accepts_bound:
+                rel_instructions[mnemonic]['bound'] = zydis_bool(accepts_bound)
             encoding = op['encoding']
             mode_filter = insn.get('filters', {}).get('mode', 'all')
             if mode_filter == '64':
@@ -385,7 +390,7 @@ def generate_rel_info(instructions):
         lookup = ''
         for i in range(3):
             lookup += '{ %d, %d, %d }, ' % (info['size'][i][0], info['size'][i][1], info['size'][i][2])
-        func += '        { { %s }, %s, %s },\n' % (lookup[:-2], info['scaling_hints'], info['branch_hits'])
+        func += '        { { %s }, %s, %s, %s },\n' % (lookup[:-2], info['scaling_hints'], info['branch_hits'], info['bound'])
     func += '    };\n\n    switch (mnemonic)\n    {\n'
     for i, case in enumerate(rel_mnemonics):
         for mnemonic in case:
