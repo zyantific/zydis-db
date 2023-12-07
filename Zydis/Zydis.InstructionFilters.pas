@@ -37,6 +37,7 @@ type
     ifcXOP,
     ifcVEX,
     ifcEMVEX,
+    ifcREX2,
     ifcOpcode,
     ifcMode,
     ifcModeCompact,
@@ -62,7 +63,11 @@ type
     ifcModeWBNOINVD,
     ifcModeCLDEMOTE,
     ifcModeCentaur,
-    ifcModeIPREFETCH
+    ifcModeIPREFETCH,
+    ifcEvexND,
+    ifcEvexNF,
+    ifcEvexSCC,
+    ifcRex2Prefix
   );
 
   TZYInstructionFilterFlag = (
@@ -172,6 +177,8 @@ type
       (FNumberOfValues:  17; FFlags: []),
       { ifcEMVEX }
       (FNumberOfValues:  49; FFlags: []),
+      { ifcREX2}
+      (FNumberOfValues:   3; FFlags: []),
       { ifcOpcode }
       (FNumberOfValues: 256; FFlags: []),
       { ifcMode }
@@ -225,6 +232,14 @@ type
       { ifcModeCentaur }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcModeIPREFETCH }
+      (FNumberOfValues:   2; FFlags: [iffIsOptional]),
+      { ifcEvexND }
+      (FNumberOfValues:   2; FFlags: [iffIsOptional]),
+      { ifcEvexNF }
+      (FNumberOfValues:   2; FFlags: [iffIsOptional]),
+      { ifcEvexSCC }
+      (FNumberOfValues:  16; FFlags: [iffIsOptional]),
+      { ifcRex2 }
       (FNumberOfValues:   2; FFlags: [iffIsOptional])
     );
   strict private
@@ -351,6 +366,7 @@ begin
   end;
   FilterOrderDef :=
     TZYInstructionFilterList.Create(
+      ifcRex2Prefix,
       ifcModeMPX,
       ifcModrmMod,
       ifcModeCLDEMOTE,
@@ -408,7 +424,10 @@ begin
       ifcOperandSize,
       ifcAddressSize,
       ifcEvexB,
-      ifcVectorLength
+      ifcVectorLength,
+      ifcEvexND,
+      ifcEvexNF,
+      ifcEvexSCC
     );
   FilterOrderMVEX :=
     TZYInstructionFilterList.Create(

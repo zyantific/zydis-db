@@ -506,6 +506,11 @@ begin
     end;
   end;
 
+  // Link REX2 nodes to maps
+  Assert(Length(FFilters[ifcREX2]) = 1);
+  TreeItemDuplicate(FRoot.Childs[$D5].Childs[$01], FRoot);
+  TreeItemDuplicate(FRoot.Childs[$D5].Childs[$02], FRoot.Childs[$0F]);
+
   WorkEnd(FGenerator);
 end;
 

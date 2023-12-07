@@ -104,7 +104,9 @@ begin
     end else Exit;
   end;
 
+  // TODO:
   B := (Definition.Encoding = iencEVEX) and (Definition.Filters.ModrmMod <> md3) and
+    (Definition.EVEX.TupleType <> ttNoScale) and
     ((Definition.EVEX.TupleType = ttInvalid) or (Definition.EVEX.ElementSize = esInvalid));
   if (B) then
   begin
@@ -306,6 +308,8 @@ const
      opeJImm16_32_64,
      opeJImm32_32_64,
      opeJImm16_32_32],
+     { optABS }
+    [opeJImm64],
     { optPTR }
     [opeNone],
     { optAGEN }
@@ -315,7 +319,9 @@ const
     { optMOFFS }
     [opeDisp16_32_64],
     { optMIB }
-    [opeModrmRm]
+    [opeModrmRm],
+    { optDFV }
+    [opeNDSNDD]
   );
 var
   B: Boolean;
