@@ -550,7 +550,8 @@ const
     'ModeWBNOINVD',
     'ModeCLDEMOTE',
     'ModeCentaur',
-    'ModeIPREFETCH'
+    'ModeIPREFETCH',
+    'ModeUD0Compat'
   );
 var
   S, T, Y, Z: Cardinal;
