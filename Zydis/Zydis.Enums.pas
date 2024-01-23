@@ -649,7 +649,10 @@ type
     ecAPXEVEXSHA,
     ecAPXEVEXCETWRSS,
     ecAPXEVEXCETWRUSS,
-    ecAPXLEGACYJMPABS
+    ecAPXLEGACYJMPABS,
+    ecAPXEVEXRAOINT,
+    ecUSERMSREVEX,
+    ecLEGACYRAOINT
   );
   TZYExceptionClassHelper = record helper for TZYExceptionClass
   public
@@ -722,7 +725,10 @@ type
       'apx-evex-sha',
       'apx-evex-cet-wrss',
       'apx-evex-cet-wruss',
-      'apx-legacy-jmpabs'
+      'apx-legacy-jmpabs',
+      'apx-evex-rao-int',
+      'user-msr-evex',
+      'legacy-rao-int'
     );
   public
     const ZydisStrings: array[TZYExceptionClass] of String = (
@@ -794,7 +800,10 @@ type
       'APX_EVEX_SHA',
       'APX_EVEX_CET_WRSS',
       'APX_EVEX_CET_WRUSS',
-      'APX_LEGACY_JMPABS'
+      'APX_LEGACY_JMPABS',
+      'APX_EVEX_RAO_INT',
+      'USER_MSR_EVEX',
+      'LEGACY_RAO_INT'
     );
   end;
 

@@ -248,6 +248,7 @@ type
     function GetModeCLDEMOTE: TZYFilterBoolean; inline;
     function GetModeCentaur: TZYFilterBoolean; inline;
     function GetModeIPREFETCH: TZYFilterBoolean; inline;
+    function GetModeUD0Compat: TZYFilterBoolean; inline;
   strict private
     procedure SetMode(Value: TZYFilterMode); inline;
     procedure SetPrefixGroup1(Value: TZYFilterBoolean); inline;
@@ -277,6 +278,7 @@ type
     procedure SetModeCLDEMOTE(Value: TZYFilterBoolean); inline;
     procedure SetModeCentaur(Value: TZYFilterBoolean); inline;
     procedure SetModeIPREFETCH(Value: TZYFilterBoolean); inline;
+    procedure SetModeUD0Compat(Value: TZYFilterBoolean); inline;
 
     procedure SetForceModrmReg(Value: Boolean); inline;
     procedure SetForceModrmRm(Value: Boolean); inline;
@@ -328,6 +330,8 @@ type
     property ModeCentaur: TZYFilterBoolean read GetModeCentaur write SetModeCentaur
       default fbPlaceholder;
     property ModeIPREFETCH: TZYFilterBoolean read GetModeIPREFETCH write SetModeIPREFETCH
+      default fbPlaceholder;
+    property ModeUD0Compat: TZYFilterBoolean read GetModeUD0Compat write SetModeUD0Compat
       default fbPlaceholder;
 
     property ForceModrmReg: Boolean read FForceModrmReg write SetForceModrmReg default false; // TODO: Move! Does not fit here. + rename (extends opcode)
@@ -1388,6 +1392,7 @@ begin
       D.SetModeCLDEMOTE(ModeCLDEMOTE);
       D.SetModeCentaur(ModeCentaur);
       D.SetModeIPREFETCH(ModeIPREFETCH);
+      D.SetModeUD0Compat(ModeUD0Compat);
 
       D.SetForceModrmReg(FForceModrmReg);
       D.SetForceModrmRm(FForceModrmRm);
@@ -1445,6 +1450,7 @@ begin
       (ModeCLDEMOTE = O.ModeCLDEMOTE) and
       (ModeCentaur = O.ModeCentaur) and
       (ModeIPREFETCH = O.ModeIPREFETCH) and
+      (ModeUD0Compat = O.ModeUD0Compat) and
 
       (FForceModrmReg = O.FForceModrmReg) and
       (FForceModrmRm = O.FForceModrmRm);
@@ -1519,6 +1525,11 @@ end;
 function TZYInstructionFilters.GetModeTZCNT: TZYFilterBoolean;
 begin
   Result := TZYFilterBoolean(Definition.FilterIndex[ifcModeTZCNT]);
+end;
+
+function TZYInstructionFilters.GetModeUD0Compat: TZYFilterBoolean;
+begin
+  Result := TZYFilterBoolean(Definition.FilterIndex[ifcModeUD0Compat]);
 end;
 
 function TZYInstructionFilters.GetModeWBNOINVD: TZYFilterBoolean;
@@ -1636,6 +1647,8 @@ begin
       'feature_centaur', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
     SetModeIPREFETCH(JSON.Reader.ReadEnum(
       'feature_iprefetch', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
+    SetModeUD0Compat(JSON.Reader.ReadEnum(
+      'feature_ud0_compat', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
 
     SetForceModrmReg(JSON.ReadBoolean('force_modrm_reg', false));
     SetForceModrmRm(JSON.ReadBoolean('force_modrm_rm', false));
@@ -1702,6 +1715,8 @@ begin
     JSON.Writer.WriteEnum('feature_centaur', ModeCentaur, TZYEnumFilterBoolean.JSONStrings);
   if (ModeIPREFETCH <> fbPlaceholder) then
     JSON.Writer.WriteEnum('feature_iprefetch', ModeIPREFETCH, TZYEnumFilterBoolean.JSONStrings);
+  if (ModeUD0Compat <> fbPlaceholder) then
+    JSON.Writer.WriteEnum('feature_ud0_compat', ModeUD0Compat, TZYEnumFilterBoolean.JSONStrings);
 
   if (FForceModrmReg <> false) then
     JSON.WriteBoolean('force_modrm_reg', FForceModrmReg);
@@ -1786,6 +1801,11 @@ end;
 procedure TZYInstructionFilters.SetModeTZCNT(Value: TZYFilterBoolean);
 begin
   Definition.FilterIndex[ifcModeTZCNT] := Ord(Value);
+end;
+
+procedure TZYInstructionFilters.SetModeUD0Compat(Value: TZYFilterBoolean);
+begin
+  Definition.FilterIndex[ifcModeUD0Compat] := Ord(Value);
 end;
 
 procedure TZYInstructionFilters.SetModeWBNOINVD(Value: TZYFilterBoolean);

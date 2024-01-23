@@ -552,6 +552,7 @@ const
     'ModeCLDEMOTE',
     'ModeCentaur',
     'ModeIPREFETCH',
+    'ModeUD0Compat',
     'EVEX_ND',
     'EVEX_NF',
     'EVEX_SCC',

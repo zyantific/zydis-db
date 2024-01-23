@@ -64,6 +64,7 @@ type
     ifcModeCLDEMOTE,
     ifcModeCentaur,
     ifcModeIPREFETCH,
+    ifcModeUD0Compat,
     ifcEvexND,
     ifcEvexNF,
     ifcEvexSCC,
@@ -233,6 +234,8 @@ type
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcModeIPREFETCH }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
+      { ifcModeUD0Compat }
+      (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcEvexND }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcEvexNF }
@@ -368,6 +371,7 @@ begin
     TZYInstructionFilterList.Create(
       ifcRex2Prefix,
       ifcModeMPX,
+      ifcModeUD0Compat,
       ifcModrmMod,
       ifcModeCLDEMOTE,
       ifcPrefixGroup1,
