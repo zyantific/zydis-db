@@ -134,7 +134,7 @@ type
       // Misc registers
       regMXCSR,     regPKRU,      regXCR0,      regGDTR,
       regLDTR,      regIDTR,      regTR,        regBNDCFG,
-      regBNDSTATUS, regUIF
+      regBNDSTATUS, regUIF ,      regIA32KernelGSBase
     );
   public
     const JSONStrings: array[Enum] of String = (
@@ -238,7 +238,7 @@ type
       // Misc registers
       'mxcsr',      'pkru',       'xcr0',       'gdtr',
       'ldtr',       'idtr',       'tr',         'bndcfg',
-      'bndstatus',  'uif'
+      'bndstatus',  'uif' ,       'ia32_kernel_gsbase'
     );
   end;
   TZYRegister = TZYEnumRegister.Enum;

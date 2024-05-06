@@ -663,6 +663,14 @@
           ],
           "width": 1,
           "width_64": 1
+        },
+        {
+          "is_encodable": false,
+          "registers": [
+            "IA32_KERNEL_GS_BASE"
+          ],
+          "width": 0,
+          "width_64": 0
         }
       ]
     }
