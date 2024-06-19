@@ -238,7 +238,7 @@ type
       // Misc registers
       'mxcsr',      'pkru',       'xcr0',       'gdtr',
       'ldtr',       'idtr',       'tr',         'bndcfg',
-      'bndstatus',  'uif' ,       'ia32_kernel_gsbase'
+      'bndstatus',  'uif' ,       'ia32_kernel_gs_base'
     );
   end;
   TZYRegister = TZYEnumRegister.Enum;
