@@ -386,6 +386,7 @@ type
     FScaleFactor: TZYScaleFactor;
     FWidth: array[1..3] of TZYSemanticOperandWidth;
     FVisible: Boolean;
+    FHasImplictDisp : Boolean;
     FIsMultisource4: Boolean;
     FIgnoreSegmentOverride: Boolean;
   strict private
@@ -402,6 +403,7 @@ type
     procedure SetScaleFactor(const Value: TZYScaleFactor); inline;
     procedure SetWidth(Index: Integer; const Value: TZYSemanticOperandWidth); inline;
     procedure SetVisible(const Value: Boolean); inline;
+    procedure SetHasImplictDisp(const Value: Boolean); inline;
     procedure SetIsMultisource4(const Value: Boolean); inline;
     procedure SetIgnoreSegmentOverride(const Value: Boolean); inline;
   protected
@@ -432,6 +434,7 @@ type
     property Width32: TZYSemanticOperandWidth index 2 read GetWidth write SetWidth default 0;
     property Width64: TZYSemanticOperandWidth index 3 read GetWidth write SetWidth default 0;
     property Visible: Boolean read FVisible write SetVisible default true;
+    property HasImplictDisp: Boolean read FHasImplictDisp write SetHasImplictDisp default true;
     property Visibility: TZYOperandVisibility read GetVisibility;
     property IsMultisource4: Boolean read FIsMultisource4 write SetIsMultisource4 default false;
     property IgnoreSegmentOverride: Boolean read FIgnoreSegmentOverride write SetIgnoreSegmentOverride default false;
@@ -2013,6 +2016,7 @@ begin
         D.SetWidth(I, FWidth[I]);
       end;
       D.SetVisible(FVisible);
+      D.SetHasImplictDisp(FHasImplictDisp);
       D.SetIsMultisource4(FIsMultisource4);
       D.SetIgnoreSegmentOverride(FIgnoreSegmentOverride);
     finally
@@ -2123,6 +2127,7 @@ begin
     SetWidth(2, JSON.ReadInteger('width32', 0));
     SetWidth(3, JSON.ReadInteger('width64', 0));
     SetVisible(JSON.ReadBoolean('visible', true));
+    SetHasImplictDisp(JSON.ReadBoolean('implictdisp', false));
     SetIsMultisource4(JSON.ReadBoolean('is_multisource4', false));
     SetIgnoreSegmentOverride(JSON.ReadBoolean('ignore_seg_override', false));
   finally
@@ -2321,6 +2326,15 @@ begin
   if (FVisible <> Value) then
   begin
     FVisible := Value;
+    Update;
+  end;
+end;
+
+procedure TZYInstructionOperand.SetHasImplictDisp(const Value: Boolean);
+begin
+  if (FHasImplictDisp <> Value) then
+  begin
+    FHasImplictDisp := Value;
     Update;
   end;
 end;
