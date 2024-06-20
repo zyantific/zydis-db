@@ -814,8 +814,9 @@ begin
           begin
             { op  } Writer.StructBegin;
             { mem } Writer.StructBegin('mem');
-                    { seg         } Writer.WriteDec(Ord(Item.MemorySegment));
-                    { base        } Writer.WriteStr('ZYDIS_IMPLMEM_BASE_' +
+                    { implicitdisp  } Writer.WriteDec(Ord(Item.HasImplictDisp));
+                    { seg           } Writer.WriteDec(Ord(Item.MemorySegment));
+                    { base          } Writer.WriteStr('ZYDIS_IMPLMEM_BASE_' +
                                       TZYBaseRegister.ZydisStrings[Item.MemoryBase]);
             { op  } Writer.StructEnd;
             { mem } Writer.StructEnd;
