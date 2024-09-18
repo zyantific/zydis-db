@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Include parent 'Directory.Build.targets' -->
+  <PropertyGroup>
+    <ParentDirectoryBuildTargetsPath>$([MSBuild]::GetPathOfFileAbove('App.Directory.Build.targets', '$(MSBuildThisFileDirectory)..\'))</ParentDirectoryBuildTargetsPath>
+  </PropertyGroup>
+  <ImportGroup>
+    <Import Project="$(ParentDirectoryBuildTargetsPath)" />
+  </ImportGroup>
+
+  <!-- Additional directives or overrides -->
+  <!-- [...] -->
+</Project>

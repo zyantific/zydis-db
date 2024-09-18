@@ -1,0 +1,7 @@
+# Inherit configuration from parent EditorConfig
+root = false
+
+# Local EditorConfig directives
+
+[*.{cs,csx,cake,vb,vbx}]
+

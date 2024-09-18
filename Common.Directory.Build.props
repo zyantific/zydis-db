@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <RestoreLockedMode Condition="'$(ContinuousIntegrationBuild)' == 'true'" />
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory).artifacts</ArtifactsPath>
+  </PropertyGroup>
+
+  <!-- https://aka.ms/vs-build-acceleration -->
+  <PropertyGroup>
+    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- <BuildAccelerationIncompatiblePackage Include="" /> -->
+  </ItemGroup>
+
+  <PropertyGroup Label="Common Debug Settings">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <StripSymbols>false</StripSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Language Features -->
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+
+    <!-- Restore Behavior -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+
+    <!-- Compiler Options -->
+    <Deterministic>true</Deterministic>
+
+    <!-- Analyzer Options -->
+    <AnalysisLevel>preview</AnalysisLevel>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Features>strict</Features>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' or '$(ContinuousIntegrationBuild)' == 'true'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+  </PropertyGroup>
+</Project>
