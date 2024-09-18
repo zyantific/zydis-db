@@ -1,0 +1,17 @@
+<!-- https://devblogs.microsoft.com/nuget/introducing-central-package-management/ -->
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    <CentralPackageFloatingVersionsEnabled>false</CentralPackageFloatingVersionsEnabled>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- <PackageVersion Include="Ben.Demystifier" Version="0.4.1" /> -->
+  </ItemGroup>
+  <ItemGroup>
+    <GlobalPackageReference Include="Microsoft.Build.CopyOnWrite" Version="1.0.334" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageVersion Include="Spectre.Console" Version="0.50.0" />
+  </ItemGroup>
+</Project>
