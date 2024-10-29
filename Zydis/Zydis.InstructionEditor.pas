@@ -233,6 +233,10 @@ type
     function GetRexB: TZYFilterRexB; inline;
     function GetEvexB: TZYFilterEvexB; inline;
     function GetMvexE: TZYFilterMvexE; inline;
+    function GetEvexND: TZYFilterEvexND; inline;
+    function GetEvexNF: TZYFilterEvexNF; inline;
+    function GetEvexSCC: TZYFilterEvexSCC; inline;
+    function GetRex2Prefix: TZYFilterRex2Prefix;
 
     function GetModeAMD: TZYFilterBoolean; inline;
     function GetModeKNC: TZYFilterBoolean; inline;
@@ -259,6 +263,10 @@ type
     procedure SetRexB(Value: TZYFilterRexB); inline;
     procedure SetEvexB(Value: TZYFilterEvexB); inline;
     procedure SetMvexE(Value: TZYFilterMvexE); inline;
+    procedure SetEvexND(Value: TZYFilterEvexND); inline;
+    procedure SetEvexNF(Value: TZYFilterEvexNF); inline;
+    procedure SetEvexSCC(Value: TZYFilterEvexSCC); inline;
+    procedure SetRex2Prefix(const Value: TZYFilterRex2Prefix);
 
     procedure SetModeAMD(Value: TZYFilterBoolean); inline;
     procedure SetModeKNC(Value: TZYFilterBoolean); inline;
@@ -304,6 +312,10 @@ type
     property RexB: TZYFilterRexB read GetRexB write SetRexB default rbPlaceholder;
     property EvexB: TZYFilterEvexB read GetEvexB write SetEvexB default ebPlaceholder;
     property MvexE: TZYFilterMvexE read GetMvexE write SetMvexE default mePlaceholder;
+    property EvexND: TZYFilterEvexND read GetEvexND write SetEvexND default ndPlaceholder;
+    property EvexNF: TZYFilterEvexNF read GetEvexNF write SetEvexNF default nfPlaceholder;
+    property EvexSCC: TZYFilterEvexSCC read GetEvexSCC write SetEvexSCC default sccPlaceholder;
+    property Rex2Prefix: TZYFilterRex2Prefix read GetRex2Prefix write SetRex2Prefix default r2Placeholder;
 
     property ModeAMD: TZYFilterBoolean read GetModeAMD write SetModeAMD default fbPlaceholder;
     property ModeKNC: TZYFilterBoolean read GetModeKNC write SetModeKNC default fbPlaceholder;
@@ -656,6 +668,7 @@ type
     Width32: Byte;
     Width64: Byte;
     IsSigned: Boolean;
+    IsAddress: Boolean;
     IsRelative: Boolean;
   end;
 
@@ -1364,6 +1377,10 @@ begin
       D.SetRexB(RexB);
       D.SetEvexB(EvexB);
       D.SetMvexE(MvexE);
+      D.SetEvexND(EvexND);
+      D.SetEvexNF(EvexNF);
+      D.SetEvexSCC(EvexSCC);
+      D.SetRex2Prefix(Rex2Prefix);
 
       D.SetModeAMD(ModeAMD);
       D.SetModeKNC(ModeKNC);
@@ -1418,6 +1435,10 @@ begin
       (RexB = O.RexB) and
       (EvexB = O.EvexB) and
       (MvexE = O.MvexE) and
+      (EvexND = O.EvexND) and
+      (EvexNF = O.EvexNF) and
+      (EvexSCC = O.EvexSCC) and
+      (Rex2Prefix = O.Rex2Prefix) and
 
       (ModeAMD = O.ModeAMD) and
       (ModeKNC = O.ModeKNC) and
@@ -1444,6 +1465,21 @@ end;
 function TZYInstructionFilters.GetEvexB: TZYFilterEvexB;
 begin
   Result := TZYFilterEvexB(Definition.FilterIndex[ifcEvexB]);
+end;
+
+function TZYInstructionFilters.GetEvexND: TZYFilterEvexND;
+begin
+  Result := TZYFilterEvexND(Definition.FilterIndex[ifcEvexND]);
+end;
+
+function TZYInstructionFilters.GetEvexNF: TZYFilterEvexNF;
+begin
+  Result := TZYFilterEvexNF(Definition.FilterIndex[ifcEvexNF]);
+end;
+
+function TZYInstructionFilters.GetEvexSCC: TZYFilterEvexSCC;
+begin
+  Result := TZYFilterEvexSCC(Definition.FilterIndex[ifcEvexSCC]);
 end;
 
 function TZYInstructionFilters.GetModeAMD: TZYFilterBoolean;
@@ -1541,6 +1577,11 @@ begin
   Result := TZYFilterBoolean(Definition.FilterIndex[ifcPrefixGroup1]);
 end;
 
+function TZYInstructionFilters.GetRex2Prefix: TZYFilterRex2Prefix;
+begin
+  Result := TZYFilterRex2Prefix(Definition.FilterIndex[ifcRex2Prefix]);
+end;
+
 function TZYInstructionFilters.GetRexB: TZYFilterRexB;
 begin
   Result := TZYFilterRexB(Definition.FilterIndex[ifcRexB]);
@@ -1581,6 +1622,10 @@ begin
     SetRexB(JSON.Reader.ReadEnum('rex_b', rbPlaceholder, TZYEnumFilterRexB.JSONStrings));
     SetEvexB(JSON.Reader.ReadEnum('evex_b', ebPlaceholder, TZYEnumFilterEvexB.JSONStrings));
     SetMvexE(JSON.Reader.ReadEnum('mvex_e', mePlaceholder, TZYEnumFilterMvexE.JSONStrings));
+    SetEvexND(JSON.Reader.ReadEnum('evex_nd', ndPlaceholder, TZYEnumFilterEvexND.JSONStrings));
+    SetEvexNF(JSON.Reader.ReadEnum('evex_nf', nfPlaceholder, TZYEnumFilterEvexNF.JSONStrings));
+    SetEvexSCC(JSON.Reader.ReadEnum('evex_scc', sccPlaceholder, TZYEnumFilterEvexSCC.JSONStrings));
+    SetRex2Prefix(JSON.Reader.ReadEnum('rex_2', r2Placeholder, TZYEnumFilterRex2Prefix.JSONStrings));
 
     SetModeAMD(JSON.Reader.ReadEnum(
       'feature_amd', fbPlaceholder, TZYEnumFilterBoolean.JSONStrings));
@@ -1641,6 +1686,14 @@ begin
     JSON.Writer.WriteEnum('evex_b', EvexB, TZYEnumFilterEvexB.JSONStrings);
   if (MvexE <> mePlaceholder) then
     JSON.Writer.WriteEnum('mvex_e', MvexE, TZYEnumFilterMvexE.JSONStrings);
+  if (EvexND <> ndPlaceholder) then
+    JSON.Writer.WriteEnum('evex_nd', EvexND, TZYEnumFilterEvexND.JSONStrings);
+  if (EvexNF <> nfPlaceholder) then
+    JSON.Writer.WriteEnum('evex_nf', EvexNF, TZYEnumFilterEvexNF.JSONStrings);
+  if (EvexSCC <> sccPlaceholder) then
+    JSON.Writer.WriteEnum('evex_scc', EvexSCC, TZYEnumFilterEvexSCC.JSONStrings);
+  if (Rex2Prefix <> r2Placeholder) then
+    JSON.Writer.WriteEnum('rex_2', Rex2Prefix, TZYEnumFilterRex2Prefix.JSONStrings);
 
   if (ModeAMD <> fbPlaceholder) then
     JSON.Writer.WriteEnum('feature_amd', ModeAMD, TZYEnumFilterBoolean.JSONStrings);
@@ -1688,6 +1741,21 @@ begin
     end;
     Definition.FilterIndex[ifcEvexB] := Ord(Value);
   end;
+end;
+
+procedure TZYInstructionFilters.SetEvexND(Value: TZYFilterEvexND);
+begin
+  Definition.FilterIndex[ifcEvexND] := Ord(Value);
+end;
+
+procedure TZYInstructionFilters.SetEvexNF(Value: TZYFilterEvexNF);
+begin
+  Definition.FilterIndex[ifcEvexNF] := Ord(Value);
+end;
+
+procedure TZYInstructionFilters.SetEvexSCC(Value: TZYFilterEvexSCC);
+begin
+  Definition.FilterIndex[ifcEvexSCC] := Ord(Value);
 end;
 
 procedure TZYInstructionFilters.SetModeAMD(Value: TZYFilterBoolean);
@@ -1824,6 +1892,11 @@ end;
 procedure TZYInstructionFilters.SetPrefixGroup1(Value: TZYFilterBoolean);
 begin
   Definition.FilterIndex[ifcPrefixGroup1] := Ord(Value);
+end;
+
+procedure TZYInstructionFilters.SetRex2Prefix(const Value: TZYFilterRex2Prefix);
+begin
+  Definition.FilterIndex[ifcRex2Prefix] := Ord(Value);
 end;
 
 procedure TZYInstructionFilters.SetRexB(Value: TZYFilterRexB);
@@ -2178,7 +2251,9 @@ begin
     optMIB,
     optIMM,
     optREL,
-    optMOFFS:
+    optABS,
+    optMOFFS,
+    optDFV:
       begin
         if (FEncoding <> opeNone) then JSON.Writer.WriteEnum(
           'encoding', FEncoding, TZYEnumOperandEncoding.JSONStrings);
@@ -3234,7 +3309,7 @@ begin
 end;
 
 procedure SetImmediate(var Index: Integer; Width16, Width32, Width64: Integer;
-  IsSigned, IsRelative: Boolean);
+  IsSigned, IsAddress, IsRelative: Boolean);
 begin
   Assert((Index = 0) or (not (ipDisplacement in FParts)));
   case Index of
@@ -3246,6 +3321,7 @@ begin
   FImmediates[Index].Width32 := Width32;
   FImmediates[Index].Width64 := Width64;
   FImmediates[Index].IsSigned := IsSigned;
+  FImmediates[Index].IsAddress := IsAddress;
   FImmediates[Index].IsRelative := IsRelative;
   Inc(Index);
 end;
@@ -3272,8 +3348,8 @@ begin
     if (O.OperandType = optPTR) then
     begin
       Assert(I = 0);
-      SetImmediate(N, 16, 32, 32, false, false);
-      SetImmediate(N, 16, 16, 16, false, false);
+      SetImmediate(N, 16, 32, 32, false, true, false);
+      SetImmediate(N, 16, 16, 16, false, true, false);
       Break;
     end;
     case O.Encoding of
@@ -3284,7 +3360,7 @@ begin
           if (not HasIS4) then
           begin
             HasIS4 := true;
-            SetImmediate(N,  8,  8,  8, false, false);
+            SetImmediate(N,  8,  8,  8, false, false, false);
           end;
         end;
       opeDisp8       : SetDisplacement(8,  8,  8);
@@ -3294,27 +3370,27 @@ begin
       opeDisp16_32_64: SetDisplacement(16, 32, 64);
       opeDisp32_32_64: SetDisplacement(32, 32, 64);
       opeDisp16_32_32: SetDisplacement(16, 32, 32);
-      opeUImm8       : SetImmediate(N,  8,  8,  8, false, false);
-      opeUImm16      : SetImmediate(N, 16, 16, 16, false, false);
-      opeUImm32      : SetImmediate(N, 32, 32, 32, false, false);
-      opeUImm64      : SetImmediate(N, 64, 64, 64, false, false);
-      opeUImm16_32_64: SetImmediate(N, 16, 32, 64, false, false);
-      opeUImm32_32_64: SetImmediate(N, 32, 32, 64, false, false);
-      opeUImm16_32_32: SetImmediate(N, 16, 32, 32, false, false);
-      opeSImm8       : SetImmediate(N,  8,  8,  8, true , false);
-      opeSImm16      : SetImmediate(N, 16, 16, 16, true , false);
-      opeSImm32      : SetImmediate(N, 32, 32, 32, true , false);
-      opeSImm64      : SetImmediate(N, 64, 64, 64, true , false);
-      opeSImm16_32_64: SetImmediate(N, 16, 32, 64, true , false);
-      opeSImm32_32_64: SetImmediate(N, 32, 32, 64, true , false);
-      opeSImm16_32_32: SetImmediate(N, 16, 32, 32, true , false);
-      opeJImm8       : SetImmediate(N,  8,  8,  8, true , true );
-      opeJImm16      : SetImmediate(N, 16, 16, 16, true , true );
-      opeJImm32      : SetImmediate(N, 32, 32, 32, true , true );
-      opeJImm64      : SetImmediate(N, 64, 64, 64, true , true );
-      opeJImm16_32_64: SetImmediate(N, 16, 32, 64, true , true );
-      opeJImm32_32_64: SetImmediate(N, 32, 32, 64, true , true );
-      opeJImm16_32_32: SetImmediate(N, 16, 32, 32, true , true );
+      opeUImm8       : SetImmediate(N,  8,  8,  8, false, false, false);
+      opeUImm16      : SetImmediate(N, 16, 16, 16, false, false, false);
+      opeUImm32      : SetImmediate(N, 32, 32, 32, false, false, false);
+      opeUImm64      : SetImmediate(N, 64, 64, 64, false, false, false);
+      opeUImm16_32_64: SetImmediate(N, 16, 32, 64, false, false, false);
+      opeUImm32_32_64: SetImmediate(N, 32, 32, 64, false, false, false);
+      opeUImm16_32_32: SetImmediate(N, 16, 32, 32, false, false, false);
+      opeSImm8       : SetImmediate(N,  8,  8,  8, true , false, false);
+      opeSImm16      : SetImmediate(N, 16, 16, 16, true , false, false);
+      opeSImm32      : SetImmediate(N, 32, 32, 32, true , false, false);
+      opeSImm64      : SetImmediate(N, 64, 64, 64, true , false, false);
+      opeSImm16_32_64: SetImmediate(N, 16, 32, 64, true , false, false);
+      opeSImm32_32_64: SetImmediate(N, 32, 32, 64, true , false, false);
+      opeSImm16_32_32: SetImmediate(N, 16, 32, 32, true , false, false);
+      opeJImm8       : SetImmediate(N,  8,  8,  8, O.OperandType = optREL, true, O.OperandType = optREL );
+      opeJImm16      : SetImmediate(N, 16, 16, 16, O.OperandType = optREL, true, O.OperandType = optREL );
+      opeJImm32      : SetImmediate(N, 32, 32, 32, O.OperandType = optREL, true, O.OperandType = optREL );
+      opeJImm64      : SetImmediate(N, 64, 64, 64, O.OperandType = optREL, true, O.OperandType = optREL );
+      opeJImm16_32_64: SetImmediate(N, 16, 32, 64, O.OperandType = optREL, true, O.OperandType = optREL );
+      opeJImm32_32_64: SetImmediate(N, 32, 32, 64, O.OperandType = optREL, true, O.OperandType = optREL );
+      opeJImm16_32_32: SetImmediate(N, 16, 32, 32, O.OperandType = optREL, true, O.OperandType = optREL );
     end;
   end;
   if (dfForceRegForm in Definition.Flags) then
@@ -3879,7 +3955,7 @@ begin
       iencDEFAULT,
       iencVEX,
       iencMVEX : B := (Value in [omapDefault, omap0F, omap0F38, omap0F3A]);
-      iencEVEX : B := (Value in [omapDefault, omap0F, omap0F38, omap0F3A, omapMAP5, omapMAP6]);
+      iencEVEX : B := (Value in [omapDefault, omap0F, omap0F38, omap0F3A, omapMAP4, omapMAP5, omapMAP6, omapMAP7]);
       ienc3DNOW: B := (Value in [omap0F0F]);
       iencXOP  : B := (Value in [omapXOP8, omapXOP9, omapXOPA]);
     end;
@@ -4010,6 +4086,7 @@ begin
           SetFilterIndex(ifcXOP  , 0);
           SetFilterIndex(ifcVEX  , 0);
           SetFilterIndex(ifcEMVEX, 0);
+          SetFilterIndex(ifcREX2 , 0);
         end;
       iencXOP    :
         begin
@@ -4556,6 +4633,8 @@ begin
       FRootNode.CreateChildNodeAtIndex($8F, ifcXOP, false, true);
       // EVEX / MVEX Table
       FRootNode.CreateChildNodeAtIndex($62, ifcEMVEX, false, true);
+      // REX2 Table
+      FRootNode.CreateChildNodeAtIndex($D5, ifcREX2, false, true);
     end;
   finally
     EndUpdate;

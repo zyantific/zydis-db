@@ -472,6 +472,10 @@ begin
       begin
         Writer.WriteStr('ZYDIS_BRANCH_TYPE_SHORT', '', false);
       end else
+      if (dfIsAbsoluteBranch in Item.Flags) then
+      begin
+        Writer.WriteStr('ZYDIS_BRANCH_TYPE_ABSOLUTE', '', false);
+      end else
       begin
         Writer.WriteStr('ZYDIS_BRANCH_TYPE_NONE', '', false);
       end;
@@ -700,6 +704,7 @@ begin
       optCR          : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkCONTROL];
       optDR          : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkDEBUG];
       optMASK        : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkMASK];
+      optDFV         : Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkDFV];
 
       optMEM         : Result := 'ZYDIS_MEMOP_TYPE_MEM';
       optMEMVSIBX    ,
@@ -887,6 +892,7 @@ begin
                                         { [2] } Writer.WriteDec(Item.ImmediateA.Width64);
                         { size        } Writer.StructEnd;
                         { isSigned    } Writer.WriteStr(ZydisBool[Item.ImmediateA.IsSigned]);
+                        { is_address  } Writer.WriteStr(ZydisBool[Item.ImmediateA.IsAddress]);
                         { isRelative  } Writer.WriteStr(ZydisBool[Item.ImmediateA.IsRelative]);
                 { [0] } Writer.StructEnd;
                 { [1] } Writer.StructBegin;
@@ -896,6 +902,7 @@ begin
                                         { [2] } Writer.WriteDec(Item.ImmediateB.Width64);
                         { size        } Writer.StructEnd;
                         { isSigned    } Writer.WriteStr(ZydisBool[Item.ImmediateB.IsSigned]);
+                        { is_address  } Writer.WriteStr(ZydisBool[Item.ImmediateB.IsAddress]);
                         { isRelative  } Writer.WriteStr(ZydisBool[Item.ImmediateB.IsRelative]);
                 { [2] } Writer.StructEnd;
       { imm   } Writer.StructEnd;
@@ -958,6 +965,7 @@ const
     'XOP',
     'VEX',
     'EMVEX',
+    'REX2',
     'OPCODE',
     'MODE',
     'MODE_COMPACT',
@@ -984,7 +992,11 @@ const
     'MODE_CLDEMOTE',
     'MODE_CENTAUR',
     'MODE_IPREFETCH',
-    'MODE_UD0_COMPAT'
+    'MODE_UD0_COMPAT',
+    'EVEX_ND',
+    'EVEX_NF',
+    'EVEX_SCC',
+    'REX2_PREFIX'
   );
   NODE_NAMES: array[TZYInstructionFilterClass] of String =
   (
@@ -992,6 +1004,7 @@ const
     'XOP',
     'VEX',
     'EMVEX',
+    'REX2',
     'OPCODE',
     'MODE',
     'MODE_COMPACT',
@@ -1018,7 +1031,11 @@ const
     'MODE_CLDEMOTE',
     'MODE_CENTAUR',
     'MODE_IPREFETCH',
-    'MODE_UD0_COMPAT'
+    'MODE_UD0_COMPAT',
+    'EVEX_ND',
+    'EVEX_NF',
+    'EVEX_SCC',
+    'REX2_PREFIX'
   );
 var
   Tables: TArray<TZYTableTemplate<PZYTreeItem>>;
