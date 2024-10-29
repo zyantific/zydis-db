@@ -586,6 +586,7 @@ type
     FTupleType: TZYEVEXTupleType;
     FElementSize: TZYEVEXElementSize;
     FStaticBroadcast: TZYStaticBroadcast;
+    FIsEEVEX: Boolean;
   strict private
     procedure SetVectorLength(Value: TZYVectorLength); inline;
     procedure SetFunctionality(Value: TZYEVEXFunctionality); inline;
@@ -594,6 +595,7 @@ type
     procedure SetTupleType(Value: TZYEVEXTupleType); inline;
     procedure SetElementSize(Value: TZYEVEXElementSize); inline;
     procedure SetStaticBroadcast(Value: TZYStaticBroadcast); inline;
+    procedure SetIsEEVEX(Value: Boolean); inline;
   protected
     procedure AssignTo(Dest: TPersistent); override;
   protected
@@ -618,6 +620,7 @@ type
       default esInvalid;
     property StaticBroadcast: TZYStaticBroadcast read FStaticBroadcast
       write SetStaticBroadcast default sbcNone;
+    property IsEEVEX: Boolean read FIsEEVEX write SetIsEEVEX default false;
   end;
 
   TZYInstructionMVEXInfo = class sealed(TZYJSONODefinitionComposite)
@@ -2996,6 +2999,7 @@ begin
       D.SetTupleType(FTupleType);
       D.SetElementSize(FElementSize);
       D.SetStaticBroadcast(FStaticBroadcast);
+      D.SetIsEEVEX(FIsEEVEX);
       // TODO:
     finally
       D.EndUpdate;
@@ -3030,7 +3034,8 @@ begin
       (O.FMaskFlags = FMaskFlags) and
       (O.FTupleType = FTupleType) and
       (O.FElementSize = FElementSize) and
-      (O.FStaticBroadcast = FStaticBroadcast);
+      (O.FStaticBroadcast = FStaticBroadcast) and
+      (O.FIsEEVEX = FIsEEVEX);
   end;
 end;
 
@@ -3052,6 +3057,8 @@ begin
       'element_size', esInvalid, TZYEVEXElementSize.JSONStrings));
     SetStaticBroadcast(JSON.Reader.ReadEnum<TZYStaticBroadcast>(
       'static_broadcast', sbcNone, TZYStaticBroadcast.JSONStrings));
+    SetIsEEVEX(JSON.Reader.ReadBoolean(
+      'is_eevex', false));
   finally
     EndUpdate;
   end;
@@ -3073,6 +3080,8 @@ begin
     'element_size', FElementSize, TZYEVEXElementSize.JSONStrings);
   if (FStaticBroadcast <> sbcNone) then JSON.Writer.WriteEnum(
     'static_broadcast', FStaticBroadcast, TZYStaticBroadcast.JSONStrings);
+  if (FIsEEVEX <> false) then JSON.Writer.WriteBoolean(
+    'is_eevex', FIsEEVEX);
 end;
 
 procedure TZYInstructionEVEXInfo.SetElementSize(Value: TZYEVEXElementSize);
@@ -3089,6 +3098,15 @@ begin
   if (FFunctionality <> Value) then
   begin
     FFunctionality := Value;
+    Update;
+  end;
+end;
+
+procedure TZYInstructionEVEXInfo.SetIsEEVEX(Value: Boolean);
+begin
+  if (FIsEEVEX <> Value) then
+  begin
+    FIsEEVEX := Value;
     Update;
   end;
 end;

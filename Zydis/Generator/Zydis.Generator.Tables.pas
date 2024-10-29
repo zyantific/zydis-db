@@ -633,6 +633,8 @@ begin
             { broadcast             } Writer.WriteStr('ZYDIS_EVEX_STATIC_BROADCAST_' +
                                         TZYStaticBroadcast.ZydisStrings[Item.EVEX.StaticBroadcast],
                                         '', false);
+
+            { is_eevex              } Writer.WriteStr(ZydisBool[Item.EVEX.IsEEVEX]);
           end;
         iencMVEX:
           begin
