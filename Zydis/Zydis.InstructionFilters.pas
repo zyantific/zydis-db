@@ -52,6 +52,7 @@ type
     ifcVectorLength,
     ifcRexW,
     ifcRexB,
+    ifcEvexU,
     ifcEvexB,
     ifcMvexE,
     ifcModeAMD,
@@ -209,6 +210,8 @@ type
       { ifcRexW }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcRexB }
+      (FNumberOfValues:   2; FFlags: [iffIsOptional]),
+      { ifcEvexU }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcEvexB }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
@@ -421,6 +424,7 @@ begin
     TZYInstructionFilterList.Create(
       ifcOpcode,
       ifcModrmMod,
+      ifcEvexU,
       ifcModrmReg,
       ifcModrmRm,
       ifcRexW,

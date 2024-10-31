@@ -231,6 +231,7 @@ type
     function GetVectorLength: TZYFilterVectorLength; inline;
     function GetRexW: TZYFilterRexW; inline;
     function GetRexB: TZYFilterRexB; inline;
+    function GetEvexU: TZYFilterEvexU; inline;
     function GetEvexB: TZYFilterEvexB; inline;
     function GetMvexE: TZYFilterMvexE; inline;
     function GetEvexND: TZYFilterEvexND; inline;
@@ -261,6 +262,7 @@ type
     procedure SetVectorLength(Value: TZYFilterVectorLength); inline;
     procedure SetRexW(Value: TZYFilterRexW); inline;
     procedure SetRexB(Value: TZYFilterRexB); inline;
+    procedure SetEvexU(Value: TZYFilterEvexU); inline;
     procedure SetEvexB(Value: TZYFilterEvexB); inline;
     procedure SetMvexE(Value: TZYFilterMvexE); inline;
     procedure SetEvexND(Value: TZYFilterEvexND); inline;
@@ -310,6 +312,7 @@ type
       default vlPlaceholder;
     property RexW: TZYFilterRexW read GetRexW write SetRexW default rwPlaceholder;
     property RexB: TZYFilterRexB read GetRexB write SetRexB default rbPlaceholder;
+    property EvexU: TZYFilterEvexU read GetEvexU write SetEvexU default euPlaceholder;
     property EvexB: TZYFilterEvexB read GetEvexB write SetEvexB default ebPlaceholder;
     property MvexE: TZYFilterMvexE read GetMvexE write SetMvexE default mePlaceholder;
     property EvexND: TZYFilterEvexND read GetEvexND write SetEvexND default ndPlaceholder;
@@ -587,6 +590,10 @@ type
     FElementSize: TZYEVEXElementSize;
     FStaticBroadcast: TZYStaticBroadcast;
     FIsEEVEX: Boolean;
+    FHasNF: Boolean;
+    FHasZU: Boolean;
+    FHasDFV: Boolean;
+    FHasPPX: Boolean;
   strict private
     procedure SetVectorLength(Value: TZYVectorLength); inline;
     procedure SetFunctionality(Value: TZYEVEXFunctionality); inline;
@@ -596,6 +603,10 @@ type
     procedure SetElementSize(Value: TZYEVEXElementSize); inline;
     procedure SetStaticBroadcast(Value: TZYStaticBroadcast); inline;
     procedure SetIsEEVEX(Value: Boolean); inline;
+    procedure SetHasNF(Value: Boolean); inline;
+    procedure SetHasZU(Value: Boolean); inline;
+    procedure SetHasDFV(Value: Boolean); inline;
+    procedure SetHasPPX(Value: Boolean); inline;
   protected
     procedure AssignTo(Dest: TPersistent); override;
   protected
@@ -621,6 +632,10 @@ type
     property StaticBroadcast: TZYStaticBroadcast read FStaticBroadcast
       write SetStaticBroadcast default sbcNone;
     property IsEEVEX: Boolean read FIsEEVEX write SetIsEEVEX default false;
+    property HasNF: Boolean read FHasNF write SetHasNF default false;
+    property HasZU: Boolean read FHasZU write SetHasZU default false;
+    property HasDFV: Boolean read FHasDFV write SetHasDFV default false;
+    property HasPPX: Boolean read FHasPPX write SetHasPPX default false;
   end;
 
   TZYInstructionMVEXInfo = class sealed(TZYJSONODefinitionComposite)
@@ -709,6 +724,7 @@ type
   TZYOpcode               = 0..255;
   TZYCPUPrivilegeLevel    = 0..  3;
 
+  TZYInstructionDefinitionArray = array of TZYInstructionDefinition;
   TZYInstructionDefinition = class sealed(TPersistent)
   strict private
     FEditor: TZYInstructionEditor;
@@ -1378,6 +1394,7 @@ begin
       D.SetVectorLength(VectorLength);
       D.SetRexW(RexW);
       D.SetRexB(RexB);
+      D.SetEvexU(EvexU);
       D.SetEvexB(EvexB);
       D.SetMvexE(MvexE);
       D.SetEvexND(EvexND);
@@ -1436,6 +1453,7 @@ begin
       (VectorLength = O.VectorLength) and
       (RexW = O.RexW) and
       (RexB = O.RexB) and
+      (EvexU = O.EvexU) and
       (EvexB = O.EvexB) and
       (MvexE = O.MvexE) and
       (EvexND = O.EvexND) and
@@ -1483,6 +1501,11 @@ end;
 function TZYInstructionFilters.GetEvexSCC: TZYFilterEvexSCC;
 begin
   Result := TZYFilterEvexSCC(Definition.FilterIndex[ifcEvexSCC]);
+end;
+
+function TZYInstructionFilters.GetEvexU: TZYFilterEvexU;
+begin
+  Result := TZYFilterEvexU(Definition.FilterIndex[ifcEvexU]);
 end;
 
 function TZYInstructionFilters.GetModeAMD: TZYFilterBoolean;
@@ -1623,6 +1646,7 @@ begin
       'vector_length', vlPlaceholder, TZYEnumFilterVectorLength.JSONStrings));
     SetRexW(JSON.Reader.ReadEnum('rex_w', rwPlaceholder, TZYEnumFilterRexW.JSONStrings));
     SetRexB(JSON.Reader.ReadEnum('rex_b', rbPlaceholder, TZYEnumFilterRexB.JSONStrings));
+    SetEvexU(JSON.Reader.ReadEnum('evex_u', euPlaceholder, TZYEnumFilterEvexU.JSONStrings));
     SetEvexB(JSON.Reader.ReadEnum('evex_b', ebPlaceholder, TZYEnumFilterEvexB.JSONStrings));
     SetMvexE(JSON.Reader.ReadEnum('mvex_e', mePlaceholder, TZYEnumFilterMvexE.JSONStrings));
     SetEvexND(JSON.Reader.ReadEnum('evex_nd', ndPlaceholder, TZYEnumFilterEvexND.JSONStrings));
@@ -1687,6 +1711,8 @@ begin
     JSON.Writer.WriteEnum('rex_b', RexB, TZYEnumFilterRexB.JSONStrings);
   if (EvexB <> ebPlaceholder) then
     JSON.Writer.WriteEnum('evex_b', EvexB, TZYEnumFilterEvexB.JSONStrings);
+  if (EvexU <> euPlaceholder) then
+    JSON.Writer.WriteEnum('evex_u', EvexU, TZYEnumFilterEvexU.JSONStrings);
   if (MvexE <> mePlaceholder) then
     JSON.Writer.WriteEnum('mvex_e', MvexE, TZYEnumFilterMvexE.JSONStrings);
   if (EvexND <> ndPlaceholder) then
@@ -1759,6 +1785,11 @@ end;
 procedure TZYInstructionFilters.SetEvexSCC(Value: TZYFilterEvexSCC);
 begin
   Definition.FilterIndex[ifcEvexSCC] := Ord(Value);
+end;
+
+procedure TZYInstructionFilters.SetEvexU(Value: TZYFilterEvexU);
+begin
+  Definition.FilterIndex[ifcEvexU] := Ord(Value);
 end;
 
 procedure TZYInstructionFilters.SetModeAMD(Value: TZYFilterBoolean);
@@ -3000,6 +3031,10 @@ begin
       D.SetElementSize(FElementSize);
       D.SetStaticBroadcast(FStaticBroadcast);
       D.SetIsEEVEX(FIsEEVEX);
+      D.SetHasNF(FHasNF);
+      D.SetHasZU(FHasZU);
+      D.SetHasDFV(FHasDFV);
+      D.SetHasPPX(FHasPPX);
       // TODO:
     finally
       D.EndUpdate;
@@ -3035,7 +3070,11 @@ begin
       (O.FTupleType = FTupleType) and
       (O.FElementSize = FElementSize) and
       (O.FStaticBroadcast = FStaticBroadcast) and
-      (O.FIsEEVEX = FIsEEVEX);
+      (O.FIsEEVEX = FIsEEVEX) and
+      (O.FHasNF = FHasNF) and
+      (O.FHasZU = FHasZU) and
+      (O.FHasDFV = FHasDFV) and
+      (O.FHasPPX = FHasPPX);
   end;
 end;
 
@@ -3059,6 +3098,14 @@ begin
       'static_broadcast', sbcNone, TZYStaticBroadcast.JSONStrings));
     SetIsEEVEX(JSON.Reader.ReadBoolean(
       'is_eevex', false));
+    SetHasNF(JSON.Reader.ReadBoolean(
+      'has_nf', false));
+    SetHasZU(JSON.Reader.ReadBoolean(
+      'has_zu', false));
+    SetHasDFV(JSON.Reader.ReadBoolean(
+      'has_dfv', false));
+    SetHasPPX(JSON.Reader.ReadBoolean(
+      'has_ppx', false));
   finally
     EndUpdate;
   end;
@@ -3082,6 +3129,50 @@ begin
     'static_broadcast', FStaticBroadcast, TZYStaticBroadcast.JSONStrings);
   if (FIsEEVEX <> false) then JSON.Writer.WriteBoolean(
     'is_eevex', FIsEEVEX);
+  if (FHasNF <> false) then JSON.Writer.WriteBoolean(
+    'has_nf', FHasNF);
+  if (FHasZU <> false) then JSON.Writer.WriteBoolean(
+    'has_zu', FHasZU);
+  if (FHasDFV <> false) then JSON.Writer.WriteBoolean(
+    'has_dfv', FHasDFV);
+  if (FHasPPX <> false) then JSON.Writer.WriteBoolean(
+    'has_ppx', FHasPPX);
+end;
+
+procedure TZYInstructionEVEXInfo.SetHasDFV(Value: Boolean);
+begin
+   if (FHasDFV <> Value) then
+  begin
+    FHasDFV := Value;
+    Update;
+  end;
+end;
+
+procedure TZYInstructionEVEXInfo.SetHasNF(Value: Boolean);
+begin
+  if (FHasNF <> Value) then
+  begin
+    FHasNF := Value;
+    Update;
+  end;
+end;
+
+procedure TZYInstructionEVEXInfo.SetHasPPX(Value: Boolean);
+begin
+  if (FHasPPX <> Value) then
+  begin
+    FHasPPX := Value;
+    Update;
+  end;
+end;
+
+procedure TZYInstructionEVEXInfo.SetHasZU(Value: Boolean);
+begin
+  if (FHasZU <> Value) then
+  begin
+    FHasZU := Value;
+    Update;
+  end;
 end;
 
 procedure TZYInstructionEVEXInfo.SetElementSize(Value: TZYEVEXElementSize);

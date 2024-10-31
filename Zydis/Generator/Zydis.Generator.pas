@@ -540,6 +540,7 @@ const
     'VectorLength',
     'REX_W',
     'REX_B',
+    'EVEX_U',
     'EVEX_B',
     'MVEX_E',
     'ModeAMD',

@@ -635,6 +635,10 @@ begin
                                         '', false);
 
             { is_eevex              } Writer.WriteStr(ZydisBool[Item.EVEX.IsEEVEX]);
+            { has_apx_nf            } Writer.WriteStr(ZydisBool[Item.EVEX.HasNF]);
+            { has_apx_zu            } Writer.WriteStr(ZydisBool[Item.EVEX.HasZU]);
+            { has_apx_dfv           } Writer.WriteStr(ZydisBool[Item.EVEX.HasDFV]);
+            { has_apx_ppx           } Writer.WriteStr(ZydisBool[Item.EVEX.HasPPX]);
           end;
         iencMVEX:
           begin
@@ -982,6 +986,7 @@ const
     'VECTOR_LENGTH',
     'REX_W',
     'REX_B',
+    'EVEX_U',
     'EVEX_B',
     'MVEX_E',
     'MODE_AMD',
@@ -1021,6 +1026,7 @@ const
     'VECTOR_LENGTH',
     'REX_W',
     'REX_B',
+    'EVEX_U',
     'EVEX_B',
     'MVEX_E',
     'MODE_AMD',

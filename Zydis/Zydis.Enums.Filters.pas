@@ -517,6 +517,28 @@ type
   end;
   TZYFilterRexB = TZYEnumFilterRexB.Enum;
 
+  TZYEnumFilterEvexU = record
+  public
+    type Enum = (
+      euPlaceholder,
+      euU0,
+      euU1
+    );
+  public
+    const Names: array[Enum] of String = (
+      'euPlaceholder',
+      'euU0',
+      'euU1'
+    );
+  public
+    const JSONStrings: array[Enum] of String = (
+      'placeholder',
+      '0',
+      '1'
+    );
+  end;
+  TZYFilterEvexU = TZYEnumFilterEvexU.Enum;
+
   TZYEnumFilterEvexB = record
   public
     type Enum = (
