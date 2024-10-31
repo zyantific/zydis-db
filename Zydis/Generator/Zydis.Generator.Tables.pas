@@ -721,6 +721,11 @@ begin
       optMIB         : Result := 'ZYDIS_MEMOP_TYPE_MIB | (1 << 3)';
     end;
   end;
+
+  if ((Result = '0') and (Encoding = opeNDSNDD) and (Operands.Definition.EVEX.HasDFV)) then
+  begin
+    Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkDFV];
+  end;
 end;
 
 class function TZYDefinitionTableGenerator.HasVSIB(Definition: TZYInstructionDefinition): Boolean;
