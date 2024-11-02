@@ -637,7 +637,6 @@ begin
             { is_eevex              } Writer.WriteStr(ZydisBool[Item.EVEX.IsEEVEX]);
             { has_apx_nf            } Writer.WriteStr(ZydisBool[Item.EVEX.HasNF]);
             { has_apx_zu            } Writer.WriteStr(ZydisBool[Item.EVEX.HasZU]);
-            { has_apx_dfv           } Writer.WriteStr(ZydisBool[Item.EVEX.HasDFV]);
             { has_apx_ppx           } Writer.WriteStr(ZydisBool[Item.EVEX.HasPPX]);
           end;
         iencMVEX:
@@ -720,11 +719,6 @@ begin
       optAGENNoRel   : Result := 'ZYDIS_MEMOP_TYPE_AGEN | (1 << 3)';
       optMIB         : Result := 'ZYDIS_MEMOP_TYPE_MIB | (1 << 3)';
     end;
-  end;
-
-  if ((Result = '0') and (Encoding = opeNDSNDD) and (Operands.Definition.EVEX.HasDFV)) then
-  begin
-    Result := 'ZYDIS_REGKIND_' + TZYEnumRegisterKind.ZydisStrings[regkDFV];
   end;
 end;
 
