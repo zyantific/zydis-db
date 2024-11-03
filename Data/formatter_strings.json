@@ -757,10 +757,6 @@
     "name": "deco_nf",
     "tokens": [
       {
-        "value": " ",
-        "type": "whitespace"
-      },
-      {
         "value": "{",
         "type": "parenthesis_open"
       },
@@ -771,6 +767,10 @@
       {
         "value": "}",
         "type": "parenthesis_close"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
       }
     ]
   },
@@ -1191,6 +1191,10 @@
   {
     "name": "near",
     "string": " near"
+  },
+  {
+    "name": "nf",
+    "string": "nf"
   },
   {
     "name": "pref_bnd",
