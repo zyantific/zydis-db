@@ -372,7 +372,6 @@ begin
   end;
   FilterOrderDef :=
     TZYInstructionFilterList.Create(
-      ifcRex2Prefix,
       ifcModeMPX,
       ifcModeUD0Compat,
       ifcModrmMod,
@@ -384,6 +383,7 @@ begin
       ifcMode,
       ifcAddressSize,
       ifcOperandSize,
+      ifcRex2Prefix,
       ifcRexW,
       ifcRexB,
       ifcModeAMD,
