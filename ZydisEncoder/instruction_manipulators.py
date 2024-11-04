@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import copy
 from abc import ABC, abstractmethod
 from utils import *
@@ -140,6 +141,43 @@ class SwappableOperandDetector(InstructionManipulator):
         self.db[mnemonic] += 2
         insn1['swappable'] = swappable_index
         insn2['swappable'] = swappable_index + 1
+
+
+class CcDetector(InstructionManipulator):
+
+    def get_encoding(self, insn):
+        pass
+
+    def update(self, insn1, insn2):
+        pass
+
+    def transform(self):
+        for insn in self.insn_db:
+            filters = insn.get('filters', {})
+            insn['apx_cc'] = insn['opcode'].startswith('4') and insn.get('opcode_map', 'default') == 'map4' and filters.get('mandatory_prefix', 'none') == 'none'
+            insn['apx_scc'] = 'evex_scc' in filters
+
+
+class ApxScalingDetector(InstructionManipulator):
+
+    def get_encoding(self, insn):
+        encoding = copy.deepcopy(get_basic_encoding(insn))
+        is_apx = insn['meta_info']['extension'].startswith('APX') and insn.get('encoding', '') == 'evex'
+        osz_scaling = any([op['operand_type'] == 'mem' and 'scale_factor' in op for op in get_operands(insn)])
+        if not is_apx or not osz_scaling:
+            return encoding
+        if 'comment' in encoding:
+            del encoding['comment']
+        if 'filters' in insn:
+            filters = copy.deepcopy(insn['filters'])
+            encoding['filters'] = filters
+            if 'mandatory_prefix' in filters:
+                del filters['mandatory_prefix']
+        return encoding
+
+    def update(self, insn1, insn2):
+        insn1['apx_osz'] = True
+        insn2['redundant'] = True
 
 
 """
