@@ -2,10 +2,8 @@
 import json
 import argparse
 from instruction_manipulators import *
-
-
-class InvalidInstructionException(Exception):
-    pass
+from collections import Counter, defaultdict
+from pathlib import Path
 
 
 def get_instructions(unique_instructions, lookup):
@@ -92,27 +90,6 @@ def get_effective_address_size(insn):
     return insn['address_size'] & mask
 
 
-def get_modrm(insn):
-    if 'filters' not in insn:
-        return 0
-    modrm = 0
-    filters = insn['filters']
-    if filters.get('modrm_mod', '') == '3':
-        modrm |= 3 << 6
-    modrm |= int(filters.get('modrm_reg', '0')) << 3
-    modrm |= int(filters.get('modrm_rm', '0'))
-    return modrm
-
-
-def get_mandatory_prefix(insn):
-    if 'filters' not in insn or 'mandatory_prefix' not in insn['filters']:
-        return 'ZYDIS_MANDATORY_PREFIX_NONE'
-    mandatory_prefix = insn['filters']['mandatory_prefix'].upper()
-    if mandatory_prefix in ['NONE', 'IGNORE']:
-        return 'ZYDIS_MANDATORY_PREFIX_NONE'
-    return 'ZYDIS_MANDATORY_PREFIX_' + mandatory_prefix
-
-
 def get_vector_length(insn):
     vector_length = zydis_vector_length(insn.get('filters', {}).get('vector_length', 'placeholder'))
     evex_vector_length = zydis_vector_length(insn.get('evex', {}).get('vector_length', 'default'))
@@ -180,7 +157,7 @@ def get_operand_mask(insn):
             op_type_value = 1
         elif op_type == 'ptr':
             op_type_value = 2
-        elif op_type in ['implicit_imm1', 'imm', 'rel',]:
+        elif op_type in ['implicit_imm1', 'imm', 'rel', 'abs']:
             op_type_value = 3
         else:
             raise InvalidInstructionException('Invalid operand_type: ' + op_type)
@@ -188,78 +165,6 @@ def get_operand_mask(insn):
         bit_offset += 2
 
     return op_mask
-
-
-def get_estimated_size(insn):
-    minimal_len = 1
-    filters = insn.get('filters', {})
-    rex_w = filters.get('rex_w', 'placeholder')
-    encoding = insn.get('encoding', 'default')
-    opcode_map = insn.get('opcode_map', 'default')
-    if encoding not in ['xop', 'vex', 'evex', 'mvex'] and get_mandatory_prefix(insn) != 'ZYDIS_MANDATORY_PREFIX_NONE':
-        minimal_len += 1
-    if encoding in ['default', '3dnow']:
-        if opcode_map == 'default':
-            pass
-        elif opcode_map == '0f':
-            minimal_len += 1
-        elif opcode_map in ['0f0f', '0f38', '0f3a']:
-            minimal_len += 2
-        else:
-            raise InvalidInstructionException('Invalid opcode map: ' + opcode_map)
-        if rex_w == '1':
-            minimal_len += 1
-    elif encoding == 'xop':
-        minimal_len += 3
-    elif encoding == 'vex':
-        minimal_len += 2
-        if rex_w == '1' or opcode_map != '0f':
-            minimal_len += 1
-    elif encoding in ['evex', 'mvex']:
-        minimal_len += 4
-    else:
-        raise InvalidInstructionException('Invalid encoding: ' + encoding)
-
-    overhead = 0
-    has_sib = False
-    has_mem = False
-    has_modrm = False
-    for op in get_operands(insn, False):
-        op_encoding = op.get('encoding', 'none')
-        if op_encoding in ['modrm_reg', 'modrm_rm']:
-            has_modrm = True
-            """
-            elif op_encoding == 'disp16_32_64':
-                minimal_len += 2
-                overhead += 2
-            """
-        elif op_encoding in ['uimm8', 'simm8', 'jimm8']:
-            minimal_len += 1
-        elif op_encoding in ['uimm16', 'simm16', 'jimm16', 'uimm16_32_64', 'uimm16_32_32', 'simm16_32_64', 'simm16_32_32', 'jimm16_32_64', 'jimm16_32_32']:
-            minimal_len += 2
-            if op_encoding in ['uimm16_32_64', 'simm16_32_64', 'jimm16_32_64']:
-                overhead += 6
-            elif op_encoding in ['uimm16_32_32', 'simm16_32_32', 'jimm16_32_32']:
-                overhead += 2
-        elif op_encoding in ['uimm32', 'simm32', 'jimm32', 'uimm32_32_64', 'simm32_32_64', 'jimm32_32_64']:
-            minimal_len += 4
-            if op_encoding in ['uimm32_32_64', 'simm32_32_64', 'jimm32_32_64']:
-                minimal_len += 4
-        elif op_encoding in ['uimm64', 'simm64', 'jimm64']:
-            minimal_len += 8
-
-        op_type = op['operand_type']
-        if op_type in ['implicit_mem', 'mem', 'agen', 'agen_norel']:
-            has_mem = True
-        elif op_type in ['mem_vsibx', 'mem_vsiby', 'mem_vsibz', 'mib']:
-            has_mem = True
-            has_sib = True
-    if has_modrm or get_modrm(insn):
-        minimal_len += 1
-    if has_sib or (has_mem and int(filters.get('modrm_rm', '0')) == 4):
-        minimal_len += 1
-
-    return minimal_len, minimal_len + overhead
 
 
 def is_swappable(insn):
@@ -283,13 +188,14 @@ def generate_encoder_lookup_table(instructions):
     table = 'const ZydisEncoderLookupEntry encoder_instruction_lookup[] =\n{\n'
     for index, count in lookup_entries:
         table += '    { 0x%04X, %d },\n' % (index, count)
-    table += '};\n'
+    table += '};\n\n'
     return table
 
 
 def generate_encoder_table(instructions):
     table = 'const ZydisEncodableInstruction encoder_instructions[] =\n{\n'
     for insn in instructions:
+        filters = insn.get('filters', {})
         members = [
             '0x%04X' % insn['instruction_table_index'],
             '0x%04X' % get_operand_mask(insn),
@@ -301,7 +207,11 @@ def generate_encoder_table(instructions):
             get_width_flags(get_effective_address_size(insn)),
             get_width_flags(insn['operand_size']),
             get_mandatory_prefix(insn),
-            zydis_bool(insn.get('filters', {}).get('rex_w', 'placeholder') == '1'),
+            zydis_bool(filters.get('rex_w', 'placeholder') == '1'),
+            zydis_bool(insn['rex2'] == ZydisRex2.rex2),
+            zydis_bool(filters.get('evex_nd', 'placeholder') == '1'),
+            zydis_bool(filters.get('evex_nf', 'placeholder') == '1'),
+            zydis_bool('apx_osz' in insn),
             get_vector_length(insn),
             get_size_hint(insn),
             zydis_bool(is_swappable(insn)),
@@ -400,6 +310,47 @@ def generate_rel_info(instructions):
     return func
 
 
+def generate_cc(instructions):
+    cc_instructions = []
+    scc_values = (
+        'ZYDIS_SCC_NONE',
+        'ZYDIS_SCC_O',
+        'ZYDIS_SCC_NO',
+        'ZYDIS_SCC_B',
+        'ZYDIS_SCC_NB',
+        'ZYDIS_SCC_Z',
+        'ZYDIS_SCC_NZ',
+        'ZYDIS_SCC_BE',
+        'ZYDIS_SCC_NBE',
+        'ZYDIS_SCC_S',
+        'ZYDIS_SCC_NS',
+        'ZYDIS_SCC_TRUE',
+        'ZYDIS_SCC_FALSE',
+        'ZYDIS_SCC_L',
+        'ZYDIS_SCC_NL',
+        'ZYDIS_SCC_LE',
+        'ZYDIS_SCC_NLE',
+    )
+    for insn in instructions:
+        if not insn['apx_cc'] and not insn['apx_scc']:
+            continue
+        filters = insn.get('filters', {})
+        info = (insn['mnemonic'], scc_values[1 + int(filters['evex_scc']) if insn['apx_scc'] else 0])
+        if not cc_instructions or cc_instructions[-1] != info:
+            cc_instructions.append(info)
+
+    func = 'ZyanBool ZydisGetCcInfo(ZydisMnemonic mnemonic, ZydisSourceConditionCode *scc)\n{\n    switch (mnemonic)\n    {\n'
+    cases = defaultdict(list)
+    for mnemonic, scc in cc_instructions:
+        cases[scc].append(mnemonic)
+    for scc, mnemonics in cases.items():
+        for mnemonic in mnemonics:
+            func += '    case ZYDIS_MNEMONIC_%s:\n' % mnemonic.upper()
+        func += '        *scc = %s;\n        return ZYAN_TRUE;\n' % scc
+    func += '    default:\n        *scc = ZYDIS_SCC_NONE;\n        return ZYAN_FALSE;\n    }\n}\n'
+    return func
+
+
 def get_filters(insn):
     filters = insn.get('filters', {})
     important_filters = (
@@ -411,9 +362,34 @@ def get_filters(insn):
     return 'mode=%s,rex_w=%s,operand_size=%s,address_size=%s' % important_filters
 
 
+def get_definition(insn, allow_invisible=False):
+    encoding = insn.get('encoding', 'default')
+    prefix = encoding.upper() + '.' if encoding != 'default' else ''
+    hint = get_size_hint(insn)
+    scaling = ''
+    if hint == 'ZYDIS_SIZE_HINT_ASZ':
+        scaling = 'HASZ.'
+    elif hint == 'ZYDIS_SIZE_HINT_OSZ':
+        scaling = 'HOSZ.'
+    decorators = [
+        'MIN%02d.' % insn['min_size'],
+        'MAX%02d.' % insn['max_size'],
+        '' if insn['encodable'] else 'NE.',
+        '' if not insn.get('is4_swappable', False) else 'IS4S.',
+        '' if not insn.get('mergable', False) else 'MERGABLE.',
+        '' if not insn.get('redundant', False) else 'REDUNDANT.',
+        '' if not insn.get('swappable', False) else 'SWAPPABLE%d.' % insn['swappable'],
+        scaling,
+        prefix,
+        insn['opcode'].upper() + '.',
+    ]
+    return ''.join(decorators) + get_full_instruction(insn, allow_invisible)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generates tables needed for encoder')
-    parser.add_argument('--mode', choices=['generate-tables', 'generate-rel-info', 'stats', 'print', 'print-all', 'encodings', 'filters'], default='generate-tables')
+    parser.add_argument('--mode', choices=['generate', 'generate-tables', 'generate-rel-info', 'generate-cc', 'stats', 'print', 'print-all', 'encodings', 'filters', 'meta'], default='generate-tables')
+    parser.add_argument('--outdir', default='')
     args = parser.parse_args()
 
     with open('../Data/instructions.json', 'r') as f:
@@ -439,6 +415,7 @@ if __name__ == "__main__":
         insn['address_size'] = get_address_size(insn)
         insn['operand_size'] = get_operand_size(insn)
         insn['operand_size_no_concat'] = insn.get('filters', {}).get('operand_size', 'placeholder')[0] == '!'
+        insn['rex2'] = get_rex2(insn)
         insn['min_size'], insn['max_size'] = get_estimated_size(insn)
 
         # Only unique signatures allowed
@@ -493,9 +470,15 @@ if __name__ == "__main__":
     get_unique_instructions = lambda insn: insn['encodable'] and not insn['redundant']
     #MergabilityDetector(filter(lambda insn: insn['encodable'], unique_instructions)).transform()
     #Is4Detector(filter(lambda insn: insn['encodable'], unique_instructions)).transform()
-    PrefixEliminator(filter(get_unique_instructions, unique_instructions)).transform()
-    ForceHiddenOperandSizes(filter(get_unique_instructions, unique_instructions)).transform()
-    SwappableOperandDetector(filter(get_unique_instructions, unique_instructions)).transform()
+    manipulators = [
+        PrefixEliminator,
+        ForceHiddenOperandSizes,
+        SwappableOperandDetector,
+        CcDetector,
+        ApxScalingDetector,
+    ]
+    for manipulator in manipulators:
+        manipulator(filter(get_unique_instructions, unique_instructions)).transform()
     for i, encoding_info in enumerate(unique_encodings['mov']['encodings']):
         mov_insn = unique_instructions[unique_encodings['mov']['indexes'][i]]
         dest = mov_insn['operands'][0]
@@ -523,7 +506,7 @@ if __name__ == "__main__":
     unique_instructions.sort(key=instrucion_sorter)
 
     # Execute requested actions
-    if args.mode in ['generate-tables', 'generate-rel-info']:
+    if args.mode in ['generate', 'generate-tables', 'generate-rel-info', 'generate-cc']:
         def is_encodable(insn):
             if not insn['encodable']:
                 return False
@@ -534,11 +517,35 @@ if __name__ == "__main__":
             return True
 
         encodable_instructions = list(filter(is_encodable, unique_instructions))
-        if args.mode == 'generate-tables':
-            print(generate_encoder_lookup_table(encodable_instructions))
-            print(generate_encoder_table(encodable_instructions))
-        else:
-            print(generate_rel_info(encodable_instructions))
+        gen_tables = args.mode == 'generate-tables'
+        gen_rel_info = args.mode == 'generate-rel-info'
+        gen_cc = args.mode == 'generate-cc'
+        if args.mode == 'generate':
+            gen_tables = gen_rel_info = gen_cc = True
+
+        tables = rel_info = cc = None
+        if gen_tables:
+            tables = generate_encoder_lookup_table(encodable_instructions)
+            tables += generate_encoder_table(encodable_instructions)
+        if gen_rel_info:
+            rel_info = generate_rel_info(encodable_instructions)
+        if gen_cc:
+            cc = generate_cc(encodable_instructions)
+
+        def print_stdout(info, filename):
+            print(info)
+
+        def print_file(info, filename):
+            with open(Path(args.outdir) / filename, 'w', newline='') as f:
+                f.write(info)
+
+        output_function = print_file if args.mode == 'generate' else print_stdout
+        if tables is not None:
+            output_function(tables, 'EncoderTables.inc')
+        if rel_info is not None:
+            output_function(rel_info, 'GetRelInfo.inc')
+        if cc is not None:
+            output_function(cc, 'GetCcInfo.inc')
     elif args.mode == 'stats':
         print('max_args=%d' % max_args)
         print('max_visible_args=%d' % max_visible_args)
@@ -557,26 +564,31 @@ if __name__ == "__main__":
     elif args.mode == 'filters':
         for filter in sorted(unique_filters):
             print(filter)
+    elif args.mode == 'meta':
+        meta = Counter()
+        for insn in unique_instructions:
+            meta[str(insn['meta_info'])] += 1
+        for t in meta.items():
+            print('%s: %d' % t)
     else:
         for insn in unique_instructions:
-            encoding = insn.get('encoding', 'default')
-            prefix = encoding.upper() + '.' if encoding != 'default' else ''
-            hint = get_size_hint(insn)
-            scaling = ''
-            if hint == 'ZYDIS_SIZE_HINT_ASZ':
-                scaling = 'HASZ.'
-            elif hint == 'ZYDIS_SIZE_HINT_OSZ':
-                scaling = 'HOSZ.'
-            decorators = [
-                'MIN%02d.' % insn['min_size'],
-                'MAX%02d.' % insn['max_size'],
-                '' if insn['encodable'] else 'NE.',
-                '' if not insn.get('is4_swappable', False) else 'IS4S.',
-                '' if not insn.get('mergable', False) else 'MERGABLE.',
-                '' if not insn.get('redundant', False) else 'REDUNDANT.',
-                '' if not insn.get('swappable', False) else 'SWAPPABLE%d.' % insn['swappable'],
-                scaling,
-                prefix,
-                insn['opcode'].upper() + '.',
-            ]
-            print(''.join(decorators) + get_full_instruction(insn, args.mode == 'print-all'))
+            filters = insn.get('filters', {})
+            condition = True
+            # All APX EEVEX instructions
+            # condition = insn['meta_info']['extension'].startswith('APX') and insn.get('encoding', '') == 'evex'
+            # Extra conditions for map4 (promoted legacy space)
+            # condition &= any([op['operand_type'] == 'mem' for op in get_operands(insn)])
+            # condition &= insn.get('opcode_map', '') == 'map4'
+            # All APX instructions without evex_(nd|nf) filters
+            # condition = 'evex_nf' not in filters and 'evex_nd' not in filters and insn['meta_info']['extension'].startswith('APX')
+            # All APX CFCMOVcc and CMOVcc
+            # condition = (insn['mnemonic'].startswith('cmov') or insn['mnemonic'].startswith('cfcmov')) and insn.get('encoding', '') == 'evex'
+            # All APX CFCMOVcc and CMOVcc (2nd method)
+            # condition = insn['opcode'].startswith('4') and insn.get('opcode_map', 'default') == 'map4' and 'evex_nf' in filters and 'evex_nd' in filters
+            # All APX SCC instructions
+            # condition = 'evex_scc' in filters
+            # All APX with REX2 forbidden
+            # condition = filters.get('rex_2', '') == 'no_rex2'
+            if not condition:
+                continue
+            print(get_definition(insn, args.mode == 'print-all'))
