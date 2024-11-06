@@ -61,7 +61,7 @@ class ZydisPreprocessor(Preprocessor):
         generated_type = "%s = IntFlag('%s', [\n" % (name, name)
         values = [
             (k, self.expand_macro(v).replace('ULL', '').replace('u', ''))
-            for k, v in preprocessor.macros.items()
+            for k, v in self.macros.items()
             if k.startswith(prefix)
         ]
         values.sort(key=lambda x: eval(x[1]))
@@ -144,13 +144,9 @@ class ZydisParser:
         return types
 
 
-if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser(description='Generates python versions of Zydis types from C sources')
-    arg_parser.add_argument('zydis_path', nargs='?', default=os.path.join('..', '..', 'zydis'), help='Path to Zydis repository')
-    args = arg_parser.parse_args()
-
+def parse_zydis_types(zydis_path):
     # Preprocess Zydis sources for parsing
-    preprocessor = ZydisPreprocessor(args.zydis_path)
+    preprocessor = ZydisPreprocessor(zydis_path)
     encoder_file = preprocessor.get_preprocessed_file()
 
     # Extract important #define constants
@@ -186,7 +182,7 @@ if __name__ == "__main__":
     ])
 
     # Save generated file
-    with open(os.path.join(args.zydis_path, 'tests', 'zydis_encoder_types.py'), 'w', newline='') as f:
+    with open(os.path.join(zydis_path, 'tests', 'zydis_encoder_types.py'), 'w', newline='') as f:
         f.write("""#!/usr/bin/env python3
 from enum import IntEnum, IntFlag
 
@@ -198,3 +194,10 @@ ZYDIS_DECODER_MODE_KNC = 2  # Must be updated manually if ZydisDecoderMode chang
         f.write(zydis_default_flags)
         f.write(zydis_encodable_prefixes)
         f.write(enums)
+
+
+if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser(description='Generates python versions of Zydis types from C sources')
+    arg_parser.add_argument('zydis_path', nargs='?', default=os.path.join('..', '..', 'zydis'), help='Path to Zydis repository')
+    args = arg_parser.parse_args()
+    parse_zydis_types(args.zydis_path)
