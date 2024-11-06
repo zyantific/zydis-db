@@ -2,6 +2,7 @@
 import json
 import argparse
 from instruction_manipulators import *
+from generate_encoder_types import *
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -388,8 +389,8 @@ def get_definition(insn, allow_invisible=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generates tables needed for encoder')
-    parser.add_argument('--mode', choices=['generate', 'generate-tables', 'generate-rel-info', 'generate-cc', 'stats', 'print', 'print-all', 'encodings', 'filters', 'meta'], default='generate-tables')
-    parser.add_argument('--outdir', default='')
+    parser.add_argument('--mode', choices=['generate', 'generate-tables', 'generate-rel-info', 'generate-cc', 'stats', 'print', 'print-all', 'encodings', 'filters', 'meta'], default='print')
+    parser.add_argument('--zydis-path', default=os.path.join('..', '..', 'zydis'), help='Path to Zydis repo')
     args = parser.parse_args()
 
     with open('../Data/instructions.json', 'r') as f:
@@ -536,16 +537,19 @@ if __name__ == "__main__":
             print(info)
 
         def print_file(info, filename):
-            with open(Path(args.outdir) / filename, 'w', newline='') as f:
+            with open(filename, 'w', newline='') as f:
                 f.write(info)
 
         output_function = print_file if args.mode == 'generate' else print_stdout
+        generated_path = Path(args.zydis_path) / 'src' / 'Generated'
         if tables is not None:
-            output_function(tables, 'EncoderTables.inc')
+            output_function(tables, generated_path / 'EncoderTables.inc')
         if rel_info is not None:
-            output_function(rel_info, 'GetRelInfo.inc')
+            output_function(rel_info, generated_path / 'GetRelInfo.inc')
         if cc is not None:
-            output_function(cc, 'GetCcInfo.inc')
+            output_function(cc, generated_path / 'GetCcInfo.inc')
+        if args.mode == 'generate':
+            parse_zydis_types(args.zydis_path)
     elif args.mode == 'stats':
         print('max_args=%d' % max_args)
         print('max_visible_args=%d' % max_visible_args)
