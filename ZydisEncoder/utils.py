@@ -50,6 +50,7 @@ def get_full_instruction(insn, allow_invisible=False):
         full_insn += ' evex{%s}' % serialize_dict(insn['evex'])
     if 'mvex' in insn:
         full_insn += ' mvex{%s}' % serialize_dict(insn['mvex'])
+    full_insn += ' ' + str(insn['rex2'])
 
     return full_insn
 
