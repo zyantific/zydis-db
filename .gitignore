@@ -72,3 +72,9 @@ __recovery/
 Debug
 Release
 Win64
+
+# PyCharm
+.idea
+
+# Python
+__pycache__
