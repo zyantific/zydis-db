@@ -522,6 +522,14 @@ if __name__ == "__main__":
                 branch_type)
     unique_instructions.sort(key=instrucion_sorter)
 
+    first_xchg_index = next((i for i, insn in enumerate(unique_instructions) if insn['mnemonic'] == 'xchg'))
+    xchg_90 = unique_instructions[first_xchg_index]
+    xchg_91 = unique_instructions[first_xchg_index + 1]
+    if xchg_90['opcode'] != '90' or xchg_91['opcode'] != '91':
+        raise InvalidInstructionException('Failed to apply fixes for XCHG/NOP aliasing')
+    xchg_90['swappable'] = True
+    xchg_91['encodable'] = False
+
     # Execute requested actions
     if args.mode in ['generate-tables', 'generate-rel-info']:
         def is_encodable(insn):
