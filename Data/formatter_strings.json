@@ -367,6 +367,342 @@
     ]
   },
   {
+    "name": "deco_dfv_0",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_1",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=cf",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_2",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=zf",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_3",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=cf, zf",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_4",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=sf",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_5",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=cf, sf",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_6",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=zf, sf",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_7",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=cf, zf, sf",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_8",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=of",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_9",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=cf, of",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_a",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=zf, of",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_b",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=cf, zf, of",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_c",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=sf, of",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_d",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=cf, sf, of",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_e",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=zf, sf, of",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_dfv_f",
+    "tokens": [
+      {
+        "value": " ",
+        "type": "whitespace"
+      },
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "dfv=cf, zf, sf, of",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
     "name": "deco_eh",
     "tokens": [
       {
@@ -414,6 +750,27 @@
       {
         "value": "}",
         "type": "parenthesis_close"
+      }
+    ]
+  },
+  {
+    "name": "deco_nf",
+    "tokens": [
+      {
+        "value": "{",
+        "type": "parenthesis_open"
+      },
+      {
+        "value": "nf",
+        "type": "decorator"
+      },
+      {
+        "value": "}",
+        "type": "parenthesis_close"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
       }
     ]
   },
@@ -834,6 +1191,10 @@
   {
     "name": "near",
     "string": " near"
+  },
+  {
+    "name": "nf",
+    "string": "nf"
   },
   {
     "name": "pref_bnd",

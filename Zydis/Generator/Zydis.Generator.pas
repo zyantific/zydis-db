@@ -525,6 +525,7 @@ const
     'XOP',
     'VEX',
     'EMVEX',
+    'REX2',
     'Opcode',
     'Mode',
     'ModeCompact',
@@ -537,10 +538,11 @@ const
     'OperandSize',
     'AddressSize',
     'VectorLength',
-    'REXW',
-    'REXB',
-    'EVEXB',
-    'MVEXE',
+    'REX_W',
+    'REX_B',
+    'EVEX_U',
+    'EVEX_B',
+    'MVEX_E',
     'ModeAMD',
     'ModeKNC',
     'ModeMPX',
@@ -551,7 +553,11 @@ const
     'ModeCLDEMOTE',
     'ModeCentaur',
     'ModeIPREFETCH',
-    'ModeUD0Compat'
+    'ModeUD0Compat',
+    'EVEX_ND',
+    'EVEX_NF',
+    'EVEX_SCC',
+    'REX2_PREFIX'
   );
 var
   S, T, Y, Z: Cardinal;

@@ -37,6 +37,7 @@ type
     ifcXOP,
     ifcVEX,
     ifcEMVEX,
+    ifcREX2,
     ifcOpcode,
     ifcMode,
     ifcModeCompact,
@@ -51,6 +52,7 @@ type
     ifcVectorLength,
     ifcRexW,
     ifcRexB,
+    ifcEvexU,
     ifcEvexB,
     ifcMvexE,
     ifcModeAMD,
@@ -63,7 +65,11 @@ type
     ifcModeCLDEMOTE,
     ifcModeCentaur,
     ifcModeIPREFETCH,
-    ifcModeUD0Compat
+    ifcModeUD0Compat,
+    ifcEvexND,
+    ifcEvexNF,
+    ifcEvexSCC,
+    ifcRex2Prefix
   );
 
   TZYInstructionFilterFlag = (
@@ -173,6 +179,8 @@ type
       (FNumberOfValues:  17; FFlags: []),
       { ifcEMVEX }
       (FNumberOfValues:  49; FFlags: []),
+      { ifcREX2}
+      (FNumberOfValues:   3; FFlags: []),
       { ifcOpcode }
       (FNumberOfValues: 256; FFlags: []),
       { ifcMode }
@@ -203,6 +211,8 @@ type
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcRexB }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
+      { ifcEvexU }
+      (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcEvexB }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcMvexE }
@@ -228,6 +238,14 @@ type
       { ifcModeIPREFETCH }
       (FNumberOfValues:   2; FFlags: [iffIsOptional]),
       { ifcModeUD0Compat }
+      (FNumberOfValues:   2; FFlags: [iffIsOptional]),
+      { ifcEvexND }
+      (FNumberOfValues:   2; FFlags: [iffIsOptional]),
+      { ifcEvexNF }
+      (FNumberOfValues:   2; FFlags: [iffIsOptional]),
+      { ifcEvexSCC }
+      (FNumberOfValues:  16; FFlags: [iffIsOptional]),
+      { ifcRex2 }
       (FNumberOfValues:   2; FFlags: [iffIsOptional])
     );
   strict private
@@ -354,6 +372,7 @@ begin
   end;
   FilterOrderDef :=
     TZYInstructionFilterList.Create(
+      ifcRex2Prefix,
       ifcModeMPX,
       ifcModeUD0Compat,
       ifcModrmMod,
@@ -405,6 +424,7 @@ begin
     TZYInstructionFilterList.Create(
       ifcOpcode,
       ifcModrmMod,
+      ifcEvexU,
       ifcModrmReg,
       ifcModrmRm,
       ifcRexW,
@@ -412,7 +432,10 @@ begin
       ifcOperandSize,
       ifcAddressSize,
       ifcEvexB,
-      ifcVectorLength
+      ifcVectorLength,
+      ifcEvexND,
+      ifcEvexNF,
+      ifcEvexSCC
     );
   FilterOrderMVEX :=
     TZYInstructionFilterList.Create(
