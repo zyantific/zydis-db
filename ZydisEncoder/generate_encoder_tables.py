@@ -174,6 +174,22 @@ def is_swappable(insn):
     return (insn['swappable'] & 1) != 0
 
 
+def get_rex2_type(insn):
+    if insn.get('encoding', 'legacy') != 'legacy':
+        return 'FORBIDDEN'
+    if insn.get('opcode_map', 'default') not in ['default', '0f']:
+        return 'FORBIDDEN'
+    rex2 = insn['rex2']
+    if rex2 in [ZydisRex2.none, ZydisRex2.rex2 | ZydisRex2.no_rex2]:
+        return 'ALLOWED'
+    elif rex2 == ZydisRex2.no_rex2:
+        return 'FORBIDDEN'
+    elif rex2 == ZydisRex2.rex2:
+        return 'MANDATORY'
+    else:
+        raise InvalidInstructionException('Invalid ZydisRex2 value')
+
+
 def generate_encoder_lookup_table(instructions):
     lookup_entries = []
     last_mnemonic = 'invalid'
@@ -209,7 +225,7 @@ def generate_encoder_table(instructions):
             get_width_flags(insn['operand_size']),
             get_mandatory_prefix(insn),
             zydis_bool(filters.get('rex_w', 'placeholder') == '1'),
-            zydis_bool(insn['rex2'] == ZydisRex2.rex2),
+            'ZYDIS_REX2_TYPE_%s' % get_rex2_type(insn),
             zydis_bool(filters.get('evex_nd', 'placeholder') == '1'),
             zydis_bool(filters.get('evex_nf', 'placeholder') == '1'),
             zydis_bool('apx_osz' in insn),
