@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from enum import IntFlag
 
 
@@ -49,6 +50,7 @@ def get_full_instruction(insn, allow_invisible=False):
         full_insn += ' evex{%s}' % serialize_dict(insn['evex'])
     if 'mvex' in insn:
         full_insn += ' mvex{%s}' % serialize_dict(insn['mvex'])
+    full_insn += ' ' + str(insn['rex2'])
 
     return full_insn
 
@@ -90,6 +92,7 @@ def get_osz(insn):
 
 def merge_instruction_features(dest, src):
     dest['allowed_modes'] |= src['allowed_modes']
+    dest['rex2'] |= src['rex2']
     if dest['address_size'] != src['address_size']:
         raise ValueError('Invalid duplicate (address size): ' + get_full_instruction(src))
     if dest['operand_size'] != src['operand_size']:
@@ -98,6 +101,7 @@ def merge_instruction_features(dest, src):
                 raise ValueError('Invalid duplicate (operand size): ' + get_full_instruction(src))
             dest['forced_hint'] = True
         dest['operand_size'] |= src['operand_size']
+    dest['min_size'], dest['max_size'] = get_estimated_size(dest)
 
 
 def zydis_bool(val):
@@ -124,8 +128,118 @@ def zydis_vector_length(length):
         raise ValueError('Invalid vector length')
 
 
+def get_rex2(insn):
+    filters = insn.get('filters', {})
+    return ZydisRex2[filters.get('rex_2', 'none')]
+
+
+def get_modrm(insn):
+    if 'filters' not in insn:
+        return 0
+    modrm = 0
+    filters = insn['filters']
+    if filters.get('modrm_mod', '') == '3':
+        modrm |= 3 << 6
+    modrm |= int(filters.get('modrm_reg', '0')) << 3
+    modrm |= int(filters.get('modrm_rm', '0'))
+    return modrm
+
+
+def get_mandatory_prefix(insn):
+    if 'filters' not in insn or 'mandatory_prefix' not in insn['filters']:
+        return 'ZYDIS_MANDATORY_PREFIX_NONE'
+    mandatory_prefix = insn['filters']['mandatory_prefix'].upper()
+    if mandatory_prefix in ['NONE', 'IGNORE']:
+        return 'ZYDIS_MANDATORY_PREFIX_NONE'
+    return 'ZYDIS_MANDATORY_PREFIX_' + mandatory_prefix
+
+
+def get_estimated_size(insn):
+    minimal_len = 1
+    filters = insn.get('filters', {})
+    rex_w = filters.get('rex_w', 'placeholder')
+    encoding = insn.get('encoding', 'default')
+    opcode_map = insn.get('opcode_map', 'default')
+    if encoding not in ['xop', 'vex', 'evex', 'mvex'] and get_mandatory_prefix(insn) != 'ZYDIS_MANDATORY_PREFIX_NONE':
+        minimal_len += 1
+    if encoding in ['default', '3dnow']:
+        if opcode_map == 'default':
+            pass
+        elif opcode_map == '0f':
+            minimal_len += 1
+        elif opcode_map in ['0f0f', '0f38', '0f3a']:
+            minimal_len += 2
+        else:
+            raise InvalidInstructionException('Invalid opcode map: ' + opcode_map)
+        if rex_w == '1':
+            minimal_len += 1
+        if insn['rex2'] == ZydisRex2.rex2:
+            minimal_len += 2
+    elif encoding == 'xop':
+        minimal_len += 3
+    elif encoding == 'vex':
+        minimal_len += 2
+        if rex_w == '1' or opcode_map != '0f':
+            minimal_len += 1
+    elif encoding in ['evex', 'mvex']:
+        minimal_len += 4
+    else:
+        raise InvalidInstructionException('Invalid encoding: ' + encoding)
+
+    overhead = 0
+    has_sib = False
+    has_mem = False
+    has_modrm = False
+    for op in get_operands(insn, False):
+        op_encoding = op.get('encoding', 'none')
+        if op_encoding in ['modrm_reg', 'modrm_rm']:
+            has_modrm = True
+            """
+            elif op_encoding == 'disp16_32_64':
+                minimal_len += 2
+                overhead += 2
+            """
+        elif op_encoding in ['uimm8', 'simm8', 'jimm8']:
+            minimal_len += 1
+        elif op_encoding in ['uimm16', 'simm16', 'jimm16', 'uimm16_32_64', 'uimm16_32_32', 'simm16_32_64', 'simm16_32_32', 'jimm16_32_64', 'jimm16_32_32']:
+            minimal_len += 2
+            if op_encoding in ['uimm16_32_64', 'simm16_32_64', 'jimm16_32_64']:
+                overhead += 6
+            elif op_encoding in ['uimm16_32_32', 'simm16_32_32', 'jimm16_32_32']:
+                overhead += 2
+        elif op_encoding in ['uimm32', 'simm32', 'jimm32', 'uimm32_32_64', 'simm32_32_64', 'jimm32_32_64']:
+            minimal_len += 4
+            if op_encoding in ['uimm32_32_64', 'simm32_32_64', 'jimm32_32_64']:
+                minimal_len += 4
+        elif op_encoding in ['uimm64', 'simm64', 'jimm64']:
+            minimal_len += 8
+
+        op_type = op['operand_type']
+        if op_type in ['implicit_mem', 'mem', 'agen', 'agen_norel']:
+            has_mem = True
+        elif op_type in ['mem_vsibx', 'mem_vsiby', 'mem_vsibz', 'mib']:
+            has_mem = True
+            has_sib = True
+    if has_modrm or get_modrm(insn):
+        minimal_len += 1
+    if has_sib or (has_mem and int(filters.get('modrm_rm', '0')) == 4):
+        minimal_len += 1
+
+    return minimal_len, minimal_len + overhead
+
+
+class InvalidInstructionException(Exception):
+    pass
+
+
 class ZydisWidthFlag(IntFlag):
     w_invalid = 0
     w_16 = 1
     w_32 = 2
     w_64 = 4
+
+
+class ZydisRex2(IntFlag):
+    none = 0
+    no_rex2 = 1
+    rex2 = 2

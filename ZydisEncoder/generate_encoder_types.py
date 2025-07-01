@@ -57,6 +57,22 @@ class ZydisPreprocessor(Preprocessor):
             macro = macro.value
         return self.concatenate_tokens(self.expand_macros(macro))
 
+    def get_macro_type(self, name, prefix, single_flags_only, extra_values=None):
+        generated_type = "%s = IntFlag('%s', [\n" % (name, name)
+        values = [
+            (k, self.expand_macro(v).replace('ULL', '').replace('u', ''))
+            for k, v in self.macros.items()
+            if k.startswith(prefix)
+        ]
+        values.sort(key=lambda x: eval(x[1]))
+        if single_flags_only:
+            values = list(filter(lambda x: bin(eval(x[1])).count('1') == 1, values))
+        if extra_values is not None:
+            values = extra_values + values
+        generated_type += '\n'.join("    ('%s', %s)," % x for x in values)
+        generated_type += '\n])\n\n\n'
+        return generated_type
+
 
 class ZydisParser:
 
@@ -128,28 +144,15 @@ class ZydisParser:
         return types
 
 
-if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser(description='Generates python versions of Zydis types from C sources')
-    arg_parser.add_argument('zydis_path', nargs='?', default=os.path.join('..', '..', 'zydis'), help='Path to Zydis repository')
-    args = arg_parser.parse_args()
-
+def parse_zydis_types(zydis_path):
     # Preprocess Zydis sources for parsing
-    preprocessor = ZydisPreprocessor(args.zydis_path)
+    preprocessor = ZydisPreprocessor(zydis_path)
     encoder_file = preprocessor.get_preprocessed_file()
 
     # Extract important #define constants
     zydis_encoder_max_operands = preprocessor.expand_macro('ZYDIS_ENCODER_MAX_OPERANDS')
-    zydis_attributes = """ZydisInstructionAttributes = IntFlag('ZydisInstructionAttributes', [
-    ('ZYDIS_ATTRIB_NONE', 0),\n"""
-    attributes = [
-        (k, preprocessor.expand_macro(v).replace('ULL', ''))
-        for k, v in preprocessor.macros.items()
-        if k.startswith('ZYDIS_ATTRIB_')
-    ]
-    attributes.sort(key=lambda x: eval(x[1]))
-    attributes = list(filter(lambda x: bin(eval(x[1])).count('1') == 1, attributes))
-    zydis_attributes += '\n'.join("    ('%s', %s)," % x for x in attributes)
-    zydis_attributes += '\n])\n\n\n'
+    zydis_attributes = preprocessor.get_macro_type('ZydisInstructionAttributes', 'ZYDIS_ATTRIB_', True, [('ZYDIS_ATTRIB_NONE', 0)])
+    zydis_default_flags = preprocessor.get_macro_type('ZydisDefaultFlagsValue', 'ZYDIS_DFV_', False)
     zydis_encodable_prefixes = 'ZYDIS_ENCODABLE_PREFIXES = '
     parts = preprocessor.concatenate_tokens(preprocessor.macros['ZYDIS_ENCODABLE_PREFIXES'].value) \
         .replace('(', '') \
@@ -179,13 +182,22 @@ if __name__ == "__main__":
     ])
 
     # Save generated file
-    with open(os.path.join(args.zydis_path, 'tests', 'zydis_encoder_types.py'), 'w') as f:
+    with open(os.path.join(zydis_path, 'tests', 'zydis_encoder_types.py'), 'w', newline='') as f:
         f.write("""#!/usr/bin/env python3
 from enum import IntEnum, IntFlag
 
 
 ZYDIS_ENCODER_MAX_OPERANDS = %s
-SIZE_OF_ZYDIS_ENCODER_OPERAND = 64  # This value must be corrected manually if structure layout changes\n\n\n""" % zydis_encoder_max_operands)
+SIZE_OF_ZYDIS_ENCODER_OPERAND = 64  # This value must be corrected manually if structure layout changes
+ZYDIS_DECODER_MODE_KNC = 2  # Must be updated manually if ZydisDecoderMode changes\n\n\n""" % zydis_encoder_max_operands)
         f.write(zydis_attributes)
+        f.write(zydis_default_flags)
         f.write(zydis_encodable_prefixes)
         f.write(enums)
+
+
+if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser(description='Generates python versions of Zydis types from C sources')
+    arg_parser.add_argument('zydis_path', nargs='?', default=os.path.join('..', '..', 'zydis'), help='Path to Zydis repository')
+    args = arg_parser.parse_args()
+    parse_zydis_types(args.zydis_path)
