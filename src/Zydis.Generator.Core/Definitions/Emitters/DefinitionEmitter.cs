@@ -202,7 +202,7 @@ internal static class DefinitionEmitter
                     OperandType.MEMVSIBZ => "ZYDIS_MEMOP_TYPE_VSIB | (1 << 3)",
                     OperandType.AGEN => "ZYDIS_MEMOP_TYPE_AGEN",
                     OperandType.AGENNoRel => "ZYDIS_MEMOP_TYPE_AGEN | (1 << 3)",
-                    OperandType.MIB => "ZYDIS_MEMOP_TYPE_MIB",
+                    OperandType.MIB => "ZYDIS_MEMOP_TYPE_MIB | (1 << 3)",
                     OperandType.DFV => "ZYDIS_REGKIND_DFV",
                     _ => throw new ArgumentOutOfRangeException()
                 };
