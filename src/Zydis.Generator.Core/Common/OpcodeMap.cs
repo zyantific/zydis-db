@@ -1,5 +1,7 @@
+using System;
 using System.Text.Json.Serialization;
 
+using Zydis.Generator.Core.Definitions;
 using Zydis.Generator.Core.Serialization;
 
 namespace Zydis.Generator.Core.Common;
@@ -46,4 +48,19 @@ public enum OpcodeMap
     XOPA
 
     // ReSharper restore InconsistentNaming
+}
+
+public static class OpcodeMapExtensions
+{
+    public static string ToZydisString(this OpcodeMap value)
+    {
+        return value switch
+        {
+            OpcodeMap.MAP0 => "DEFAULT",
+            OpcodeMap.M0F or OpcodeMap.M0F38 or OpcodeMap.M0F3A or OpcodeMap.M0F0F => value.ToString("G")[1..],
+            OpcodeMap.MAP4 or OpcodeMap.MAP5 or OpcodeMap.MAP6 or OpcodeMap.MAP7 or
+            OpcodeMap.XOP8 or OpcodeMap.XOP9 or OpcodeMap.XOPA => value.ToString("G"),
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
+        };
+    }
 }

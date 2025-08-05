@@ -62,7 +62,7 @@ internal static class DefinitionEmitter
                     .Conditional().WriteFieldDesignation("category").WriteExpression("ZYDIS_CATEGORY_{0}", definition.MetaInfo.Category.ToUpperInvariant())
                     .Conditional().WriteFieldDesignation("isa_set").WriteExpression("ZYDIS_ISA_SET_{0}", definition.MetaInfo.IsaSet.ToUpperInvariant())
                     .Conditional().WriteFieldDesignation("isa_ext").WriteExpression("ZYDIS_ISA_EXT_{0}", definition.MetaInfo.IsaExtension.ToUpperInvariant())
-                    .Conditional().WriteFieldDesignation("branch_type").WriteExpression("ZYDIS_BRANCH_TYPE_{0}", GetBranchType(definition))
+                    .Conditional().WriteFieldDesignation("branch_type").WriteExpression("ZYDIS_BRANCH_TYPE_{0}", definition.GetBranchType().ToZydisString())
                     .Conditional().WriteFieldDesignation("exception_class").WriteExpression("ZYDIS_EXCEPTION_CLASS_{0}", (definition.ExceptionClass ?? ExceptionClass.None).ToZydisString())
                     .WriteFieldDesignation("op_reg").WriteExpression(GetRegisterConstraint(definition.Operands, OperandEncoding.ModrmReg))
                     .WriteFieldDesignation("op_rm").WriteExpression(GetRegisterConstraint(definition.Operands, OperandEncoding.ModrmRm))
@@ -140,31 +140,6 @@ internal static class DefinitionEmitter
         }
 
         return;
-
-        static string GetBranchType(InstructionDefinition definition)
-        {
-            if (definition.Flags.HasFlag(InstructionFlagsEnum.IsFarBranch))
-            {
-                return "FAR";
-            }
-
-            if (definition.Flags.HasFlag(InstructionFlagsEnum.IsNearBranch))
-            {
-                return "NEAR";
-            }
-
-            if (definition.Flags.HasFlag(InstructionFlagsEnum.IsShortBranch))
-            {
-                return "SHORT";
-            }
-
-            if (definition.Flags.HasFlag(InstructionFlagsEnum.IsAbsBranch))
-            {
-                return "ABSOLUTE";
-            }
-
-            return "NONE";
-        }
 
         static string GetRegisterConstraint(IReadOnlyList<InstructionOperand>? operands, OperandEncoding encoding)
         {

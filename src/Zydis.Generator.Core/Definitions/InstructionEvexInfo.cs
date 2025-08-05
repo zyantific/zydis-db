@@ -15,7 +15,7 @@ public sealed record InstructionEvexInfo :
 
 #pragma warning restore CA1036
 {
-    public EvexVectorLength VectorLength { get; init; }
+    public VectorLength VectorLength { get; init; }
     public EvexFunctionality Functionality { get; init; }
     public MaskMode MaskMode { get; init; }
     public EvexMaskFlags? MaskFlags { get; init; } // Nullable to allow setting "AcceptsZeroMask" as the default value.

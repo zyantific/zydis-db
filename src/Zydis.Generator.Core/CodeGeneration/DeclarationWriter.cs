@@ -114,4 +114,10 @@ public sealed class DeclarationWriter
 
         return new InitializerListWriter(_writer, _indented && !doNotIndent ? 4 : null);
     }
+
+    public DeclarationWriter WriteNewline()
+    {
+        _writer.WriteLine();
+        return this;
+    }
 }
