@@ -297,10 +297,6 @@ public sealed class InitializerListWriter
         {
             _writer.Write(_indentString);
         }
-        else
-        {
-            _writer.Write(' ');
-        }
     }
 
     private void EnsureMacroParenthesis()

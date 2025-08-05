@@ -68,4 +68,25 @@ public sealed record InstructionDefinition
                 : null
             : null;
     }
+
+    public BranchType GetBranchType()
+    {
+        if (Flags.HasFlag(InstructionFlagsEnum.IsShortBranch))
+        {
+            return BranchType.ShortRel;
+        }
+        else if (Flags.HasFlag(InstructionFlagsEnum.IsNearBranch))
+        {
+            return BranchType.NearRel;
+        }
+        else if (Flags.HasFlag(InstructionFlagsEnum.IsFarBranch))
+        {
+            return BranchType.Far;
+        }
+        else if (Flags.HasFlag(InstructionFlagsEnum.IsAbsBranch))
+        {
+            return BranchType.Absolute;
+        }
+        return BranchType.None;
+    }
 }

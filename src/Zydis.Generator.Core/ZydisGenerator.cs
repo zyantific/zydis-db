@@ -7,11 +7,8 @@ using System.Threading.Tasks;
 
 using Zydis.Generator.Core.CodeGeneration;
 using Zydis.Generator.Core.Common;
-using Zydis.Generator.Core.DecoderTable;
-using Zydis.Generator.Core.DecoderTree;
 using Zydis.Generator.Core.DecoderTree.Builder;
 using Zydis.Generator.Core.DecoderTree.Emitters;
-using Zydis.Generator.Core.Definitions;
 using Zydis.Generator.Core.Definitions.Builder;
 using Zydis.Generator.Core.Definitions.Emitters;
 using Zydis.Generator.Core.Serialization;
@@ -25,18 +22,17 @@ public sealed class ZydisGenerator
     private readonly EncodingRegistry _encodingRegistry = new();
     private readonly OperandsRegistry _operandsRegistry = new();
     private readonly AccessedFlagsRegistry _accessedFlagsRegistry = new();
+    private readonly EncoderDefinitionRegistry _encoderRegistry = new();
 
     public async Task ReadDefinitionsAsync(string filename, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(filename);
 
-        var i = 0;
-
         await foreach (var definition in DefinitionReader.ReadAsync(filename, cancellationToken).ConfigureAwait(false))
         {
-            i++;
             _definitionRegistry.InsertDefinition(definition);
             _decoderTreeBuilder.InsertDefinition(definition);
+            _encoderRegistry.InsertDefinition(definition);
         }
 
         _decoderTreeBuilder.InsertOpcodeTableSwitchNodes();
@@ -49,6 +45,8 @@ public sealed class ZydisGenerator
         _encodingRegistry.Initialize(allDefinitions);
         _operandsRegistry.Initialize(allDefinitions);
         _accessedFlagsRegistry.Initialize(allDefinitions);
+
+        _encoderRegistry.Optimize();
 
         //var emitter = new OpcodeTableConsoleEmitter(_definitionRegistry, _encodingRegistry, null);
         //emitter.Emit(_decoderTreeBuilder.OpcodeTables.GetTable(InstructionEncoding.Default, OpcodeMap.MAP0, null));
@@ -64,29 +62,35 @@ public sealed class ZydisGenerator
         }
 
         var statistics = new DecoderTableEmitterStatistics();
+        var utf8 = new UTF8Encoding(false);
+        var generatedSourcesPath = Path.Combine(outputDirectory, "src", "Generated");
 
-        await using var tableWriter = new StreamWriter(Path.Combine(outputDirectory, "src", "Generated", "DecoderTables.inc"), false, Encoding.UTF8); // TODO: ConfigureAwait
+        await using var tableWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "DecoderTables.inc"), false, utf8); // TODO: ConfigureAwait
 
         await GenerateOpcodeTables(tableWriter, statistics).ConfigureAwait(false);
         await GenerateOpcodeTableLookup(tableWriter).ConfigureAwait(false);
 
         await tableWriter.FlushAsync(cancellationToken).ConfigureAwait(false);
 
-        await using var definitionWriter = new StreamWriter(Path.Combine(outputDirectory, "src", "Generated", "InstructionDefinitions.inc"), false, Encoding.UTF8);
+        await using var definitionWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "InstructionDefinitions.inc"), false, utf8);
 
         await DefinitionEmitter.EmitAsync(definitionWriter, _definitionRegistry, _operandsRegistry, _accessedFlagsRegistry).ConfigureAwait(false);
 
-        await using var operandsWriter = new StreamWriter(Path.Combine(outputDirectory, "src", "Generated", "OperandDefinitions.inc"), false, Encoding.UTF8);
+        await using var operandsWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "OperandDefinitions.inc"), false, utf8);
 
         await OperandsEmitter.EmitAsync(operandsWriter, _operandsRegistry, cancellationToken).ConfigureAwait(false);
 
-        await using var encodingsWriter = new StreamWriter(Path.Combine(outputDirectory, "src", "Generated", "InstructionEncodings.inc"), false, Encoding.UTF8);
+        await using var encodingsWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "InstructionEncodings.inc"), false, utf8);
 
         await EncodingEmitter.EmitAsync(encodingsWriter, _encodingRegistry, cancellationToken).ConfigureAwait(false);
 
-        await using var flagsWriter = new StreamWriter(Path.Combine(outputDirectory, "src", "Generated", "AccessedFlags.inc"), false, Encoding.UTF8);
+        await using var flagsWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "AccessedFlags.inc"), false, utf8);
 
         await AffectedFlagsEmitter.EmitAsync(flagsWriter, _accessedFlagsRegistry, cancellationToken).ConfigureAwait(false);
+
+        await using var encoderWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "EncoderTables.inc"), false, utf8);
+
+        await EncoderTablesEmitter.EmitAsync(encoderWriter, _encoderRegistry, _definitionRegistry).ConfigureAwait(false);
     }
 
     private async Task GenerateOpcodeTables(StreamWriter writer, DecoderTableEmitterStatistics statistics)
