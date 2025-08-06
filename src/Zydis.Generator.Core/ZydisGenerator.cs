@@ -23,6 +23,8 @@ public sealed class ZydisGenerator
     private readonly OperandsRegistry _operandsRegistry = new();
     private readonly AccessedFlagsRegistry _accessedFlagsRegistry = new();
     private readonly EncoderDefinitionRegistry _encoderRegistry = new();
+    private readonly ConditionCodeRegistry _conditionCodeRegistry = new();
+    private readonly RelativeInfoRegistry _relativeInfoRegistry = new();
 
     public async Task ReadDefinitionsAsync(string filename, CancellationToken cancellationToken = default)
     {
@@ -47,6 +49,8 @@ public sealed class ZydisGenerator
         _accessedFlagsRegistry.Initialize(allDefinitions);
 
         _encoderRegistry.Optimize();
+        _conditionCodeRegistry.Initialize(_encoderRegistry.Definitions);
+        _relativeInfoRegistry.Initialize(_encoderRegistry.Definitions);
 
         //var emitter = new OpcodeTableConsoleEmitter(_definitionRegistry, _encodingRegistry, null);
         //emitter.Emit(_decoderTreeBuilder.OpcodeTables.GetTable(InstructionEncoding.Default, OpcodeMap.MAP0, null));
@@ -91,6 +95,14 @@ public sealed class ZydisGenerator
         await using var encoderWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "EncoderTables.inc"), false, utf8);
 
         await EncoderTablesEmitter.EmitAsync(encoderWriter, _encoderRegistry, _definitionRegistry).ConfigureAwait(false);
+
+        await using var conditionCodeWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "GetCcInfo.inc"), false, utf8);
+
+        await ConditionCodeEmitter.EmitAsync(conditionCodeWriter, _conditionCodeRegistry).ConfigureAwait(false);
+
+        await using var relativeInfoWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "GetRelInfo.inc"), false, utf8);
+
+        await RelativeInfoEmitter.EmitAsync(relativeInfoWriter, _relativeInfoRegistry).ConfigureAwait(false);
     }
 
     private async Task GenerateOpcodeTables(StreamWriter writer, DecoderTableEmitterStatistics statistics)

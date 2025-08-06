@@ -25,14 +25,10 @@ internal sealed class EncoderDefinitionRegistry
         {
             (definition1, definition2) = (definition2, definition1);
         }
-        if (!_swappableTracker.TryGetValue(definition1.Instruction.Mnemonic, out var index))
-        {
-            index = 1;
-            _swappableTracker[definition1.Instruction.Mnemonic] = index;
-        }
-        _swappableTracker[definition1.Instruction.Mnemonic] += 2;
+        var index = _swappableTracker.GetOrCreate(definition1.Instruction.Mnemonic, 1);
         definition1.SwappableIndex = index;
         definition2.SwappableIndex = index + 1;
+        _swappableTracker[definition1.Instruction.Mnemonic] += 2;
     }
 
     private static bool CheckSwappableOperands(IReadOnlyList<InstructionOperand>? operands1, IReadOnlyList<InstructionOperand>? operands2)

@@ -10,7 +10,7 @@ using Zydis.Generator.Core.Definitions.Builder;
 
 namespace Zydis.Generator.Core.Definitions.Emitters;
 
-internal class EncoderTablesEmitter
+internal static class EncoderTablesEmitter
 {
     private struct LookupEntry
     {

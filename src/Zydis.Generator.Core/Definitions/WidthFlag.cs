@@ -25,7 +25,7 @@ public static class WidthFlagExtensions
 
     public static string ToZydisString(this WidthFlag value)
     {
-        return string.Join(" | ", Enum.GetValues(value.GetType()).Cast<WidthFlag>()
+        return string.Join(" | ", Enum.GetValues<WidthFlag>()
             .Where(x => x != 0 && value.HasFlag(x))
             .Select(x => ZydisNames[x]));
     }
