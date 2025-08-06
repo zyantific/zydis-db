@@ -15,6 +15,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zydis.Generator.Core", "src\Zydis.Generator.Core\Zydis.Generator.Core.csproj", "{C8A7DC13-01D7-46A2-985D-BECF5093626F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zydis.Generator.SourceGenerator", "src\Zydis.Generator.SourceGenerator\Zydis.Generator.SourceGenerator.csproj", "{70AD6E24-7744-AB0F-6EBE-D39B1CD0AAD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zydis.Generator.Enums", "src\Zydis.Generator.Enums\Zydis.Generator.Enums.csproj", "{CC908FA2-1CC7-578B-FD1E-EF3DA46892F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zydis.Generator.Enums.SourceGenerator", "src\Zydis.Generator.Enums.SourceGenerator\Zydis.Generator.Enums.SourceGenerator.csproj", "{000322C6-999B-7F7F-BB64-AEBE384727B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zydis.SourceGeneration", "src\Zydis.SourceGeneration\Zydis.SourceGeneration.csproj", "{E283425E-A578-6D82-4C81-0E6080EB0A60}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +37,22 @@ Global
 		{C8A7DC13-01D7-46A2-985D-BECF5093626F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8A7DC13-01D7-46A2-985D-BECF5093626F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8A7DC13-01D7-46A2-985D-BECF5093626F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70AD6E24-7744-AB0F-6EBE-D39B1CD0AAD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70AD6E24-7744-AB0F-6EBE-D39B1CD0AAD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70AD6E24-7744-AB0F-6EBE-D39B1CD0AAD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70AD6E24-7744-AB0F-6EBE-D39B1CD0AAD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC908FA2-1CC7-578B-FD1E-EF3DA46892F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC908FA2-1CC7-578B-FD1E-EF3DA46892F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC908FA2-1CC7-578B-FD1E-EF3DA46892F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC908FA2-1CC7-578B-FD1E-EF3DA46892F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{000322C6-999B-7F7F-BB64-AEBE384727B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{000322C6-999B-7F7F-BB64-AEBE384727B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{000322C6-999B-7F7F-BB64-AEBE384727B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{000322C6-999B-7F7F-BB64-AEBE384727B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E283425E-A578-6D82-4C81-0E6080EB0A60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E283425E-A578-6D82-4C81-0E6080EB0A60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E283425E-A578-6D82-4C81-0E6080EB0A60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E283425E-A578-6D82-4C81-0E6080EB0A60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

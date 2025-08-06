@@ -1,0 +1,337 @@
+[
+  {
+    "name": "base_register::IMPLMEM_BASE",
+    "members": [
+      {
+        "name": "agpr_reg"
+      },
+      {
+        "name": "agpr_rm"
+      },
+      {
+        "name": "ax:AAX:AAX"
+      },
+      {
+        "name": "dx:ADX:ADX"
+      },
+      {
+        "name": "bx:ABX:ABX"
+      },
+      {
+        "name": "si:ASI:ASI"
+      },
+      {
+        "name": "di:ADI:ADI"
+      },
+      {
+        "name": "sp:SSP:SSP"
+      },
+      {
+        "name": "bp:SBP:SBP"
+      }
+    ],
+    "is_serializable": true
+  },
+  {
+    "name": "branch_type",
+    "members": [
+      {
+        "name": "none"
+      },
+      {
+        "name": "short_rel::SHORT"
+      },
+      {
+        "name": "near_rel::NEAR"
+      },
+      {
+        "name": "far"
+      },
+      {
+        "name": "absolute"
+      }
+    ]
+  },
+  {
+    "name": "element_type::IELEMENT_TYPE",
+    "members": [
+      {
+        "name": "invalid"
+      },
+      {
+        "name": "variable"
+      },
+      {
+        "name": "struct"
+      },
+      {
+        "name": "int:INT"
+      },
+      {
+        "name": "uint:UINT"
+      },
+      {
+        "name": "int1:INT1"
+      },
+      {
+        "name": "int8:INT8"
+      },
+      {
+        "name": "int8x4:INT8X4"
+      },
+      {
+        "name": "int16:INT16"
+      },
+      {
+        "name": "int16x2:INT16X2"
+      },
+      {
+        "name": "int32:INT32"
+      },
+      {
+        "name": "int64:INT64"
+      },
+      {
+        "name": "int128:INT128"
+      },
+      {
+        "name": "uint8:UINT8"
+      },
+      {
+        "name": "uint8x4:UINT8X4"
+      },
+      {
+        "name": "uint16:UINT16"
+      },
+      {
+        "name": "uint16x2:UINT16X2"
+      },
+      {
+        "name": "uint32:UINT32"
+      },
+      {
+        "name": "uint64:UINT64"
+      },
+      {
+        "name": "uint128:UINT128"
+      },
+      {
+        "name": "uint256:UINT256"
+      },
+      {
+        "name": "float16:FLOAT16"
+      },
+      {
+        "name": "float16x2:FLOAT16X2"
+      },
+      {
+        "name": "float32:FLOAT32"
+      },
+      {
+        "name": "float64:FLOAT64"
+      },
+      {
+        "name": "float80:FLOAT80"
+      },
+      {
+        "name": "bfloat16x2:BFLOAT16X2"
+      },
+      {
+        "name": "bcd80:BCD80"
+      },
+      {
+        "name": "cc3:CC3"
+      },
+      {
+        "name": "cc5:CC5"
+      }
+    ],
+    "is_serializable": true
+  },
+  {
+    "name": "evex_element_size::IELEMENT_SIZE",
+    "members": [
+      {
+        "name": "invalid"
+      },
+      {
+        "name": "8:E8"
+      },
+      {
+        "name": "16:E16"
+      },
+      {
+        "name": "32:E32"
+      },
+      {
+        "name": "64:E64"
+      },
+      {
+        "name": "128:E128"
+      }
+    ],
+    "is_serializable": true
+  },
+  {
+    "name": "evex_functionality::EVEX_FUNC",
+    "members": [
+      {
+        "name": "invalid"
+      },
+      {
+        "name": "bc:BC"
+      },
+      {
+        "name": "rc:RC"
+      },
+      {
+        "name": "sae:SAE"
+      }
+    ],
+    "is_serializable": true
+  },
+  {
+    "name": "evex_tuple_type::TUPLETYPE",
+    "members": [
+      {
+        "name": "invalid"
+      },
+      {
+        "name": "no_scale"
+      },
+      {
+        "name": "fv:FV"
+      },
+      {
+        "name": "hv:HV"
+      },
+      {
+        "name": "fvm:FVM"
+      },
+      {
+        "name": "t1s:T1S"
+      },
+      {
+        "name": "t1f:T1F"
+      },
+      {
+        "name": "gscat:GSCAT"
+      },
+      {
+        "name": "t2:T2"
+      },
+      {
+        "name": "t4:T4"
+      },
+      {
+        "name": "t8:T8"
+      },
+      {
+        "name": "hvm:HVM"
+      },
+      {
+        "name": "qvm:QVM"
+      },
+      {
+        "name": "ovm:OVM"
+      },
+      {
+        "name": "m128:M128"
+      },
+      {
+        "name": "dup:DUP"
+      },
+      {
+        "name": "t1_4x:T14X"
+      },
+      {
+        "name": "quarter:QUARTER"
+      }
+    ],
+    "is_serializable": true
+  },
+  {
+    "name": "instruction_encoding",
+    "members": [
+      {
+        "name": "default::LEGACY"
+      },
+      {
+        "name": "vex:VEX"
+      },
+      {
+        "name": "evex:EVEX"
+      },
+      {
+        "name": "mvex:MVEX"
+      },
+      {
+        "name": "xop:XOP"
+      },
+      {
+        "name": "3dnow:AMD3DNOW"
+      }
+    ],
+    "is_serializable": true
+  },
+  {
+    "name": "mask_mode::MASK_POLICY",
+    "members": [
+      {
+        "name": "invalid"
+      },
+      {
+        "name": "allowed"
+      },
+      {
+        "name": "required"
+      },
+      {
+        "name": "forbidden"
+      }
+    ],
+    "is_serializable": true
+  },
+  {
+    "name": "opcode_map",
+    "members": [
+      {
+        "name": "default:MAP0"
+      },
+      {
+        "name": "0f:M0F"
+      },
+      {
+        "name": "0f38:M0F38"
+      },
+      {
+        "name": "0f3a:M0F3A"
+      },
+      {
+        "name": "map4:MAP4"
+      },
+      {
+        "name": "map5:MAP5"
+      },
+      {
+        "name": "map6:MAP6"
+      },
+      {
+        "name": "map7:MAP7"
+      },
+      {
+        "name": "0f0f:M0F0F"
+      },
+      {
+        "name": "xop8:XOP8"
+      },
+      {
+        "name": "xop9:XOP9"
+      },
+      {
+        "name": "xopa:XOPA"
+      }
+    ],
+    "is_serializable": true
+  }
+]

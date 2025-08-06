@@ -6,6 +6,7 @@ using System.Linq;
 using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.DecoderTree;
 using Zydis.Generator.Core.Extensions;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.Definitions.Builder;
 
@@ -82,8 +83,8 @@ internal sealed class EncoderDefinitionRegistry
         }
         foreach (var definition in definitions)
         {
-            var selectors1 = definition.GetSelectors(SelectorDefinitions.MandatoryPrefix.Name);
-            var selectors2 = newDefinition.GetSelectors(SelectorDefinitions.MandatoryPrefix.Name);
+            var selectors1 = definition.GetSelectors(MandatoryPrefixNode.NodeDefinition.Instance.Name);
+            var selectors2 = newDefinition.GetSelectors(MandatoryPrefixNode.NodeDefinition.Instance.Name);
             if (!selectors1.Compare(selectors2) ||
                 definition.Instruction.OpcodeMap != newDefinition.Instruction.OpcodeMap)
             {

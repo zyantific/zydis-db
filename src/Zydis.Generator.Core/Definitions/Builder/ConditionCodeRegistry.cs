@@ -18,7 +18,7 @@ internal sealed class ConditionCodeRegistry
         Dictionary<SourceConditionCode, List<string>> cases = new();
         foreach (var definition in definitions)
         {
-            var sccFilter = definition.GetIntFilter(SelectorDefinitions.EvexScc, -1);
+            var sccFilter = definition.GetIntFilter(EvexSccNode.NodeDefinition.Instance, -1);
             if (!definition.Instruction.HasAnnotation<AnnotationApxCc>() && sccFilter == -1)
             {
                 continue;

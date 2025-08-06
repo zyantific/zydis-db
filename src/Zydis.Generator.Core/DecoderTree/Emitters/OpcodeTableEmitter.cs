@@ -36,7 +36,7 @@ public abstract class OpcodeTableEmitter
         ArgumentNullException.ThrowIfNull(node);
 
         CurrentAddress = startAddress;
-        TargetAddress = startAddress + node.EncodedSize;
+        TargetAddress = startAddress + node.Definition.EncodedSize;
 
         _queue.Enqueue(node);
 
@@ -49,40 +49,32 @@ public abstract class OpcodeTableEmitter
         return TargetAddress - startAddress;
     }
 
-    protected abstract void EmitSelectorNode(SelectorNode node, IEnumerable<(int Index, DecoderTreeNode? TargetNode, int TargetAddress, int OffsetToTarget)> targets);
-
-    protected abstract void EmitFunctionNode(FunctionNode node, DecoderTreeNode? targetNode, int targetAddress, int offsetToTarget);
+    protected abstract void EmitDecisionNode(DecisionNode node, IEnumerable<(int Index, DecoderTreeNode? TargetNode, int TargetAddress, int OffsetToTarget)> targets);
 
     protected abstract void EmitDefinitionNode(DefinitionNode node);
 
-    protected abstract void EmitSelectorOpcodeTableNode(SelectOpcodeTableNode node);
+    protected abstract void EmitOpcodeTableSwitchNode(OpcodeTableSwitchNode node);
 
     private void VisitNode(DecoderTreeNode? node)
     {
         switch (node)
         {
-            case SelectorNode sn:
-                VisitSelector(sn);
+            case NonTerminalNode n:
+                VisitNonTerminalNode(n);
                 break;
 
-            case FunctionNode fn:
-                VisitFunction(fn);
-                break;
-
-            case TerminalNode tn:
-                VisitTerminalNode(tn);
+            case TerminalNode n:
+                VisitTerminalNode(n);
                 break;
 
             default:
-                throw new ArgumentException(
-                    $"Node must be a '{nameof(SelectorNode)}', '{nameof(FunctionNode)}' or '{nameof(DefinitionNode)}'.",
-                    nameof(node));
+                throw new NotSupportedException($"Unsupported node type '{node?.GetType().Name ?? "null"}'.");
         }
     }
 
-    private void VisitSelector(SelectorNode node)
+    private void VisitNonTerminalNode(NonTerminalNode node)
     {
-        var effectiveEntries = node.GetEffectiveEntries().ToArray();
+        var effectiveEntries = node.EnumerateSlots().ToArray();
 
         // Determine target offsets.
 
@@ -101,24 +93,32 @@ public abstract class OpcodeTableEmitter
                 continue;
             }
 
-            nextTargetOffset += entry.EncodedSize;
+            nextTargetOffset += entry.Definition.EncodedSize;
         }
 
-        // Emit selector table.
+        // Emit.
 
-        EmitSelectorNode(node, EnumerateEntries());
-        _statistics?.SelectorTableEmitted(node);
+        switch (node)
+        {
+            case DecisionNode n:
+                EmitDecisionNode(n, EnumerateEntries());
+                _statistics?.DecisionNodeEmitted(n);
+                break;
 
-        CurrentAddress += node.EncodedSize;
+            default:
+                throw new NotSupportedException($"Unsupported node type '{node.GetType().Name}'.");
+        }
+
+        CurrentAddress += node.Definition.EncodedSize;
         TargetAddress += nextTargetOffset;
 
-        // Recursively visit switch-table entry nodes.
+        // Recursively child nodes.
 
         var visited = new HashSet<DecoderTreeNode>();
 
         foreach (var entry in effectiveEntries)
         {
-            if ((entry is null) || (entry.EncodedSize is 0))
+            if ((entry is null) || (entry.Definition.EncodedSize is 0))
             {
                 // Do not visit leaf nodes.
                 continue;
@@ -150,19 +150,9 @@ public abstract class OpcodeTableEmitter
 
                 _statistics?.UpdateHighestOffset(offset);
 
-                yield return entry switch
-                {
-                    SelectorNode or FunctionNode or DefinitionNode or SelectOpcodeTableNode => (i++, entry, targetAddress, offset),
-                    DataNode => (i++, entry, -1, -1),
-                    _ => throw new InvalidOperationException()
-                };
+                yield return (i++, entry, targetAddress, offset);
             }
         }
-    }
-
-    private void VisitFunction(FunctionNode node)
-    {
-        throw new NotImplementedException();
     }
 
     private void VisitTerminalNode(TerminalNode node)
@@ -173,30 +163,30 @@ public abstract class OpcodeTableEmitter
                 EmitDefinitionNode(n);
                 break;
 
-            case SelectOpcodeTableNode n:
-                EmitSelectorOpcodeTableNode(n);
+            case OpcodeTableSwitchNode n:
+                EmitOpcodeTableSwitchNode(n);
                 break;
 
             default:
                 throw new NotSupportedException($"Terminal node of type '{node.GetType().Name}' is not supported.");
         }
 
-        CurrentAddress += node.EncodedSize;
+        CurrentAddress += node.Definition.EncodedSize;
     }
 }
 
 public sealed record DecoderTableEmitterStatistics
 {
-    private readonly Dictionary<(SelectorDefinition Definition, string Arguments), int> _selectorTables = new();
+    private readonly Dictionary<(DecisionNodeDefinition Definition, string Arguments), int> _selectorTables = [];
 
-    public IDictionary<(SelectorDefinition Definition, string Arguments), int> SelectorTables => _selectorTables;
+    public IDictionary<(DecisionNodeDefinition Definition, string Arguments), int> SelectorTables => _selectorTables;
     public int HighestOffset { get; private set; }
 
-    internal void SelectorTableEmitted(SelectorNode node)
+    internal void DecisionNodeEmitted(DecisionNode node)
     {
         ArgumentNullException.ThrowIfNull(node);
 
-        var key = (node.Definition, string.Join(',', node.Arguments.Select(x => x.Data)));
+        var key = (node.Definition, /* TODO: string.Join(',', node.Arguments.Select(x => x.Data)) */ "");
         var count = _selectorTables.GetValueOrDefault(key, 0);
 
         _selectorTables[key] = count + 1;

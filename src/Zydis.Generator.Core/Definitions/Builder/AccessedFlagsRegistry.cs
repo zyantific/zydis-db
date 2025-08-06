@@ -7,7 +7,7 @@ using Zydis.Generator.Core.Helpers;
 
 namespace Zydis.Generator.Core.Definitions.Builder;
 
-internal class AccessedFlagsRegistry
+internal sealed class AccessedFlagsRegistry
 {
     private readonly SortedSet<DefinitionAccessedFlags> _accessedFlags = new();
     private readonly ConditionalWeakTable<InstructionDefinition, DefinitionAccessedFlags> _lut = new();

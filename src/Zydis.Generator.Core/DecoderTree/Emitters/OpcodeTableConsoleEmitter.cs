@@ -1,16 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
 
 using Spectre.Console;
 
-using Zydis.Generator.Core.DecoderTree;
-using Zydis.Generator.Core.DecoderTree.Emitters;
-using Zydis.Generator.Core.Definitions;
 using Zydis.Generator.Core.Definitions.Builder;
 
-namespace Zydis.Generator.Core.DecoderTable;
+namespace Zydis.Generator.Core.DecoderTree.Emitters;
 
 internal sealed class OpcodeTableConsoleEmitter :
     OpcodeTableEmitter
@@ -30,7 +25,7 @@ internal sealed class OpcodeTableConsoleEmitter :
         _encodingRegistry = encodingRegistry;
     }
 
-    protected override void EmitSelectorNode(SelectorNode node, IEnumerable<(int Index, DecoderTreeNode? TargetNode, int TargetAddress, int OffsetToTarget)> targets)
+    protected override void EmitDecisionNode(DecisionNode node, IEnumerable<(int Index, DecoderTreeNode? TargetNode, int TargetAddress, int OffsetToTarget)> targets)
     {
         ArgumentNullException.ThrowIfNull(node);
         ArgumentNullException.ThrowIfNull(targets);
@@ -40,21 +35,24 @@ internal sealed class OpcodeTableConsoleEmitter :
         // Print Header
 
         PrintOffsetAndIndex(0);
-        AnsiConsole.MarkupLine($"TYPE = [{ColorConstants.ColorSelector}]{node.Definition.Name}[/] ");
+        AnsiConsole.MarkupLine($"TYPE = [{ColorConstants.ColorDecision}]{node.Definition.Name}[/] ");
 
-        // Print Arguments
+        // TODO:
+        //// Print Arguments
 
-        var startIndex = (node.Arguments.Count == 0) ? 1 : 0; // TYPE and ARG0 is encoded in the same position
-        for (var i = 0; i < node.Arguments.Count; ++i)
-        {
-            var parameter = node.Definition.Parameters[i];
-            var argument = node.Arguments[i];
+        //var startIndex = (node.Arguments.Count == 0) ? 1 : 0; // TYPE and ARG0 is encoded in the same position
+        //for (var i = 0; i < node.Arguments.Count; ++i)
+        //{
+        //    var parameter = node.Definition.Parameters[i];
+        //    var argument = node.Arguments[i];
 
-            PrintOffsetAndIndex(i);
-            AnsiConsole.MarkupLine($"[{GetNodeColor(argument)}]{parameter} = {GetNodeText(argument)}[/]");
+        //    PrintOffsetAndIndex(i);
+        //    AnsiConsole.MarkupLine($"[{GetNodeColor(argument)}]{parameter} = {GetNodeText(argument)}[/]");
 
-            ++startIndex;
-        }
+        //    ++startIndex;
+        //}
+
+        var startIndex = 0;
 
         foreach (var (index, targetNode, targetAddress, offsetToTarget) in targets)
         {
@@ -64,7 +62,7 @@ internal sealed class OpcodeTableConsoleEmitter :
             }
 
             PrintOffsetAndIndex(startIndex + index);
-            AnsiConsole.Markup($"[{ColorConstants.ColorEmpty}]/* {node.Definition.Slots[index],6} */[/] ");
+            AnsiConsole.Markup($"[{ColorConstants.ColorEmpty}]/* {node.Definition.GetSlotName(index),6} */[/] ");
 
             if (targetNode is null)
             {
@@ -79,14 +77,11 @@ internal sealed class OpcodeTableConsoleEmitter :
         }
     }
 
-    protected override void EmitFunctionNode(FunctionNode node, DecoderTreeNode? targetNode, int targetAddress, int offsetToTarget)
-    {
-        throw new NotImplementedException();
-    }
-
     protected override void EmitDefinitionNode(DefinitionNode node)
     {
         ArgumentNullException.ThrowIfNull(node);
+
+        var definition = node.InstructionDefinition;
 
         PrintSymbol(node);
 
@@ -96,13 +91,13 @@ internal sealed class OpcodeTableConsoleEmitter :
         AnsiConsole.MarkupLine($"TYPE = [{ColorConstants.ColorDefinition}]DEFINITION[/] ");
 
         PrintOffsetAndIndex(0);
-        AnsiConsole.MarkupLine($"[{ColorConstants.ColorData}]ENCODING_ID = {_encodingRegistry.GetEncodingId(node.Definition):X2}[/]");
+        AnsiConsole.MarkupLine($"[{ColorConstants.ColorData}]ENCODING_ID = {_encodingRegistry.GetEncodingId(definition):X2}[/]");
 
         PrintOffsetAndIndex(1);
-        AnsiConsole.MarkupLine($"[{ColorConstants.ColorData}]INSTRUCTION_ID = {_definitionRegistry.GetDefinitionId(node.Definition):X4}[/] [{ColorConstants.ColorEmpty}]/* {node.Definition.Mnemonic} */[/]");
+        AnsiConsole.MarkupLine($"[{ColorConstants.ColorData}]INSTRUCTION_ID = {_definitionRegistry.GetDefinitionId(definition):X4}[/] [{ColorConstants.ColorEmpty}]/* {definition.Mnemonic} */[/]");
     }
 
-    protected override void EmitSelectorOpcodeTableNode(SelectOpcodeTableNode node)
+    protected override void EmitOpcodeTableSwitchNode(OpcodeTableSwitchNode node)
     {
         ArgumentNullException.ThrowIfNull(node);
 
@@ -145,10 +140,9 @@ internal sealed class OpcodeTableConsoleEmitter :
         return node switch
         {
             null => ColorConstants.ColorEmpty,
-            DataNode => ColorConstants.ColorData,
             DefinitionNode => ColorConstants.ColorDefinition,
-            SelectorNode => ColorConstants.ColorSelector,
-            FunctionNode => ColorConstants.ColorFunction,
+            DecisionNode => ColorConstants.ColorDecision,
+            //FunctionNode => ColorConstants.ColorFunction,
             OverflowNode => ColorConstants.ColorOverflow,
             _ => throw new NotSupportedException()
         };

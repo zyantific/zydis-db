@@ -8,6 +8,7 @@ using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.DecoderTree;
 using Zydis.Generator.Core.Extensions;
 using Zydis.Generator.Core.Helpers;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.Definitions;
 
@@ -57,23 +58,23 @@ public sealed class EncodableDefinition :
     public EncodableDefinition(InstructionDefinition instruction)
     {
         Instruction = instruction;
-        IsEncodable = !GetBoolFilter(SelectorDefinitions.FeatureAmd);
+        IsEncodable = !GetBoolFilter(FeatureAmdNode.NodeDefinition.Instance);
         if (Instruction.Mnemonic == "nop" && IsEncodable)
         {
-            if (!GetBoolFilter(SelectorDefinitions.FeatureMpx, true) ||
-                !GetBoolFilter(SelectorDefinitions.FeatureCldemote, true) ||
-                !GetBoolFilter(SelectorDefinitions.FeatureCet, true) ||
-                !GetBoolFilter(SelectorDefinitions.FeatureKnc, true) ||
-                (GetFilter(SelectorDefinitions.ModrmReg)?.StartsWith('!') ?? false))
+            if (!GetBoolFilter(FeatureMpxNode.NodeDefinition.Instance, true) ||
+                !GetBoolFilter(FeatureCldemoteNode.NodeDefinition.Instance, true) ||
+                !GetBoolFilter(FeatureCetNode.NodeDefinition.Instance, true) ||
+                !GetBoolFilter(FeatureKncNode.NodeDefinition.Instance, true) ||
+                (GetFilter(ModrmRegNode.NodeDefinition.Instance)?.StartsWith('!') ?? false))
             {
                 IsEncodable = false;
             }
         }
-        AddressSizes = GetWidthFilter(SelectorDefinitions.AddressSize);
-        OperandSizes = GetWidthFilter(SelectorDefinitions.OperandSize);
-        RexW = GetBoolFilter(SelectorDefinitions.RexW);
-        EvexNd = GetBoolFilter(SelectorDefinitions.EvexNd);
-        EvexNf = GetBoolFilter(SelectorDefinitions.EvexNf);
+        AddressSizes = GetWidthFilter(AddressSizeNode.NodeDefinition.Instance);
+        OperandSizes = GetWidthFilter(OperandSizeNode.NodeDefinition.Instance);
+        RexW = GetBoolFilter(RexWNode.NodeDefinition.Instance);
+        EvexNd = GetBoolFilter(EvexNdNode.NodeDefinition.Instance);
+        EvexNf = GetBoolFilter(EvexNfNode.NodeDefinition.Instance);
         SetAllowedModes();
         SetRex2();
         SetMandatoryPrefix();
@@ -85,7 +86,7 @@ public sealed class EncodableDefinition :
     private void EstimateSize()
     {
         MinSize = 1;
-        var rexW = GetBoolFilter(SelectorDefinitions.RexW);
+        var rexW = GetBoolFilter(RexWNode.NodeDefinition.Instance);
         if (Instruction.Encoding is not (InstructionEncoding.XOP or InstructionEncoding.VEX or InstructionEncoding.EVEX or InstructionEncoding.MVEX) &&
             MandatoryPrefix is not (MandatoryPrefix.None or MandatoryPrefix.Ignore))
         {
@@ -110,9 +111,11 @@ public sealed class EncodableDefinition :
                     MinSize += 2;
                 }
                 break;
+
             case InstructionEncoding.XOP:
                 MinSize += 3;
                 break;
+
             case InstructionEncoding.VEX:
                 MinSize += 2;
                 if (rexW || Instruction.OpcodeMap != OpcodeMap.M0F)
@@ -120,9 +123,11 @@ public sealed class EncodableDefinition :
                     MinSize += 1;
                 }
                 break;
+
             case InstructionEncoding.EVEX or InstructionEncoding.MVEX:
                 MinSize += 4;
                 break;
+
             default:
                 throw new NotSupportedException($"Invalid encoding {Instruction.Encoding}");
         }
@@ -168,7 +173,7 @@ public sealed class EncodableDefinition :
         {
             MinSize += 1;
         }
-        if (hasSib || (hasMem && GetIntFilter(SelectorDefinitions.ModrmRm) == 4))
+        if (hasSib || (hasMem && GetIntFilter(ModrmRmNode.NodeDefinition.Instance) == 4))
         {
             MinSize += 1;
         }
@@ -177,7 +182,7 @@ public sealed class EncodableDefinition :
 
     private void SetVectorLength()
     {
-        var vectorLength = GetVectorLengthFilter(SelectorDefinitions.VectorLength);
+        var vectorLength = GetVectorLengthFilter(VectorLengthNode.NodeDefinition.Instance);
         var evexVectorLength = Instruction.Evex?.VectorLength ?? VectorLength.Default;
         if (vectorLength != evexVectorLength)
         {
@@ -195,18 +200,18 @@ public sealed class EncodableDefinition :
 
     private void SetModrm()
     {
-        Modrm |= GetFilter(SelectorDefinitions.ModrmMod) switch
+        Modrm |= GetFilter(ModrmModNode.NodeDefinition.Instance) switch
         {
             null or "!3" => 0,
             "3" => 3 << 6,
             _ => throw new NotSupportedException("Invalid value for ModrmMod selector")
         };
-        Modrm |= (GetIntFilter(SelectorDefinitions.ModrmReg) << 3) | GetIntFilter(SelectorDefinitions.ModrmRm);
+        Modrm |= (GetIntFilter(ModrmRegNode.NodeDefinition.Instance) << 3) | GetIntFilter(ModrmRmNode.NodeDefinition.Instance);
     }
 
     private void SetMandatoryPrefix()
     {
-        MandatoryPrefix = GetFilter(SelectorDefinitions.MandatoryPrefix) switch
+        MandatoryPrefix = GetFilter(MandatoryPrefixNode.NodeDefinition.Instance) switch
         {
             null or "none" => MandatoryPrefix.None,
             "ignore" => MandatoryPrefix.Ignore,
@@ -219,7 +224,7 @@ public sealed class EncodableDefinition :
 
     private void SetRex2()
     {
-        Rex2 = GetFilter(SelectorDefinitions.Rex2) switch
+        Rex2 = GetFilter(Rex2Node.NodeDefinition.Instance) switch
         {
             null => Rex2Type.Allowed,
             "no_rex2" => Rex2Type.Forbidden,
@@ -238,8 +243,8 @@ public sealed class EncodableDefinition :
 
     private void SetAllowedModes()
     {
-        Modes = GetWidthFilter(SelectorDefinitions.Mode);
-        var rexW = GetBoolFilter(SelectorDefinitions.RexW);
+        Modes = GetWidthFilter(ModeNode.NodeDefinition.Instance);
+        var rexW = GetBoolFilter(RexWNode.NodeDefinition.Instance);
         var force64 = rexW && Instruction.Encoding is not (InstructionEncoding.VEX or InstructionEncoding.EVEX or InstructionEncoding.XOP);
         switch (Modes)
         {
@@ -253,18 +258,21 @@ public sealed class EncodableDefinition :
                     throw new NotSupportedException();
                 }
                 break;
+
             case WidthFlag.Width64:
                 if (AddressSizes == WidthFlag.Width16)
                 {
                     throw new NotSupportedException();
                 }
                 break;
+
             case WidthFlag.Width16 | WidthFlag.Width32 | WidthFlag.Width64:
                 if (force64 || AddressSizes == WidthFlag.Width64 || OperandSizes == WidthFlag.Width64)
                 {
                     Modes = WidthFlag.Width64;
                 }
                 break;
+
             default:
                 throw new NotSupportedException($"Invalid mode {Modes.ToZydisString()}");
         }
@@ -402,7 +410,7 @@ public sealed class EncodableDefinition :
         }
     }
 
-    public WidthFlag GetWidthFilter(SelectorDefinition selector)
+    public WidthFlag GetWidthFilter(DecisionNodeDefinition selector)
     {
         return GetFilter(selector) switch
         {
@@ -417,7 +425,7 @@ public sealed class EncodableDefinition :
         };
     }
 
-    public VectorLength GetVectorLengthFilter(SelectorDefinition selector)
+    public VectorLength GetVectorLengthFilter(DecisionNodeDefinition selector)
     {
         return GetFilter(selector) switch
         {
@@ -429,7 +437,7 @@ public sealed class EncodableDefinition :
         };
     }
 
-    public int GetIntFilter(SelectorDefinition selector, int defaultValue = 0)
+    public int GetIntFilter(DecisionNodeDefinition selector, int defaultValue = 0)
     {
         return GetFilter(selector) switch
         {
@@ -438,7 +446,7 @@ public sealed class EncodableDefinition :
         };
     }
 
-    public bool GetBoolFilter(SelectorDefinition selector, bool defaultValue = false)
+    public bool GetBoolFilter(DecisionNodeDefinition selector, bool defaultValue = false)
     {
         return GetFilter(selector) switch
         {
@@ -449,14 +457,15 @@ public sealed class EncodableDefinition :
         };
     }
 
-    public string? GetFilter(SelectorDefinition selector)
+    public string? GetFilter(DecisionNodeDefinition selector)
     {
         ArgumentNullException.ThrowIfNull(selector);
 
-        if (!(Instruction.SelectorValues?.TryGetValue(selector.Name, out var value) ?? false))
+        if (!(Instruction.Pattern?.TryGetValue(selector.Name, out var value) ?? false))
         {
             return null;
         }
+
         return value.ValueKind is JsonValueKind.String ? value.ToString() : throw new InvalidDataException();
     }
 
@@ -487,7 +496,7 @@ public sealed class EncodableDefinition :
 
     public Dictionary<string, string> GetSelectors()
     {
-        return Instruction.SelectorValues?.Select(x => (x.Key, x.Value.ToString())).ToDictionary() ?? [];
+        return Instruction.Pattern?.Select(x => (x.Key, x.Value.ToString())).ToDictionary() ?? [];
     }
 
     public Dictionary<string, string> GetSelectors(params string[] ignoreList)
@@ -566,7 +575,7 @@ public sealed class EncodableDefinition :
         {
             return false;
         }
-        if (GetBoolFilter(SelectorDefinitions.PrefixGroup1) != definition.GetBoolFilter(SelectorDefinitions.PrefixGroup1))
+        if (GetBoolFilter(PrefixGroup1Node.NodeDefinition.Instance) != definition.GetBoolFilter(PrefixGroup1Node.NodeDefinition.Instance))
         {
             return false;
         }
@@ -578,16 +587,16 @@ public sealed class EncodableDefinition :
         var repeatPrefix = GetRepeatPrefix();
         if (repeatPrefix != definition.GetRepeatPrefix() ||
             (repeatPrefix == MandatoryPrefix.Ignore &&
-            GetFilter(SelectorDefinitions.RexW) == definition.GetFilter(SelectorDefinitions.RexW)))
+            GetFilter(RexWNode.NodeDefinition.Instance) == definition.GetFilter(RexWNode.NodeDefinition.Instance)))
         {
             return true;
         }
-        var myfilters = GetSelectors(SelectorDefinitions.RexW.Name);
-        var otherFilters = definition.GetSelectors(SelectorDefinitions.RexW.Name);
+        var myfilters = GetSelectors(RexWNode.NodeDefinition.Instance.Name);
+        var otherFilters = definition.GetSelectors(RexWNode.NodeDefinition.Instance.Name);
         if (myfilters.GetValueOrDefault("operand_size", "") == "64" && otherFilters.GetValueOrDefault("operand_size", "") == "!64")
         {
-            myfilters.Remove(SelectorDefinitions.OperandSize.Name);
-            otherFilters.Remove(SelectorDefinitions.OperandSize.Name);
+            myfilters.Remove(OperandSizeNode.NodeDefinition.Instance.Name);
+            otherFilters.Remove(OperandSizeNode.NodeDefinition.Instance.Name);
             _forcedSizeHint = true;
         }
         if (myfilters.Compare(otherFilters))

@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 
 using Zydis.Generator.Core.Helpers;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.Definitions;
 

@@ -4,6 +4,7 @@ using System.Linq;
 
 using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.Helpers;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.Definitions.Builder;
 

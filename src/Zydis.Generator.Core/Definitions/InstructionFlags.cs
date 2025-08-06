@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 
 using Zydis.Generator.Core.Helpers;
 using Zydis.Generator.Core.Serialization;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.Definitions;
 
@@ -46,7 +47,7 @@ public sealed record InstructionFlags :
                 Access = fpuAccess.Value,
                 Type = OperandType.ImplicitReg,
                 Register = Register.regX87STATUS,
-                ElementType = ElementType.STRUCT,
+                ElementType = ElementType.Struct,
                 IsVisible = false
             };
         }
