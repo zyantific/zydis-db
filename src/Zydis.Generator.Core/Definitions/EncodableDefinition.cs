@@ -379,7 +379,7 @@ public sealed class EncodableDefinition :
         return SizeHint.None;
     }
 
-    private IEnumerable<InstructionOperand> GetVisibleOperands()
+    public IEnumerable<InstructionOperand> GetVisibleOperands()
     {
         foreach (var operand in Instruction.Operands ?? Enumerable.Empty<InstructionOperand>())
         {
@@ -391,7 +391,7 @@ public sealed class EncodableDefinition :
         }
     }
 
-    private IEnumerable<InstructionOperand> GetHiddenOperands()
+    public IEnumerable<InstructionOperand> GetHiddenOperands()
     {
         foreach (var operand in Instruction.Operands ?? Enumerable.Empty<InstructionOperand>())
         {
@@ -402,7 +402,7 @@ public sealed class EncodableDefinition :
         }
     }
 
-    private WidthFlag GetWidthFilter(SelectorDefinition selector)
+    public WidthFlag GetWidthFilter(SelectorDefinition selector)
     {
         return GetFilter(selector) switch
         {
@@ -417,7 +417,7 @@ public sealed class EncodableDefinition :
         };
     }
 
-    private VectorLength GetVectorLengthFilter(SelectorDefinition selector)
+    public VectorLength GetVectorLengthFilter(SelectorDefinition selector)
     {
         return GetFilter(selector) switch
         {
@@ -429,7 +429,7 @@ public sealed class EncodableDefinition :
         };
     }
 
-    private int GetIntFilter(SelectorDefinition selector, int defaultValue = 0)
+    public int GetIntFilter(SelectorDefinition selector, int defaultValue = 0)
     {
         return GetFilter(selector) switch
         {
@@ -438,7 +438,7 @@ public sealed class EncodableDefinition :
         };
     }
 
-    private bool GetBoolFilter(SelectorDefinition selector, bool defaultValue = false)
+    public bool GetBoolFilter(SelectorDefinition selector, bool defaultValue = false)
     {
         return GetFilter(selector) switch
         {
@@ -449,8 +449,10 @@ public sealed class EncodableDefinition :
         };
     }
 
-    private string? GetFilter(SelectorDefinition selector)
+    public string? GetFilter(SelectorDefinition selector)
     {
+        ArgumentNullException.ThrowIfNull(selector);
+
         if (!(Instruction.SelectorValues?.TryGetValue(selector.Name, out var value) ?? false))
         {
             return null;
