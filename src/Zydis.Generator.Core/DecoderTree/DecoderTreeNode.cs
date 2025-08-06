@@ -1,39 +1,65 @@
-using System.Diagnostics.Contracts;
+using System;
 
 namespace Zydis.Generator.Core.DecoderTree;
+
+public abstract class DecoderTreeNodeDefinition
+{
+    /// <summary>
+    /// The name of the decoder tree node.
+    /// </summary>
+    public abstract string Name { get; }
+
+    /// <summary>
+    /// The number of <c>ZydisDecoderTreeNode</c> items that are required to represent this node in its encoded form.
+    /// <para>
+    ///     The minimum encoded size is <c>1</c> (to be able to encode the node header).
+    /// </para>
+    /// <para>
+    ///     A <see cref="EncodedSize"/> value of <c>0</c> indicates a synthetic, generator specific, node that is
+    ///     impossible to encode.
+    /// </para>
+    /// </summary>
+    public abstract int EncodedSize { get; }
+}
 
 /// <summary>
 /// Represents a node in the decoder table tree.
 /// </summary>
-/// <remarks>
-/// This tree representation is purely used for the code generation process and does not reflect the exact structure
-/// of the resulting C decoder tables.
-/// </remarks>
 public abstract class DecoderTreeNode
 {
     /// <summary>
-    /// The size (number of items) of the encoded table
-    /// <para>
-    ///     <c>0</c> indicates a leaf node (instruction definition) or a synthetic node that is impossible to encode.
-    /// </para>
+    /// The definition for this node type.
     /// </summary>
-    public abstract int EncodedSize { get; }
+    public DecoderTreeNodeDefinition Definition { get; }
 
     /// <summary>
     /// Constructs a new <see cref="DecoderTreeNode"/>.
     /// </summary>
-    protected DecoderTreeNode()
+    protected DecoderTreeNode(DecoderTreeNodeDefinition definition)
     {
+        ArgumentNullException.ThrowIfNull(definition);
+
+        Definition = definition;
     }
 
-    /// <summary>
-    /// Calculates the total encoded size of the current node and all its descendants.
-    /// </summary>
-    /// <remarks>
-    /// This method traverses the node hierarchy recursively, summing the encoded sizes of the current node and all its
-    /// child nodes. It is useful for determining the complete size of a tree structure in its encoded form.
-    /// </remarks>
-    /// <returns>The total encoded size of the current node and its descendants.</returns>
-    [Pure]
-    public abstract int CalcEncodedSizeRecursive();
+    // TODO: Implement visitor pattern.
+    ///// <summary>
+    ///// Calculates the total encoded size of the current node and all its descendants.
+    ///// </summary>
+    ///// <remarks>
+    ///// This method traverses the node hierarchy recursively, summing the encoded sizes of the current node and all its
+    ///// child nodes. It is useful for determining the complete size of a tree structure in its encoded form.
+    ///// </remarks>
+    ///// <returns>The total encoded size of the current node and its descendants.</returns>
+    //[Pure]
+    //public abstract int CalcEncodedSizeRecursive();
+
+    #region Debugging
+
+    public override string ToString()
+    {
+        return Definition.Name;
+    }
+
+    #endregion Debugging
 }

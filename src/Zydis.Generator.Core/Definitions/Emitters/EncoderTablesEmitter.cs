@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Zydis.Generator.Core.CodeGeneration;
 using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.Definitions.Builder;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.Definitions.Emitters;
 
@@ -90,7 +91,7 @@ internal static class EncoderTablesEmitter
                 .WriteInteger(definition.Instruction.Opcode, 2, true)
                 .WriteInteger(definition.Modrm, 2, true)
                 .WriteExpression(definition.Instruction.Encoding.ToZydisString())
-                .WriteExpression("ZYDIS_OPCODE_MAP_{0}", definition.Instruction.OpcodeMap.ToZydisString())
+                .WriteExpression(definition.Instruction.OpcodeMap.ToZydisString())
                 .WriteExpression(definition.Modes.ToZydisString())
                 .WriteExpression(definition.GetEffectiveAddressSize().ToZydisString())
                 .WriteExpression(definition.OperandSizes.ToZydisString())

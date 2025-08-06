@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Zydis.Generator.Core.DecoderTree;
 
@@ -16,13 +15,29 @@ namespace Zydis.Generator.Core.DecoderTree;
 public sealed class OverflowNode :
     DecoderTreeNode
 {
-    private readonly List<DecoderTreeNode> _children;
+#pragma warning disable CA1034
 
-    public override int EncodedSize => 0;
+    public sealed class NodeDefinition :
+
+        DecoderTreeNodeDefinition
+    {
+        public static NodeDefinition Instance { get; } = new();
+
+        /// <inheritdoc/>
+        public override string Name => "overflow";
+
+        /// <inheritdoc/>
+        public override int EncodedSize => 0;
+    }
+
+#pragma warning restore CA1034
+
+    private readonly List<DecoderTreeNode> _children;
 
     public IReadOnlyList<DecoderTreeNode> Children => _children;
 
-    public OverflowNode(params IEnumerable<DecoderTreeNode> children)
+    public OverflowNode(params IEnumerable<DecoderTreeNode> children) :
+        base(NodeDefinition.Instance)
     {
         ArgumentNullException.ThrowIfNull(children);
 
@@ -37,13 +52,6 @@ public sealed class OverflowNode :
     public void Remove(DecoderTreeNode node)
     {
         _children.Remove(node);
-    }
-
-    /// <inheritdoc/>
-    [Pure]
-    public override int CalcEncodedSizeRecursive()
-    {
-        return 0;
     }
 
     #region Debugging

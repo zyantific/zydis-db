@@ -3,12 +3,10 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.ExceptionServices;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.Definitions;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.DecoderTree.Builder;
 
@@ -24,16 +22,28 @@ public sealed class DecoderTreeBuilder
         {
             InstructionEncoding.Default => null,
             InstructionEncoding.AMD3DNOW => RefiningPrefix.PNP,
-            _ => (RefiningPrefix?)definition.GetSelectorIndex(SelectorDefinitions.MandatoryPrefix)?.Index
+            _ when definition.GetDecisionNodeIndex(MandatoryPrefixNode.NodeDefinition.Instance) is { Index: var index, IsNegated: false } =>
+                MandatoryPrefixNode.NodeDefinition.Instance.GetSlotName(index) switch
+                {
+                    "ignore" => throw new NotSupportedException($"Refining prefix 'ignore' is not supported for instruction encoding '{definition.Encoding}'."),
+                    "none" => RefiningPrefix.PNP,
+                    "66" => RefiningPrefix.P66,
+                    "f3" => RefiningPrefix.PF3,
+                    "f2" => RefiningPrefix.PF2,
+                    _ => throw new UnreachableException()
+                },
+            _ when definition.GetDecisionNodeIndex(MandatoryPrefixNode.NodeDefinition.Instance) is { IsNegated: true } =>
+                throw new NotSupportedException($"Negated refining prefix is not supported for instruction encoding '{definition.Encoding}'."),
+            _ => null
         };
 
-        SelectorNode currentTarget = OpcodeTables.GetTable(definition.Encoding, definition.OpcodeMap, prefix);
-        SelectorTableIndex currentTargetIndex = definition.Opcode;
+        DecisionNode currentTarget = OpcodeTables.GetTable(definition.Encoding, definition.OpcodeMap, prefix);
+        DecisionNodeIndex currentTargetIndex = definition.Opcode;
 
         foreach (var filter in EnumerateSelectorValues(definition))
         {
-            var (nextSelectorDefinition, nextSelectorArguments) = SelectorDefinitions.ParseSelectorType(filter.Type);
-            var nextTargetIndex = nextSelectorDefinition.ParseIndex(filter.Value);
+            var (nextDecisionNodeDefinition, nextDecisionNodeArguments) = DecisionNodes.ParseDecisionNodeType(filter.Type);
+            var nextTargetIndex = nextDecisionNodeDefinition.ParseSlotIndex(filter.Value);
 
             switch (currentTarget[currentTargetIndex])
             {
@@ -41,25 +51,25 @@ public sealed class DecoderTreeBuilder
                 {
                     // Target slot is empty.
                     // Create a new selector node and insert it.
-                    var next = new SelectorNode(nextSelectorDefinition, nextSelectorArguments);
+                    var next = nextDecisionNodeDefinition.Create(nextDecisionNodeArguments);
                     currentTarget[currentTargetIndex] = next;
                     currentTarget = next;
                     currentTargetIndex = nextTargetIndex;
                     break;
                 }
-                case SelectorNode sn when sn.IsConstructedFrom(nextSelectorDefinition, nextSelectorArguments):
+                case DecisionNode dn when dn.IsConstructedFrom(nextDecisionNodeDefinition, nextDecisionNodeArguments):
                 {
                     // Target slot contains a selector node of the correct type.
                     // Continue inserting into the existing selector node.
-                    currentTarget = sn;
+                    currentTarget = dn;
                     currentTargetIndex = nextTargetIndex;
                     break;
                 }
-                case OverflowNode on when FindSelectorNode(on, nextSelectorDefinition, nextSelectorArguments) is { } sn:
+                case OverflowNode on when FindDecisionNode(on, nextDecisionNodeDefinition, nextDecisionNodeArguments) is { } dn:
                 {
                     // Target slots contains an overflow node that has a selector node of correct type.
                     // Continue inserting into the existing selector node.
-                    currentTarget = sn;
+                    currentTarget = dn;
                     currentTargetIndex = nextTargetIndex;
                     break;
                 }
@@ -67,26 +77,17 @@ public sealed class DecoderTreeBuilder
                 {
                     // Target slot contains an overflow node that does NOT have selector node of correct type.
                     // Create a new selector node and insert it.
-                    var next = new SelectorNode(nextSelectorDefinition, nextSelectorArguments);
+                    var next = nextDecisionNodeDefinition.Create(nextDecisionNodeArguments);
                     on.Add(next);
                     currentTarget = next;
                     currentTargetIndex = nextTargetIndex;
                     break;
                 }
-                case FunctionNode:
-                {
-                    // TODO: Handle function nodes.
-                    throw new NotImplementedException();
-                }
-                case DataNode:
-                {
-                    throw new UnreachableException();
-                }
                 default:
                 {
                     // Target slot contains a selector node of the wrong type or a definition node.
                     // Create a new overflow node and insert both the existing node and the new selector node.
-                    var next = new SelectorNode(nextSelectorDefinition, nextSelectorArguments);
+                    var next = nextDecisionNodeDefinition.Create(nextDecisionNodeArguments);
                     currentTarget[currentTargetIndex] = new OverflowNode(currentTarget[currentTargetIndex]!, next);
                     currentTarget = next;
                     currentTargetIndex = nextTargetIndex;
@@ -122,10 +123,10 @@ public sealed class DecoderTreeBuilder
             }
         }
 
-        static SelectorNode? FindSelectorNode(OverflowNode haystack, SelectorDefinition definition, string[] arguments)
+        static DecisionNode? FindDecisionNode(OverflowNode haystack, DecisionNodeDefinition definition, string[] arguments)
         {
             return haystack.Children
-                .FirstOrDefault(x => x is SelectorNode fn && fn.IsConstructedFrom(definition, arguments)) as SelectorNode;
+                .FirstOrDefault(x => x is DecisionNode fn && fn.IsConstructedFrom(definition, arguments)) as DecisionNode;
         }
     }
 
@@ -148,120 +149,120 @@ public sealed class DecoderTreeBuilder
 
 #pragma warning disable IDE0055
 
-        defaultTable[opcodeRex2] = new SelectorNode(SelectorDefinitions.Rex2Map, null)
+        defaultTable[opcodeRex2] = new SwitchTableREX2Node
         {
-            /* default      */ [0] = defaultTable[opcodeRex2],
-            /* rex2_default */ [1] = CreateOpcodeTableSelectNode(InstructionEncoding.Default, OpcodeMap.MAP0, null),
-            /* rex2_0f      */ [2] = CreateOpcodeTableSelectNode(InstructionEncoding.Default, OpcodeMap.M0F , null)
+            [SwitchTableREX2Node.Slot.Default] = defaultTable[opcodeRex2],
+            [SwitchTableREX2Node.Slot.REX2   ] = CreateOpcodeTableSelectNode(InstructionEncoding.Default, OpcodeMap.MAP0, null),
+            [SwitchTableREX2Node.Slot.REX2_0F] = CreateOpcodeTableSelectNode(InstructionEncoding.Default, OpcodeMap.M0F , null)
         };
 
-        defaultTable[opcodeXOP] = new SelectorNode(SelectorDefinitions.XOP, null)
+        defaultTable[opcodeXOP] = new SwitchTableXOPNode
         {
-            /* default */ [0] = defaultTable[opcodeXOP],
-            /* np_xop8 */ [1] = CreateOpcodeTableSelectNode(InstructionEncoding.XOP, OpcodeMap.XOP8, RefiningPrefix.PNP),
-            /* np_xop9 */ [2] = CreateOpcodeTableSelectNode(InstructionEncoding.XOP, OpcodeMap.XOP9, RefiningPrefix.PNP),
-            /* np_xopa */ [3] = CreateOpcodeTableSelectNode(InstructionEncoding.XOP, OpcodeMap.XOPA, RefiningPrefix.PNP)
-            /* ....... */ /* INVALID */
+            [SwitchTableXOPNode.Slot.Default ] = defaultTable[opcodeXOP],
+            [SwitchTableXOPNode.Slot.PNP_XOP8] = CreateOpcodeTableSelectNode(InstructionEncoding.XOP, OpcodeMap.XOP8, RefiningPrefix.PNP),
+            [SwitchTableXOPNode.Slot.PNP_XOP9] = CreateOpcodeTableSelectNode(InstructionEncoding.XOP, OpcodeMap.XOP9, RefiningPrefix.PNP),
+            [SwitchTableXOPNode.Slot.PNP_XOPA] = CreateOpcodeTableSelectNode(InstructionEncoding.XOP, OpcodeMap.XOPA, RefiningPrefix.PNP)
+            /* Rest = INVALID */
         };
 
-        defaultTable[opcodeVEX3] = new SelectorNode(SelectorDefinitions.VEX, null)
+        defaultTable[opcodeVEX3] = new SwitchTableVEXNode
         {
-            /* default */ [ 0] = defaultTable[opcodeVEX3],
-            /* np      */ [ 1] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP0 , RefiningPrefix.PNP),
-            /* np_0f   */ [ 2] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F  , RefiningPrefix.PNP),
-            /* np_0f38 */ [ 3] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F38, RefiningPrefix.PNP),
-            /* np_0f3a */ [ 4] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F3A, RefiningPrefix.PNP),
-            /* 66      */ [ 5] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP0 , RefiningPrefix.P66),
-            /* 66_0f   */ [ 6] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F  , RefiningPrefix.P66),
-            /* 66_0f38 */ [ 7] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F38, RefiningPrefix.P66),
-            /* 66_0f3a */ [ 8] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F3A, RefiningPrefix.P66),
-            /* f3      */ [ 9] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP0 , RefiningPrefix.PF3),
-            /* f3_0f   */ [10] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F  , RefiningPrefix.PF3),
-            /* f3_0f38 */ [11] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F38, RefiningPrefix.PF3),
-            /* f3_0f3a */ [12] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F3A, RefiningPrefix.PF3),
-            /* f2      */ [13] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP0 , RefiningPrefix.PF2),
-            /* f2_0f   */ [14] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F  , RefiningPrefix.PF2),
-            /* f2_0f38 */ [15] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F38, RefiningPrefix.PF2),
-            /* f2_0f3a */ [16] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F3A, RefiningPrefix.PF2)
+            [SwitchTableVEXNode.Slot.Default ] = defaultTable[opcodeVEX3],
+            [SwitchTableVEXNode.Slot.PNP     ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP0 , RefiningPrefix.PNP),
+            [SwitchTableVEXNode.Slot.PNP_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F  , RefiningPrefix.PNP),
+            [SwitchTableVEXNode.Slot.PNP_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F38, RefiningPrefix.PNP),
+            [SwitchTableVEXNode.Slot.PNP_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F3A, RefiningPrefix.PNP),
+            [SwitchTableVEXNode.Slot.P66     ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP0 , RefiningPrefix.P66),
+            [SwitchTableVEXNode.Slot.P66_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F  , RefiningPrefix.P66),
+            [SwitchTableVEXNode.Slot.P66_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F38, RefiningPrefix.P66),
+            [SwitchTableVEXNode.Slot.P66_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F3A, RefiningPrefix.P66),
+            [SwitchTableVEXNode.Slot.PF3     ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP0 , RefiningPrefix.PF3),
+            [SwitchTableVEXNode.Slot.PF3_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F  , RefiningPrefix.PF3),
+            [SwitchTableVEXNode.Slot.PF3_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F38, RefiningPrefix.PF3),
+            [SwitchTableVEXNode.Slot.PF3_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F3A, RefiningPrefix.PF3),
+            [SwitchTableVEXNode.Slot.PF2     ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP0 , RefiningPrefix.PF2),
+            [SwitchTableVEXNode.Slot.PF2_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F  , RefiningPrefix.PF2),
+            [SwitchTableVEXNode.Slot.PF2_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F38, RefiningPrefix.PF2),
+            [SwitchTableVEXNode.Slot.PF2_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F3A, RefiningPrefix.PF2)
         };
 
         // VEX C5 (2-byte) only supports the 0F opcode map.
 
-        defaultTable[opcodeVEX2] = new SelectorNode(SelectorDefinitions.VEX, null)
+        defaultTable[opcodeVEX2] = new SwitchTableVEXNode
         {
-            /* default */[ 0] = defaultTable[opcodeVEX2],
-            /* np_0f   */[ 2] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F, RefiningPrefix.PNP),
-            /* 66_0f   */[ 6] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F, RefiningPrefix.P66),
-            /* f3_0f   */[10] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F, RefiningPrefix.PF3),
-            /* f2_0f   */[14] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F, RefiningPrefix.PF2)
-            /* ....... */ /* INVALID */
+            [SwitchTableVEXNode.Slot.Default] = defaultTable[opcodeVEX2],
+            [SwitchTableVEXNode.Slot.PNP_0F ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F, RefiningPrefix.PNP),
+            [SwitchTableVEXNode.Slot.P66_0F ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F, RefiningPrefix.P66),
+            [SwitchTableVEXNode.Slot.PF3_0F ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F, RefiningPrefix.PF3),
+            [SwitchTableVEXNode.Slot.PF2_0F ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F, RefiningPrefix.PF2)
+            /* Rest = INVALID */
         };
 
-        defaultTable[opcodeEMVEX] = new SelectorNode(SelectorDefinitions.EMVEX, null)
+        defaultTable[opcodeEMVEX] = new SwitchTableEMVEXNode
         {
-            /* default      */ [ 0] = defaultTable[opcodeEMVEX],
-            /* evex_np      */ [ 1] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP0 , RefiningPrefix.PNP),
-            /* evex_np_0f   */ [ 2] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F  , RefiningPrefix.PNP),
-            /* evex_np_0f38 */ [ 3] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F38, RefiningPrefix.PNP),
-            /* evex_np_0f3a */ [ 4] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F3A, RefiningPrefix.PNP),
-            /* evex_np_map4 */ [ 5] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP4 , RefiningPrefix.PNP),
-            /* evex_np_map5 */ [ 6] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP5 , RefiningPrefix.PNP),
-            /* evex_np_map6 */ [ 7] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP6 , RefiningPrefix.PNP),
-            /* evex_np_map7 */ [ 8] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP7 , RefiningPrefix.PNP),
-            /* evex_66      */ [ 9] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP0 , RefiningPrefix.P66),
-            /* evex_66_0f   */ [10] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F  , RefiningPrefix.P66),
-            /* evex_66_0f38 */ [11] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F38, RefiningPrefix.P66),
-            /* evex_66_0f3a */ [12] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F3A, RefiningPrefix.P66),
-            /* evex_66_map4 */ [13] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP4 , RefiningPrefix.P66),
-            /* evex_66_map5 */ [14] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP5 , RefiningPrefix.P66),
-            /* evex_66_map6 */ [15] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP6 , RefiningPrefix.P66),
-            /* evex_66_map7 */ [16] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP7 , RefiningPrefix.P66),
-            /* evex_f3      */ [17] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP0 , RefiningPrefix.PF3),
-            /* evex_f3_0f   */ [18] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F  , RefiningPrefix.PF3),
-            /* evex_f3_0f38 */ [19] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F38, RefiningPrefix.PF3),
-            /* evex_f3_0f3a */ [20] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F3A, RefiningPrefix.PF3),
-            /* evex_f3_map4 */ [21] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP4 , RefiningPrefix.PF3),
-            /* evex_f3_map5 */ [22] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP5 , RefiningPrefix.PF3),
-            /* evex_f3_map6 */ [23] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP6 , RefiningPrefix.PF3),
-            /* evex_f3_map7 */ [24] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP7 , RefiningPrefix.PF3),
-            /* evex_f2      */ [25] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP0 , RefiningPrefix.PF2),
-            /* evex_f2_0f   */ [26] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F  , RefiningPrefix.PF2),
-            /* evex_f2_0f38 */ [27] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F38, RefiningPrefix.PF2),
-            /* evex_f2_0f3a */ [28] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F3A, RefiningPrefix.PF2),
-            /* evex_f2_map4 */ [29] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP4 , RefiningPrefix.PF2),
-            /* evex_f2_map5 */ [30] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP5 , RefiningPrefix.PF2),
-            /* evex_f2_map6 */ [31] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP6 , RefiningPrefix.PF2),
-            /* evex_f2_map7 */ [32] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP7 , RefiningPrefix.PF2),
-            /* mvex_np      */ [33] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.MAP0 , RefiningPrefix.PNP),
-            /* mvex_np_0f   */ [34] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F  , RefiningPrefix.PNP),
-            /* mvex_np_0f38 */ [35] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F38, RefiningPrefix.PNP),
-            /* mvex_np_0f3a */ [36] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F3A, RefiningPrefix.PNP),
-            /* mvex_66      */ [37] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.MAP0 , RefiningPrefix.P66),
-            /* mvex_66_0f   */ [38] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F  , RefiningPrefix.P66),
-            /* mvex_66_0f38 */ [39] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F38, RefiningPrefix.P66),
-            /* mvex_66_0f3a */ [40] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F3A, RefiningPrefix.P66),
-            /* mvex_f3      */ [41] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.MAP0 , RefiningPrefix.PF3),
-            /* mvex_f3_0f   */ [42] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F  , RefiningPrefix.PF3),
-            /* mvex_f3_0f38 */ [43] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F38, RefiningPrefix.PF3),
-            /* mvex_f3_0f3a */ [44] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F3A, RefiningPrefix.PF3),
-            /* mvex_f2      */ [45] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.MAP0 , RefiningPrefix.PF2),
-            /* mvex_f2_0f   */ [46] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F  , RefiningPrefix.PF2),
-            /* mvex_f2_0f38 */ [47] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F38, RefiningPrefix.PF2),
-            /* mvex_f2_0f3a */ [48] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F3A, RefiningPrefix.PF2)
+            [SwitchTableEMVEXNode.Slot.Default      ] = defaultTable[opcodeEMVEX],
+            [SwitchTableEMVEXNode.Slot.EVEX_PNP     ] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP0 , RefiningPrefix.PNP),
+            [SwitchTableEMVEXNode.Slot.EVEX_PNP_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F  , RefiningPrefix.PNP),
+            [SwitchTableEMVEXNode.Slot.EVEX_PNP_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F38, RefiningPrefix.PNP),
+            [SwitchTableEMVEXNode.Slot.EVEX_PNP_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F3A, RefiningPrefix.PNP),
+            [SwitchTableEMVEXNode.Slot.EVEX_PNP_MAP4] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP4 , RefiningPrefix.PNP),
+            [SwitchTableEMVEXNode.Slot.EVEX_PNP_MAP5] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP5 , RefiningPrefix.PNP),
+            [SwitchTableEMVEXNode.Slot.EVEX_PNP_MAP6] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP6 , RefiningPrefix.PNP),
+            [SwitchTableEMVEXNode.Slot.EVEX_PNP_MAP7] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP7 , RefiningPrefix.PNP),
+            [SwitchTableEMVEXNode.Slot.EVEX_P66     ] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP0 , RefiningPrefix.P66),
+            [SwitchTableEMVEXNode.Slot.EVEX_P66_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F  , RefiningPrefix.P66),
+            [SwitchTableEMVEXNode.Slot.EVEX_P66_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F38, RefiningPrefix.P66),
+            [SwitchTableEMVEXNode.Slot.EVEX_P66_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F3A, RefiningPrefix.P66),
+            [SwitchTableEMVEXNode.Slot.EVEX_P66_MAP4] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP4 , RefiningPrefix.P66),
+            [SwitchTableEMVEXNode.Slot.EVEX_P66_MAP5] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP5 , RefiningPrefix.P66),
+            [SwitchTableEMVEXNode.Slot.EVEX_P66_MAP6] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP6 , RefiningPrefix.P66),
+            [SwitchTableEMVEXNode.Slot.EVEX_P66_MAP7] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP7 , RefiningPrefix.P66),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF3     ] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP0 , RefiningPrefix.PF3),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF3_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F  , RefiningPrefix.PF3),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF3_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F38, RefiningPrefix.PF3),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF3_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F3A, RefiningPrefix.PF3),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF3_MAP4] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP4 , RefiningPrefix.PF3),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF3_MAP5] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP5 , RefiningPrefix.PF3),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF3_MAP6] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP6 , RefiningPrefix.PF3),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF3_MAP7] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP7 , RefiningPrefix.PF3),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF2     ] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP0 , RefiningPrefix.PF2),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF2_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F  , RefiningPrefix.PF2),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF2_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F38, RefiningPrefix.PF2),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF2_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.M0F3A, RefiningPrefix.PF2),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF2_MAP4] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP4 , RefiningPrefix.PF2),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF2_MAP5] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP5 , RefiningPrefix.PF2),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF2_MAP6] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP6 , RefiningPrefix.PF2),
+            [SwitchTableEMVEXNode.Slot.EVEX_PF2_MAP7] = CreateOpcodeTableSelectNode(InstructionEncoding.EVEX, OpcodeMap.MAP7 , RefiningPrefix.PF2),
+            [SwitchTableEMVEXNode.Slot.MVEX_PNP     ] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.MAP0 , RefiningPrefix.PNP),
+            [SwitchTableEMVEXNode.Slot.MVEX_PNP_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F  , RefiningPrefix.PNP),
+            [SwitchTableEMVEXNode.Slot.MVEX_PNP_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F38, RefiningPrefix.PNP),
+            [SwitchTableEMVEXNode.Slot.MVEX_PNP_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F3A, RefiningPrefix.PNP),
+            [SwitchTableEMVEXNode.Slot.MVEX_P66     ] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.MAP0 , RefiningPrefix.P66),
+            [SwitchTableEMVEXNode.Slot.MVEX_P66_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F  , RefiningPrefix.P66),
+            [SwitchTableEMVEXNode.Slot.MVEX_P66_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F38, RefiningPrefix.P66),
+            [SwitchTableEMVEXNode.Slot.MVEX_P66_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F3A, RefiningPrefix.P66),
+            [SwitchTableEMVEXNode.Slot.MVEX_PF3     ] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.MAP0 , RefiningPrefix.PF3),
+            [SwitchTableEMVEXNode.Slot.MVEX_PF3_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F  , RefiningPrefix.PF3),
+            [SwitchTableEMVEXNode.Slot.MVEX_PF3_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F38, RefiningPrefix.PF3),
+            [SwitchTableEMVEXNode.Slot.MVEX_PF3_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F3A, RefiningPrefix.PF3),
+            [SwitchTableEMVEXNode.Slot.MVEX_PF2     ] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.MAP0 , RefiningPrefix.PF2),
+            [SwitchTableEMVEXNode.Slot.MVEX_PF2_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F  , RefiningPrefix.PF2),
+            [SwitchTableEMVEXNode.Slot.MVEX_PF2_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F38, RefiningPrefix.PF2),
+            [SwitchTableEMVEXNode.Slot.MVEX_PF2_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.MVEX, OpcodeMap.M0F3A, RefiningPrefix.PF2)
         };
 
 #pragma warning restore IDE0055
 
         return;
 
-        SelectOpcodeTableNode? CreateOpcodeTableSelectNode(InstructionEncoding encoding, OpcodeMap map, RefiningPrefix? prefix)
+        OpcodeTableSwitchNode? CreateOpcodeTableSelectNode(InstructionEncoding encoding, OpcodeMap map, RefiningPrefix? prefix)
         {
-            if (!OpcodeTables.GetTable(encoding, map, prefix).HasNonZeroEntries)
+            if (!OpcodeTables.GetTable(encoding, map, prefix).EnumerateSlots().Any(x => x is not null))
             {
                 return null;
             }
 
-            return new SelectOpcodeTableNode(encoding, map, prefix);
+            return new OpcodeTableSwitchNode(encoding, map, prefix);
         }
     }
 
@@ -276,41 +277,24 @@ public sealed class DecoderTreeBuilder
 
         return;
 
-        void Optimize(SelectorNode node)
+        void Optimize(DecisionNode node)
         {
-            for (var i = 0; i < node.Definition.NumberOfEntries - 1; ++i)
+            foreach (var (index, value) in node.EnumerateVirtualSlots())
             {
-                var index = SelectorTableIndex.ForIndex(i);
-
-                if (node[index] is not SelectorNode sn)
+                if (value is not DecisionNode dn)
                 {
                     continue;
                 }
 
-                Optimize(sn);
+                Optimize(dn);
 
-                var optimized = GetOptimizedSelector(sn);
-
-                if (optimized is null)
+                var optimized = dn switch
                 {
-                    continue;
-                }
+                    ModeNode => GetOptimizedDecisionNode<ModeNode, ModeNode.Slot, ModeCompactNode>(dn, ModeNode.Slot.M64),
+                    ModrmModNode => GetOptimizedDecisionNode<ModrmModNode, ModrmModNode.Slot, ModrmModCompactNode>(dn, ModrmModNode.Slot.M3),
+                    _ => null
+                };
 
-                node[index] = optimized;
-            }
-
-            for (var i = 0; i < node.Definition.NumberOfEntries - 1; ++i)
-            {
-                var index = SelectorTableIndex.ForNegatedIndex(i);
-
-                if (node[index] is not SelectorNode sn)
-                {
-                    continue;
-                }
-
-                Optimize(sn);
-
-                var optimized = GetOptimizedSelector(sn);
                 if (optimized is null)
                 {
                     continue;
@@ -320,67 +304,36 @@ public sealed class DecoderTreeBuilder
             }
         }
 
-        DecoderTreeNode? GetOptimizedSelector(SelectorNode node)
+        DecoderTreeNode? GetOptimizedDecisionNode<TNode, TNodeIndexEnum, TOptimizedNode>(DecisionNode node, TNodeIndexEnum indexOfInterest)
+            where TNode : DecisionNode<TNodeIndexEnum>
+            where TOptimizedNode : DecisionNode, new()
+            where TNodeIndexEnum : struct, Enum
         {
-            if (node.Definition == SelectorDefinitions.ModrmMod)
+            if (node is not TNode inputNode)
             {
-                if (node.NegatedEntries[3] is not null)
-                {
-                    return new SelectorNode(SelectorDefinitions.ModrmModCompact, null)
-                    {
-                        [SelectorDefinitions.ModrmModCompact.ParseIndex("3")] = node.Entries[3],
-                        [SelectorDefinitions.ModrmModCompact.ParseIndex("!3")] = node.NegatedEntries[3]
-                    };
-                }
-
-                if (node.NegatedEntries.Any(x => x is not null))
-                {
-                    return null;
-                }
-
-                if (node.Entries.Take(3).All(x => x is null))
-                {
-                    return new SelectorNode(SelectorDefinitions.ModrmModCompact, null)
-                    {
-                        [SelectorDefinitions.ModrmModCompact.ParseIndex("3")] = node.Entries[3],
-                        [SelectorDefinitions.ModrmModCompact.ParseIndex("!3")] = node.NegatedEntries[3]
-                    };
-                }
+                return null;
             }
 
-            if (node.Definition == SelectorDefinitions.Mode)
+            var numberOfUnreducibleSlots = inputNode
+                .EnumerateVirtualSlots()
+                .Count(x => !EqualityComparer<TNodeIndexEnum>.Default.Equals(x.Key.Index, indexOfInterest) && (x.Value is not null));
+
+            if (numberOfUnreducibleSlots is not 0)
             {
-                if (node.NegatedEntries[2] is not null)
-                {
-                    return new SelectorNode(SelectorDefinitions.ModeCompact, null)
-                    {
-                        [SelectorDefinitions.ModeCompact.ParseIndex("64")] = node.Entries[2],
-                        [SelectorDefinitions.ModeCompact.ParseIndex("!64")] = node.NegatedEntries[2]
-                    };
-                }
-
-                if (node.NegatedEntries.Any(x => x is not null))
-                {
-                    return null;
-                }
-
-                if (node.Entries.Take(2).All(x => x is null))
-                {
-                    return new SelectorNode(SelectorDefinitions.ModeCompact, null)
-                    {
-                        [SelectorDefinitions.ModeCompact.ParseIndex("64")] = node.Entries[2],
-                        [SelectorDefinitions.ModeCompact.ParseIndex("!64")] = node.NegatedEntries[2]
-                    };
-                }
+                return null;
             }
 
-            return null;
+            return new TOptimizedNode
+            {
+                [0] = inputNode[indexOfInterest],
+                [DecisionNodeIndex.ForNegatedIndex(0)] = inputNode[DecisionNodeIndex.ForNegatedIndex(indexOfInterest)]
+            };
         }
     }
 
     private static IEnumerable<(string Type, string Value)> EnumerateSelectorValues(InstructionDefinition definition)
     {
-        if (definition.SelectorValues is null)
+        if (definition.Pattern is null)
         {
             return [];
         }
@@ -388,7 +341,7 @@ public sealed class DecoderTreeBuilder
         var order = FilterOrder[definition.Encoding];
         var lookup = order.Select((x, i) => (x, i)).ToDictionary(k => k.x, v => v.i);
 
-        return definition.SelectorValues
+        return definition.Pattern
             .Where(x => order.Contains(x.Key))
             .Select(x => (type: x.Key, value: x.Value.GetString()!))
             .OrderBy(x => lookup[x.type]);
@@ -488,10 +441,4 @@ public sealed class DecoderTreeBuilder
             "address_size"
         ]
     }.ToFrozenDictionary();
-}
-
-[JsonSerializable(typeof(RefiningPrefix))]
-internal sealed partial class DecoderTreeBuilderSerializerContext :
-    JsonSerializerContext
-{
 }

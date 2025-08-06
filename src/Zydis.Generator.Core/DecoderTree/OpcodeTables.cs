@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Text;
 
 using Zydis.Generator.Core.Common;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.DecoderTree;
 

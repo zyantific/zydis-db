@@ -12,6 +12,7 @@ using Zydis.Generator.Core.DecoderTree.Emitters;
 using Zydis.Generator.Core.Definitions.Builder;
 using Zydis.Generator.Core.Definitions.Emitters;
 using Zydis.Generator.Core.Serialization;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core;
 
@@ -109,7 +110,7 @@ public sealed class ZydisGenerator
     {
         foreach (var table in _decoderTreeBuilder.OpcodeTables.Tables)
         {
-            if (!table.HasNonZeroEntries)
+            if (table.EnumerateSlots().All(x => x is null))
             {
                 continue; // Skip empty tables.
             }
@@ -144,7 +145,7 @@ public sealed class ZydisGenerator
         {
             initializerListWriter.WriteInlineComment("{0,-12}", table);
 
-            if (!table.HasNonZeroEntries)
+            if (table.EnumerateSlots().All(x => x is null))
             {
                 initializerListWriter.WriteNull();
                 continue; // Skip empty tables.

@@ -1,0 +1,424 @@
+[
+  {
+    "type": "terminal",
+    "name": "definition",
+    "description": "A terminal decoder tree node that contains a reference to the final instruction definition."
+  },
+  {
+    "type": "terminal",
+    "name": "opcode_table_switch",
+    "description": "A terminal decoder tree node that instructs the decoder to switch to a different opcode table."
+  },
+  {
+    "type": "decision",
+    "name": "opcode_table",
+    "description": "A non-terminal decision node that dispatches based on the opcode.",
+    "flags": [
+      "is_synthetic"
+    ],
+    "number_of_slots": 256
+  },
+  {
+    "type": "decision",
+    "name": "switch_table_vex:SwitchTableVEX",
+    "description": "",
+    "flags": [
+      "is_synthetic"
+    ],
+    "named_slots": [
+      "default",
+      "np:PNP",
+      "np_0f:PNP_0F",
+      "np_0f38:PNP_0F38",
+      "np_0f3a:PNP_0F3A",
+      "66:P66",
+      "66_0f:P66_0F",
+      "66_0f38:P66_0F38",
+      "66_0f3a:P66_0F3A",
+      "f3:PF3",
+      "f3_0f:PF3_0F",
+      "f3_0f38:PF3_0F38",
+      "f3_0f3a:PF3_0F3A",
+      "f2:PF2",
+      "f2_0f:PF2_0F",
+      "f2_0f38:PF2_0F38",
+      "f2_0f3a:PF2_0F3A"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "switch_table_emvex:SwitchTableEMVEX",
+    "description": "",
+    "flags": [
+      "is_synthetic"
+    ],
+    "named_slots": [
+      "default",
+      "evex_np:EVEX_PNP",
+      "evex_np_0f:EVEX_PNP_0F",
+      "evex_np_0f38:EVEX_PNP_0F38",
+      "evex_np_0f3a:EVEX_PNP_0F3A",
+      "evex_np_map4:EVEX_PNP_MAP4",
+      "evex_np_map5:EVEX_PNP_MAP5",
+      "evex_np_map6:EVEX_PNP_MAP6",
+      "evex_np_map7:EVEX_PNP_MAP7",
+      "evex_66:EVEX_P66",
+      "evex_66_0f:EVEX_P66_0F",
+      "evex_66_0f38:EVEX_P66_0F38",
+      "evex_66_0f3a:EVEX_P66_0F3A",
+      "evex_66_map4:EVEX_P66_MAP4",
+      "evex_66_map5:EVEX_P66_MAP5",
+      "evex_66_map6:EVEX_P66_MAP6",
+      "evex_66_map7:EVEX_P66_MAP7",
+      "evex_f3:EVEX_PF3",
+      "evex_f3_0f:EVEX_PF3_0F",
+      "evex_f3_0f38:EVEX_PF3_0F38",
+      "evex_f3_0f3a:EVEX_PF3_0F3A",
+      "evex_f3_map4:EVEX_PF3_MAP4",
+      "evex_f3_map5:EVEX_PF3_MAP5",
+      "evex_f3_map6:EVEX_PF3_MAP6",
+      "evex_f3_map7:EVEX_PF3_MAP7",
+      "evex_f2:EVEX_PF2",
+      "evex_f2_0f:EVEX_PF2_0F",
+      "evex_f2_0f38:EVEX_PF2_0F38",
+      "evex_f2_0f3a:EVEX_PF2_0F3A",
+      "evex_f2_map4:EVEX_PF2_MAP4",
+      "evex_f2_map5:EVEX_PF2_MAP5",
+      "evex_f2_map6:EVEX_PF2_MAP6",
+      "evex_f2_map7:EVEX_PF2_MAP7",
+      "mvex_np:MVEX_PNP",
+      "mvex_np_0f:MVEX_PNP_0F",
+      "mvex_np_0f38:MVEX_PNP_0F38",
+      "mvex_np_0f3a:MVEX_PNP_0F3A",
+      "mvex_66:MVEX_P66",
+      "mvex_66_0f:MVEX_P66_0F",
+      "mvex_66_0f38:MVEX_P66_0F38",
+      "mvex_66_0f3a:MVEX_P66_0F3A",
+      "mvex_f3:MVEX_PF3",
+      "mvex_f3_0f:MVEX_PF3_0F",
+      "mvex_f3_0f38:MVEX_PF3_0F38",
+      "mvex_f3_0f3a:MVEX_PF3_0F3A",
+      "mvex_f2:MVEX_PF2",
+      "mvex_f2_0f:MVEX_PF2_0F",
+      "mvex_f2_0f38:MVEX_PF2_0F38",
+      "mvex_f2_0f3a:MVEX_PF2_0F3A"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "switch_table_rex2:SwitchTableREX2",
+    "description": "",
+    "flags": [
+      "is_synthetic"
+    ],
+    "named_slots": [
+      "default",
+      "rex2:REX2",
+      "rex2_0f:REX2_0F"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "switch_table_xop:SwitchTableXOP",
+    "description": "",
+    "flags": [
+      "is_synthetic"
+    ],
+    "named_slots": [
+      "default",
+      "np_xop8:PNP_XOP8",
+      "np_xop9:PNP_XOP9",
+      "np_xopa:PNP_XOPA",
+      "66_xop8:P66_XOP8",
+      "66_xop9:P66_XOP9",
+      "66_xopa:P66_XOPA",
+      "f3_xop8:PF3_XOP8",
+      "f3_xop9:PF3_XOP9",
+      "f3_xopa:PF3_XOPA",
+      "f2_xop8:PF2_XOP8",
+      "f2_xop9:PF2_XOP9",
+      "f2_xopa:PF2_XOPA"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "mode_compact",
+    "description": "",
+    "flags": [
+      "is_synthetic"
+    ],
+    "named_slots": [
+      "64:M64", "!64:MNot64"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "modrm_mod_compact",
+    "description": "",
+    "flags": [
+      "is_synthetic"
+    ],
+    "named_slots": [
+      "reg:Register", "mem:Memory"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "mode",
+    "description": "",
+    "named_slots": [
+      "16:M16", "32:M32", "64:M64"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "modrm_mod",
+    "description": "",
+    "named_slots": [
+      "0:M0", "1:M1", "2:M2", "3:M3"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "modrm_reg",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:R0", "1:R1", "2:R2", "3:R3", "4:R4", "5:R5", "6:R6", "7:R7"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "modrm_rm",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:M0", "1:M1", "2:M2", "3:M3", "4:M4", "5:M5", "6:M6", "7:M7"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "prefix_group1",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:P0", "1:P1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "mandatory_prefix",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "ignore:Ignore", "none:PNP", "66:P66", "f3:PF3", "f2:PF2"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "operand_size",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "16:OSZ16", "32:OSZ32", "64:OSZ64"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "address_size",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "16:ASZ16", "32:ASZ32", "64:ASZ64"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "vector_length",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "128:VL128", "256:VL256", "512:VL512"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "rex_w",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "rex_b",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "evex_b",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "evex_u",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:U0", "1:U1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "mvex_e",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "feature_amd",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "feature_knc",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "feature_mpx",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "feature_cet",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "feature_lzcnt",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "feature_tzcnt",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "feature_wbnoinvd",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "feature_cldemote",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "feature_centaur",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "feature_iprefetch",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "feature_ud0_compat",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "evex_nd",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "evex_nf",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "evex_scc",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:SCC0", "1:SCC1", "2:SCC2", "3:SCC3", "4:SCC4", "5:SCC5", "6:SCC6", "7:SCC7", "8:SCC8", "9:SCC9", "10:SCC10", "11:SCC11", "12:SCC12", "13:SCC13", "14:SCC14", "15:SCC15"
+    ]
+  },
+  {
+    "type": "decision",
+    "name": "rex_2",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "no_rex2", "rex2"
+    ]
+  }
+]

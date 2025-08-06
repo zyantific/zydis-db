@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using Zydis.Generator.Core.CodeGeneration;
 using Zydis.Generator.Core.Definitions.Builder;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.Definitions.Emitters;
 
@@ -46,7 +47,7 @@ internal static class OperandsEmitter
                 .EndList();
 
             initializerListWriter
-                .WriteFieldDesignation("element_type").WriteExpression("ZYDIS_IELEMENT_TYPE_{0}", operand.ElementType.ToZydisString());
+                .WriteFieldDesignation("element_type").WriteExpression(operand.ElementType.ToZydisString());
 
             var op = initializerListWriter
                 .WriteFieldDesignation("op").WriteInitializerList()
@@ -100,7 +101,7 @@ internal static class OperandsEmitter
                  op.WriteFieldDesignation("mem").WriteInitializerList()
                     .BeginList()
                     .WriteFieldDesignation("seg").WriteInteger((int)(operand.MemorySegment ?? SegmentRegister.None))
-                    .WriteFieldDesignation("base").WriteExpression("ZYDIS_IMPLMEM_BASE_{0}", operand.MemoryBase!.Value.ToZydisString())
+                    .WriteFieldDesignation("base").WriteExpression(operand.MemoryBase!.Value.ToZydisString())
                     .EndList();
             }
 

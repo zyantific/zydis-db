@@ -2,6 +2,7 @@ using System;
 using System.Text.Json.Serialization;
 
 using Zydis.Generator.Core.Helpers;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.Definitions;
 

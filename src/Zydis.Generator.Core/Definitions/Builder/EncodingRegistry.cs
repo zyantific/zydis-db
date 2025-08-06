@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -46,9 +45,9 @@ internal sealed class EncodingRegistry
 
     private static PhysicalInstructionEncoding GetPhysicalInstructionEncoding(InstructionDefinition definition)
     {
-        var hasModrm = (definition.GetSelectorIndex(SelectorDefinitions.ModrmMod) is not null) ||
-                       (definition.GetSelectorIndex(SelectorDefinitions.ModrmReg) is not null) ||
-                       (definition.GetSelectorIndex(SelectorDefinitions.ModrmRm) is not null);
+        var hasModrm = (definition.GetDecisionNodeIndex(ModrmModNode.NodeDefinition.Instance) is not null) ||
+                       (definition.GetDecisionNodeIndex(ModrmRegNode.NodeDefinition.Instance) is not null) ||
+                       (definition.GetDecisionNodeIndex(ModrmRmNode.NodeDefinition.Instance) is not null);
 
         var hasIS4 = false;
         PhysicalInstructionEncodingDisp? displacement = null;

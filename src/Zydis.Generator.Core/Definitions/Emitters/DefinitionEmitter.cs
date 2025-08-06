@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Zydis.Generator.Core.CodeGeneration;
 using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.Definitions.Builder;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.Definitions.Emitters;
 
@@ -62,7 +63,7 @@ internal static class DefinitionEmitter
                     .Conditional().WriteFieldDesignation("category").WriteExpression("ZYDIS_CATEGORY_{0}", definition.MetaInfo.Category.ToUpperInvariant())
                     .Conditional().WriteFieldDesignation("isa_set").WriteExpression("ZYDIS_ISA_SET_{0}", definition.MetaInfo.IsaSet.ToUpperInvariant())
                     .Conditional().WriteFieldDesignation("isa_ext").WriteExpression("ZYDIS_ISA_EXT_{0}", definition.MetaInfo.IsaExtension.ToUpperInvariant())
-                    .Conditional().WriteFieldDesignation("branch_type").WriteExpression("ZYDIS_BRANCH_TYPE_{0}", definition.GetBranchType().ToZydisString())
+                    .Conditional().WriteFieldDesignation("branch_type").WriteExpression(definition.GetBranchType().ToZydisString())
                     .Conditional().WriteFieldDesignation("exception_class").WriteExpression("ZYDIS_EXCEPTION_CLASS_{0}", (definition.ExceptionClass ?? ExceptionClass.None).ToZydisString())
                     .WriteFieldDesignation("op_reg").WriteExpression(GetRegisterConstraint(definition.Operands, OperandEncoding.ModrmReg))
                     .WriteFieldDesignation("op_rm").WriteExpression(GetRegisterConstraint(definition.Operands, OperandEncoding.ModrmRm))
@@ -109,10 +110,10 @@ internal static class DefinitionEmitter
                     case InstructionEncoding.EVEX:
                         initializerListWriter
                             .Conditional().WriteFieldDesignation("vector_length").WriteExpression("ZYDIS_IVECTOR_LENGTH_{0}", definition.Evex!.VectorLength.ToZydisString())
-                            .Conditional().WriteFieldDesignation("tuple_type").WriteExpression("ZYDIS_TUPLETYPE_{0}", definition.Evex!.TupleType.ToZydisString())
-                            .Conditional().WriteFieldDesignation("element_size").WriteExpression("ZYDIS_IELEMENT_SIZE_{0}", definition.Evex!.ElementSize.ToZydisString())
-                            .Conditional().WriteFieldDesignation("functionality").WriteExpression("ZYDIS_EVEX_FUNC_{0}", definition.Evex!.Functionality.ToZydisString())
-                            .WriteFieldDesignation("mask_policy").WriteExpression("ZYDIS_MASK_POLICY_{0}", definition.Evex!.MaskMode.ToZydisString())
+                            .Conditional().WriteFieldDesignation("tuple_type").WriteExpression(definition.Evex!.TupleType.ToZydisString())
+                            .Conditional().WriteFieldDesignation("element_size").WriteExpression(definition.Evex!.ElementSize.ToZydisString())
+                            .Conditional().WriteFieldDesignation("functionality").WriteExpression(definition.Evex!.Functionality.ToZydisString())
+                            .WriteFieldDesignation("mask_policy").WriteExpression(definition.Evex!.MaskMode.ToZydisString())
                             .WriteFieldDesignation("accepts_zero_mask").WriteBool(definition.Evex!.MaskFlags?.HasFlag(EvexMaskFlags.AcceptsZeroMask) ?? true)
                             .Conditional().WriteFieldDesignation("mask_override").WriteExpression("ZYDIS_MASK_OVERRIDE_{0}", GetMaskOverride(definition))
                             .Conditional().WriteFieldDesignation("broadcast").WriteExpression("ZYDIS_EVEX_STATIC_BROADCAST_{0}", definition.Evex!.StaticBroadcast.ToZydisString())
@@ -125,7 +126,7 @@ internal static class DefinitionEmitter
                     case InstructionEncoding.MVEX:
                         initializerListWriter
                             .WriteFieldDesignation("functionality").WriteExpression("ZYDIS_MVEX_FUNC_{0}", definition.Mvex!.Functionality.ToZydisString())
-                            .WriteFieldDesignation("mask_policy").WriteExpression("ZYDIS_MASK_POLICY_{0}", definition.Mvex!.MaskMode.ToZydisString())
+                            .WriteFieldDesignation("mask_policy").WriteExpression(definition.Mvex!.MaskMode.ToZydisString())
                             .Conditional().WriteFieldDesignation("has_element_granularity").WriteBool(definition.Mvex!.HasElementGranularity)
                             .Conditional().WriteFieldDesignation("broadcast").WriteExpression("ZYDIS_MVEX_STATIC_BROADCAST_{0}", definition.Mvex!.StaticBroadcast.ToZydisString());
                         break;

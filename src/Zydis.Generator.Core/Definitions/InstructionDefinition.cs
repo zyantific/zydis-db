@@ -9,6 +9,7 @@ using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.DecoderTree;
 using Zydis.Generator.Core.DecoderTree.Builder;
 using Zydis.Generator.Core.Serialization;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.Definitions;
 
@@ -24,7 +25,7 @@ public sealed record InstructionDefinition
     public required byte Opcode { get; init; }
 
     [JsonPropertyName("filters")]
-    public IReadOnlyDictionary<string, JsonElement>? SelectorValues { get; init; }
+    public IReadOnlyDictionary<string, JsonElement>? Pattern { get; init; }
 
     [JsonPropertyName("meta_info")]
     public required InstructionMetaInfo MetaInfo { get; init; }
@@ -64,14 +65,12 @@ public sealed record InstructionDefinition
 
     public T? GetAnnotation<T>() where T : Annotation => Annotations?.FirstOrDefault(x => x.GetType() == typeof(T)) as T ?? null;
 
-    public SelectorTableIndex? GetSelectorIndex(SelectorDefinition definition)
+    public DecisionNodeIndex? GetDecisionNodeIndex(DecisionNodeDefinition definition)
     {
         ArgumentNullException.ThrowIfNull(definition);
 
-        return SelectorValues?.TryGetValue(definition.Name, out var value) ?? false
-            ? definition.TryParseIndex(value.ValueKind is JsonValueKind.String ? value.ToString() : throw new InvalidDataException(), out var result)
-                ? result
-                : null
+        return Pattern?.TryGetValue(definition.Name, out var value) ?? false
+            ? definition.ParseSlotIndex(value.ValueKind is JsonValueKind.String ? value.ToString() : throw new InvalidDataException())
             : null;
     }
 
