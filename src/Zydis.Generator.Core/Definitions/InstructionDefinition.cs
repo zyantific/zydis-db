@@ -52,11 +52,17 @@ public sealed record InstructionDefinition
 
     public string? Comment { get; init; }
 
+    public IReadOnlyList<Annotation>? Annotations { get; init; }
+
     public IEnumerable<InstructionOperand> AllOperands => [.. Operands ?? [], .. AffectedFlags?.GetFlagsRegisterOperands() ?? []];
 
     public int NumberOfOperands => AllOperands.Count();
 
     public int NumberOfVisibleOperands => (Operands is null) ? 0 : Operands.TakeWhile(x => x.Visibility is not OperandVisibility.Hidden).Count();
+
+    public bool HasAnnotation<T>() => Annotations?.Any(x => x.GetType() == typeof(T)) ?? false;
+
+    public T? GetAnnotation<T>() where T : Annotation => Annotations?.FirstOrDefault(x => x.GetType() == typeof(T)) as T ?? null;
 
     public SelectorTableIndex? GetSelectorIndex(SelectorDefinition definition)
     {

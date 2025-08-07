@@ -471,7 +471,9 @@ public sealed class EncodableDefinition :
         Modes |= definition.Modes;
         OperandSizes |= definition.OperandSizes;
         if (Rex2 != definition.Rex2)
+        {
             Rex2 = Rex2Type.AlwaysAllowed; // TODO: For now Forbidden + Mantatory => Allowed
+        }
         EstimateSize();
         return true;
     }

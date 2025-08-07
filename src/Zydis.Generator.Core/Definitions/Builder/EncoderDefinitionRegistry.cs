@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using Zydis.Generator.Core.Common;
@@ -126,30 +127,30 @@ internal sealed class EncoderDefinitionRegistry
         Definitions.Add(encodableDefinition);
     }
 
+    private void ProcessAnnotatedSwappables()
+    {
+        for (var i = 0; i < Definitions.Count; ++i)
+        {
+            var definition = Definitions[i];
+            var swappableAnnotation = definition.Instruction.GetAnnotation<AnnotationSwappable>();
+            if (swappableAnnotation == null)
+            {
+                continue;
+            }
+            definition.SwappableIndex = 1;
+            var nextDefinitionName = i + 1 < Definitions.Count ? Definitions[i + 1].Instruction.GetAnnotation<AnnotationName>()?.Name ?? null : null;
+            if (swappableAnnotation.Next != nextDefinitionName)
+            {
+                throw new InvalidDataException($"Swappable definition constraint check has failed. Next definition is not: {swappableAnnotation.Next}");
+            }
+        }
+    }
+
     public void Optimize()
     {
         var stableSorted = Definitions.OrderBy(x => x).ToList();
         Definitions.Clear();
         Definitions.AddRange(stableSorted);
-
-        // TODO: Add DB annotations system
-        var xchgDefinitions = _instructions["xchg"];
-        var xchg90 = xchgDefinitions.First(x => x.Instruction.Opcode == 0x90);
-        xchg90.SwappableIndex = 1;
-
-        bool IsMovSwappable(EncodableDefinition definition)
-        {
-            if ((definition.Instruction.Operands?.Count ?? 0) != 2)
-            {
-                return false;
-            }
-            var dst = definition.Instruction.Operands![0];
-            var src = definition.Instruction.Operands![1];
-            return dst.Type == OperandType.GPR16_32_64 && dst.Encoding == OperandEncoding.Opcode &&
-                src.Type == OperandType.IMM && src.Encoding == OperandEncoding.Simm16_32_64;
-        }
-        var movDefinitions = _instructions["mov"];
-        var movB8 = movDefinitions.First(IsMovSwappable);
-        movB8.SwappableIndex = 1;
+        ProcessAnnotatedSwappables();
     }
 }
