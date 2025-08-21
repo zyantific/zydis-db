@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ internal static class OperandsEmitter
         {
             var initializerListWriter = operandsWriter
                 //.WriteInlineComment("{0:X4}", i++)
-                .WriteInitializerList()
+                .WriteInitializerList(indent: Debugger.IsAttached)
                 .BeginList();
 
             initializerListWriter
@@ -95,16 +96,14 @@ internal static class OperandsEmitter
 
                 reg.EndList();
             }
-
             else if (operand.Type is OperandType.ImplicitMem)
             {
-                 op.WriteFieldDesignation("mem").WriteInitializerList()
-                    .BeginList()
-                    .WriteFieldDesignation("seg").WriteInteger((int)(operand.MemorySegment ?? SegmentRegister.None))
-                    .WriteFieldDesignation("base").WriteExpression(operand.MemoryBase!.Value.ToZydisString())
-                    .EndList();
+                op.WriteFieldDesignation("mem").WriteInitializerList()
+                   .BeginList()
+                   .WriteFieldDesignation("seg").WriteInteger((int)(operand.MemorySegment ?? SegmentRegister.None))
+                   .WriteFieldDesignation("base").WriteExpression(operand.MemoryBase!.Value.ToZydisString())
+                   .EndList();
             }
-
             else
             {
                 op

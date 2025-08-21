@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ internal sealed class AffectedFlagsEmitter
 
         foreach (var accessedFlags in accessedFlagsRegistry.AccessedFlags)
         {
-            var ilw = flagsWriter.WriteInitializerList().BeginList();
+            var ilw = flagsWriter.WriteInitializerList(indent: Debugger.IsAttached).BeginList();
             var cpu = ilw.WriteFieldDesignation("cpu_flags").WriteInitializerList().BeginList();
             cpu.WriteFieldDesignation("tested").WriteInteger(accessedFlags.CpuFlags.Tested, 8, true);
             cpu.WriteFieldDesignation("modified").WriteInteger(accessedFlags.CpuFlags.Modified, 8, true);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ internal static class EncodingEmitter
 
         foreach (var encoding in encodingRegistry.Encodings)
         {
-            var initializerListWriter = encodingsWriter.WriteInitializerList().BeginList();
+            var initializerListWriter = encodingsWriter.WriteInitializerList(indent: Debugger.IsAttached).BeginList();
 
             initializerListWriter
                 .WriteFieldDesignation("flags").WriteExpression(GetEncodingFlags(encoding));

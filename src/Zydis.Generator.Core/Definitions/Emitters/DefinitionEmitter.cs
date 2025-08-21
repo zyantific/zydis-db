@@ -5,7 +5,6 @@ using System.IO;
 using System.Threading.Tasks;
 
 using Zydis.Generator.Core.CodeGeneration;
-using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.Definitions.Builder;
 using Zydis.Generator.Enums;
 
@@ -47,9 +46,9 @@ internal static class DefinitionEmitter
             foreach (var definition in definitions)
             {
                 // Initialize base struct
-                initializerListWriter
+                var ilw = initializerListWriter
                     //.WriteInlineComment("{0:X4}", i++)
-                    .WriteInitializerList()
+                    .WriteInitializerList(indent: Debugger.IsAttached)
                     .BeginList()
                     .WriteFieldDesignation("mnemonic").WriteExpression("ZYDIS_MNEMONIC_{0}", definition.Mnemonic.ToUpperInvariant())
                     .Conditional().WriteFieldDesignation("operand_count").WriteInteger(definition.NumberOfOperands)
@@ -74,12 +73,12 @@ internal static class DefinitionEmitter
 
                 if (encoding is InstructionEncoding.VEX or InstructionEncoding.EVEX or InstructionEncoding.MVEX or InstructionEncoding.XOP)
                 {
-                    initializerListWriter.WriteFieldDesignation("op_ndsndd").WriteExpression(GetRegisterConstraint(definition.Operands, OperandEncoding.NDSNDD));
+                    ilw.WriteFieldDesignation("op_ndsndd").WriteExpression(GetRegisterConstraint(definition.Operands, OperandEncoding.NDSNDD));
                 }
 
                 if (encoding is InstructionEncoding.VEX or InstructionEncoding.EVEX or InstructionEncoding.MVEX)
                 {
-                    initializerListWriter
+                    ilw
                         .WriteFieldDesignation("is_gather").WriteBool(definition.Flags.HasFlag(InstructionFlagsEnum.IsGather))
                         .WriteFieldDesignation("no_source_dest_match").WriteBool(definition.Flags.HasFlag(InstructionFlagsEnum.NoSourceDestMatch))
                         .WriteFieldDesignation("no_source_source_match").WriteBool(definition.Flags.HasFlag(InstructionFlagsEnum.NoSourceSourceMatch));
@@ -88,7 +87,7 @@ internal static class DefinitionEmitter
                 switch (encoding)
                 {
                     case InstructionEncoding.Default:
-                        initializerListWriter
+                        ilw
                             .Conditional().WriteFieldDesignation("is_privileged").WriteBool(definition.Cpl is 0)
                             .WriteFieldDesignation("accepts_LOCK").WriteBool(definition.PrefixFlags.HasFlag(PrefixFlags.AcceptsLOCK))
                             .Conditional().WriteFieldDesignation("accepts_REP").WriteBool(definition.PrefixFlags.HasFlag(PrefixFlags.AcceptsREP))
@@ -103,12 +102,12 @@ internal static class DefinitionEmitter
                         break;
 
                     case InstructionEncoding.VEX:
-                        initializerListWriter
+                        ilw
                             .Conditional().WriteFieldDesignation("broadcast").WriteExpression("ZYDIS_VEX_STATIC_BROADCAST_{0}", (definition.Vex?.StaticBroadcast ?? StaticBroadcast.None).ToZydisString());
                         break;
 
                     case InstructionEncoding.EVEX:
-                        initializerListWriter
+                        ilw
                             .Conditional().WriteFieldDesignation("vector_length").WriteExpression("ZYDIS_IVECTOR_LENGTH_{0}", definition.Evex!.VectorLength.ToZydisString())
                             .Conditional().WriteFieldDesignation("tuple_type").WriteExpression(definition.Evex!.TupleType.ToZydisString())
                             .Conditional().WriteFieldDesignation("element_size").WriteExpression(definition.Evex!.ElementSize.ToZydisString())
@@ -124,7 +123,7 @@ internal static class DefinitionEmitter
                         break;
 
                     case InstructionEncoding.MVEX:
-                        initializerListWriter
+                        ilw
                             .WriteFieldDesignation("functionality").WriteExpression("ZYDIS_MVEX_FUNC_{0}", definition.Mvex!.Functionality.ToZydisString())
                             .WriteFieldDesignation("mask_policy").WriteExpression(definition.Mvex!.MaskMode.ToZydisString())
                             .Conditional().WriteFieldDesignation("has_element_granularity").WriteBool(definition.Mvex!.HasElementGranularity)
@@ -132,7 +131,7 @@ internal static class DefinitionEmitter
                         break;
                 }
 
-                initializerListWriter.EndList();
+                ilw.EndList();
             }
 
             initializerListWriter.EndList();
@@ -159,12 +158,12 @@ internal static class DefinitionEmitter
                     OperandType.GPR64 or
                     OperandType.GPR16_32_64 or
                     OperandType.GPR32_32_64 or
-                    OperandType.GPR16_32_32 or 
+                    OperandType.GPR16_32_32 or
                     OperandType.GPRASZ => "ZYDIS_REGKIND_GPR",
                     OperandType.FPR => "ZYDIS_REGKIND_X87",
                     OperandType.MMX => "ZYDIS_REGKIND_MMX",
                     OperandType.XMM or
-                    OperandType.YMM or 
+                    OperandType.YMM or
                     OperandType.ZMM => "ZYDIS_REGKIND_VR",
                     OperandType.TMM => "ZYDIS_REGKIND_TMM",
                     OperandType.BND => "ZYDIS_REGKIND_BOUND",
