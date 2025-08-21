@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
+using Zydis.Generator.Core.CodeGeneration;
 using Zydis.Generator.Core.DecoderTree;
 using Zydis.Generator.Core.Helpers;
 
@@ -333,6 +334,7 @@ public sealed class PhysicalInstructionEncodingDisp :
 
 #pragma warning disable CA1036
 
+[Emittable(0, "size")]
 public sealed class PhysicalInstructionEncodingImm :
     IComparable<PhysicalInstructionEncodingImm>,
     IComparable,
@@ -343,8 +345,14 @@ public sealed class PhysicalInstructionEncodingImm :
     public int Width16 { get; init; }
     public int Width32 { get; init; }
     public int Width64 { get; init; }
+
+    [Emittable(1)]
     public bool IsSigned { get; init; }
+
+    [Emittable(2)]
     public bool IsAddress { get; init; }
+
+    [Emittable(3)]
     public bool IsRelative { get; init; }
 
     public int CompareTo(PhysicalInstructionEncodingImm? other)

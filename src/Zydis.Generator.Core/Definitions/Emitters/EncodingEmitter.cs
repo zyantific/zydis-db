@@ -18,62 +18,44 @@ internal static class EncodingEmitter
         ArgumentNullException.ThrowIfNull(encodingRegistry);
 
         var declarationWriter = DeclarationWriter.Create(writer);
-
         var encodingsWriter = declarationWriter
             .BeginDeclaration("static const", "ZydisInstructionEncodingInfo", "INSTR_ENCODINGS[]")
             .WriteInitializerList()
             .BeginList();
+        var instructionEncodingInfoDeclaration = new SimpleObjectDeclaration("flags", "disp", "imm");
+        var dispDeclaration = new SimpleObjectDeclaration("size");
+        var immArrayDeclaration = new ArrayObjectDeclaration(2);
+        var immDeclaration = new ObjectDeclaration<PhysicalInstructionEncodingImm>();
 
         foreach (var encoding in encodingRegistry.Encodings)
         {
-            var initializerListWriter = encodingsWriter.WriteInitializerList(indent: Debugger.IsAttached).BeginList();
-
-            initializerListWriter
-                .WriteFieldDesignation("flags").WriteExpression(GetEncodingFlags(encoding));
-
-            var dispWriter = initializerListWriter.WriteFieldDesignation("disp").WriteInitializerList()
-                .BeginList();
-            dispWriter.WriteFieldDesignation("size").WriteInitializerList()
-                .BeginList()
-                .WriteInteger(encoding.Displacement?.Width16 ?? 0)
-                .WriteInteger(encoding.Displacement?.Width32 ?? 0)
-                .WriteInteger(encoding.Displacement?.Width64 ?? 0)
-                .EndList();
-            dispWriter.EndList();
-
-            var immediatesWriter = initializerListWriter.WriteFieldDesignation("imm").WriteInitializerList().BeginList();
-
-            var imm0Writer = immediatesWriter.WriteArrayDesignation(0).WriteInitializerList()
-                .BeginList();
-            imm0Writer.WriteFieldDesignation("size").WriteInitializerList()
-                .BeginList()
-                .WriteInteger(encoding.Immediate0?.Width16 ?? 0)
-                .WriteInteger(encoding.Immediate0?.Width32 ?? 0)
-                .WriteInteger(encoding.Immediate0?.Width64 ?? 0)
-                .EndList();
-            imm0Writer
-                .WriteFieldDesignation("is_signed").WriteBool(encoding.Immediate0?.IsSigned ?? false)
-                .WriteFieldDesignation("is_address").WriteBool(encoding.Immediate0?.IsAddress ?? false)
-                .WriteFieldDesignation("is_relative").WriteBool(encoding.Immediate0?.IsRelative ?? false);
-            imm0Writer.EndList();
-
-            var imm1Writer = immediatesWriter.WriteArrayDesignation(1).WriteInitializerList()
-                .BeginList();
-            imm1Writer.WriteFieldDesignation("size").WriteInitializerList()
-                .BeginList()
-                .WriteInteger(encoding.Immediate1?.Width16 ?? 0)
-                .WriteInteger(encoding.Immediate1?.Width32 ?? 0)
-                .WriteInteger(encoding.Immediate1?.Width64 ?? 0)
-                .EndList();
-            imm1Writer
-                .WriteFieldDesignation("is_signed").WriteBool(encoding.Immediate1?.IsSigned ?? false)
-                .WriteFieldDesignation("is_address").WriteBool(encoding.Immediate1?.IsAddress ?? false)
-                .WriteFieldDesignation("is_relative").WriteBool(encoding.Immediate1?.IsRelative ?? false);
-            imm1Writer.EndList();
-
-            immediatesWriter.EndList();
-
-            initializerListWriter.EndList();
+            var encodingEntry = encodingsWriter.CreateObjectWriter(instructionEncodingInfoDeclaration);
+            var dispEntry = encodingEntry.CreateObjectWriter(dispDeclaration);
+            dispEntry.WriteIntegerArray("size",
+                encoding.Displacement?.Width16 ?? 0,
+                encoding.Displacement?.Width32 ?? 0,
+                encoding.Displacement?.Width64 ?? 0);
+            var immArrayEntry = encodingEntry.CreateObjectWriter(immArrayDeclaration);
+            PhysicalInstructionEncodingImm?[] immediates = [encoding.Immediate0, encoding.Immediate1];
+            for (var i = 0; i < immediates.Length; ++i)
+            {
+                var immediate = immediates[i];
+                var immEntry = immArrayEntry.CreateObjectWriter(immDeclaration);
+                immEntry
+                    .WriteIntegerArray("size",
+                        immediate?.Width16 ?? 0,
+                        immediate?.Width32 ?? 0,
+                        immediate?.Width64 ?? 0)
+                    .WriteBool("is_signed", immediate?.IsSigned ?? false)
+                    .WriteBool("is_address", immediate?.IsAddress ?? false)
+                    .WriteBool("is_relative", immediate?.IsRelative ?? false);
+                immArrayEntry.WriteObject(i, immEntry);
+            }
+            encodingEntry
+                .WriteExpression("flags", GetEncodingFlags(encoding))
+                .WriteObject("disp", dispEntry)
+                .WriteObject("imm", immArrayEntry);
+            encodingsWriter.WriteObject(encodingEntry);
         }
 
         encodingsWriter.EndList();

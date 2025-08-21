@@ -7,6 +7,9 @@ namespace Zydis.Generator.Core.CodeGeneration;
 
 public sealed class InitializerListWriter
 {
+    private const int IndentSize = 4;
+    private const bool IndentByDefault = false;
+
     private readonly TextWriter _writer;
     private readonly int? _indent;
     private readonly string? _indentString;
@@ -28,13 +31,6 @@ public sealed class InitializerListWriter
         }
     }
 
-    public static InitializerListWriter Create(TextWriter writer, bool indent = true)
-    {
-        ArgumentNullException.ThrowIfNull(writer);
-
-        return new InitializerListWriter(writer, indent ? 4 : null);
-    }
-
     public InitializerListWriter BeginList()
     {
         if (_indent.HasValue)
@@ -47,6 +43,12 @@ public sealed class InitializerListWriter
         }
 
         return this;
+    }
+
+    public InitializerListWriter WriteObject(ObjectWriter objectWriter)
+    {
+        ArgumentNullException.ThrowIfNull(objectWriter);
+        return WriteExpression(objectWriter.GetExpression());
     }
 
     public InitializerListWriter WriteExpression(string value)
@@ -142,7 +144,7 @@ public sealed class InitializerListWriter
         return this;
     }
 
-    public InitializerListWriter WriteInitializerList(bool indent = true)
+    public InitializerListWriter WriteInitializerList(bool indent = IndentByDefault)
     {
         EnsureDelimiter();
 
@@ -150,7 +152,13 @@ public sealed class InitializerListWriter
 
         // TODO: EnsureMacroParenthesis();
 
-        return new InitializerListWriter(_writer, !indent ? null : _indent + 4);
+        return new InitializerListWriter(_writer, indent ? _indent + IndentSize : null);
+    }
+
+    public ObjectWriter CreateObjectWriter(ObjectDeclaration declaration, bool indent = IndentByDefault)
+    {
+        ArgumentNullException.ThrowIfNull(declaration);
+        return new ObjectWriter(declaration, indent ? _indent + IndentSize : null);
     }
 
     public InitializerListWriter WriteFieldDesignation(string identifier)
@@ -250,7 +258,7 @@ public sealed class InitializerListWriter
             if (_lastTokenIsExpression)
             {
                 _writer.WriteLine();
-                _writer.Write(_indentString![..^4]);
+                _writer.Write(_indentString![..^IndentSize]);
             }
         }
         else

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Zydis.Generator.Core.CodeGeneration;
-using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.Definitions.Builder;
 using Zydis.Generator.Enums;
 
@@ -55,59 +54,57 @@ internal static class EncoderTablesEmitter
 
     private static void EmitLookupTable(DeclarationWriter writer, EncoderDefinitionRegistry registry)
     {
-        var initializerListWriter = writer
+        var lookupWriter = writer
             .BeginDeclaration("const", "ZydisEncoderLookupEntry", "encoder_instruction_lookup[]")
             .WriteInitializerList()
             .BeginList();
+        var lookupDeclaration = new SimpleObjectDeclaration("encoder_reference", "instruction_count");
 
         foreach (var entry in GetLookupEntries(registry))
         {
-            initializerListWriter
-                .WriteInitializerList(true)
-                .BeginList()
-                .WriteInteger(entry.Reference, 4, true)
-                .WriteInteger(entry.Count)
-                .EndList();
+            var lookupEntry = lookupWriter.CreateObjectWriter(lookupDeclaration)
+                .WriteInteger("encoder_reference", entry.Reference, 4, true)
+                .WriteInteger("instruction_count", entry.Count);
+            lookupWriter.WriteObject(lookupEntry);
         }
 
-        initializerListWriter.EndList();
+        lookupWriter.EndList();
         writer.EndDeclaration().WriteNewline();
     }
 
     private static void EmitDefinitionsTable(DeclarationWriter writer, EncoderDefinitionRegistry registry, DefinitionRegistry instructions)
     {
-        var initializerListWriter = writer
+        var definitionWriter = writer
             .BeginDeclaration("const", "ZydisEncodableInstruction", "encoder_instructions[]")
             .WriteInitializerList()
             .BeginList();
+        var encodableInstructionDeclaration = new ObjectDeclaration<EncodableDefinition>();
 
         foreach (var definition in registry.Definitions)
         {
-            initializerListWriter
-                .WriteInitializerList(true)
-                .BeginList()
-                .WriteInteger(instructions.GetDefinitionId(definition.Instruction), 4, true)
-                .WriteInteger(definition.GetOperandMask(), 4, true)
-                .WriteInteger(definition.Instruction.Opcode, 2, true)
-                .WriteInteger(definition.Modrm, 2, true)
-                .WriteExpression(definition.Instruction.Encoding.ToZydisString())
-                .WriteExpression(definition.Instruction.OpcodeMap.ToZydisString())
-                .WriteExpression(definition.Modes.ToZydisString())
-                .WriteExpression(definition.GetEffectiveAddressSize().ToZydisString())
-                .WriteExpression(definition.OperandSizes.ToZydisString())
-                .WriteExpression("ZYDIS_MANDATORY_PREFIX_{0}", definition.MandatoryPrefix.ToZydisString())
-                .WriteBool(definition.RexW)
-                .WriteExpression("ZYDIS_REX2_TYPE_{0}", definition.Rex2.ToZydisString())
-                .WriteBool(definition.EvexNd)
-                .WriteBool(definition.EvexNf)
-                .WriteBool(definition.ApxOsz)
-                .WriteExpression("ZYDIS_VECTOR_LENGTH_{0}", definition.VectorLength.ToZydisEncoderString())
-                .WriteExpression("ZYDIS_SIZE_HINT_{0}", definition.GetSizeHint().ToZydisString())
-                .WriteBool(definition.IsSwappable)
-                .EndList();
+            var definitionEntry = definitionWriter.CreateObjectWriter(encodableInstructionDeclaration)
+                .WriteInteger("instruction_reference", instructions.GetDefinitionId(definition.Instruction), 4, true)
+                .WriteInteger("operand_mask", definition.GetOperandMask(), 4, true)
+                .WriteInteger("opcode", definition.Instruction.Opcode, 2, true)
+                .WriteInteger("modrm", definition.Modrm, 2, true)
+                .WriteExpression("encoding", definition.Instruction.Encoding.ToZydisString())
+                .WriteExpression("opcode_map", definition.Instruction.OpcodeMap.ToZydisString())
+                .WriteExpression("modes", definition.Modes.ToZydisString())
+                .WriteExpression("address_sizes", definition.GetEffectiveAddressSize().ToZydisString())
+                .WriteExpression("operand_sizes", definition.OperandSizes.ToZydisString())
+                .WriteExpression("mandatory_prefix", "ZYDIS_MANDATORY_PREFIX_{0}", definition.MandatoryPrefix.ToZydisString())
+                .WriteBool("rex_w", definition.RexW)
+                .WriteExpression("rex2", "ZYDIS_REX2_TYPE_{0}", definition.Rex2.ToZydisString())
+                .WriteBool("evex_nd", definition.EvexNd)
+                .WriteBool("evex_nf", definition.EvexNf)
+                .WriteBool("apx_osz", definition.ApxOsz)
+                .WriteExpression("vector_length", "ZYDIS_VECTOR_LENGTH_{0}", definition.VectorLength.ToZydisEncoderString())
+                .WriteExpression("accepts_hint", "ZYDIS_SIZE_HINT_{0}", definition.GetSizeHint().ToZydisString())
+                .WriteBool("swappable", definition.IsSwappable);
+            definitionWriter.WriteObject(definitionEntry);
         }
 
-        initializerListWriter.EndList();
+        definitionWriter.EndList();
         writer.EndDeclaration().WriteNewline();
     }
 }

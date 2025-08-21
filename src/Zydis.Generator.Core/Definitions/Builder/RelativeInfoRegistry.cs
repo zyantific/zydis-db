@@ -10,7 +10,7 @@ internal sealed class RelativeInfoRegistry
 
     public readonly List<List<string>> Mnemonics = new();
 
-    public class RelInfo : IEquatable<RelInfo>
+    internal sealed class RelInfo : IEquatable<RelInfo>
     {
         public int[,] Size { get; private set; }
         public SizeHint SizeHint { get; init; }

@@ -21,30 +21,32 @@ internal sealed class AffectedFlagsEmitter
         await writer.WriteLineAsync("#ifndef ZYDIS_MINIMAL_MODE").ConfigureAwait(false);
 
         var declarationWriter = DeclarationWriter.Create(writer);
-
         var flagsWriter = declarationWriter
             .BeginDeclaration("static const", "ZydisDefinitionAccessedFlags", "ACCESSED_FLAGS[]")
             .WriteInitializerList()
             .BeginList();
+        var definitionAccessedFlagsDeclaration = new ObjectDeclaration<DefinitionAccessedFlags>();
+        var accessedFlagsDeclaration = new ObjectDeclaration<AccessedFlags>();
 
         foreach (var accessedFlags in accessedFlagsRegistry.AccessedFlags)
         {
-            var ilw = flagsWriter.WriteInitializerList(indent: Debugger.IsAttached).BeginList();
-            var cpu = ilw.WriteFieldDesignation("cpu_flags").WriteInitializerList().BeginList();
-            cpu.WriteFieldDesignation("tested").WriteInteger(accessedFlags.CpuFlags.Tested, 8, true);
-            cpu.WriteFieldDesignation("modified").WriteInteger(accessedFlags.CpuFlags.Modified, 8, true);
-            cpu.WriteFieldDesignation("set_0").WriteInteger(accessedFlags.CpuFlags.Set0, 8, true);
-            cpu.WriteFieldDesignation("set_1").WriteInteger(accessedFlags.CpuFlags.Set1, 8, true);
-            cpu.WriteFieldDesignation("undefined").WriteInteger(accessedFlags.CpuFlags.Undefined, 8, true);
-            cpu.EndList();
-            var fpu = ilw.WriteFieldDesignation("fpu_flags").WriteInitializerList().BeginList();
-            fpu.WriteFieldDesignation("tested").WriteInteger(accessedFlags.FpuFlags.Tested, 8, true);
-            fpu.WriteFieldDesignation("modified").WriteInteger(accessedFlags.FpuFlags.Modified, 8, true);
-            fpu.WriteFieldDesignation("set_0").WriteInteger(accessedFlags.FpuFlags.Set0, 8, true);
-            fpu.WriteFieldDesignation("set_1").WriteInteger(accessedFlags.FpuFlags.Set1, 8, true);
-            fpu.WriteFieldDesignation("undefined").WriteInteger(accessedFlags.FpuFlags.Undefined, 8, true);
-            fpu.EndList();
-            ilw.EndList();
+            var flagsEntry = flagsWriter.CreateObjectWriter(definitionAccessedFlagsDeclaration);
+            var cpu = flagsEntry.CreateObjectWriter(accessedFlagsDeclaration)
+                .WriteInteger("tested", accessedFlags.CpuFlags.Tested, 8, true)
+                .WriteInteger("modified", accessedFlags.CpuFlags.Modified, 8, true)
+                .WriteInteger("set_0", accessedFlags.CpuFlags.Set0, 8, true)
+                .WriteInteger("set_1", accessedFlags.CpuFlags.Set1, 8, true)
+                .WriteInteger("undefined", accessedFlags.CpuFlags.Undefined, 8, true);
+            var fpu = flagsEntry.CreateObjectWriter(accessedFlagsDeclaration)
+                .WriteInteger("tested", accessedFlags.FpuFlags.Tested, 8, true)
+                .WriteInteger("modified", accessedFlags.FpuFlags.Modified, 8, true)
+                .WriteInteger("set_0", accessedFlags.FpuFlags.Set0, 8, true)
+                .WriteInteger("set_1", accessedFlags.FpuFlags.Set1, 8, true)
+                .WriteInteger("undefined", accessedFlags.FpuFlags.Undefined, 8, true);
+            flagsEntry
+                .WriteObject("cpu_flags", cpu)
+                .WriteObject("fpu_flags", fpu);
+            flagsWriter.WriteObject(flagsEntry);
         }
 
         flagsWriter.EndList();
