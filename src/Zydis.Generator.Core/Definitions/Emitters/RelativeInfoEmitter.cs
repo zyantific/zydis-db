@@ -7,7 +7,7 @@ using Zydis.Generator.Core.Definitions.Builder;
 
 namespace Zydis.Generator.Core.Definitions.Emitters;
 
-internal class RelativeInfoEmitter
+internal sealed class RelativeInfoEmitter
 {
     public static async Task EmitAsync(StreamWriter writer, RelativeInfoRegistry registry)
     {

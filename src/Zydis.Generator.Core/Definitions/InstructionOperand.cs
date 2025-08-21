@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json.Serialization;
 
+using Zydis.Generator.Core.CodeGeneration;
 using Zydis.Generator.Core.Helpers;
 using Zydis.Generator.Enums;
 
@@ -10,6 +11,8 @@ namespace Zydis.Generator.Core.Definitions;
 
 #pragma warning disable CA1036
 
+[Emittable(3, "size")]
+[Emittable(5, "op")]
 public sealed class InstructionOperand :
     IComparable<InstructionOperand>,
     IComparable,
@@ -17,15 +20,21 @@ public sealed class InstructionOperand :
 
 #pragma warning restore CA1036
 {
+    [Emittable(0)]
     [JsonPropertyName("operand_type")]
     public OperandType Type { get; init; }
 
+    [Emittable(2, "actions")]
     [JsonPropertyName("action")]
     public OperandAccess Access { get; init; }
 
     public OperandEncoding Encoding { get; init; }
+
+    [Emittable(4)]
     public ElementType ElementType { get; init; }
+
     public ScaleFactor ScaleFactor { get; init; }
+
     public int Width16 { get; init; }
     public int Width32 { get; init; }
     public int Width64 { get; init; }
@@ -33,9 +42,11 @@ public sealed class InstructionOperand :
     [JsonPropertyName("visible")]
     public bool? IsVisible { get; init; }
 
+    [Emittable(6, "is_multisource4")]
     [JsonPropertyName("is_multisource4")]
     public bool IsMultiSource4 { get; init; }
 
+    [Emittable(7, "ignore_seg_override")]
     [JsonPropertyName("ignore_seg_override")]
     public bool IgnoreSegmentOverride { get; init; }
 
@@ -47,6 +58,7 @@ public sealed class InstructionOperand :
     [JsonPropertyName("mem_base")]
     public BaseRegister? MemoryBase { get; init; }
 
+    [Emittable(1)]
     [JsonIgnore]
     public OperandVisibility Visibility => Type switch
     {

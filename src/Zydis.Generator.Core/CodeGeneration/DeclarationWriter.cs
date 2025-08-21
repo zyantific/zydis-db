@@ -7,6 +7,9 @@ namespace Zydis.Generator.Core.CodeGeneration;
 
 public sealed class DeclarationWriter
 {
+    private const int IndentSize = 4;
+    private const bool IndentByDefault = true;
+
     private readonly TextWriter _writer;
     private readonly bool _indented;
 
@@ -18,7 +21,7 @@ public sealed class DeclarationWriter
         _indented = indented;
     }
 
-    public static DeclarationWriter Create(TextWriter writer, bool indented = true)
+    public static DeclarationWriter Create(TextWriter writer, bool indented = IndentByDefault)
     {
         ArgumentNullException.ThrowIfNull(writer);
 
@@ -103,7 +106,7 @@ public sealed class DeclarationWriter
         return this;
     }
 
-    public InitializerListWriter WriteInitializerList(bool doNotIndent = false)
+    public InitializerListWriter WriteInitializerList(bool indent = IndentByDefault)
     {
         _writer.Write(" = ");
 
@@ -112,7 +115,7 @@ public sealed class DeclarationWriter
             _writer.WriteLine();
         }
 
-        return new InitializerListWriter(_writer, _indented && !doNotIndent ? 4 : null);
+        return new InitializerListWriter(_writer, _indented && indent ? IndentSize : null);
     }
 
     public DeclarationWriter WriteNewline()

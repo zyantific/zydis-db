@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 
-using Zydis.Generator.Core.Common;
+using Zydis.Generator.Core.CodeGeneration;
 using Zydis.Generator.Core.DecoderTree;
 using Zydis.Generator.Core.Extensions;
 using Zydis.Generator.Core.Helpers;
@@ -14,6 +14,13 @@ namespace Zydis.Generator.Core.Definitions;
 
 #pragma warning disable CA1036
 
+[Emittable(0, "instruction_reference")]
+[Emittable(1, "operand_mask")]
+[Emittable(2, "opcode")]
+[Emittable(4, "encoding")]
+[Emittable(5, "opcode_map")]
+[Emittable(7, "address_sizes")]
+[Emittable(16, "accepts_hint")]
 public sealed class EncodableDefinition :
     IComparable<EncodableDefinition>
 
@@ -25,32 +32,43 @@ public sealed class EncodableDefinition :
 
     public bool IsSwappable { get => (SwappableIndex & 1) != 0; }
 
+    [Emittable(6)]
     public WidthFlag Modes { get; set; }
 
     public WidthFlag AddressSizes { get; set; }
 
+    [Emittable(8)]
     public WidthFlag OperandSizes { get; set; }
 
+    [Emittable(11)]
     public Rex2Type Rex2 { get; set; }
 
+    [Emittable(9)]
     public MandatoryPrefix MandatoryPrefix { get; set; }
 
+    [Emittable(3)]
     public int Modrm { get; set; }
 
     public int MinSize { get; set; }
 
     public int MaxSize { get; set; }
 
+    [Emittable(10)]
     public bool RexW { get; set; }
 
+    [Emittable(12)]
     public bool EvexNd { get; set; }
 
+    [Emittable(13)]
     public bool EvexNf { get; set; }
 
+    [Emittable(15)]
     public VectorLength VectorLength { get; set; }
 
+    [Emittable(14)]
     public bool ApxOsz { get; set; }
 
+    [Emittable(17, "swappable")]
     public int SwappableIndex { get; set; }
 
     private bool _forcedSizeHint;

@@ -4,11 +4,11 @@ namespace Zydis.Generator.Core.Definitions;
 
 public enum MandatoryPrefix
 {
-   None,
-   Ignore,
-   P66,
-   PF2,
-   PF3,
+    None,
+    Ignore,
+    P66,
+    PF2,
+    PF3,
 }
 
 public static class MandatoryPrefixExtensions

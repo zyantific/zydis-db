@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
+using Zydis.Generator.Core.CodeGeneration;
 using Zydis.Generator.Core.Helpers;
 
 namespace Zydis.Generator.Core.Definitions.Builder;
@@ -160,7 +161,10 @@ public sealed class DefinitionAccessedFlags :
     IComparable,
     IEquatable<DefinitionAccessedFlags>
 {
+    [Emittable(0)]
     public required AccessedFlags CpuFlags { get; init; }
+
+    [Emittable(1)]
     public required AccessedFlags FpuFlags { get; init; }
 
     public int CompareTo(DefinitionAccessedFlags? other)
@@ -208,10 +212,19 @@ public sealed class AccessedFlags :
     IComparable,
     IEquatable<AccessedFlags>
 {
+    [Emittable(0)]
     public uint Tested { get; init; }
+
+    [Emittable(1)]
     public uint Modified { get; init; }
+
+    [Emittable(2, "set_0")]
     public uint Set0 { get; init; }
+
+    [Emittable(3, "set_1")]
     public uint Set1 { get; init; }
+
+    [Emittable(4)]
     public uint Undefined { get; init; }
 
     public int CompareTo(AccessedFlags? other)
