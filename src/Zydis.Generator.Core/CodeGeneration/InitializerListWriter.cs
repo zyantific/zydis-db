@@ -142,7 +142,7 @@ public sealed class InitializerListWriter
         return this;
     }
 
-    public InitializerListWriter WriteInitializerList(bool doNotIndent = false)
+    public InitializerListWriter WriteInitializerList(bool indent = true)
     {
         EnsureDelimiter();
 
@@ -150,7 +150,7 @@ public sealed class InitializerListWriter
 
         // TODO: EnsureMacroParenthesis();
 
-        return new InitializerListWriter(_writer, doNotIndent ? null : _indent + 4);
+        return new InitializerListWriter(_writer, !indent ? null : _indent + 4);
     }
 
     public InitializerListWriter WriteFieldDesignation(string identifier)
