@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  workflow_call:
+    inputs:
+      root-path:
+        description: The project root path.
+        type: string
+        required: false
+        default: ''
+
+env:
+  BUILD_CONFIG: Debug
+  DOTNET_GLOBAL_JSON: ${{ inputs.root-path != '' && format('{0}/global.json', inputs.root-path) || 'global.json' }}
+  RESTORE_PATTERN: ${{ inputs.root-path != '' && format('{0}/**/packages.lock.json', inputs.root-path) || '**/packages.lock.json' }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: .NET Setup
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: ${{ env.DOTNET_GLOBAL_JSON }}
+
+      - name: .NET Cache Packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles(env.RESTORE_PATTERN) }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: .NET Build
+        working-directory: ${{ inputs.root-path }}
+        run: >-
+          dotnet build
