@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using Zydis.Generator.Core.CodeGeneration;
 using Zydis.Generator.Core.Definitions.Builder;
 
+using static Zydis.Generator.Core.CodeGeneration.ObjectDeclaration;
+using static Zydis.Generator.Core.Definitions.Builder.RelativeInfoRegistry;
+
 namespace Zydis.Generator.Core.Definitions.Emitters;
 
 internal sealed class RelativeInfoEmitter
@@ -14,44 +17,55 @@ internal sealed class RelativeInfoEmitter
         ArgumentNullException.ThrowIfNull(writer);
         ArgumentNullException.ThrowIfNull(registry);
 
-        // TODO: Add something to handle indentation automatically
-        writer.WriteLine("const ZydisEncoderRelInfo *ZydisGetRelInfo(ZydisMnemonic mnemonic)");
-        writer.WriteLine("{");
-        writer.WriteLine("    static const ZydisEncoderRelInfo info_lookup[{0}] =", registry.Infos.Count);
-        writer.WriteLine("    {");
+        var codeWriter = new CodeWriter(writer);
+        codeWriter
+            .WriteLine("const ZydisEncoderRelInfo *ZydisGetRelInfo(ZydisMnemonic mnemonic)")
+            .BeginBlock()
+            .WriteLine("static const ZydisEncoderRelInfo info_lookup[{0}] =", registry.Infos.Count)
+            .BeginBlock();
+        var relInfoDeclaration = new ObjectDeclaration<RelInfo>(InitializerType.Positional);
+        var sizeArrayDeclaration = new ArrayObjectDeclaration(3);
 
         foreach (var info in registry.Infos)
         {
-            var lookup = "";
+            var relInfoEntry = new ObjectWriter(relInfoDeclaration, null);
+            var sizeEntry = new ObjectWriter(sizeArrayDeclaration, null);
             for (var i = 0; i < info.Size.GetLength(0); ++i)
             {
-                lookup += $"{{ {info.Size[i, 0]}, {info.Size[i, 1]}, {info.Size[i, 2]} }}, ";
+                sizeEntry.WriteIntegerArray(i, info.Size[i, 0], info.Size[i, 1], info.Size[i, 2]);
             }
-            writer.Write("        {{ {{ {0} }}, ZYDIS_SIZE_HINT_{1}, ", lookup[..^2], info.SizeHint.ToZydisString());
-            WriterExtensions.WriteBool(writer, info.AcceptsBranchHints);
-            writer.Write(", ");
-            WriterExtensions.WriteBool(writer, info.AcceptsBound);
-            writer.WriteLine(" },");
+            relInfoEntry
+                .WriteObject("size", sizeEntry)
+                .WriteExpression("accepts_scaling_hints", "ZYDIS_SIZE_HINT_{0}", info.SizeHint.ToZydisString())
+                .WriteBool("accepts_branch_hints", info.AcceptsBranchHints)
+                .WriteBool("accepts_bound", info.AcceptsBound);
+            codeWriter.WriteLine("{0},", relInfoEntry.GetExpression());
         }
 
-        writer.WriteLine("    };");
-        writer.WriteLine("");
-        writer.WriteLine("    switch (mnemonic)");
-        writer.WriteLine("    {");
+        codeWriter
+            .EndBlock(true)
+            .Newline()
+            .WriteLine("switch (mnemonic)")
+            .BeginBlock(false);
 
         var info_index = 0;
         foreach (var mnemonics in registry.Mnemonics)
         {
             foreach (var mnemonic in mnemonics)
             {
-                writer.WriteLine("    case ZYDIS_MNEMONIC_{0}:", mnemonic.ToUpperInvariant());
+                codeWriter.WriteLine("case ZYDIS_MNEMONIC_{0}:", mnemonic.ToUpperInvariant());
             }
-            writer.WriteLine("        return &info_lookup[{0}];", info_index++);
+            codeWriter
+                .BeginIndent()
+                .WriteLine("return &info_lookup[{0}];", info_index++)
+                .EndIndent();
         }
 
-        writer.WriteLine("    default:");
-        writer.WriteLine("        return ZYAN_NULL;");
-        writer.WriteLine("    }");
-        writer.WriteLine("}");
+        codeWriter
+            .WriteLine("default:")
+            .BeginIndent()
+            .WriteLine("return ZYAN_NULL;")
+            .EndBlock()
+            .EndBlock();
     }
 }
