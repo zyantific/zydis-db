@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using Zydis.Generator.Core.CodeGeneration;
+
 namespace Zydis.Generator.Core.Definitions.Builder;
 
 internal sealed class RelativeInfoRegistry
@@ -12,9 +14,16 @@ internal sealed class RelativeInfoRegistry
 
     internal sealed class RelInfo : IEquatable<RelInfo>
     {
+        [Emittable(0)]
         public int[,] Size { get; private set; }
+
+        [Emittable(1, "accepts_scaling_hints")]
         public SizeHint SizeHint { get; init; }
+
+        [Emittable(2)]
         public bool AcceptsBranchHints { get; init; }
+
+        [Emittable(3)]
         public bool AcceptsBound { get; private set; }
 
         public RelInfo(EncodableDefinition definition)
