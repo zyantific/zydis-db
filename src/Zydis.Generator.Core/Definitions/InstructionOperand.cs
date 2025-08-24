@@ -11,8 +11,8 @@ namespace Zydis.Generator.Core.Definitions;
 
 #pragma warning disable CA1036
 
-[Emittable(3, "size")]
-[Emittable(5, "op")]
+[Emittable(6, "size_reference")]
+[Emittable(7, "details_reference")]
 public sealed class InstructionOperand :
     IComparable<InstructionOperand>,
     IComparable,
@@ -30,7 +30,7 @@ public sealed class InstructionOperand :
 
     public OperandEncoding Encoding { get; init; }
 
-    [Emittable(4)]
+    [Emittable(3)]
     public ElementType ElementType { get; init; }
 
     public ScaleFactor ScaleFactor { get; init; }
@@ -42,11 +42,11 @@ public sealed class InstructionOperand :
     [JsonPropertyName("visible")]
     public bool? IsVisible { get; init; }
 
-    [Emittable(6, "is_multisource4")]
+    [Emittable(4, "is_multisource4")]
     [JsonPropertyName("is_multisource4")]
     public bool IsMultiSource4 { get; init; }
 
-    [Emittable(7, "ignore_seg_override")]
+    [Emittable(5, "ignore_seg_override")]
     [JsonPropertyName("ignore_seg_override")]
     public bool IgnoreSegmentOverride { get; init; }
 
