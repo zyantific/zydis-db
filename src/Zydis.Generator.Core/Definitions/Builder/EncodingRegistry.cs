@@ -51,7 +51,7 @@ internal sealed class EncodingRegistry
                        (definition.GetDecisionNodeIndex(ModrmRmNode.NodeDefinition.Instance) is not null);
 
         var hasIS4 = false;
-        PhysicalInstructionEncodingDisp? displacement = null;
+        SizeTable? displacement = null;
         List<PhysicalInstructionEncodingImm>? immediates = null;
 
         foreach (var operand in definition.Operands ?? [])
@@ -83,31 +83,31 @@ internal sealed class EncodingRegistry
                     break;
 
                 case OperandEncoding.Disp8:
-                    displacement = new() { Width16 = 8, Width32 = 8, Width64 = 8 };
+                    displacement = new SizeTable(8, 8, 8);
                     break;
 
                 case OperandEncoding.Disp16:
-                    displacement = new() { Width16 = 16, Width32 = 16, Width64 = 16 };
+                    displacement = new SizeTable(16, 16, 16);
                     break;
 
                 case OperandEncoding.Disp32:
-                    displacement = new() { Width16 = 32, Width32 = 32, Width64 = 32 };
+                    displacement = new SizeTable(32, 32, 32);
                     break;
 
                 case OperandEncoding.Disp64:
-                    displacement = new() { Width16 = 64, Width32 = 64, Width64 = 64 };
+                    displacement = new SizeTable(64, 64, 64);
                     break;
 
                 case OperandEncoding.Disp16_32_64:
-                    displacement = new() { Width16 = 16, Width32 = 32, Width64 = 64 };
+                    displacement = new SizeTable(16, 32, 64);
                     break;
 
                 case OperandEncoding.Disp32_32_64:
-                    displacement = new() { Width16 = 32, Width32 = 32, Width64 = 648 };
+                    displacement = new SizeTable(32, 32, 64);
                     break;
 
                 case OperandEncoding.Disp16_32_32:
-                    displacement = new() { Width16 = 16, Width32 = 32, Width64 = 32 };
+                    displacement = new SizeTable(16, 32, 32);
                     break;
 
                 case OperandEncoding.Uimm8:
@@ -226,7 +226,7 @@ public sealed class PhysicalInstructionEncoding :
 #pragma warning restore CA1036
 {
     public bool HasModrm { get; init; }
-    public PhysicalInstructionEncodingDisp? Displacement { get; init; }
+    public SizeTable? Displacement { get; init; }
     public PhysicalInstructionEncodingImm? Immediate0 { get; init; }
     public PhysicalInstructionEncodingImm? Immediate1 { get; init; }
     public bool ForceRegForm { get; init; }
@@ -274,61 +274,6 @@ public sealed class PhysicalInstructionEncoding :
     public override int GetHashCode()
     {
         return HashCode.Combine(HasModrm, Displacement, Immediate0, Immediate1, ForceRegForm);
-    }
-}
-
-#pragma warning disable CA1036
-
-public sealed class PhysicalInstructionEncodingDisp :
-    IComparable<PhysicalInstructionEncodingDisp>,
-    IComparable,
-    IEquatable<PhysicalInstructionEncodingDisp>
-
-#pragma warning restore CA1036
-{
-    public int Width16 { get; init; }
-    public int Width32 { get; init; }
-    public int Width64 { get; init; }
-
-    public int CompareTo(PhysicalInstructionEncodingDisp? other)
-    {
-        return FluentComparer.Compare(this, other,
-            x => x.Compare(x => x.Width16),
-            x => x.Compare(x => x.Width32),
-            x => x.Compare(x => x.Width64)
-        );
-    }
-
-    public int CompareTo(object? obj)
-    {
-        return CompareTo(obj as PhysicalInstructionEncodingDisp);
-    }
-
-    public bool Equals(PhysicalInstructionEncodingDisp? other)
-    {
-        if (other is null)
-        {
-            return false;
-        }
-
-        if (ReferenceEquals(this, other))
-        {
-            return true;
-        }
-
-        return (Width16 == other.Width16) &&
-               (Width32 == other.Width32) &&
-               (Width64 == other.Width64);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return ReferenceEquals(this, obj) || (obj is PhysicalInstructionEncodingDisp other) && Equals(other);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Width16, Width32, Width64);
     }
 }
 
