@@ -3,6 +3,7 @@
 
 import json
 import os
+import sys
 
 class _JsonRegisterClass():
 
@@ -98,7 +99,7 @@ class _ZydisEnumWriter():
 
 class _ZydisTableWriter():
     def __init__(self, symbol_name, item_type, file_name, is_static=True, is_const=True, indent=4):
-        self.__file_name = file_name
+        self._file_name = file_name
         self.__symbol_name = symbol_name
         self.__item_type = item_type
         self.__static = 'static ' if is_static else ''
@@ -107,7 +108,7 @@ class _ZydisTableWriter():
         self.__expect_delim = False
         
     def __enter__(self):
-        self.__f = open(self.__file_name, 'w')
+        self._f = open(self._file_name, 'w')
         self.__emit_header()
         return self
 
@@ -115,7 +116,7 @@ class _ZydisTableWriter():
         if exc_type is not None:
             return False
         self.__emit_footer()
-        self.__f.close()
+        self._f.close()
         return True
 
     def __emit_header(self):
@@ -128,55 +129,69 @@ class _ZydisTableWriter():
             item_type = self.__item_type,
             symbol_name = self.__symbol_name
         )
-        self.__f.write(header)
+        self._f.write(header)
 
     def __emit_footer(self):
         footer = (
             '\n};\n'
         )
-        self.__f.write(footer)
+        self._f.write(footer)
 
     def __emit_delim(self):
         if self.__expect_delim:
-            self.__f.write(',\n')
+            self._f.write(',\n')
 
     def emit_value(self, value):
         self.__emit_delim()
-        self.__f.write('{indent}{value}'.format(
-            indent = self.__indent, 
+        self._f.write('{indent}{value}'.format(
+            indent = self.__indent,
             value = value
         ))
         self.__expect_delim = True
 
-    def emit_comment(self, comment):
+    def emit_comment(self, comment, indent=None):
         self.__emit_delim()
-        self.__f.write('{indent}// {comment}\n'.format(
-            indent = self.__indent, 
+        self._f.write('{indent}// {comment}\n'.format(
+            indent = indent if indent is not None else self.__indent,
             comment = comment
         ))
         self.__expect_delim = False
 
     def emit_newline(self):
         self.__emit_delim()
-        self.__f.write('\n')
-        self.__expect_delim = False 
+        self._f.write('\n')
+        self.__expect_delim = False
 
-class _ZydisStringTableWriter(_ZydisTableWriter):
+class _ZydisShortStringTableWriter(_ZydisTableWriter):
 
-    def __init__(self, symbol_name, make_shortstrings, file_name, indent=4):
-        item_type = 'ZydisShortString' if make_shortstrings else 'char*'
-        super().__init__(symbol_name, item_type, file_name, True, True, indent)
-        self.__make_shortstrings = make_shortstrings
-        
+    def __init__(self, symbol_name, file_name, indent=4):
+        super().__init__(symbol_name, 'ZydisShortString*', file_name, True, True, indent)
+        self.__symbol_name = symbol_name
+        self.__values_count = 0
+
+    def __value_symbol_name(self, i):
+        return f'{self.__symbol_name}_VALUE_{i}'
+
+    def __enter__(self):
+        self._f = open(self._file_name, 'w')
+        return self
+
+    def __exit__(self, exc_type, exc_value, tb):
+        self._f.write('\n')
+        self._ZydisTableWriter__emit_header()
+        for i in range(self.__values_count):
+            super().emit_value(f'&{self.__value_symbol_name(i)}')
+        return super().__exit__(exc_type, exc_value, tb)
+
     def emit_value(self, value):
-        value = '"{value}"'.format(
+        self._f.write('static const ZydisShortString {sym} = ZYDIS_MAKE_SHORTSTRING("{value}");\n'.format(
+            sym = self.__value_symbol_name(self.__values_count),
             value = value.lower()
-        )
-        if self.__make_shortstrings:
-            value = 'ZYDIS_MAKE_SHORTSTRING({value})'.format(
-                value = value
-            )
-        super().emit_value(value) 
+        ))
+        self.__values_count += 1
+
+    def emit_comment(self, comment, indent=None):
+        super().emit_comment(comment, indent=indent if indent is not None else '')
 
 class Generator():
 
@@ -195,8 +210,8 @@ class Generator():
         fn_enum = os.path.join(output_dir, 'include/Zydis/Generated/EnumRegister.h')
         fn_enum_strings = os.path.join(output_dir, 'src/Generated/EnumRegister.inc')
         with (
-            _ZydisEnumWriter('Register', 'REGISTER', fn_enum) as w_enum, 
-            _ZydisStringTableWriter('STR_REGISTERS', True, fn_enum_strings) as w_enum_strings
+            _ZydisEnumWriter('Register', 'REGISTER', fn_enum) as w_enum,
+            _ZydisShortStringTableWriter('STR_REGISTERS', fn_enum_strings) as w_enum_strings
         ):
             w_enum.emit_value('none')
             w_enum_strings.emit_value('none')
@@ -267,6 +282,10 @@ class Generator():
                     width = width,
                     width_64 = width_64
                 ))
-              
-generator = Generator('./Data/registers.json')
-generator.generate('D:/Development/GitHub/zydis/')
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        sys.stderr.write(f"usage: {sys.argv[0]} [datafiles/registers.json] [path/to/zydis/]")
+        sys.exit(1)
+    generator = Generator(sys.argv[1])
+    generator.generate(sys.argv[2])

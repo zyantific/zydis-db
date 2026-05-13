@@ -95,6 +95,16 @@ public sealed class DeclarationWriter
         return this;
     }
 
+    public DeclarationWriter WriteInitializerZydisShortString(string value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+
+        _writer.Write(" = ");
+        WriterExtensions.WriteZydisShortString(_writer, value);
+
+        return this;
+    }
+
     public DeclarationWriter WriteInitializerValue<TValue>(IBinaryInteger<TValue> value, int length = 0, bool hex = false)
         where TValue : struct, IBinaryInteger<TValue>
     {
@@ -108,11 +118,15 @@ public sealed class DeclarationWriter
 
     public InitializerListWriter WriteInitializerList(bool indent = IndentByDefault)
     {
-        _writer.Write(" = ");
+        _writer.Write(" =");
 
         if (_indented)
         {
             _writer.WriteLine();
+        }
+        else
+        {
+            _writer.Write(" ");
         }
 
         return new InitializerListWriter(_writer, _indented && indent ? IndentSize : null);
