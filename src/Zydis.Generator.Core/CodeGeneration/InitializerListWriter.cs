@@ -117,6 +117,20 @@ public sealed class InitializerListWriter
         return this;
     }
 
+    public InitializerListWriter WriteZydisShortString(string value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+
+        EnsureDelimiter();
+
+        WriterExtensions.WriteZydisShortString(_writer, value);
+        _lastTokenIsExpression = true;
+
+        EnsureMacroParenthesis();
+
+        return this;
+    }
+
     public InitializerListWriter WriteInteger<TValue>(IBinaryInteger<TValue> value, int length = 0, bool hex = false)
         where TValue : struct, IBinaryInteger<TValue>
     {
