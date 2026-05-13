@@ -95,6 +95,16 @@ public sealed class DeclarationWriter
         return this;
     }
 
+    public DeclarationWriter WriteInitializerZydisShortString(string value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+
+        _writer.Write(" = ");
+        WriterExtensions.WriteZydisShortString(_writer, value);
+
+        return this;
+    }
+
     public DeclarationWriter WriteInitializerValue<TValue>(IBinaryInteger<TValue> value, int length = 0, bool hex = false)
         where TValue : struct, IBinaryInteger<TValue>
     {

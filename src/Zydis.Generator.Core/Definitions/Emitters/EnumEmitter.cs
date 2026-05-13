@@ -44,26 +44,49 @@ typedef enum Zydis{enumName}_
 
     public async Task EmitStringsAsync(StreamWriter writer, bool useInternalStringType)
     {
-        var declarationWriter = new DeclarationWriter(writer, true);
-        declarationWriter
+        string ShortStringName(int index)
+        {
+            return $"STR_{enumName.ToUpperInvariant()}_VALUE_{index}";
+        }
+
+        var index = 0;
+        if (useInternalStringType)
+        {
+            var valueDeclarationWriter = new DeclarationWriter(writer, false);
+            foreach (var item in items)
+            {
+                valueDeclarationWriter
+                    .BeginDeclaration("static const", "ZydisShortString", ShortStringName(index))
+                    .WriteInitializerZydisShortString(item)
+                    .EndDeclaration()
+                    .WriteNewline();
+                index++;
+            }
+            valueDeclarationWriter.WriteNewline();
+        }
+
+        var tableDeclarationWriter = new DeclarationWriter(writer, true);
+        tableDeclarationWriter
             .BeginDeclaration(
                 "static const",
-                useInternalStringType ? "ZydisShortString" : "char*",
+                useInternalStringType ? "ZydisShortString*" : "char*",
                 $"STR_{enumName.ToUpperInvariant()}[]");
-        var initializerListWriter = declarationWriter.WriteInitializerList().BeginList();
+        var initializerListWriter = tableDeclarationWriter.WriteInitializerList().BeginList();
+        index = 0;
         foreach (var item in items)
         {
             if (useInternalStringType)
             {
-                initializerListWriter.WriteZydisShortString(item);
+                initializerListWriter.WriteExpression($"&{ShortStringName(index)}");
             }
             else
             {
                 initializerListWriter.WriteString(item);
             }
+            index++;
         }
         initializerListWriter.EndList();
-        declarationWriter.EndDeclaration();
+        tableDeclarationWriter.EndDeclaration();
         await writer.WriteLineAsync().ConfigureAwait(false);
     }
 }
