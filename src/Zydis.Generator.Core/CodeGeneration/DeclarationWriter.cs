@@ -108,11 +108,15 @@ public sealed class DeclarationWriter
 
     public InitializerListWriter WriteInitializerList(bool indent = IndentByDefault)
     {
-        _writer.Write(" = ");
+        _writer.Write(" =");
 
         if (_indented)
         {
             _writer.WriteLine();
+        }
+        else
+        {
+            _writer.Write(" ");
         }
 
         return new InitializerListWriter(_writer, _indented && indent ? IndentSize : null);

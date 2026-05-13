@@ -25,6 +25,13 @@ internal static class WriterExtensions
         writer.Write("\"{0}\"", value);
     }
 
+    public static void WriteZydisShortString(TextWriter writer, string value)
+    {
+        writer.Write("ZYDIS_MAKE_SHORTSTRING(");
+        WriteString(writer, value);
+        writer.Write(")");
+    }
+
     public static void WriteInteger<TValue>(TextWriter writer, IBinaryInteger<TValue> value, int length, bool hex)
         where TValue : struct, IBinaryInteger<TValue>
     {

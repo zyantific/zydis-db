@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,13 +13,14 @@ namespace Zydis.Generator.Core.Definitions.Builder;
 /// Maintains a collection of instruction definitions per encoding while ensuring a deterministic order.
 /// Deduplicates definitions during insertion.
 /// </summary>
-internal sealed class DefinitionRegistry
+internal sealed class DefinitionRegistry: IEnumerable<InstructionDefinition>
 {
     private static readonly SortedDictionary<InstructionDefinition, int> Empty = new(InstructionDefinitionTableComparer.Instance);
 
-    private readonly Dictionary<InstructionEncoding, SortedDictionary<InstructionDefinition, int>> _instructions = new();
+    private readonly SortedSet<InstructionDefinition> _instructions = new(InstructionDefinitionTableComparer.Instance);
+    private readonly Dictionary<InstructionEncoding, SortedDictionary<InstructionDefinition, int>> _encodingInstructions = new();
 
-    public IEnumerable<InstructionDefinition> this[InstructionEncoding encoding] => _instructions.GetValueOrDefault(encoding, Empty).Keys;
+    public IEnumerable<InstructionDefinition> this[InstructionEncoding encoding] => _encodingInstructions.GetValueOrDefault(encoding, Empty).Keys;
 
     /// <summary>
     /// Retrieves the unique identifier for the specified instruction definition.
@@ -30,7 +32,7 @@ internal sealed class DefinitionRegistry
     {
         ArgumentNullException.ThrowIfNull(definition);
 
-        if (!_instructions.TryGetValue(definition.Encoding, out var instructions))
+        if (!_encodingInstructions.TryGetValue(definition.Encoding, out var instructions))
         {
             throw new ArgumentException("Unknown instruction encoding.", nameof(definition));
         }
@@ -55,10 +57,10 @@ internal sealed class DefinitionRegistry
     {
         ArgumentNullException.ThrowIfNull(definition);
 
-        if (!_instructions.TryGetValue(definition.Encoding, out var instructions))
+        if (!_encodingInstructions.TryGetValue(definition.Encoding, out var instructions))
         {
             instructions = new SortedDictionary<InstructionDefinition, int>(InstructionDefinitionTableComparer.Instance);
-            _instructions.Add(definition.Encoding, instructions);
+            _encodingInstructions.Add(definition.Encoding, instructions);
         }
 
         if (instructions.ContainsKey(definition))
@@ -66,7 +68,18 @@ internal sealed class DefinitionRegistry
             return;
         }
 
+        _instructions.Add(definition);
         instructions.Add(definition, instructions.Count);
+    }
+
+    public IEnumerator<InstructionDefinition> GetEnumerator()
+    {
+        return _instructions.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }
 

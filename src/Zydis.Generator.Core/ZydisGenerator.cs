@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -69,6 +70,7 @@ public sealed class ZydisGenerator
         var statistics = new DecoderTableEmitterStatistics();
         var utf8 = new UTF8Encoding(false);
         var generatedSourcesPath = Path.Combine(outputDirectory, "src", "Generated");
+        var generatedIncludePath = Path.Combine(outputDirectory, "include", "Zydis", "Generated");
 
         await using var tableWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "DecoderTables.inc"), false, utf8); // TODO: ConfigureAwait
 
@@ -104,6 +106,43 @@ public sealed class ZydisGenerator
         await using var relativeInfoWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "GetRelInfo.inc"), false, utf8);
 
         await RelativeInfoEmitter.EmitAsync(relativeInfoWriter, _relativeInfoRegistry).ConfigureAwait(false);
+
+        async Task GenerateEnum(string enumName, string prefix, bool useInternalStringType, IEnumerable<string> items, string invalidValue)
+        {
+            var emitter = new EnumEmitter(enumName, prefix, new SortedSet<string>(items).Prepend(invalidValue));
+            await using var enumDefWriter = new StreamWriter(Path.Combine(generatedIncludePath, $"Enum{enumName}.h"), false, utf8);
+            await emitter.EmitDefinitionAsync(enumDefWriter).ConfigureAwait(false);
+            await using var enumStringsWriter = new StreamWriter(Path.Combine(generatedSourcesPath, $"Enum{enumName}.inc"), false, utf8);
+            await emitter.EmitStringsAsync(enumStringsWriter, useInternalStringType).ConfigureAwait(false);
+        }
+        await GenerateEnum(
+            "Mnemonic",
+            "MNEMONIC",
+            true,
+            _definitionRegistry.Select(definition => definition.Mnemonic),
+            "invalid"
+        ).ConfigureAwait(false);
+        await GenerateEnum(
+            "InstructionCategory",
+            "CATEGORY",
+            false,
+            _definitionRegistry.Select(definition => definition.MetaInfo.Category),
+            "INVALID"
+        ).ConfigureAwait(false);
+        await GenerateEnum(
+            "ISASet",
+            "ISA_SET",
+            false,
+            _definitionRegistry.Select(definition => definition.MetaInfo.IsaSet),
+            "INVALID"
+        ).ConfigureAwait(false);
+        await GenerateEnum(
+            "ISAExt",
+            "ISA_EXT",
+            false,
+            _definitionRegistry.Select(definition => definition.MetaInfo.IsaExtension),
+            "INVALID"
+        ).ConfigureAwait(false);
     }
 
     private async Task GenerateOpcodeTables(StreamWriter writer, DecoderTableEmitterStatistics statistics)
