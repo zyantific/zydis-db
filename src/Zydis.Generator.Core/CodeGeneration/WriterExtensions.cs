@@ -17,7 +17,11 @@ internal static class WriterExtensions
 
     public static void WriteChar(TextWriter writer, char value)
     {
-        writer.Write("'{0}'", value);
+        writer.Write("'{0}'", value switch
+        {
+            '\0' => "\\0",
+            _ => value
+        });
     }
 
     public static void WriteString(TextWriter writer, string value)

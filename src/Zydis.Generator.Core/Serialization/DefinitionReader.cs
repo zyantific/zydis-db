@@ -24,7 +24,7 @@ public static partial class DefinitionReader
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
     };
 
-    public static async IAsyncEnumerable<InstructionDefinition> ReadAsync(string filename, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public static async IAsyncEnumerable<T> ReadAsync<T>(string filename, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(filename);
 
@@ -33,7 +33,7 @@ public static partial class DefinitionReader
             .ConfigureAwait(false);
 
         var items = JsonSerializer
-            .DeserializeAsyncEnumerable<InstructionDefinition>(fs, SerializerOptions, cancellationToken)
+            .DeserializeAsyncEnumerable<T>(fs, SerializerOptions, cancellationToken)
             .ConfigureAwait(false);
 
         await foreach (var item in items)
@@ -52,6 +52,7 @@ public static partial class DefinitionReader
     [JsonSerializable(typeof(InstructionFlagsAccess))]
     [JsonSerializable(typeof(InstructionFlag))]
     [JsonSerializable(typeof(InstructionFlagOperation))]
+    [JsonSerializable(typeof(FormatterStringDefinition))]
     private sealed partial class SerializerContext :
         JsonSerializerContext
     {

@@ -10,6 +10,7 @@ using Zydis.Generator.Core.CodeGeneration;
 using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.DecoderTree.Builder;
 using Zydis.Generator.Core.DecoderTree.Emitters;
+using Zydis.Generator.Core.Definitions;
 using Zydis.Generator.Core.Definitions.Builder;
 using Zydis.Generator.Core.Definitions.Emitters;
 using Zydis.Generator.Core.Serialization;
@@ -27,12 +28,13 @@ public sealed class ZydisGenerator
     private readonly EncoderDefinitionRegistry _encoderRegistry = new();
     private readonly ConditionCodeRegistry _conditionCodeRegistry = new();
     private readonly RelativeInfoRegistry _relativeInfoRegistry = new();
+    private readonly FormatterStringsRegistry _formatterStringsRegistry = new();
 
-    public async Task ReadDefinitionsAsync(string filename, CancellationToken cancellationToken = default)
+    public async Task ReadDefinitionsAsync(string datafilesPath, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrEmpty(filename);
+        ArgumentException.ThrowIfNullOrEmpty(datafilesPath);
 
-        await foreach (var definition in DefinitionReader.ReadAsync(filename, cancellationToken).ConfigureAwait(false))
+        await foreach (var definition in DefinitionReader.ReadAsync<InstructionDefinition>(Path.Join(datafilesPath, "instructions.json"), cancellationToken).ConfigureAwait(false))
         {
             _definitionRegistry.InsertDefinition(definition);
             _decoderTreeBuilder.InsertDefinition(definition);
@@ -56,6 +58,8 @@ public sealed class ZydisGenerator
 
         //var emitter = new OpcodeTableConsoleEmitter(_definitionRegistry, _encodingRegistry, null);
         //emitter.Emit(_decoderTreeBuilder.OpcodeTables.GetTable(InstructionEncoding.Default, OpcodeMap.MAP0, null));
+
+        await _formatterStringsRegistry.ReadAsync(Path.Join(datafilesPath, "formatter_strings.json"), cancellationToken);
     }
 
     public async Task GenerateDataTablesAsync(string outputDirectory, CancellationToken cancellationToken = default)
@@ -143,6 +147,9 @@ public sealed class ZydisGenerator
             _definitionRegistry.Select(definition => definition.MetaInfo.IsaExtension),
             "INVALID"
         ).ConfigureAwait(false);
+
+        await using var formatterStringsWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "FormatterStrings.inc"));
+        await FormatterStringsEmitter.EmitAsync(formatterStringsWriter, _formatterStringsRegistry).ConfigureAwait(false);
     }
 
     private async Task GenerateOpcodeTables(StreamWriter writer, DecoderTableEmitterStatistics statistics)
