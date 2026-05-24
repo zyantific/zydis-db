@@ -333,5 +333,56 @@
       }
     ],
     "is_serializable": true
+  },
+  {
+    "name": "token_type::TOKEN",
+    "members": [
+      {
+        "name": "invalid"
+      },
+      {
+        "name": "whitespace"
+      },
+      {
+        "name": "delimiter"
+      },
+      {
+        "name": "parenthesis_open"
+      },
+      {
+        "name": "parenthesis_close"
+      },
+      {
+        "name": "prefix"
+      },
+      {
+        "name": "mnemonic"
+      },
+      {
+        "name": "register"
+      },
+      {
+        "name": "address_abs"
+      },
+      {
+        "name": "address_rel"
+      },
+      {
+        "name": "displacement"
+      },
+      {
+        "name": "immediate"
+      },
+      {
+        "name": "typecast"
+      },
+      {
+        "name": "decorator"
+      },
+      {
+        "name": "symbol"
+      }
+    ],
+    "is_serializable": true
   }
 ]

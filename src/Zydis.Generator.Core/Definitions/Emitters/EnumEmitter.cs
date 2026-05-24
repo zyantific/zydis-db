@@ -9,16 +9,6 @@ namespace Zydis.Generator.Core.Definitions.Emitters;
 
 internal class EnumEmitter(string enumName, string prefix, IEnumerable<string> items)
 {
-    /*private string _enumName;
-    private SortedSet<string> _items;
-
-    public EnumEmitter(string enumName, IEnumerable<string> items)
-    {
-        _enumName = enumName;
-        _items = [..items];
-    }*/
-
-
     public async Task EmitDefinitionAsync(StreamWriter writer)
     {
         await writer.WriteLineAsync($@"/**
