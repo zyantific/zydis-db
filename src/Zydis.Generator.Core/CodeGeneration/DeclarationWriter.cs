@@ -30,14 +30,18 @@ public sealed class DeclarationWriter
 
     public DeclarationWriter BeginDeclaration(string type, string identifier)
     {
-        _writer.Write("{0} {1}", type, identifier);
+        ArgumentNullException.ThrowIfNull(type);
+
+        _writer.Write("{0} {1}", type.ReplaceLineEndings(_writer.NewLine), identifier);
 
         return this;
     }
 
     public DeclarationWriter BeginDeclaration(string modifier, string type, string identifier)
     {
-        _writer.Write("{0} {1} {2}", modifier, type, identifier);
+        ArgumentNullException.ThrowIfNull(type);
+
+        _writer.Write("{0} {1} {2}", modifier, type.ReplaceLineEndings(_writer.NewLine), identifier);
 
         return this;
     }

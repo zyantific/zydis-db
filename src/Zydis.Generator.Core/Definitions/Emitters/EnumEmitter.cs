@@ -11,7 +11,7 @@ internal class EnumEmitter(string enumName, string prefix, IEnumerable<string> i
 {
     public async Task EmitDefinitionAsync(StreamWriter writer)
     {
-        await writer.WriteLineAsync($@"/**
+        await WriterExtensions.WriteMultilineAsync(writer, $@"/**
  * Defines the `Zydis{enumName}` enum.
  */
 typedef enum Zydis{enumName}_
@@ -20,7 +20,7 @@ typedef enum Zydis{enumName}_
         {
             await writer.WriteLineAsync($"    ZYDIS_{prefix}_{item.ToUpperInvariant()},").ConfigureAwait(false);
         }
-        await writer.WriteLineAsync($@"
+        await WriterExtensions.WriteMultilineAsync(writer, $@"
     /**
      * Maximum value of this enum.
      */

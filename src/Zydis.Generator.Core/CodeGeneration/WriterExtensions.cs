@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace Zydis.Generator.Core.CodeGeneration;
 
@@ -56,5 +57,10 @@ internal static class WriterExtensions
     public static void WriteNull(TextWriter writer)
     {
         writer.Write("ZYAN_NULL");
+    }
+
+    public static Task WriteMultilineAsync(TextWriter writer, string? value)
+    {
+        return writer.WriteLineAsync(value?.ReplaceLineEndings(writer.NewLine));
     }
 }
