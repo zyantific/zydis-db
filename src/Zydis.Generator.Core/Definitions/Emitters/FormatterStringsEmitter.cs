@@ -65,10 +65,13 @@ internal static class FormatterStringsEmitter
                 initializerListWriter.EndList();
                 declarationWriter.EndDeclaration();
                 await writer.WriteLineAsync().ConfigureAwait(false);
-                declarationWriter.BeginDeclaration("static const", "ZydisPredefinedToken* const", $"TOK_{cName}")
-                    .WriteInitializerExpression($"(const ZydisPredefinedToken* const)&TOK_DATA_{cName}")
-                    .EndDeclaration();
-                await writer.WriteLineAsync().ConfigureAwait(false);
+                if (!definition.SkipPointerDefinition)
+                {
+                    declarationWriter.BeginDeclaration("static const", "ZydisPredefinedToken* const", $"TOK_{cName}")
+                        .WriteInitializerExpression($"(const ZydisPredefinedToken* const)&TOK_DATA_{cName}")
+                        .EndDeclaration();
+                    await writer.WriteLineAsync().ConfigureAwait(false);
+                }
                 await writer.WriteLineAsync().ConfigureAwait(false);
             }
         }
