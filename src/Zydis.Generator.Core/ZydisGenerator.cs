@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Zydis.Generator.Core.CodeGeneration;
-using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.DecoderTree.Builder;
 using Zydis.Generator.Core.DecoderTree.Emitters;
 using Zydis.Generator.Core.Definitions;
@@ -72,51 +71,50 @@ public sealed class ZydisGenerator
         }
 
         var statistics = new DecoderTableEmitterStatistics();
-        var utf8 = new UTF8Encoding(false);
         var generatedSourcesPath = Path.Combine(outputDirectory, "src", "Generated");
         var generatedIncludePath = Path.Combine(outputDirectory, "include", "Zydis", "Generated");
 
-        await using var tableWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "DecoderTables.inc"), false, utf8); // TODO: ConfigureAwait
+        await using var tableWriter = CreateWriter(Path.Combine(generatedSourcesPath, "DecoderTables.inc")); // TODO: ConfigureAwait
 
         await GenerateOpcodeTables(tableWriter, statistics).ConfigureAwait(false);
         await GenerateOpcodeTableLookup(tableWriter).ConfigureAwait(false);
 
         await tableWriter.FlushAsync(cancellationToken).ConfigureAwait(false);
 
-        await using var definitionWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "InstructionDefinitions.inc"), false, utf8);
+        await using var definitionWriter = CreateWriter(Path.Combine(generatedSourcesPath, "InstructionDefinitions.inc"));
 
         await DefinitionEmitter.EmitAsync(definitionWriter, _definitionRegistry, _operandsRegistry, _accessedFlagsRegistry).ConfigureAwait(false);
 
-        await using var operandsWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "OperandDefinitions.inc"), false, utf8);
+        await using var operandsWriter = CreateWriter(Path.Combine(generatedSourcesPath, "OperandDefinitions.inc"));
 
         await OperandsEmitter.EmitAsync(operandsWriter, _operandsRegistry, cancellationToken).ConfigureAwait(false);
 
-        await using var encodingsWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "InstructionEncodings.inc"), false, utf8);
+        await using var encodingsWriter = CreateWriter(Path.Combine(generatedSourcesPath, "InstructionEncodings.inc"));
 
         await EncodingEmitter.EmitAsync(encodingsWriter, _encodingRegistry, cancellationToken).ConfigureAwait(false);
 
-        await using var flagsWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "AccessedFlags.inc"), false, utf8);
+        await using var flagsWriter = CreateWriter(Path.Combine(generatedSourcesPath, "AccessedFlags.inc"));
 
         await AffectedFlagsEmitter.EmitAsync(flagsWriter, _accessedFlagsRegistry, cancellationToken).ConfigureAwait(false);
 
-        await using var encoderWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "EncoderTables.inc"), false, utf8);
+        await using var encoderWriter = CreateWriter(Path.Combine(generatedSourcesPath, "EncoderTables.inc"));
 
         await EncoderTablesEmitter.EmitAsync(encoderWriter, _encoderRegistry, _definitionRegistry).ConfigureAwait(false);
 
-        await using var conditionCodeWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "GetCcInfo.inc"), false, utf8);
+        await using var conditionCodeWriter = CreateWriter(Path.Combine(generatedSourcesPath, "GetCcInfo.inc"));
 
         await ConditionCodeEmitter.EmitAsync(conditionCodeWriter, _conditionCodeRegistry).ConfigureAwait(false);
 
-        await using var relativeInfoWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "GetRelInfo.inc"), false, utf8);
+        await using var relativeInfoWriter = CreateWriter(Path.Combine(generatedSourcesPath, "GetRelInfo.inc"));
 
         await RelativeInfoEmitter.EmitAsync(relativeInfoWriter, _relativeInfoRegistry).ConfigureAwait(false);
 
         async Task GenerateEnum(string enumName, string prefix, bool useInternalStringType, IEnumerable<string> items, string invalidValue)
         {
             var emitter = new EnumEmitter(enumName, prefix, new SortedSet<string>(items).Prepend(invalidValue));
-            await using var enumDefWriter = new StreamWriter(Path.Combine(generatedIncludePath, $"Enum{enumName}.h"), false, utf8);
+            await using var enumDefWriter = CreateWriter(Path.Combine(generatedIncludePath, $"Enum{enumName}.h"));
             await emitter.EmitDefinitionAsync(enumDefWriter).ConfigureAwait(false);
-            await using var enumStringsWriter = new StreamWriter(Path.Combine(generatedSourcesPath, $"Enum{enumName}.inc"), false, utf8);
+            await using var enumStringsWriter = CreateWriter(Path.Combine(generatedSourcesPath, $"Enum{enumName}.inc"));
             await emitter.EmitStringsAsync(enumStringsWriter, useInternalStringType).ConfigureAwait(false);
         }
         await GenerateEnum(
@@ -148,8 +146,15 @@ public sealed class ZydisGenerator
             "INVALID"
         ).ConfigureAwait(false);
 
-        await using var formatterStringsWriter = new StreamWriter(Path.Combine(generatedSourcesPath, "FormatterStrings.inc"));
+        await using var formatterStringsWriter = CreateWriter(Path.Combine(generatedSourcesPath, "FormatterStrings.inc"));
         await FormatterStringsEmitter.EmitAsync(formatterStringsWriter, _formatterStringsRegistry).ConfigureAwait(false);
+    }
+
+    private StreamWriter CreateWriter(string path)
+    {
+        var writer = new StreamWriter(path, append: false, encoding: new UTF8Encoding(false));
+        writer.NewLine = "\n";
+        return writer;
     }
 
     private async Task GenerateOpcodeTables(StreamWriter writer, DecoderTableEmitterStatistics statistics)
