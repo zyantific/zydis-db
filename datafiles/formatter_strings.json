@@ -1263,6 +1263,7 @@
   },
   {
     "name": "pref_rex_4A",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.wx",
@@ -1276,6 +1277,7 @@
   },
   {
     "name": "pref_rex_4B",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.wxb",
@@ -1289,6 +1291,7 @@
   },
   {
     "name": "pref_rex_4C",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.wr",
@@ -1302,6 +1305,7 @@
   },
   {
     "name": "pref_rex_4D",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.wrb",
@@ -1315,6 +1319,7 @@
   },
   {
     "name": "pref_rex_4E",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.wrx",
@@ -1328,6 +1333,7 @@
   },
   {
     "name": "pref_rex_4F",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.wrxb",
@@ -1341,6 +1347,7 @@
   },
   {
     "name": "pref_rex_40",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex",
@@ -1354,6 +1361,7 @@
   },
   {
     "name": "pref_rex_41",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.b",
@@ -1367,6 +1375,7 @@
   },
   {
     "name": "pref_rex_42",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.x",
@@ -1380,6 +1389,7 @@
   },
   {
     "name": "pref_rex_43",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.xb",
@@ -1393,6 +1403,7 @@
   },
   {
     "name": "pref_rex_44",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.r",
@@ -1406,6 +1417,7 @@
   },
   {
     "name": "pref_rex_45",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.rb",
@@ -1419,6 +1431,7 @@
   },
   {
     "name": "pref_rex_46",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.rx",
@@ -1432,6 +1445,7 @@
   },
   {
     "name": "pref_rex_47",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.rxb",
@@ -1445,6 +1459,7 @@
   },
   {
     "name": "pref_rex_48",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.w",
@@ -1458,6 +1473,7 @@
   },
   {
     "name": "pref_rex_49",
+    "skip_pointer_definition": true,
     "tokens": [
       {
         "value": "rex.wb",

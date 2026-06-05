@@ -25,6 +25,9 @@ public sealed record FormatterStringDefinition
     [JsonPropertyName("string")]
     public string? StringLiteral { get; init; }
 
+    [JsonPropertyName("skip_pointer_definition")]
+    public bool SkipPointerDefinition { get; init; }
+
     public string? FullString
     {
         get
