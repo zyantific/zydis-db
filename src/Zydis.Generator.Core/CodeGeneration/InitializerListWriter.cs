@@ -117,13 +117,13 @@ public sealed class InitializerListWriter
         return this;
     }
 
-    public InitializerListWriter WriteZydisShortString(string value)
+    public InitializerListWriter WriteZydisShortStringReference(string identifier)
     {
-        ArgumentNullException.ThrowIfNull(value);
+        ArgumentNullException.ThrowIfNull(identifier);
 
         EnsureDelimiter();
 
-        WriterExtensions.WriteZydisShortString(_writer, value);
+        WriterExtensions.WriteZydisShortStringReference(_writer, identifier);
         _lastTokenIsExpression = true;
 
         EnsureMacroParenthesis();
