@@ -99,16 +99,6 @@ public sealed class DeclarationWriter
         return this;
     }
 
-    public DeclarationWriter WriteInitializerZydisShortString(string value)
-    {
-        ArgumentNullException.ThrowIfNull(value);
-
-        _writer.Write(" = ");
-        WriterExtensions.WriteZydisShortString(_writer, value);
-
-        return this;
-    }
-
     public DeclarationWriter WriteInitializerValue<TValue>(IBinaryInteger<TValue> value, int length = 0, bool hex = false)
         where TValue : struct, IBinaryInteger<TValue>
     {
@@ -117,6 +107,17 @@ public sealed class DeclarationWriter
         _writer.Write(" = ");
         WriterExtensions.WriteInteger(_writer, value, length, hex);
 
+        return this;
+    }
+
+    public DeclarationWriter WriteZydisShortStringDefinition(string identifier, string value)
+    {
+        ArgumentNullException.ThrowIfNull(identifier);
+        ArgumentNullException.ThrowIfNull(value);
+        _writer.Write("ZYDIS_DEFINE_SHORTSTRING_DATA({0}, {1}, ", identifier, value.Length);
+        WriterExtensions.WriteString(_writer, value);
+        _writer.Write(")");
+        this.EndDeclaration();
         return this;
     }
 

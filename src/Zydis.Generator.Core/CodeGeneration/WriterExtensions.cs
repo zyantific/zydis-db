@@ -30,11 +30,9 @@ internal static class WriterExtensions
         writer.Write("\"{0}\"", value);
     }
 
-    public static void WriteZydisShortString(TextWriter writer, string value)
+    public static void WriteZydisShortStringReference(TextWriter writer, string identifier)
     {
-        writer.Write("ZYDIS_MAKE_SHORTSTRING(");
-        WriteString(writer, value);
-        writer.Write(")");
+        writer.Write("ZYDIS_SHORTSTRING({0})", identifier);
     }
 
     public static void WriteInteger<TValue>(TextWriter writer, IBinaryInteger<TValue> value, int length, bool hex)

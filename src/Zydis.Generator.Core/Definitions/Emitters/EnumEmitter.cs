@@ -36,7 +36,7 @@ typedef enum Zydis{enumName}_
     {
         string ShortStringName(int index)
         {
-            return $"STR_{enumName.ToUpperInvariant()}_VALUE_{index}";
+            return $"{enumName.ToUpperInvariant()}_VALUE_{index}";
         }
 
         var index = 0;
@@ -46,9 +46,7 @@ typedef enum Zydis{enumName}_
             foreach (var item in items)
             {
                 valueDeclarationWriter
-                    .BeginDeclaration("static const", "ZydisShortString", ShortStringName(index))
-                    .WriteInitializerZydisShortString(item)
-                    .EndDeclaration()
+                    .WriteZydisShortStringDefinition(ShortStringName(index), item)
                     .WriteNewline();
                 index++;
             }
@@ -67,7 +65,7 @@ typedef enum Zydis{enumName}_
         {
             if (useInternalStringType)
             {
-                initializerListWriter.WriteExpression($"&{ShortStringName(index)}");
+                initializerListWriter.WriteZydisShortStringReference(ShortStringName(index));
             }
             else
             {

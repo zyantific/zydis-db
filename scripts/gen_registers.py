@@ -170,7 +170,7 @@ class _ZydisShortStringTableWriter(_ZydisTableWriter):
         self.__values_count = 0
 
     def __value_symbol_name(self, i):
-        return f'{self.__symbol_name}_VALUE_{i}'
+        return f'{self.__symbol_name.removeprefix("STR_")}_VALUE_{i}'
 
     def __enter__(self):
         self._f = open(self._file_name, 'w')
@@ -180,12 +180,13 @@ class _ZydisShortStringTableWriter(_ZydisTableWriter):
         self._f.write('\n')
         self._ZydisTableWriter__emit_header()
         for i in range(self.__values_count):
-            super().emit_value(f'&{self.__value_symbol_name(i)}')
+            super().emit_value(f'ZYDIS_SHORTSTRING({self.__value_symbol_name(i)})')
         return super().__exit__(exc_type, exc_value, tb)
 
     def emit_value(self, value):
-        self._f.write('static const ZydisShortString {sym} = ZYDIS_MAKE_SHORTSTRING("{value}");\n'.format(
+        self._f.write('ZYDIS_DEFINE_SHORTSTRING_DATA({sym}, {length}, "{value}");\n'.format(
             sym = self.__value_symbol_name(self.__values_count),
+            length = len(value),
             value = value.lower()
         ))
         self.__values_count += 1

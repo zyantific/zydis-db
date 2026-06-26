@@ -22,10 +22,8 @@ internal static class FormatterStringsEmitter
             var fullString = definition.FullString;
             Debug.Assert(fullString != null, "definition.FullString != null");
             declarationWriter
-                .BeginDeclaration("static const", "ZydisShortString", $"STR_{cName}")
-                .WriteInitializerZydisShortString(fullString)
-                .EndDeclaration();
-            await writer.WriteLineAsync().ConfigureAwait(false);
+                .WriteZydisShortStringDefinition(cName, fullString)
+                .WriteNewline();
 
             var tokens = definition.Tokens;
             if (tokens != null && tokens.Length > 0)
