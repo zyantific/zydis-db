@@ -63,7 +63,6 @@ public sealed record InstructionFlags :
             if (operation is InstructionFlagOperation.Tested or InstructionFlagOperation.TestedModified)
             {
                 doesRead = true;
-                continue;
             }
 
             if (operation is InstructionFlagOperation.TestedModified
