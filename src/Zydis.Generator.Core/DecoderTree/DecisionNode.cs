@@ -196,6 +196,16 @@ public class DecisionNode :
 
 #pragma warning restore CA1043
 
+    /// <summary>
+    /// Gets or sets the <see cref="DecoderTreeNode"/> used for slots that have neither an explicit entry nor a
+    /// negated entry.
+    /// </summary>
+    /// <remarks>
+    /// This is the constraint-based counterpart to the legacy negated-entry mechanism; the two express the same
+    /// "everything else" concept in different builders and must never be set on the same node.
+    /// </remarks>
+    public DecoderTreeNode? ElseEntry { get; set; }
+
     /// <inheritdoc/>
     protected DecisionNode(DecisionNodeDefinition definition) :
         base(definition)
@@ -227,26 +237,36 @@ public class DecisionNode :
 
     /// <inheritdoc/>
     /// <remarks>
-    /// This method iterates through all slots of the decision node and determines whether to return the original entry
-    /// or a negated entry. If no negated entry is present, the original entries are returned as-is. If a negated entry
+    /// This method iterates through all slots of the decision node and determines whether to return the original entry,
+    /// a negated entry, or the <see cref="ElseEntry"/>. If no negated entry is present, the original entries are
+    /// returned as-is, falling back to <see cref="ElseEntry"/> for slots without an explicit entry. If a negated entry
     /// is present, the negated entry is returned for all indices except the negated entry index itself, which returns
     /// the original entry.
     /// </remarks>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if multiple negated entries are found in the table or of if a non-<see langword="null"/> entry is found
-    /// in a slot that is already covered by a negated entry.
+    /// Thrown if multiple negated entries are found in the table, if a non-<see langword="null"/> entry is found in a
+    /// slot that is already covered by a negated entry, or if both a negated entry and <see cref="ElseEntry"/> are
+    /// present on the node.
     /// </exception>
     [Pure]
     public override IEnumerable<DecoderTreeNode?> EnumerateSlots()
     {
         var negatedEntryIndex = FindNegatedEntryIndex();
 
+        if ((negatedEntryIndex is not null) && (ElseEntry is not null))
+        {
+            // The legacy negated-entry mechanism and the else entry both express "everything else" and would
+            // conflict on which value applies to the uncovered slots.
+            throw new InvalidOperationException(
+                "The decision node contains both a negated entry and an else entry, which is not supported.");
+        }
+
         for (var i = 0; i < Definition.NumberOfSlots; i++)
         {
             if (negatedEntryIndex is null)
             {
-                // If there is no negated entry, we can return the entry as is.
-                yield return _entries[i];
+                // If there is no negated entry, we can return the entry as is, falling back to the else entry.
+                yield return _entries[i] ?? ElseEntry;
                 continue;
             }
 
