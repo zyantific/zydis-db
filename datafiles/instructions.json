@@ -127657,7 +127657,7 @@
     "mnemonic": "nop",
     "opcode": "90",
     "filters": {
-      "mandatory_prefix": "ignore",
+      "mandatory_prefix": "!f3",
       "rex_b": "0"
     },
     "meta_info": {
@@ -526242,7 +526242,7 @@
     "mnemonic": "xchg",
     "opcode": "90",
     "filters": {
-      "mandatory_prefix": "ignore",
+      "mandatory_prefix": "!f3",
       "rex_b": "1"
     },
     "operands": [

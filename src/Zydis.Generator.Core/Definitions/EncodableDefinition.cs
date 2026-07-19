@@ -236,6 +236,9 @@ public sealed class EncodableDefinition :
             "66" => MandatoryPrefix.P66,
             "f2" => MandatoryPrefix.PF2,
             "f3" => MandatoryPrefix.PF3,
+            // A negated mandatory prefix decodes for every prefix except the named one and carries none of its
+            // own to encode, so it encodes exactly like "ignore".
+            string value when value.StartsWith('!') => MandatoryPrefix.Ignore,
             _ => throw new NotSupportedException("Invalid value for MandatoryPrefix selector")
         };
     }
