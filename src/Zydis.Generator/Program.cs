@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Zydis.Generator.Core;
 using Zydis.Generator.Core.DecoderTree.Builder;
+using Zydis.Generator.Core.DecoderTree.Emitters;
 using Zydis.Generator.Core.Definitions;
 using Zydis.Generator.Core.Serialization;
 
@@ -75,26 +76,24 @@ internal sealed class Program
 
     private static async Task<int> RunDpAsync(IReadOnlyList<string> positional)
     {
-        if (positional.Count is < 1 or > 2)
+        if (positional.Count != 2)
         {
             await Console.Error.WriteLineAsync(
-                "usage: Zydis.Generator --tree=dp [path/to/datafiles/] [path/to/zydis/]").ConfigureAwait(false);
+                "usage: Zydis.Generator --tree=dp path/to/datafiles/ path/to/zydis/").ConfigureAwait(false);
             return 1;
         }
 
-        var builder = new VariablePositionTreeBuilder();
-        await foreach (var definition in ReadDefinitionsAsync(positional[0]).ConfigureAwait(false))
-        {
-            builder.InsertDefinition(definition);
-        }
+        var generator = new ZydisGenerator(DecoderTreeMode.VariablePosition);
 
-        builder.Build();
-        builder.InsertOpcodeTableSwitchNodes();
+        await generator.ReadDefinitionsAsync(positional[0]).ConfigureAwait(false);
+        await generator.GenerateDataTablesAsync(positional[1]).ConfigureAwait(false);
 
-        Console.WriteLine("variable-position tree:");
-        Console.WriteLine(builder.Statistics.Render());
+        var report = GenerationReport.Create(
+            generator.DecoderTreeStatistics, generator.DecoderTableEmissionStatistics);
 
-        // Emission for the variable-position tree is not wired yet, so no output files are written here.
+        Console.WriteLine("decoder tables (variable-position):");
+        Console.WriteLine(report.Render());
+
         return 0;
     }
 
@@ -151,11 +150,23 @@ internal sealed class Program
         Console.WriteLine();
         Console.WriteLine($"max per-definition point cross-product: {maxPoints}");
 
+        // Emitted sizes come from laying out both trees into throwaway buffers, so verify mode never writes output.
+        var comparison = SizeComparisonReport.Create(
+            DecoderTableEmissionMeasurer.Measure(legacyBuilder.OpcodeTables),
+            DecoderTableEmissionMeasurer.Measure(dpBuilder.OpcodeTables));
+
+        Console.WriteLine();
+        Console.WriteLine("decoder table size (legacy vs variable-position):");
+        Console.WriteLine(comparison.Render());
+
         if (!equivalent)
         {
+            Console.WriteLine();
             Console.WriteLine("result: DIFFERENCES FOUND");
             return 2;
         }
+
+        Console.WriteLine();
 
         Console.WriteLine("result: ALL TABLES EQUIVALENT");
         return 0;
