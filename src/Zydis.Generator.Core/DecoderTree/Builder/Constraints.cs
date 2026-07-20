@@ -177,8 +177,7 @@ internal sealed class ConstraintSet
 
         if (definition.Pattern is not null)
         {
-            // Sorted so that any future diagnostics/debugging output built from this set is deterministic.
-            foreach (var (key, value) in definition.Pattern.OrderBy(x => x.Key, StringComparer.Ordinal))
+            foreach (var (key, value) in definition.Pattern)
             {
                 if (SkippedFilterKeys.Contains(key))
                 {

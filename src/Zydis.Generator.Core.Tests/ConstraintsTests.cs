@@ -97,6 +97,20 @@ public class ConstraintsTests
         Assert.Equal(RegionRelation.FirstContainsSecond, RegionAlgebra.Relate(first, second));
     }
 
+    [Fact]
+    public async Task Parse_KeyOrderDoesNotAffectResult()
+    {
+        var forward = await TestHelpers.ParseDefinitionAsync(
+            "test", """{"modrm_mod":"3","mandatory_prefix":"66","rex_w":"1"}""");
+        var reversed = await TestHelpers.ParseDefinitionAsync(
+            "test", """{"rex_w":"1","mandatory_prefix":"66","modrm_mod":"3"}""");
+
+        var a = ConstraintSet.Parse(forward);
+        var b = ConstraintSet.Parse(reversed);
+
+        Assert.Equal(RegionRelation.Equal, RegionAlgebra.Relate(a, b));
+    }
+
     private static string WithFilters(string filtersJson) =>
         $$$"""{"mnemonic":"test","opcode":"00","filters":{{{filtersJson}}},"meta_info":{}}""";
 
