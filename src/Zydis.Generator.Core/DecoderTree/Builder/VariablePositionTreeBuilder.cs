@@ -72,6 +72,8 @@ public sealed class VariablePositionTreeBuilder
     // order leads, then each other encoding's remaining filters follow in declaration order.
     private static readonly IReadOnlyList<string> MergedTieBreakPriority = BuildMergedTieBreakPriority();
 
+    private static readonly FilterKey MandatoryPrefixKey = new("mandatory_prefix");
+
     private readonly SortedDictionary<(int TableId, int Opcode), List<InstructionDefinition>> _buckets = new();
     private readonly List<string> _bucketErrors = [];
     private readonly NodeInterner _interner = new();
@@ -193,7 +195,20 @@ public sealed class VariablePositionTreeBuilder
         {
             try
             {
-                parsed.Add(new GroupMember(definition, ConstraintSet.Parse(definition)));
+                var constraints = ConstraintSet.Parse(definition);
+
+                // For every encoding except Default and AMD3DNOW, the mandatory prefix is the opcode-table identity
+                // that OpcodeTableRouting.GetRefiningPrefix already consumed to bucket this definition, not an
+                // in-group filter. Inside these vector tables the decoder's mandatory candidate is always "none", so
+                // a retained constraint would build a MandatoryPrefixNode whose only live slot is the table's own
+                // refining prefix - a dead end that resolves to INVALID at runtime. Drop it so the group refines on
+                // its real filters.
+                if (definition.Encoding is not (InstructionEncoding.Default or InstructionEncoding.AMD3DNOW))
+                {
+                    constraints = constraints.Without(MandatoryPrefixKey);
+                }
+
+                parsed.Add(new GroupMember(definition, constraints));
             }
             catch (Exception ex) when (ex is NotSupportedException or ArgumentException or InvalidDataException)
             {
