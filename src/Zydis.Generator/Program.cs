@@ -211,11 +211,23 @@ internal sealed class Program
             }
         }
 
-        var reordered = definitions.Select(definition => ReorderPattern(definition, orders.GetValueOrDefault(definition))).ToList();
+        var reordered = new List<InstructionDefinition>(definitions.Count);
+        var changedCount = 0;
+        foreach (var definition in definitions)
+        {
+            var updated = ReorderPattern(definition, orders.GetValueOrDefault(definition));
+            if (PatternKeyOrder.Changed(definition, updated))
+            {
+                changedCount++;
+            }
+
+            reordered.Add(updated);
+        }
+
         await DefinitionWriter.WriteAsync(Path.Join(positional[0], "instructions.json"), reordered).ConfigureAwait(false);
 
         Console.WriteLine(
-            $"Reordered {orders.Count} of {definitions.Count} definitions " +
+            $"Reordered {changedCount} of {definitions.Count} definitions " +
             $"({definitions.Count - orders.Count} had no group-derived order and were left as-is).");
         return 0;
     }
