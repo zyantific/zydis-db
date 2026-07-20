@@ -71,7 +71,8 @@ internal static class DefinitionEmitter
                     "has_apx_nf",
                     "has_apx_zu",
                     "has_apx_ppx",
-                    "has_apx_scc"],
+                    "has_apx_scc",
+                    "has_apx_nf_check"],
                 InstructionEncoding.MVEX => [
                     .. baseVectorFields,
                     "functionality",
@@ -155,7 +156,8 @@ internal static class DefinitionEmitter
                             .WriteBool("has_apx_nf", definition.Evex!.HasNf)
                             .WriteBool("has_apx_zu", definition.Evex!.HasZu)
                             .WriteBool("has_apx_ppx", definition.Evex!.HasPpx)
-                            .WriteBool("has_apx_scc", HasApxScc(definition));
+                            .WriteBool("has_apx_scc", HasApxScc(definition))
+                            .WriteBool("has_apx_nf_check", HasApxNfCheck(definition));
                         break;
                     case InstructionEncoding.MVEX:
                         definitionEntry
@@ -341,6 +343,14 @@ internal static class DefinitionEmitter
     internal static bool HasApxScc(InstructionDefinition definition)
     {
         return definition.Pattern?.ContainsKey("evex_scc") ?? false;
+    }
+
+    // The walk-time NF validation (reject z/L/mask-low-bits, then clear mask) moved to definition time for
+    // every definition behind an evex_nf filter slot, not just the ones with the evex "nf" property set, so
+    // this mirrors HasApxScc's filter-presence derivation rather than reusing has_apx_nf.
+    internal static bool HasApxNfCheck(InstructionDefinition definition)
+    {
+        return definition.Pattern?.ContainsKey("evex_nf") ?? false;
     }
 
     private static string? GetRawFilterValue(InstructionDefinition definition, string filterName)
