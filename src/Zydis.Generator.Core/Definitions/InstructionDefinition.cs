@@ -35,21 +35,17 @@ public sealed record InstructionDefinition
 
     public OpcodeMap OpcodeMap { get; init; } = OpcodeMap.MAP0;
 
+    // Opcode 0x00 is a legitimate value, so it must always be written even though it equals
+    // default(byte); the shared serializer options otherwise omit default values.
     [JsonConverter(typeof(HexadecimalIntConverter<byte>))]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required byte Opcode { get; init; }
 
     [JsonPropertyName("filters")]
+    [JsonConverter(typeof(FilterPatternConverter))]
     public IReadOnlyDictionary<string, JsonElement>? Pattern { get; init; }
 
-    [JsonPropertyName("meta_info")]
-    public required InstructionMetaInfo MetaInfo { get; init; }
-
-    [JsonPropertyName("affected_flags")]
-    public InstructionFlags? AffectedFlags { get; init; }
-
-    public InstructionVexInfo? Vex { get; init; }
-    public InstructionEvexInfo? Evex { get; init; }
-    public InstructionMvexInfo? Mvex { get; init; }
+    public IReadOnlyList<InstructionOperand>? Operands { get; init; }
 
     [Emittable(4, "operand_size_map")]
     public OperandSizeMap OpsizeMap { get; init; }
@@ -57,27 +53,39 @@ public sealed record InstructionDefinition
     [Emittable(5, "address_size_map")]
     public AddressSizeMap AdsizeMap { get; init; }
 
-    public IReadOnlyList<InstructionOperand>? Operands { get; init; }
+    public int? Cpl { get; init; }
 
-    public PrefixFlags PrefixFlags { get; init; }
+    public InstructionFlagsEnum Flags { get; init; }
+
+    [JsonPropertyName("meta_info")]
+    public required InstructionMetaInfo MetaInfo { get; init; }
 
     [Emittable(13, "exception_class")]
     public ExceptionClass? ExceptionClass { get; init; }
 
-    public InstructionFlagsEnum Flags { get; init; }
+    public InstructionMvexInfo? Mvex { get; init; }
 
-    public int? Cpl { get; init; }
+    public PrefixFlags PrefixFlags { get; init; }
+
+    [JsonPropertyName("affected_flags")]
+    public InstructionFlags? AffectedFlags { get; init; }
+
+    public InstructionEvexInfo? Evex { get; init; }
+    public InstructionVexInfo? Vex { get; init; }
 
     public string? Comment { get; init; }
 
     public IReadOnlyList<Annotation>? Annotations { get; init; }
 
+    [JsonIgnore]
     public IEnumerable<InstructionOperand> AllOperands => [.. Operands ?? [], .. AffectedFlags?.GetFlagsRegisterOperands() ?? []];
 
     [Emittable(1, "operand_count")]
+    [JsonIgnore]
     public int NumberOfOperands => AllOperands.Count();
 
     [Emittable(2, "operand_count_visible")]
+    [JsonIgnore]
     public int NumberOfVisibleOperands => (Operands is null) ? 0 : Operands.TakeWhile(x => x.Visibility is not OperandVisibility.Hidden).Count();
 
     public bool HasAnnotation<T>() => Annotations?.Any(x => x.GetType() == typeof(T)) ?? false;

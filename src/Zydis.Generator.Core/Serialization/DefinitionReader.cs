@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -15,13 +16,21 @@ namespace Zydis.Generator.Core.Serialization;
 
 public static partial class DefinitionReader
 {
-    private static readonly JsonSerializerOptions SerializerOptions = new()
+    /// <summary>
+    /// The exact reader configuration, shared with <see cref="DefinitionWriter"/> so writes agree with reads on
+    /// property naming, converters and unmapped-member handling.
+    /// </summary>
+    internal static readonly JsonSerializerOptions Options = new()
     {
         PropertyNameCaseInsensitive = true,
         UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
         TypeInfoResolver = SerializerContext.Default,
         PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+
+        // The reference file leaves characters like '>' unescaped in comment text; the default encoder would
+        // HTML-escape them (e.g. to ">"), producing a spurious diff on every write.
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
     public static async IAsyncEnumerable<T> ReadAsync<T>(string filename, [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -33,7 +42,7 @@ public static partial class DefinitionReader
             .ConfigureAwait(false);
 
         var items = JsonSerializer
-            .DeserializeAsyncEnumerable<T>(fs, SerializerOptions, cancellationToken)
+            .DeserializeAsyncEnumerable<T>(fs, Options, cancellationToken)
             .ConfigureAwait(false);
 
         await foreach (var item in items)
@@ -49,6 +58,7 @@ public static partial class DefinitionReader
 
     [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata)]
     [JsonSerializable(typeof(InstructionDefinition))]
+    [JsonSerializable(typeof(Dictionary<string, JsonElement>))]
     [JsonSerializable(typeof(InstructionFlagsAccess))]
     [JsonSerializable(typeof(InstructionFlag))]
     [JsonSerializable(typeof(InstructionFlagOperation))]
