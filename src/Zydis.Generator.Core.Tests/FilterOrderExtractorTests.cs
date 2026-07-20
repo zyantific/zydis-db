@@ -39,15 +39,20 @@ public class FilterOrderExtractorTests
     public async Task ExtractOrders_DontCareLeafReachableViaMultiplePaths_OrderIsPathIndependent()
     {
         // Mirrors the design doc's fallback pattern (an F3-mandatory, mode=64-specific definition with a don't-care
-        // else), strengthened so the don't-care definition also owns a filter of its own: 'fallback' declares only
-        // rex_w=0, and 'specific' shares that exact value, so rex_w never discriminates between them and cannot be
-        // used to isolate 'fallback' in a single cheap test. That forces the constructor to replicate 'fallback'
-        // across both the mandatory_prefix decision's uncovered slots *and* the nested mode decision under its f3
-        // slot - two genuinely different decision-node ancestries, confirmed below rather than assumed.
+        // else), strengthened two ways over the design doc's own example:
+        //  - 'fallback' owns *two* filters of its own (rex_w, rex_b), not zero or one, so there is a genuine
+        //    relative order between them for ExtractOrders to get wrong - a single-filter fallback can only ever
+        //    produce a trivially "consistent" singleton list regardless of whether extraction is even correct.
+        //  - 'specific' shares both exact values with 'fallback', so neither filter ever discriminates between them
+        //    and cannot be used to isolate 'fallback' in a single cheap test. That forces the constructor to
+        //    replicate 'fallback' across both the mandatory_prefix decision's uncovered slots *and* the nested mode
+        //    decision under its f3 slot - two genuinely different decision-node ancestries, confirmed below rather
+        //    than assumed - so ExtractOrders' cross-path disagreement check in Record() is actually exercised
+        //    against more than one real occurrence, not just a single recorded path.
         var builder = new VariablePositionTreeBuilder();
         var specific = await TestHelpers.ParseDefinitionAsync(
-            "x", """{"mandatory_prefix":"f3","mode":"64","rex_w":"0"}""");
-        var fallback = await TestHelpers.ParseDefinitionAsync("x", """{"rex_w":"0"}""");
+            "x", """{"mandatory_prefix":"f3","mode":"64","rex_w":"0","rex_b":"0"}""");
+        var fallback = await TestHelpers.ParseDefinitionAsync("x", """{"rex_w":"0","rex_b":"0"}""");
         builder.InsertDefinition(specific);
         builder.InsertDefinition(fallback);
 
@@ -61,9 +66,11 @@ public class FilterOrderExtractorTests
             $"expected 'fallback' to be reachable at more than one tree depth (found: {string.Join(',', depths)}); " +
             "the fixture no longer exercises a genuine multi-path leaf.");
 
+        // ExtractOrders itself throws InvalidOperationException if any two of those paths disagree on 'fallback's
+        // own filter order, so simply not throwing here is already part of what this test verifies.
         var orders = FilterOrderExtractor.ExtractOrders(group);
 
-        Assert.Equal([new FilterKey("rex_w")], orders[fallback]);
+        Assert.Equal([new FilterKey("rex_w"), new FilterKey("rex_b")], orders[fallback]);
     }
 
     // Records the depth (root = 0) at which every occurrence of `target`'s DefinitionNode is reached, independent of
