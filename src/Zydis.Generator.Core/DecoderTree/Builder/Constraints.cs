@@ -121,8 +121,8 @@ internal sealed record FilterConstraint(
 /// </summary>
 internal sealed class ConstraintSet
 {
-    // Informational flags present in the instruction data with no decision-node counterpart. `DecoderTreeBuilder`
-    // never sees them either, since it only consumes keys listed in its per-encoding `FilterOrder`.
+    // Informational flags present in the instruction data with no decision-node counterpart. The reference model
+    // never sees them either, since it only consumes keys listed in `FixedFilterOrder`.
     private static readonly FrozenSet<string> SkippedFilterKeys =
         new[] { "force_modrm_reg", "force_modrm_rm" }.ToFrozenSet(StringComparer.Ordinal);
 

@@ -55,12 +55,12 @@ public class RegionEquivalenceTests
         Assert.Empty(differences);
     }
 
-    // A mandatory ignore-fallback group: the legacy tree splits on the mandatory prefix and parks the
+    // A mandatory ignore-fallback group: the reference tree splits on the mandatory prefix and parks the
     // unconstrained member in the ignore slot; the DAG replicates that member instead. The ignore member
     // must be reachable at every prefix where the concrete slot dead-ends (here: none/66/f2, and f3 with
     // mode != 64), which only matches if the ignore-slot complement is modelled.
     [Fact]
-    public async Task MandatoryIgnoreFallback_LegacyAndDp_AreEquivalent()
+    public async Task MandatoryIgnoreFallback_ReferenceAndDp_AreEquivalent()
     {
         var members = new[]
         {
@@ -68,9 +68,9 @@ public class RegionEquivalenceTests
             await DefinitionAsync("B", "10", """{"mandatory_prefix":"ignore"}""")
         };
 
-        var (legacy, dp) = BuildBoth(members, 0x10);
+        var (reference, dp) = BuildBoth(members, 0x10);
 
-        var differences = RegionEquivalenceChecker.CompareGroup("PRIMARY", 0x10, legacy, dp);
+        var differences = RegionEquivalenceChecker.CompareGroup("PRIMARY", 0x10, reference, dp);
 
         Assert.Empty(differences);
     }
@@ -101,30 +101,26 @@ public class RegionEquivalenceTests
         Assert.Contains(differences, difference => difference.Contains('B'));
     }
 
-    private static (DecoderTreeNode? Legacy, DecoderTreeNode? Dp) BuildBoth(
+    private static (DecoderTreeNode? Reference, DecoderTreeNode? Dp) BuildBoth(
         IReadOnlyList<InstructionDefinition> members, int opcode)
     {
-        var legacyBuilder = new DecoderTreeBuilder();
-        var dpBuilder = new VariablePositionTreeBuilder();
+        var referenceTables = RegionEquivalenceChecker.BuildReferenceModel(members);
 
+        var dpBuilder = new VariablePositionTreeBuilder();
         foreach (var member in members)
         {
-            legacyBuilder.InsertDefinition(member);
             dpBuilder.InsertDefinition(member);
         }
-
-        legacyBuilder.InsertOpcodeTableSwitchNodes();
-        legacyBuilder.Optimize();
 
         dpBuilder.Build();
         dpBuilder.InsertOpcodeTableSwitchNodes();
 
-        var legacyRoot = legacyBuilder.OpcodeTables
+        var referenceRoot = referenceTables
             .GetTable(InstructionEncoding.Default, OpcodeMap.MAP0, null)[DecisionNodeIndex.ForIndex(opcode)];
         var dpRoot = dpBuilder.OpcodeTables
             .GetTable(InstructionEncoding.Default, OpcodeMap.MAP0, null)[DecisionNodeIndex.ForIndex(opcode)];
 
-        return (legacyRoot, dpRoot);
+        return (referenceRoot, dpRoot);
     }
 
     private static string DefinitionJson(string mnemonic, string opcode, string filtersJson) =>

@@ -10,8 +10,8 @@ namespace Zydis.Generator.Core.DecoderTree.Builder;
 
 /// <summary>
 /// Shared opcode-table routing used by every decoder-tree builder: it maps a definition onto its refining prefix and
-/// wires the inter-table switch nodes. Keeping this in one place means the legacy and variable-position builders bucket
-/// definitions and stitch the top-level tables together identically.
+/// wires the inter-table switch nodes. Keeping this in one place means the reference and variable-position builders
+/// bucket definitions and stitch the top-level tables together identically.
 /// </summary>
 internal static class OpcodeTableRouting
 {

@@ -67,7 +67,7 @@ public sealed class DecoderTreeBuildException :
 /// </summary>
 public sealed class VariablePositionTreeBuilder
 {
-    // One TreeConstructor takes a single tie-break list, but each encoding has its own legacy filter order. The
+    // One TreeConstructor takes a single tie-break list, but each encoding has its own fixed filter order. The
     // tie-break only decides between equal-cost candidates, so per-encoding fidelity is not load-bearing: the default
     // order leads, then each other encoding's remaining filters follow in declaration order.
     private static readonly IReadOnlyList<string> MergedTieBreakPriority = BuildMergedTieBreakPriority();
@@ -176,8 +176,8 @@ public sealed class VariablePositionTreeBuilder
     }
 
     /// <summary>
-    /// Wires the top-level opcode-map switch nodes into <see cref="OpcodeTables"/>, using the same routing as the
-    /// legacy builder.
+    /// Wires the top-level opcode-map switch nodes into <see cref="OpcodeTables"/>, using the shared
+    /// <see cref="OpcodeTableRouting"/> so every builder buckets and routes identically.
     /// </summary>
     public void InsertOpcodeTableSwitchNodes()
     {
@@ -313,7 +313,7 @@ public sealed class VariablePositionTreeBuilder
 
         foreach (var encoding in declarationOrder)
         {
-            foreach (var filter in DecoderTreeBuilder.FilterOrder[encoding])
+            foreach (var filter in FixedFilterOrder.ByEncoding[encoding])
             {
                 if (seen.Add(filter))
                 {
