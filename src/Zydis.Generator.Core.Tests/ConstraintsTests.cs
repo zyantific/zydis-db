@@ -38,13 +38,12 @@ public class ConstraintsTests
     }
 
     [Fact]
-    public async Task Parse_MandatoryIgnore_YieldsNoConstraint()
+    public async Task Parse_MandatoryIgnore_ThrowsNotSupported()
     {
-        var definition = await ParseDefinitionAsync(WithFilters("""{"mandatory_prefix":"ignore"}"""));
+        var definition = await TestHelpers.ParseDefinitionAsync("bsf", """{"modrm_mod":"3","mandatory_prefix":"ignore"}""");
 
-        var set = ConstraintSet.Parse(definition);
-
-        Assert.Empty(set.Constraints);
+        var ex = Assert.Throws<NotSupportedException>(() => ConstraintSet.Parse(definition));
+        Assert.Contains("retired", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

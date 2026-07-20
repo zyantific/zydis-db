@@ -20,9 +20,17 @@ internal static class TestHelpers
         string metaInfoJson = "{}", string? affectedFlagsJson = null)
     {
         var definition = await ParseDefinitionAsync(
-            WithMnemonic(mnemonic, filtersJson, operandCountOverride, comment, metaInfoJson, affectedFlagsJson)).ConfigureAwait(false);
+            mnemonic, filtersJson, operandCountOverride, comment, metaInfoJson, affectedFlagsJson).ConfigureAwait(false);
 
         return new GroupMember(definition, ConstraintSet.Parse(definition));
+    }
+
+    public static async Task<InstructionDefinition> ParseDefinitionAsync(
+        string mnemonic, string filtersJson, int? operandCountOverride = null, string? comment = null,
+        string metaInfoJson = "{}", string? affectedFlagsJson = null)
+    {
+        return await ParseDefinitionAsync(
+            WithMnemonic(mnemonic, filtersJson, operandCountOverride, comment, metaInfoJson, affectedFlagsJson)).ConfigureAwait(false);
     }
 
     private static string WithMnemonic(
