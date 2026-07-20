@@ -19,7 +19,8 @@ internal sealed class Program
     {
         Dp,
         Verify,
-        MigrateOrder
+        MigrateOrder,
+        Lint
     }
 
     private static async Task<int> Main(string[] args)
@@ -37,9 +38,10 @@ internal sealed class Program
                     case "dp": mode = TreeMode.Dp; break;
                     case "verify": mode = TreeMode.Verify; break;
                     case "migrate-order": mode = TreeMode.MigrateOrder; break;
+                    case "lint": mode = TreeMode.Lint; break;
                     default:
                         await Console.Error.WriteLineAsync(
-                                $"unknown --tree value '{value}' (expected dp|verify|migrate-order)")
+                                $"unknown --tree value '{value}' (expected dp|verify|migrate-order|lint)")
                             .ConfigureAwait(false);
                         return 1;
                 }
@@ -55,6 +57,7 @@ internal sealed class Program
             TreeMode.Dp => await RunDpAsync(positional).ConfigureAwait(false),
             TreeMode.Verify => await RunVerifyAsync(positional).ConfigureAwait(false),
             TreeMode.MigrateOrder => await RunMigrateOrderAsync(positional).ConfigureAwait(false),
+            TreeMode.Lint => await RunLintAsync(positional).ConfigureAwait(false),
             _ => 1
         };
     }
@@ -228,6 +231,51 @@ internal sealed class Program
         }
 
         return definition with { Pattern = reordered };
+    }
+
+    // Advisory check (see docs/superpowers/plans/2026-07-20-filter-order-followups.md, Task 9): compares each
+    // definition's checked-in "filters" key order against what re-running --tree=migrate-order would write, without
+    // touching any file. Always exits 0 so it can run unconditionally in CI without gating the build on findings.
+    private static async Task<int> RunLintAsync(IReadOnlyList<string> positional)
+    {
+        if (positional.Count != 1)
+        {
+            await Console.Error.WriteLineAsync(
+                "usage: Zydis.Generator --tree=lint path/to/datafiles/").ConfigureAwait(false);
+            return 1;
+        }
+
+        var definitions = new List<InstructionDefinition>();
+        await foreach (var definition in ReadDefinitionsAsync(positional[0]).ConfigureAwait(false))
+        {
+            definitions.Add(definition);
+        }
+
+        var builder = new VariablePositionTreeBuilder();
+        foreach (var definition in definitions)
+        {
+            builder.InsertDefinition(definition);
+        }
+
+        var findings = FilterOrderLint.Run(builder.BuildGroups());
+
+        if (findings.Count == 0)
+        {
+            Console.WriteLine("No stale filter arrangements found.");
+        }
+        else
+        {
+            Console.WriteLine($"{findings.Count} definition(s) have a stale filter arrangement " +
+                               "(run --tree=migrate-order to fix):");
+            foreach (var finding in findings.OrderBy(f => f.Definition.Mnemonic, StringComparer.Ordinal))
+            {
+                Console.WriteLine(
+                    $"  {finding.Definition.Mnemonic}: recorded=[{string.Join(",", finding.RecordedOrder)}] " +
+                    $"current=[{string.Join(",", finding.CurrentOrder)}]");
+            }
+        }
+
+        return 0; // always advisory - never fail the build on findings
     }
 
     private static IAsyncEnumerable<InstructionDefinition> ReadDefinitionsAsync(string datafilesPath)
