@@ -56,3 +56,8 @@ jobs:
           dotnet run --project src/Zydis.Generator -c "${BUILD_CONFIG}" -- --tree=dp datafiles "$out1"
           dotnet run --project src/Zydis.Generator -c "${BUILD_CONFIG}" -- --tree=dp datafiles "$out2"
           diff -r "$out1" "$out2"
+
+      - name: Filter-order lint (advisory)
+        working-directory: ${{ inputs.root-path }}
+        run: >-
+          dotnet run --project src/Zydis.Generator -c "${BUILD_CONFIG}" -- --tree=lint datafiles
