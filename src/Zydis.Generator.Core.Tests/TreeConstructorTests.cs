@@ -215,17 +215,14 @@ public class TreeConstructorTests
     [Fact]
     public async Task Evaluate_ImposedExpensiveOrder_CostsAtLeastOptimal()
     {
-        var members = new[]
-        {
-            await MemberAsync("D1", """{"mode":"64","rex_w":"0"}"""),
-            await MemberAsync("D2", """{"mode":"64","rex_w":"1"}"""),
-            await MemberAsync("D3", """{"mode":"!64"}""")
-        };
+        // Shared with FilterOrderLintTests.Run_RecordedOrderDiffersFromCurrent_ReportsFinding: same known-suboptimal
+        // case, exercised here directly against Evaluate and there through FilterOrderExtractor's public surface.
+        var group = await TestHelpers.BuildKnownSuboptimalGroupAsync();
 
         var constructor = new TreeConstructor(new NodeInterner(), DefaultTieBreak, new ConstructorOptions());
 
         // Forcing rex_w before mode duplicates the not-64 tail the optimal tree shares once.
-        var (optimal, imposed) = constructor.Evaluate(members, [new FilterKey("rex_w"), new FilterKey("mode")]);
+        var (optimal, imposed) = constructor.Evaluate(group.Members, [new FilterKey("rex_w"), new FilterKey("mode")]);
 
         Assert.True(optimal < imposed, $"expected optimal ({optimal}) < imposed ({imposed})");
     }
