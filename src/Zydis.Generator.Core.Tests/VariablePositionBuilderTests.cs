@@ -61,17 +61,16 @@ public class VariablePositionBuilderTests
     }
 
     [Fact]
-    public async Task LegacyBuilder_FullCorpus_ContainsNoOverflowNode()
+    public async Task ReferenceModel_FullCorpus_ContainsNoOverflowNode()
     {
         // OverflowNode has EncodedSize 0, so the emitter treats it as a leaf and silently drops its collided children.
-        // The legacy fixed-order tree must therefore never contain one for the real corpus.
-        var builder = new DecoderTreeBuilder();
-        await InsertCorpusAsync(builder.InsertDefinition);
+        // The fixed-order reference tree must therefore never contain one for the real corpus.
+        var corpus = new List<InstructionDefinition>();
+        await InsertCorpusAsync(corpus.Add);
 
-        builder.InsertOpcodeTableSwitchNodes();
-        builder.Optimize();
+        var tables = RegionEquivalenceChecker.BuildReferenceModel(corpus);
 
-        Assert.Empty(CollectOverflowNodes(builder.OpcodeTables));
+        Assert.Empty(CollectOverflowNodes(tables));
     }
 
     [Fact]

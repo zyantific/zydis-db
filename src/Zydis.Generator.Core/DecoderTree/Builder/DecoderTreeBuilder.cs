@@ -1,15 +1,17 @@
 using System;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 
-using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.Definitions;
-using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.DecoderTree.Builder;
 
-public sealed class DecoderTreeBuilder
+/// <summary>
+/// Frozen fixed-order reference model that inserts each definition's filters in <see cref="FixedFilterOrder"/> and
+/// resolves node overflow with a follow-up optimization pass. It exists as the pre-variable-position baseline the
+/// advisory verify mode compares the variable-position output against, so its layout must stay stable.
+/// </summary>
+internal sealed class DecoderTreeBuilder
 {
     public OpcodeTables OpcodeTables { get; } = new();
 
@@ -189,7 +191,7 @@ public sealed class DecoderTreeBuilder
             return [];
         }
 
-        var order = FilterOrder[definition.Encoding];
+        var order = FixedFilterOrder.ByEncoding[definition.Encoding];
         var lookup = order.Select((x, i) => (x, i)).ToDictionary(k => k.x, v => v.i);
 
         return definition.Pattern
@@ -197,99 +199,4 @@ public sealed class DecoderTreeBuilder
             .Select(x => (type: x.Key, value: x.Value.GetString()!))
             .OrderBy(x => lookup[x.type]);
     }
-
-    internal static readonly IReadOnlyDictionary<InstructionEncoding, string[]> FilterOrder = new Dictionary<InstructionEncoding, string[]>
-    {
-        [InstructionEncoding.Default] =
-        [
-            "rex_2",
-            "feature_mpx",
-            "feature_ud0_compat",
-            "modrm_mod",
-            "feature_cldemote",
-            "prefix_group1",
-            "mandatory_prefix",
-            "modrm_reg",
-            "modrm_rm",
-            "mode",
-            "address_size",
-            "operand_size",
-            "rex_w",
-            "rex_b",
-            "feature_amd",
-            "feature_knc",
-            "feature_cet",
-            "feature_lzcnt",
-            "feature_tzcnt",
-            "feature_wbnoinvd",
-            "feature_centaur",
-            "feature_iprefetch"
-        ],
-        [InstructionEncoding.AMD3DNOW] =
-        [
-            "rex2",
-            "modrm_mod",
-            "mode_cldemote",
-            "prefix_group1",
-            "mandatory_prefix",
-            "modrm_reg",
-            "modrm_rm",
-            "mode",
-            "address_size",
-            "operand_size",
-            "rex_w",
-            "rex_b",
-        ],
-        [InstructionEncoding.VEX] =
-        [
-            "modrm_reg",
-            "modrm_rm",
-            "vector_length",
-            "mode",
-            "modrm_mod",
-            "rex_w",
-            "operand_size",
-            "address_size",
-            "feature_knc"
-        ],
-        [InstructionEncoding.EVEX] =
-        [
-            "modrm_mod",
-            "evex_u",
-            "modrm_reg",
-            "modrm_rm",
-            "rex_w",
-            "mode",
-            "operand_size",
-            "address_size",
-            "evex_b",
-            "vector_length",
-            "evex_nd",
-            "evex_nf",
-            "evex_scc"
-        ],
-        [InstructionEncoding.MVEX] =
-        [
-            "modrm_mod",
-            "modrm_reg",
-            "modrm_rm",
-            "rex_w",
-            "mode",
-            "operand_size",
-            "address_size",
-            "mvex_e",
-            "vector_length"
-        ],
-        [InstructionEncoding.XOP] =
-        [
-            "modrm_reg",
-            "modrm_rm",
-            "vector_length",
-            "mode",
-            "modrm_mod",
-            "rex_w",
-            "operand_size",
-            "address_size"
-        ]
-    }.ToFrozenDictionary();
 }

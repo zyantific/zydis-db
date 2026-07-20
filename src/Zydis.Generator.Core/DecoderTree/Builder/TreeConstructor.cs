@@ -51,7 +51,7 @@ internal sealed class TreeConstructor
     /// <param name="interner">The interner that canonicalizes and identifies the constructed nodes.</param>
     /// <param name="tieBreakPriority">
     /// Filter names in ascending priority. Used to break ties between equal-cost candidates and to steer the greedy
-    /// fallback; typically the legacy per-encoding filter order.
+    /// fallback; typically the fixed per-encoding filter order.
     /// </param>
     /// <param name="options">Search tuning knobs.</param>
     public TreeConstructor(NodeInterner interner, IReadOnlyList<string> tieBreakPriority, ConstructorOptions options)
@@ -458,7 +458,7 @@ internal sealed class TreeConstructor
         {
             // A mode/modrm_mod test that only distinguishes one interesting slot from "everything else" collapses to
             // its compact two-slot counterpart; the interesting slot becomes slot 0 and the rest becomes the else
-            // branch. Mirrors the retired `DecoderTreeBuilder.Optimize` pass, ahead of interning and costing.
+            // branch. Mirrors the reference `DecoderTreeBuilder.Optimize` pass, ahead of interning and costing.
             switch (node)
             {
                 case ModeNode

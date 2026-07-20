@@ -85,8 +85,9 @@ internal sealed class IgnoreFallback
 public sealed record TableVerification(string Table, IReadOnlyList<string> Differences, long MaxPointCount);
 
 /// <summary>
-/// Verifies that the legacy fixed-order decoder tree and the variable-position DAG route every real decode point of
-/// every opcode group to the same definition.
+/// Verifies that the frozen fixed-order reference tree and the variable-position DAG route every real decode point of
+/// every opcode group to the same definition. Owns the reference model so the advisory verify mode has a stable
+/// baseline to compare the production output against.
 /// </summary>
 /// <remarks>
 /// Both trees are built in-process from the same <see cref="InstructionDefinition"/> instances over the current
@@ -94,11 +95,11 @@ public sealed record TableVerification(string Table, IReadOnlyList<string> Diffe
 /// (conjunctions of <see cref="FilterKey"/> to <see cref="SlotMask"/>); the two sets are then compared pointwise over
 /// the cross-product of every filter either side mentions.
 /// <para>
-/// The legacy mandatory-prefix node keeps its physical ignore slot on this branch. Its runtime fallback is modelled as
-/// a per-candidate complement: a definition in the ignore slot is reached, for a concrete prefix value, only where that
+/// The reference mandatory-prefix node keeps its physical ignore slot. Its runtime fallback is modelled as a
+/// per-candidate complement: a definition in the ignore slot is reached, for a concrete prefix value, only where that
 /// value's slot subtree covers no definition. The complement is evaluated pointwise during comparison rather than
 /// materialised symbolically. For the vector encodings the mandatory prefix is the opcode-table identity (it selects the
-/// table) rather than an in-group filter, so it is dropped from the DAG regions exactly where the legacy tree has no
+/// table) rather than an in-group filter, so it is dropped from the DAG regions exactly where the reference tree has no
 /// mandatory node.
 /// </para>
 /// </remarks>
@@ -113,6 +114,27 @@ public static class RegionEquivalenceChecker
     private static readonly int[] MandatoryCandidateSlots = [1, 2, 3, 4];
 
     private const long PointBudget = 10_000_000;
+
+    /// <summary>
+    /// Builds the frozen fixed-order reference tree for <paramref name="definitions"/>. This is the baseline the
+    /// advisory verify mode compares the variable-position output against; it is never emitted.
+    /// </summary>
+    public static OpcodeTables BuildReferenceModel(IEnumerable<InstructionDefinition> definitions)
+    {
+        ArgumentNullException.ThrowIfNull(definitions);
+
+        var builder = new DecoderTreeBuilder();
+
+        foreach (var definition in definitions)
+        {
+            builder.InsertDefinition(definition);
+        }
+
+        builder.InsertOpcodeTableSwitchNodes();
+        builder.Optimize();
+
+        return builder.OpcodeTables;
+    }
 
     /// <summary>
     /// Verifies every opcode table of <paramref name="legacy"/> against <paramref name="dp"/>.

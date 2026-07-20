@@ -15,7 +15,7 @@ namespace Zydis.Generator.Core.Tests;
 
 public class TreeConstructorTests
 {
-    // Legacy `FilterOrder` for the default encoding; index doubles as tie-break priority (lower wins).
+    // Fixed `FilterOrder` for the default encoding; index doubles as tie-break priority (lower wins).
     private static readonly string[] DefaultTieBreak =
     [
         "rex_2", "feature_mpx", "feature_ud0_compat", "modrm_mod", "feature_cldemote", "prefix_group1",
