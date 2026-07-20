@@ -197,10 +197,11 @@ internal sealed class ConstraintSet
 
                 var rawValue = value.GetString()!;
 
-                // "ignore" is a transitional alias meaning "no constraint" for the mandatory prefix filter.
                 if (key is "mandatory_prefix" && rawValue is "ignore")
                 {
-                    continue;
+                    throw new NotSupportedException(
+                        $"'{definition.Mnemonic}': mandatory_prefix 'ignore' is retired - omit the filter entirely for " +
+                        "\"no constraint\" instead.");
                 }
 
                 var index = nodeDefinition.ParseSlotIndex(rawValue);

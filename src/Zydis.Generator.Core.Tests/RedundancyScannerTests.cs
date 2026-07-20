@@ -11,9 +11,9 @@ public class RedundancyScannerTests
     [Fact]
     public async Task FindRedundant_SupersetSiblingCoversNarrowerDuplicate_FlagsNarrowerMember()
     {
-        var broad = await TestHelpers.MemberAsync("bsf", """{"modrm_mod":"3","mandatory_prefix":"ignore"}""");
+        var broad = await TestHelpers.MemberAsync("bsf", """{"modrm_mod":"3"}""");
         var narrow = await TestHelpers.MemberAsync("bsf", """{"modrm_mod":"3","mandatory_prefix":"none"}""");
-        var unrelated = await TestHelpers.MemberAsync("bsf", """{"modrm_mod":"!3","mandatory_prefix":"ignore"}""");
+        var unrelated = await TestHelpers.MemberAsync("bsf", """{"modrm_mod":"!3"}""");
 
         var redundant = RedundancyScanner.FindRedundant([broad, narrow, unrelated]);
 
@@ -26,7 +26,7 @@ public class RedundancyScannerTests
     {
         // Same region relationship as above, but the narrower definition's operands differ from the
         // broader one's, so it is a real, distinct instruction form and must not be flagged.
-        var broad = await TestHelpers.MemberAsync("bsf", """{"modrm_mod":"3","mandatory_prefix":"ignore"}""");
+        var broad = await TestHelpers.MemberAsync("bsf", """{"modrm_mod":"3"}""");
         var narrowDifferentOperands = await TestHelpers.MemberAsync(
             "bsf", """{"modrm_mod":"3","mandatory_prefix":"none"}""", operandCountOverride: 3);
 
@@ -44,7 +44,7 @@ public class RedundancyScannerTests
         // rows in datafiles/instructions.json (each row is parsed from its own JSON object). Verifies operands are
         // compared by content, not list identity.
         var broad = await TestHelpers.MemberAsync(
-            "bsf", """{"modrm_mod":"3","mandatory_prefix":"ignore"}""", operandCountOverride: 2);
+            "bsf", """{"modrm_mod":"3"}""", operandCountOverride: 2);
         var narrow = await TestHelpers.MemberAsync(
             "bsf", """{"modrm_mod":"3","mandatory_prefix":"none"}""", operandCountOverride: 2);
 
@@ -63,7 +63,7 @@ public class RedundancyScannerTests
         // parsed but content-identical.
         const string affectedFlags = """{"access":"must_write","cf":"u","pf":"u","af":"u","zf":"m","sf":"u","of":"u"}""";
         var broad = await TestHelpers.MemberAsync(
-            "bsf", """{"modrm_mod":"3","mandatory_prefix":"ignore"}""", affectedFlagsJson: affectedFlags);
+            "bsf", """{"modrm_mod":"3"}""", affectedFlagsJson: affectedFlags);
         var narrow = await TestHelpers.MemberAsync(
             "bsf", """{"modrm_mod":"3","mandatory_prefix":"none"}""", affectedFlagsJson: affectedFlags);
 
@@ -80,7 +80,7 @@ public class RedundancyScannerTests
         // decoding and legitimately differs between two rows describing the same outcome (this is exactly the
         // case for the real bsf/bsr duplicates in datafiles/instructions.json), so it must not block the match.
         var broad = await TestHelpers.MemberAsync(
-            "bsf", """{"modrm_mod":"3","mandatory_prefix":"ignore"}""", comment: "replaced in the HSW builds");
+            "bsf", """{"modrm_mod":"3"}""", comment: "replaced in the HSW builds");
         var narrow = await TestHelpers.MemberAsync(
             "bsf", """{"modrm_mod":"3","mandatory_prefix":"none"}""", comment: "AMD reused 0FBC for TZCNT");
 
@@ -99,7 +99,7 @@ public class RedundancyScannerTests
         // `none`/PPRO pair in datafiles/instructions.json, where the isa_set difference is real and must be
         // preserved).
         var broad = await TestHelpers.MemberAsync(
-            "nop", """{"modrm_mod":"3","mandatory_prefix":"ignore"}""", metaInfoJson: """{"isa_set":"FAT_NOP"}""");
+            "nop", """{"modrm_mod":"3"}""", metaInfoJson: """{"isa_set":"FAT_NOP"}""");
         var narrow = await TestHelpers.MemberAsync(
             "nop", """{"modrm_mod":"3","mandatory_prefix":"none"}""", metaInfoJson: """{"isa_set":"PPRO"}""");
 
