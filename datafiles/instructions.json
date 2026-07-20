@@ -23572,8 +23572,7 @@
     "opcode_map": "0f",
     "opcode": "BC",
     "filters": {
-      "modrm_mod": "3",
-      "mandatory_prefix": "ignore"
+      "modrm_mod": "3"
     },
     "operands": [
       {
@@ -23607,8 +23606,7 @@
     "opcode_map": "0f",
     "opcode": "BC",
     "filters": {
-      "modrm_mod": "!3",
-      "mandatory_prefix": "ignore"
+      "modrm_mod": "!3"
     },
     "operands": [
       {
@@ -23647,8 +23645,7 @@
     "opcode_map": "0f",
     "opcode": "BD",
     "filters": {
-      "modrm_mod": "3",
-      "mandatory_prefix": "ignore"
+      "modrm_mod": "3"
     },
     "operands": [
       {
@@ -23682,8 +23679,7 @@
     "opcode_map": "0f",
     "opcode": "BD",
     "filters": {
-      "modrm_mod": "!3",
-      "mandatory_prefix": "ignore"
+      "modrm_mod": "!3"
     },
     "operands": [
       {
@@ -57147,8 +57143,7 @@
     "filters": {
       "modrm_mod": "3",
       "modrm_reg": "3",
-      "modrm_rm": "5",
-      "mandatory_prefix": "ignore"
+      "modrm_rm": "5"
     },
     "flags": [
       "protected_mode"
@@ -57340,8 +57335,7 @@
     "filters": {
       "modrm_mod": "3",
       "modrm_reg": "7",
-      "modrm_rm": "4",
-      "mandatory_prefix": "ignore"
+      "modrm_rm": "4"
     },
     "operands": [
       {
@@ -65058,7 +65052,6 @@
     "mnemonic": "cmpsb",
     "opcode": "A6",
     "filters": {
-      "mandatory_prefix": "ignore",
       "rex_2": "no_rex2"
     },
     "operands": [
@@ -65266,7 +65259,6 @@
     "mnemonic": "cmpsd",
     "opcode": "A7",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "32",
       "rex_2": "no_rex2"
     },
@@ -65562,7 +65554,6 @@
     "mnemonic": "cmpsq",
     "opcode": "A7",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "64",
       "rex_2": "no_rex2"
     },
@@ -65858,7 +65849,6 @@
     "mnemonic": "cmpsw",
     "opcode": "A7",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "16",
       "rex_2": "no_rex2"
     },
@@ -66381,7 +66371,6 @@
       "mode": "64",
       "modrm_mod": "!3",
       "modrm_reg": "1",
-      "mandatory_prefix": "ignore",
       "rex_w": "1",
       "rex_2": "no_rex2"
     },
@@ -66441,7 +66430,6 @@
       "mode": "64",
       "modrm_mod": "!3",
       "modrm_reg": "1",
-      "mandatory_prefix": "ignore",
       "rex_w": "1",
       "rex_2": "rex2"
     },
@@ -66501,7 +66489,6 @@
       "mode": "64",
       "modrm_mod": "!3",
       "modrm_reg": "1",
-      "mandatory_prefix": "ignore",
       "rex_w": "0",
       "rex_2": "no_rex2"
     },
@@ -66563,7 +66550,6 @@
       "mode": "64",
       "modrm_mod": "!3",
       "modrm_reg": "1",
-      "mandatory_prefix": "ignore",
       "rex_w": "0",
       "rex_2": "rex2"
     },
@@ -66625,7 +66611,6 @@
       "mode": "!64",
       "modrm_mod": "!3",
       "modrm_reg": "1",
-      "mandatory_prefix": "ignore",
       "rex_2": "no_rex2"
     },
     "operands": [
@@ -66686,7 +66671,6 @@
       "mode": "!64",
       "modrm_mod": "!3",
       "modrm_reg": "1",
-      "mandatory_prefix": "ignore",
       "rex_2": "rex2"
     },
     "operands": [
@@ -103628,7 +103612,6 @@
     "mnemonic": "insb",
     "opcode": "6C",
     "filters": {
-      "mandatory_prefix": "ignore"
     },
     "operands": [
       {
@@ -103781,7 +103764,6 @@
     "mnemonic": "insd",
     "opcode": "6D",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "32"
     },
     "operands": [
@@ -103828,7 +103810,6 @@
     "mnemonic": "insd",
     "opcode": "6D",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "64"
     },
     "operands": [
@@ -104257,7 +104238,6 @@
     "mnemonic": "insw",
     "opcode": "6D",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "16"
     },
     "operands": [
@@ -104686,8 +104666,7 @@
     "opcode": "01",
     "filters": {
       "modrm_mod": "!3",
-      "modrm_reg": "7",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "7"
     },
     "operands": [
       {
@@ -104715,8 +104694,7 @@
     "filters": {
       "modrm_mod": "3",
       "modrm_reg": "3",
-      "modrm_rm": "7",
-      "mandatory_prefix": "ignore"
+      "modrm_rm": "7"
     },
     "operands": [
       {
@@ -114958,8 +114936,7 @@
     "filters": {
       "mode": "64",
       "modrm_mod": "!3",
-      "modrm_reg": "2",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "2"
     },
     "operands": [
       {
@@ -114992,8 +114969,7 @@
     "filters": {
       "mode": "!64",
       "modrm_mod": "!3",
-      "modrm_reg": "2",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "2"
     },
     "operands": [
       {
@@ -115062,8 +115038,7 @@
     "filters": {
       "mode": "64",
       "modrm_mod": "!3",
-      "modrm_reg": "3",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "3"
     },
     "operands": [
       {
@@ -115097,8 +115072,7 @@
     "filters": {
       "mode": "!64",
       "modrm_mod": "!3",
-      "modrm_reg": "3",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "3"
     },
     "operands": [
       {
@@ -115209,8 +115183,7 @@
     "opcode": "00",
     "filters": {
       "modrm_mod": "3",
-      "modrm_reg": "2",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "2"
     },
     "operands": [
       {
@@ -115241,8 +115214,7 @@
     "opcode": "00",
     "filters": {
       "modrm_mod": "!3",
-      "modrm_reg": "2",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "2"
     },
     "operands": [
       {
@@ -115307,8 +115279,7 @@
     "opcode": "01",
     "filters": {
       "modrm_mod": "3",
-      "modrm_reg": "6",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "6"
     },
     "operands": [
       {
@@ -115336,8 +115307,7 @@
     "opcode": "01",
     "filters": {
       "modrm_mod": "!3",
-      "modrm_reg": "6",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "6"
     },
     "operands": [
       {
@@ -115428,7 +115398,6 @@
     "mnemonic": "lodsb",
     "opcode": "AC",
     "filters": {
-      "mandatory_prefix": "ignore",
       "rex_2": "no_rex2"
     },
     "operands": [
@@ -115580,7 +115549,6 @@
     "mnemonic": "lodsd",
     "opcode": "AD",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "32",
       "rex_2": "no_rex2"
     },
@@ -115732,7 +115700,6 @@
     "mnemonic": "lodsq",
     "opcode": "AD",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "64",
       "rex_2": "no_rex2"
     },
@@ -115884,7 +115851,6 @@
     "mnemonic": "lodsw",
     "opcode": "AD",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "16",
       "rex_2": "no_rex2"
     },
@@ -116265,8 +116231,7 @@
     "opcode": "00",
     "filters": {
       "modrm_mod": "3",
-      "modrm_reg": "3",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "3"
     },
     "operands": [
       {
@@ -116297,8 +116262,7 @@
     "opcode": "00",
     "filters": {
       "modrm_mod": "!3",
-      "modrm_reg": "3",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "3"
     },
     "operands": [
       {
@@ -118397,7 +118361,6 @@
     "mnemonic": "mov",
     "opcode": "A1",
     "filters": {
-      "mandatory_prefix": "ignore",
       "rex_2": "no_rex2"
     },
     "operands": [
@@ -122505,7 +122468,6 @@
     "mnemonic": "movsb",
     "opcode": "A4",
     "filters": {
-      "mandatory_prefix": "ignore",
       "rex_2": "no_rex2"
     },
     "operands": [
@@ -122693,7 +122655,6 @@
     "mnemonic": "movsd",
     "opcode": "A5",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "32",
       "rex_2": "no_rex2"
     },
@@ -123169,7 +123130,6 @@
     "mnemonic": "movsq",
     "opcode": "A5",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "64",
       "rex_2": "no_rex2"
     },
@@ -123501,7 +123461,6 @@
     "mnemonic": "movsw",
     "opcode": "A5",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "16",
       "rex_2": "no_rex2"
     },
@@ -128088,7 +128047,6 @@
     "opcode": "1C",
     "filters": {
       "modrm_mod": "!3",
-      "mandatory_prefix": "ignore",
       "feature_cldemote": "1"
     },
     "operands": [
@@ -128200,8 +128158,7 @@
     "opcode_map": "0f",
     "opcode": "1E",
     "filters": {
-      "modrm_mod": "3",
-      "mandatory_prefix": "ignore"
+      "modrm_mod": "3"
     },
     "operands": [
       {
@@ -135724,7 +135681,6 @@
     "mnemonic": "outsb",
     "opcode": "6E",
     "filters": {
-      "mandatory_prefix": "ignore"
     },
     "operands": [
       {
@@ -135873,7 +135829,6 @@
     "mnemonic": "outsd",
     "opcode": "6F",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "32"
     },
     "operands": [
@@ -135918,7 +135873,6 @@
     "mnemonic": "outsd",
     "opcode": "6F",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "64"
     },
     "operands": [
@@ -136171,7 +136125,6 @@
     "mnemonic": "outsw",
     "opcode": "6F",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "16"
     },
     "operands": [
@@ -164227,8 +164180,7 @@
     "filters": {
       "modrm_mod": "3",
       "modrm_reg": "7",
-      "modrm_rm": "5",
-      "mandatory_prefix": "ignore"
+      "modrm_rm": "5"
     },
     "operands": [
       {
@@ -164525,8 +164477,7 @@
     "filters": {
       "modrm_mod": "3",
       "modrm_reg": "7",
-      "modrm_rm": "1",
-      "mandatory_prefix": "ignore"
+      "modrm_rm": "1"
     },
     "operands": [
       {
@@ -183055,7 +183006,6 @@
     "mnemonic": "scasb",
     "opcode": "AE",
     "filters": {
-      "mandatory_prefix": "ignore",
       "rex_2": "no_rex2"
     },
     "operands": [
@@ -183228,7 +183178,6 @@
     "mnemonic": "scasd",
     "opcode": "AF",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "32",
       "rex_2": "no_rex2"
     },
@@ -183401,7 +183350,6 @@
     "mnemonic": "scasq",
     "opcode": "AF",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "64",
       "rex_2": "no_rex2"
     },
@@ -183574,7 +183522,6 @@
     "mnemonic": "scasw",
     "opcode": "AF",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "16",
       "rex_2": "no_rex2"
     },
@@ -187556,8 +187503,7 @@
     "filters": {
       "mode": "64",
       "modrm_mod": "!3",
-      "modrm_reg": "0",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "0"
     },
     "operands": [
       {
@@ -187590,8 +187536,7 @@
     "filters": {
       "mode": "!64",
       "modrm_mod": "!3",
-      "modrm_reg": "0",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "0"
     },
     "operands": [
       {
@@ -207333,8 +207278,7 @@
     "filters": {
       "mode": "64",
       "modrm_mod": "!3",
-      "modrm_reg": "1",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "1"
     },
     "operands": [
       {
@@ -207367,8 +207311,7 @@
     "filters": {
       "mode": "!64",
       "modrm_mod": "!3",
-      "modrm_reg": "1",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "1"
     },
     "operands": [
       {
@@ -207401,8 +207344,7 @@
     "filters": {
       "modrm_mod": "3",
       "modrm_reg": "3",
-      "modrm_rm": "6",
-      "mandatory_prefix": "ignore"
+      "modrm_rm": "6"
     },
     "operands": [
       {
@@ -207426,8 +207368,7 @@
     "opcode": "00",
     "filters": {
       "modrm_mod": "3",
-      "modrm_reg": "0",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "0"
     },
     "operands": [
       {
@@ -207457,8 +207398,7 @@
     "opcode": "00",
     "filters": {
       "modrm_mod": "!3",
-      "modrm_reg": "0",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "0"
     },
     "operands": [
       {
@@ -207522,8 +207462,7 @@
     "opcode": "01",
     "filters": {
       "modrm_mod": "3",
-      "modrm_reg": "4",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "4"
     },
     "operands": [
       {
@@ -207550,8 +207489,7 @@
     "opcode": "01",
     "filters": {
       "modrm_mod": "!3",
-      "modrm_reg": "4",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "4"
     },
     "operands": [
       {
@@ -207977,8 +207915,7 @@
     "filters": {
       "modrm_mod": "3",
       "modrm_reg": "3",
-      "modrm_rm": "4",
-      "mandatory_prefix": "ignore"
+      "modrm_rm": "4"
     },
     "flags": [
       "protected_mode"
@@ -208078,7 +208015,6 @@
     "mnemonic": "stosb",
     "opcode": "AA",
     "filters": {
-      "mandatory_prefix": "ignore",
       "rex_2": "no_rex2"
     },
     "operands": [
@@ -208231,7 +208167,6 @@
     "mnemonic": "stosd",
     "opcode": "AB",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "32",
       "rex_2": "no_rex2"
     },
@@ -208384,7 +208319,6 @@
     "mnemonic": "stosq",
     "opcode": "AB",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "64",
       "rex_2": "no_rex2"
     },
@@ -208537,7 +208471,6 @@
     "mnemonic": "stosw",
     "opcode": "AB",
     "filters": {
-      "mandatory_prefix": "ignore",
       "operand_size": "16",
       "rex_2": "no_rex2"
     },
@@ -208692,8 +208625,7 @@
     "opcode": "00",
     "filters": {
       "modrm_mod": "3",
-      "modrm_reg": "1",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "1"
     },
     "operands": [
       {
@@ -208723,8 +208655,7 @@
     "opcode": "00",
     "filters": {
       "modrm_mod": "!3",
-      "modrm_reg": "1",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "1"
     },
     "operands": [
       {
@@ -214925,8 +214856,7 @@
       "mode": "64",
       "modrm_mod": "3",
       "modrm_reg": "7",
-      "modrm_rm": "0",
-      "mandatory_prefix": "ignore"
+      "modrm_rm": "0"
     },
     "operands": [
       {
@@ -272225,8 +272155,7 @@
     "opcode": "00",
     "filters": {
       "modrm_mod": "3",
-      "modrm_reg": "4",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "4"
     },
     "operands": [
       {
@@ -272254,8 +272183,7 @@
     "opcode": "00",
     "filters": {
       "modrm_mod": "!3",
-      "modrm_reg": "4",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "4"
     },
     "operands": [
       {
@@ -272287,8 +272215,7 @@
     "opcode": "00",
     "filters": {
       "modrm_mod": "3",
-      "modrm_reg": "5",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "5"
     },
     "operands": [
       {
@@ -272316,8 +272243,7 @@
     "opcode": "00",
     "filters": {
       "modrm_mod": "!3",
-      "modrm_reg": "5",
-      "mandatory_prefix": "ignore"
+      "modrm_reg": "5"
     },
     "operands": [
       {
@@ -346903,8 +346829,7 @@
     "filters": {
       "modrm_mod": "3",
       "modrm_reg": "3",
-      "modrm_rm": "2",
-      "mandatory_prefix": "ignore"
+      "modrm_rm": "2"
     },
     "operands": [
       {
@@ -346929,8 +346854,7 @@
     "filters": {
       "modrm_mod": "3",
       "modrm_reg": "3",
-      "modrm_rm": "1",
-      "mandatory_prefix": "ignore"
+      "modrm_rm": "1"
     },
     "meta_info": {
       "category": "SYSTEM",
@@ -362411,8 +362335,7 @@
     "filters": {
       "modrm_mod": "3",
       "modrm_reg": "3",
-      "modrm_rm": "0",
-      "mandatory_prefix": "ignore"
+      "modrm_rm": "0"
     },
     "operands": [
       {
@@ -362437,8 +362360,7 @@
     "filters": {
       "modrm_mod": "3",
       "modrm_reg": "3",
-      "modrm_rm": "3",
-      "mandatory_prefix": "ignore"
+      "modrm_rm": "3"
     },
     "operands": [
       {
