@@ -89,6 +89,20 @@ public class VariablePositionBuilderTests
     }
 
     [Fact]
+    public async Task BuildGroups_YieldsOneEntryPerBucketWithMatchingMembersAndResult()
+    {
+        var builder = new VariablePositionTreeBuilder();
+        builder.InsertDefinition(await TestHelpers.ParseDefinitionAsync("bsf", """{"modrm_mod":"3"}"""));
+        builder.InsertDefinition(await TestHelpers.ParseDefinitionAsync("bsf", """{"modrm_mod":"!3"}"""));
+
+        var groups = builder.BuildGroups().ToList();
+
+        var group = Assert.Single(groups);
+        Assert.Equal(2, group.Members.Count);
+        Assert.NotNull(group.Result.Root);
+    }
+
+    [Fact]
     public async Task Build_ConflictsAcrossGroups_AggregatesEveryProblem()
     {
         var builder = new VariablePositionTreeBuilder();
