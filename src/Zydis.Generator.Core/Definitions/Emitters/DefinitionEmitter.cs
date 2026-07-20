@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using Zydis.Generator.Core.CodeGeneration;
@@ -53,7 +54,8 @@ internal static class DefinitionEmitter
                     "accepts_XRELEASE",
                     "accepts_NOTRACK",
                     "accepts_hle_without_lock",
-                    "accepts_branch_hints"],
+                    "accepts_branch_hints",
+                    "mandatory_prefix"],
                 InstructionEncoding.VEX => [.. baseVectorFields, "broadcast"],
                 InstructionEncoding.EVEX => [
                     .. baseVectorFields,
@@ -68,7 +70,8 @@ internal static class DefinitionEmitter
                     "is_eevex",
                     "has_apx_nf",
                     "has_apx_zu",
-                    "has_apx_ppx"],
+                    "has_apx_ppx",
+                    "has_apx_scc"],
                 InstructionEncoding.MVEX => [
                     .. baseVectorFields,
                     "functionality",
@@ -131,7 +134,8 @@ internal static class DefinitionEmitter
                             .Conditional().WriteBool("accepts_XRELEASE", definition.PrefixFlags.HasFlag(PrefixFlags.AcceptsXRELEASE))
                             .Conditional().WriteBool("accepts_NOTRACK", definition.PrefixFlags.HasFlag(PrefixFlags.AcceptsNOTRACK))
                             .Conditional().WriteBool("accepts_hle_without_lock", definition.PrefixFlags.HasFlag(PrefixFlags.AcceptsLocklessHLE))
-                            .Conditional().WriteBool("accepts_branch_hints", definition.PrefixFlags.HasFlag(PrefixFlags.AcceptsBranchHints));
+                            .Conditional().WriteBool("accepts_branch_hints", definition.PrefixFlags.HasFlag(PrefixFlags.AcceptsBranchHints))
+                            .WriteInteger("mandatory_prefix", GetMandatoryPrefixEncoding(definition));
                         break;
                     case InstructionEncoding.VEX:
                         definitionEntry
@@ -150,7 +154,8 @@ internal static class DefinitionEmitter
                             .WriteBool("is_eevex", definition.Evex!.IsEevex)
                             .WriteBool("has_apx_nf", definition.Evex!.HasNf)
                             .WriteBool("has_apx_zu", definition.Evex!.HasZu)
-                            .WriteBool("has_apx_ppx", definition.Evex!.HasPpx);
+                            .WriteBool("has_apx_ppx", definition.Evex!.HasPpx)
+                            .WriteBool("has_apx_scc", HasApxScc(definition));
                         break;
                     case InstructionEncoding.MVEX:
                         definitionEntry
@@ -312,5 +317,39 @@ internal static class DefinitionEmitter
         }
 
         return "DEFAULT";
+    }
+
+    // Encodes which mandatory prefix (if any) the decoder must consume for this definition, so the walk-time
+    // decoder can consume it up front instead of re-deriving it from the opcode-table shape.
+    internal static int GetMandatoryPrefixEncoding(InstructionDefinition definition)
+    {
+        return GetRawFilterValue(definition, "mandatory_prefix") switch
+        {
+            null or "none" or "ignore" => 0,
+            "66" => 1,
+            "f3" => 2,
+            "f2" => 3,
+            // A negated mandatory prefix decodes for every prefix except the named one and consumes none of
+            // its own, so it behaves like "ignore" for consumption purposes.
+            string value when value.StartsWith('!') => 0,
+            var value => throw new NotSupportedException($"Invalid value '{value}' for mandatory_prefix filter"),
+        };
+    }
+
+    // Mirrors has_apx_nf's derivation: unlike has_apx_nf (a plain flag from the raw "evex" record data),
+    // evex_scc only ever appears as a decoder filter, so presence in the filter set is the only signal.
+    internal static bool HasApxScc(InstructionDefinition definition)
+    {
+        return definition.Pattern?.ContainsKey("evex_scc") ?? false;
+    }
+
+    private static string? GetRawFilterValue(InstructionDefinition definition, string filterName)
+    {
+        if (!(definition.Pattern?.TryGetValue(filterName, out var value) ?? false))
+        {
+            return null;
+        }
+
+        return value.ValueKind is JsonValueKind.String ? value.ToString() : throw new InvalidDataException();
     }
 }
