@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using Zydis.Generator.Core;
@@ -17,7 +18,8 @@ internal sealed class Program
     private enum TreeMode
     {
         Dp,
-        Verify
+        Verify,
+        MigrateOrder
     }
 
     private static async Task<int> Main(string[] args)
@@ -34,8 +36,10 @@ internal sealed class Program
                 {
                     case "dp": mode = TreeMode.Dp; break;
                     case "verify": mode = TreeMode.Verify; break;
+                    case "migrate-order": mode = TreeMode.MigrateOrder; break;
                     default:
-                        await Console.Error.WriteLineAsync($"unknown --tree value '{value}' (expected dp|verify)")
+                        await Console.Error.WriteLineAsync(
+                                $"unknown --tree value '{value}' (expected dp|verify|migrate-order)")
                             .ConfigureAwait(false);
                         return 1;
                 }
@@ -50,6 +54,7 @@ internal sealed class Program
         {
             TreeMode.Dp => await RunDpAsync(positional).ConfigureAwait(false),
             TreeMode.Verify => await RunVerifyAsync(positional).ConfigureAwait(false),
+            TreeMode.MigrateOrder => await RunMigrateOrderAsync(positional).ConfigureAwait(false),
             _ => 1
         };
     }
@@ -152,6 +157,77 @@ internal sealed class Program
 
         Console.WriteLine("result: ALL TABLES EQUIVALENT");
         return 0;
+    }
+
+    // One-time migration (see docs/superpowers/plans/2026-07-20-filter-order-followups.md, Task 6): records each
+    // definition's optimizer-chosen filter-test order as its own "filters" key order, so a future filter-order
+    // change is visible in the data diff instead of only in decoder table output.
+    private static async Task<int> RunMigrateOrderAsync(IReadOnlyList<string> positional)
+    {
+        if (positional.Count != 1)
+        {
+            await Console.Error.WriteLineAsync(
+                "usage: Zydis.Generator --tree=migrate-order path/to/datafiles/").ConfigureAwait(false);
+            return 1;
+        }
+
+        var definitions = new List<InstructionDefinition>();
+        await foreach (var definition in ReadDefinitionsAsync(positional[0]).ConfigureAwait(false))
+        {
+            definitions.Add(definition);
+        }
+
+        var builder = new VariablePositionTreeBuilder();
+        foreach (var definition in definitions)
+        {
+            builder.InsertDefinition(definition);
+        }
+
+        var orders = new Dictionary<InstructionDefinition, IReadOnlyList<FilterKey>>();
+        foreach (var group in builder.BuildGroups())
+        {
+            foreach (var (definition, order) in FilterOrderExtractor.ExtractOrders(group))
+            {
+                orders[definition] = order;
+            }
+        }
+
+        var reordered = definitions.Select(definition => ReorderPattern(definition, orders.GetValueOrDefault(definition))).ToList();
+        await DefinitionWriter.WriteAsync(Path.Join(positional[0], "instructions.json"), reordered).ConfigureAwait(false);
+
+        Console.WriteLine(
+            $"Reordered {orders.Count} of {definitions.Count} definitions " +
+            $"({definitions.Count - orders.Count} had no group-derived order and were left as-is).");
+        return 0;
+    }
+
+    // Rewrites 'definition's Pattern so its key order matches 'order' (the root-to-leaf order the optimizer
+    // actually tested it in). A definition with no group-derived order (e.g. one that failed to route to any
+    // opcode table) or with 0-1 filters is returned unchanged, since there is nothing meaningful to reorder.
+    private static InstructionDefinition ReorderPattern(InstructionDefinition definition, IReadOnlyList<FilterKey>? order)
+    {
+        if (order is null || definition.Pattern is null || definition.Pattern.Count <= 1)
+        {
+            return definition;
+        }
+
+        var reordered = new Dictionary<string, JsonElement>();
+        foreach (var key in order)
+        {
+            if (definition.Pattern.TryGetValue(key.Name, out var value))
+            {
+                reordered[key.Name] = value;
+            }
+        }
+
+        // Fails safe rather than silently dropping a filter: every key of 'definition.Pattern' is expected to
+        // already be covered by 'order' per Task 5's invariant, so this loop should be a no-op in practice.
+        foreach (var (key, value) in definition.Pattern)
+        {
+            reordered.TryAdd(key, value);
+        }
+
+        return definition with { Pattern = reordered };
     }
 
     private static IAsyncEnumerable<InstructionDefinition> ReadDefinitionsAsync(string datafilesPath)
