@@ -39,6 +39,11 @@ jobs:
         run: >-
           dotnet build
 
+      - name: .NET Test
+        working-directory: ${{ inputs.root-path }}
+        run: >-
+          dotnet test --no-build
+
       - name: Decoder-table determinism gate
         working-directory: ${{ inputs.root-path }}
         run: |
