@@ -38,6 +38,13 @@ public abstract class OpcodeTableEmitter
     /// </summary>
     internal int CloneCount { get; private set; }
 
+    /// <summary>
+    /// The number of distinct nodes laid out (and therefore emitted) during the most recent
+    /// <see cref="Emit(OpcodeTableNode, int)"/>. A subtree shared across parents is counted once; a cloned subtree is
+    /// counted per copy.
+    /// </summary>
+    internal int EmittedNodeCount { get; private set; }
+
     protected OpcodeTableEmitter(DecoderTableEmitterStatistics? statistics = null) :
         this(DefaultMaximumOffset, statistics)
     {
@@ -97,6 +104,7 @@ public abstract class OpcodeTableEmitter
 
         // Pass 2: emit nodes in address order, resolving edges against the shared address map.
         TargetAddress = layout.EndAddress;
+        EmittedNodeCount = layout.Order.Count;
 
         foreach (var node in layout.Order)
         {

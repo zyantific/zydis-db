@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Zydis.Generator.Core.CodeGeneration;
+using Zydis.Generator.Core.DecoderTree;
 using Zydis.Generator.Core.DecoderTree.Builder;
 using Zydis.Generator.Core.DecoderTree.Emitters;
 using Zydis.Generator.Core.Definitions;
@@ -17,10 +18,24 @@ using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core;
 
+/// <summary>
+/// Selects which decoder-tree builder generation uses to lay out the opcode tables.
+/// </summary>
+public enum DecoderTreeMode
+{
+    /// <summary>The legacy fixed filter-order builder followed by its overflow-resolving optimization pass.</summary>
+    Legacy,
+
+    /// <summary>The variable-position builder that searches for the cheapest interned sub-DAG per group.</summary>
+    VariablePosition
+}
+
 public sealed class ZydisGenerator
 {
+    private readonly DecoderTreeMode _treeMode;
     private readonly DefinitionRegistry _definitionRegistry = new();
     private readonly DecoderTreeBuilder _decoderTreeBuilder = new();
+    private readonly VariablePositionTreeBuilder _variablePositionTreeBuilder = new();
     private readonly EncodingRegistry _encodingRegistry = new();
     private readonly OperandsRegistry _operandsRegistry = new();
     private readonly AccessedFlagsRegistry _accessedFlagsRegistry = new();
@@ -29,6 +44,32 @@ public sealed class ZydisGenerator
     private readonly RelativeInfoRegistry _relativeInfoRegistry = new();
     private readonly FormatterStringsRegistry _formatterStringsRegistry = new();
 
+    public ZydisGenerator() :
+        this(DecoderTreeMode.Legacy)
+    {
+    }
+
+    public ZydisGenerator(DecoderTreeMode treeMode)
+    {
+        _treeMode = treeMode;
+    }
+
+    /// <summary>
+    /// The variable-position construction statistics from the most recent <see cref="ReadDefinitionsAsync"/>;
+    /// <see cref="BuilderStatistics.Empty"/> in <see cref="DecoderTreeMode.Legacy"/> mode.
+    /// </summary>
+    public BuilderStatistics DecoderTreeStatistics { get; private set; } = BuilderStatistics.Empty;
+
+    /// <summary>
+    /// The per-table decoder-table emission measurements from the most recent <see cref="GenerateDataTablesAsync"/>.
+    /// </summary>
+    public IReadOnlyList<TableEmissionStatistics> DecoderTableEmissionStatistics { get; private set; } = [];
+
+    // The opcode tables of the builder selected for this run; both builders always expose a populated instance.
+    private OpcodeTables OpcodeTables => _treeMode is DecoderTreeMode.Legacy
+        ? _decoderTreeBuilder.OpcodeTables
+        : _variablePositionTreeBuilder.OpcodeTables;
+
     public async Task ReadDefinitionsAsync(string datafilesPath, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(datafilesPath);
@@ -36,12 +77,31 @@ public sealed class ZydisGenerator
         await foreach (var definition in DefinitionReader.ReadAsync<InstructionDefinition>(Path.Join(datafilesPath, "instructions.json"), cancellationToken).ConfigureAwait(false))
         {
             _definitionRegistry.InsertDefinition(definition);
-            _decoderTreeBuilder.InsertDefinition(definition);
             _encoderRegistry.InsertDefinition(definition);
+
+            if (_treeMode is DecoderTreeMode.Legacy)
+            {
+                _decoderTreeBuilder.InsertDefinition(definition);
+            }
+            else
+            {
+                _variablePositionTreeBuilder.InsertDefinition(definition);
+            }
         }
 
-        _decoderTreeBuilder.InsertOpcodeTableSwitchNodes();
-        _decoderTreeBuilder.Optimize();
+        if (_treeMode is DecoderTreeMode.Legacy)
+        {
+            _decoderTreeBuilder.InsertOpcodeTableSwitchNodes();
+            _decoderTreeBuilder.Optimize();
+        }
+        else
+        {
+            // The variable-position builder compacts each group inside its constructor, so it needs no separate
+            // optimization pass.
+            _variablePositionTreeBuilder.Build();
+            _variablePositionTreeBuilder.InsertOpcodeTableSwitchNodes();
+            DecoderTreeStatistics = _variablePositionTreeBuilder.Statistics;
+        }
 
         var allDefinitions = Enum.GetValues<InstructionEncoding>()
             .SelectMany(encoding => _definitionRegistry[encoding])
@@ -159,7 +219,9 @@ public sealed class ZydisGenerator
 
     private async Task GenerateOpcodeTables(StreamWriter writer, DecoderTableEmitterStatistics statistics)
     {
-        foreach (var table in _decoderTreeBuilder.OpcodeTables.Tables)
+        var emissionStatistics = new List<TableEmissionStatistics>();
+
+        foreach (var table in OpcodeTables.Tables)
         {
             if (table.EnumerateSlots().All(x => x is null))
             {
@@ -173,13 +235,18 @@ public sealed class ZydisGenerator
             var initializerListWriter = declarationWriter.WriteInitializerList().BeginList();
 
             var emitter = new DecoderTableCodeEmitter(initializerListWriter, _definitionRegistry, _encodingRegistry, statistics);
-            emitter.Emit(table);
+            var size = emitter.Emit(table);
+
+            emissionStatistics.Add(
+                new TableEmissionStatistics(table.ToString()!, size, emitter.EmittedNodeCount, emitter.CloneCount));
 
             initializerListWriter.EndList();
             declarationWriter.EndDeclaration();
 
             await writer.WriteLineAsync().ConfigureAwait(false);
         }
+
+        DecoderTableEmissionStatistics = emissionStatistics;
     }
 
     private async Task GenerateOpcodeTableLookup(StreamWriter writer)
@@ -192,7 +259,7 @@ public sealed class ZydisGenerator
 
         var initializerListWriter = declarationWriter.WriteInitializerList().BeginList();
 
-        foreach (var table in _decoderTreeBuilder.OpcodeTables.Tables)
+        foreach (var table in OpcodeTables.Tables)
         {
             initializerListWriter.WriteInlineComment("{0,-12}", table);
 
