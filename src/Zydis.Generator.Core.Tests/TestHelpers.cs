@@ -25,6 +25,23 @@ internal static class TestHelpers
         return new GroupMember(definition, ConstraintSet.Parse(definition));
     }
 
+    /// <summary>
+    /// Builds the known-suboptimal-order fixture shared by <c>TreeConstructorTests</c> and
+    /// <c>FilterOrderLintTests</c>: three members whose optimal subtree splits on <c>mode</c> first (sharing the
+    /// not-64 tail once). D1's declared filter order lists <c>rex_w</c> before <c>mode</c> - the reverse of what the
+    /// optimizer actually tests - while D2's declared order already matches, so exactly one member's recorded order
+    /// disagrees with the current optimum (D3 has a single filter, so it has no order to disagree on).
+    /// </summary>
+    public static async Task<ConstructedGroup> BuildKnownSuboptimalGroupAsync()
+    {
+        var builder = new VariablePositionTreeBuilder();
+        builder.InsertDefinition(await ParseDefinitionAsync("D1", """{"rex_w":"0","mode":"64"}""").ConfigureAwait(false));
+        builder.InsertDefinition(await ParseDefinitionAsync("D2", """{"mode":"64","rex_w":"1"}""").ConfigureAwait(false));
+        builder.InsertDefinition(await ParseDefinitionAsync("D3", """{"mode":"!64"}""").ConfigureAwait(false));
+
+        return builder.BuildGroups().Single();
+    }
+
     public static async Task<InstructionDefinition> ParseDefinitionAsync(
         string mnemonic, string filtersJson, int? operandCountOverride = null, string? comment = null,
         string metaInfoJson = "{}", string? affectedFlagsJson = null)
