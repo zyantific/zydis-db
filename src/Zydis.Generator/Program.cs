@@ -20,7 +20,8 @@ internal sealed class Program
         Dp,
         Verify,
         MigrateOrder,
-        Lint
+        Lint,
+        ScanRedundant
     }
 
     private static async Task<int> Main(string[] args)
@@ -39,6 +40,7 @@ internal sealed class Program
                     case "verify": mode = TreeMode.Verify; break;
                     case "migrate-order": mode = TreeMode.MigrateOrder; break;
                     case "lint": mode = TreeMode.Lint; break;
+                    case "scan-redundant": mode = TreeMode.ScanRedundant; break;
                     default:
                         await Console.Error.WriteLineAsync(
                                 $"unknown --tree value '{value}'. Available modes:")
@@ -52,6 +54,9 @@ internal sealed class Program
                             .ConfigureAwait(false);
                         await Console.Error.WriteLineAsync(
                                 "  lint - report definitions whose filter arrangement is no longer optimal")
+                            .ConfigureAwait(false);
+                        await Console.Error.WriteLineAsync(
+                                "  scan-redundant - report definitions made redundant by a sibling's broader region")
                             .ConfigureAwait(false);
                         return 1;
                 }
@@ -68,6 +73,7 @@ internal sealed class Program
             TreeMode.Verify => await RunVerifyAsync(positional).ConfigureAwait(false),
             TreeMode.MigrateOrder => await RunMigrateOrderAsync(positional).ConfigureAwait(false),
             TreeMode.Lint => await RunLintAsync(positional).ConfigureAwait(false),
+            TreeMode.ScanRedundant => await RunScanRedundantAsync(positional).ConfigureAwait(false),
             _ => 1
         };
     }
@@ -286,6 +292,60 @@ internal sealed class Program
         }
 
         return 0; // always advisory - never fail the build on findings
+    }
+
+    // Read-only report: finds definitions within a group whose region is a strict subset of a sibling's and are
+    // otherwise field-identical (see RedundancyScanner), without deleting anything or writing any file. Always
+    // exits 0, matching --tree=lint's precedent of never gating the build on findings.
+    private static async Task<int> RunScanRedundantAsync(IReadOnlyList<string> positional)
+    {
+        if (positional.Count != 1)
+        {
+            await Console.Error.WriteLineAsync(
+                "usage: Zydis.Generator --tree=scan-redundant path/to/datafiles/").ConfigureAwait(false);
+            return 1;
+        }
+
+        var definitions = new List<InstructionDefinition>();
+        await foreach (var definition in ReadDefinitionsAsync(positional[0]).ConfigureAwait(false))
+        {
+            definitions.Add(definition);
+        }
+
+        var builder = new VariablePositionTreeBuilder();
+        foreach (var definition in definitions)
+        {
+            builder.InsertDefinition(definition);
+        }
+
+        var redundant = new List<InstructionDefinition>();
+        foreach (var group in builder.BuildGroups())
+        {
+            redundant.AddRange(RedundancyScanner.FindRedundant(group.Members));
+        }
+
+        if (redundant.Count == 0)
+        {
+            Console.WriteLine("No redundant definitions found.");
+        }
+        else
+        {
+            Console.WriteLine($"{redundant.Count} redundant definition(s) found:");
+            foreach (var definition in redundant.OrderBy(d => d.Mnemonic, StringComparer.Ordinal))
+            {
+                Console.WriteLine(
+                    $"  {definition.Mnemonic} opcode=0x{definition.Opcode:X2}: {FormatPattern(definition.Pattern)}");
+            }
+        }
+
+        return 0; // always advisory - never fail the build on findings
+    }
+
+    private static string FormatPattern(IReadOnlyDictionary<string, JsonElement>? pattern)
+    {
+        return pattern is null
+            ? string.Empty
+            : string.Join(", ", pattern.Select(kv => $"{kv.Key}={kv.Value}"));
     }
 
     private static IAsyncEnumerable<InstructionDefinition> ReadDefinitionsAsync(string datafilesPath)
