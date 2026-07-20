@@ -145,6 +145,24 @@ internal sealed class ConstraintSet
     }
 
     /// <summary>
+    /// Returns a copy of this set with the constraint for <paramref name="key"/> removed, or the same instance when
+    /// the key is absent.
+    /// </summary>
+    public ConstraintSet Without(FilterKey key)
+    {
+        if (!Constraints.ContainsKey(key))
+        {
+            return this;
+        }
+
+        var remaining = Constraints
+            .Where(entry => !entry.Key.Equals(key))
+            .ToFrozenDictionary(entry => entry.Key, entry => entry.Value);
+
+        return new ConstraintSet(remaining);
+    }
+
+    /// <summary>
     /// Parses the <see cref="InstructionDefinition.Pattern"/> of <paramref name="definition"/> into a canonical set
     /// of filter constraints.
     /// </summary>

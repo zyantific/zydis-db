@@ -100,6 +100,31 @@ public class TreeConstructorTests
     }
 
     [Fact]
+    public async Task LoneNegatedMember_MaterializesElseAndKeepsClaimedSlotInvalid()
+    {
+        var members = new[]
+        {
+            await MemberAsync("A", """{"mode":"!64"}""")
+        };
+
+        var result = Construct(members);
+
+        // The excluded M64 slot must stay invalid, so the else child cannot be a catch-all: it is copied into every
+        // other slot instead. With M16 and M32 populated the compaction to `ModeCompactNode` does not apply, so the
+        // node stays a full `ModeNode`.
+        var root = Assert.IsType<ModeNode>(result.Root);
+        AssertLeaf("A", root[DecisionNodeIndex.ForIndex((int)ModeNode.Slot.M16)]);
+        AssertLeaf("A", root[DecisionNodeIndex.ForIndex((int)ModeNode.Slot.M32)]);
+        Assert.Null(root[DecisionNodeIndex.ForIndex((int)ModeNode.Slot.M64)]);
+        Assert.Null(root.ElseEntry);
+
+        // The materialized else child is interned once and shared across the reachable slots.
+        Assert.Same(
+            root[DecisionNodeIndex.ForIndex((int)ModeNode.Slot.M16)],
+            root[DecisionNodeIndex.ForIndex((int)ModeNode.Slot.M32)]);
+    }
+
+    [Fact]
     public async Task Rex2Pin_ChosenFirst()
     {
         var members = new[]

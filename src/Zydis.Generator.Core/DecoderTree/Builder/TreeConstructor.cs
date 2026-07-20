@@ -354,6 +354,15 @@ internal sealed class TreeConstructor
 
             var elseChild = elseGroup.Count > 0 ? Solve([.. elseGroup]) : null;
 
+            // Interned identity is keyed on the node definition and its slot children only; `Create` discards the
+            // arguments, so two filters differing solely by arguments would collapse onto one shared node. Refuse
+            // loudly rather than mis-share. No corpus filter carries arguments today; this guards future ones.
+            if (sample.NodeArguments.Length > 0)
+            {
+                throw new NotSupportedException(
+                    $"Filter '{sample.Key.Name}' carries node arguments, which the interned decoder tree cannot represent.");
+            }
+
             var node = sample.NodeDefinition.Create(sample.NodeArguments);
 
             foreach (var (slot, child) in slotChildren)

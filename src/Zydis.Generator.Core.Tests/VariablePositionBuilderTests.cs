@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Xunit;
 
+using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.DecoderTree;
 using Zydis.Generator.Core.DecoderTree.Builder;
 using Zydis.Generator.Core.Definitions;
@@ -33,6 +34,30 @@ public class VariablePositionBuilderTests
         // 3DNow! groups build like any other; every 0F0F suffix splits on modrm_mod, so the table is at least one deep.
         var amd3dnow = builder.Statistics.Tables.Single(table => table.Table.Contains("3DNW", StringComparison.Ordinal));
         Assert.True(amd3dnow.MaxDepth >= 1, $"expected 3DNow! depth >= 1, got {amd3dnow.MaxDepth}");
+
+        // The mandatory prefix is the opcode-table identity for every vector encoding, so no vector table may
+        // contain a MandatoryPrefixNode.
+        Assert.Empty(CollectVectorMandatoryPrefixNodes(builder.OpcodeTables));
+    }
+
+    [Fact]
+    public async Task VectorGroup_StripsMandatoryPrefixConstraint()
+    {
+        // Both members route to the VEX 66 MAP0 table via their mandatory prefix, then refine on modrm_reg. The
+        // mandatory prefix is the table identity here, so the built subtree must refine on modrm_reg alone and never
+        // materialise a MandatoryPrefixNode (whose only live slot would dead-end to INVALID at runtime).
+        var builder = new VariablePositionTreeBuilder();
+        builder.InsertDefinition(await DefinitionAsync("A", "10", """{"mandatory_prefix":"66","modrm_reg":"0"}""", "vex"));
+        builder.InsertDefinition(await DefinitionAsync("B", "10", """{"mandatory_prefix":"66","modrm_reg":"1"}""", "vex"));
+
+        builder.Build();
+
+        var root = builder.OpcodeTables
+            .GetTable(InstructionEncoding.VEX, OpcodeMap.MAP0, RefiningPrefix.P66)[DecisionNodeIndex.ForIndex(0x10)];
+
+        Assert.NotNull(root);
+        Assert.IsNotType<MandatoryPrefixNode>(root);
+        Assert.Empty(CollectVectorMandatoryPrefixNodes(builder.OpcodeTables));
     }
 
     [Fact]
@@ -118,6 +143,51 @@ public class VariablePositionBuilderTests
         }
     }
 
+    // Walks only the vector tables (VEX/EVEX/MVEX/XOP), where the mandatory prefix is the table identity. The Default
+    // and 3DNow! tables legitimately test the mandatory prefix as an in-group filter, so they are excluded.
+    private static List<MandatoryPrefixNode> CollectVectorMandatoryPrefixNodes(OpcodeTables tables)
+    {
+        var found = new List<MandatoryPrefixNode>();
+        var visited = new HashSet<DecoderTreeNode>(ReferenceEqualityComparer.Instance);
+
+        foreach (var table in tables.Tables)
+        {
+            var name = table.ToString()!;
+            if (name.StartsWith("VEX", StringComparison.Ordinal) ||
+                name.StartsWith("EVEX", StringComparison.Ordinal) ||
+                name.StartsWith("MVEX", StringComparison.Ordinal) ||
+                name.StartsWith("XOP", StringComparison.Ordinal))
+            {
+                Walk(table);
+            }
+        }
+
+        return found;
+
+        void Walk(DecoderTreeNode? node)
+        {
+            if (node is null || !visited.Add(node))
+            {
+                return;
+            }
+
+            if (node is MandatoryPrefixNode mandatory)
+            {
+                found.Add(mandatory);
+            }
+
+            if (node is DecisionNode decision)
+            {
+                foreach (var (_, child) in decision.EnumerateVirtualSlots())
+                {
+                    Walk(child);
+                }
+
+                Walk(decision.ElseEntry);
+            }
+        }
+    }
+
     private static List<OverflowNode> CollectOverflowNodes(OpcodeTables tables)
     {
         var overflow = new List<OverflowNode>();
@@ -173,15 +243,16 @@ public class VariablePositionBuilderTests
         throw new FileNotFoundException($"Could not locate 'datafiles/{name}' above '{AppContext.BaseDirectory}'.");
     }
 
-    private static string Definition(string mnemonic, string opcode, string filtersJson) =>
-        $$$"""{"mnemonic":"{{{mnemonic}}}","opcode":"{{{opcode}}}","filters":{{{filtersJson}}},"meta_info":{}}""";
+    private static string Definition(string mnemonic, string opcode, string filtersJson, string encoding) =>
+        $$$"""{"mnemonic":"{{{mnemonic}}}","opcode":"{{{opcode}}}","encoding":"{{{encoding}}}","filters":{{{filtersJson}}},"meta_info":{}}""";
 
-    private static async Task<InstructionDefinition> DefinitionAsync(string mnemonic, string opcode, string filtersJson)
+    private static async Task<InstructionDefinition> DefinitionAsync(
+        string mnemonic, string opcode, string filtersJson, string encoding = "default")
     {
         var path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.json");
         try
         {
-            await File.WriteAllTextAsync(path, $"[{Definition(mnemonic, opcode, filtersJson)}]").ConfigureAwait(false);
+            await File.WriteAllTextAsync(path, $"[{Definition(mnemonic, opcode, filtersJson, encoding)}]").ConfigureAwait(false);
 
             await foreach (var definition in DefinitionReader.ReadAsync<InstructionDefinition>(path).ConfigureAwait(false))
             {
