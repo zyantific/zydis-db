@@ -246,6 +246,22 @@ internal sealed class InstructionFlagsConverter :
 
     public override void Write(Utf8JsonWriter writer, InstructionFlags value, JsonSerializerOptions options)
     {
-        throw new NotImplementedException();
+        writer.WriteStartObject();
+
+        // "access" is omitted for the default (ReadOnly) value, mirroring the WhenWritingDefault
+        // behavior a plain property would get.
+        if (value.Access is not InstructionFlagsAccess.ReadOnly)
+        {
+            writer.WritePropertyName("access");
+            _accessConverter.Write(writer, value.Access, options);
+        }
+
+        foreach (var (key, flagValue) in value.Flags)
+        {
+            _keyConverter.WriteAsPropertyName(writer, key, options);
+            _valueConverter.Write(writer, flagValue, options);
+        }
+
+        writer.WriteEndObject();
     }
 }
