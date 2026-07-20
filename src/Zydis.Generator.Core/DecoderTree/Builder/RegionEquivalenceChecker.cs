@@ -4,8 +4,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 
+using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.Definitions;
+using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.DecoderTree.Builder;
 
@@ -124,8 +127,9 @@ public static class RegionEquivalenceChecker
         ArgumentNullException.ThrowIfNull(definitions);
 
         var builder = new DecoderTreeBuilder();
+        var originalByReconstructed = new Dictionary<InstructionDefinition, InstructionDefinition>(ReferenceEqualityComparer.Instance);
 
-        foreach (var definition in definitions)
+        foreach (var definition in ReconstructIgnoreMarkers(definitions, originalByReconstructed))
         {
             builder.InsertDefinition(definition);
         }
@@ -133,7 +137,147 @@ public static class RegionEquivalenceChecker
         builder.InsertOpcodeTableSwitchNodes();
         builder.Optimize();
 
+        // The synthetic copies only exist to steer node *shape*; every other part of the pipeline (region
+        // collection, difference reporting) identifies definitions by reference, so restore the originals now that
+        // the tree shape they were needed for is fixed.
+        if (originalByReconstructed.Count > 0)
+        {
+            RestoreOriginalDefinitions(builder.OpcodeTables, originalByReconstructed);
+        }
+
         return builder.OpcodeTables;
+    }
+
+    /// <summary>
+    /// The frozen legacy builder (<see cref="DecoderTreeBuilder.EnumerateSelectorValues"/>) decides whether to
+    /// insert a mandatory-prefix decision node purely from whether the raw <c>mandatory_prefix</c> key is present in
+    /// a definition's pattern - it has no notion of "ignore" as a value, only key presence. Before "ignore" was
+    /// retired from the data, a definition that didn't care about the mandatory prefix but shared a bucket with a
+    /// sibling that did still carried an explicit <c>mandatory_prefix: "ignore"</c> key, so it got a node and
+    /// occupied the reserved ignore slot - keeping it out of its siblings' concrete slots. Now such definitions have
+    /// no mandatory_prefix key at all, so the legacy builder skips the node and collides with the sibling that has
+    /// one. This reconstructs the marker for comparison-model construction only, scoped to buckets where it's
+    /// actually needed; the committed data and every other code path are untouched.
+    /// </summary>
+    /// <param name="originalByReconstructed">
+    /// Populated with an entry (keyed by reference) for every synthetic copy this produces, mapping it back to the
+    /// original definition it stands in for.
+    /// </param>
+    private static IEnumerable<InstructionDefinition> ReconstructIgnoreMarkers(
+        IEnumerable<InstructionDefinition> definitions, Dictionary<InstructionDefinition, InstructionDefinition> originalByReconstructed)
+    {
+        var list = definitions as IReadOnlyList<InstructionDefinition> ?? definitions.ToList();
+
+        var bucketsWithExplicitValue = new HashSet<(InstructionEncoding, OpcodeMap, RefiningPrefix?, byte)>();
+        foreach (var definition in list)
+        {
+            if (definition.Encoding is InstructionEncoding.Default or InstructionEncoding.AMD3DNOW && HasExplicitMandatoryPrefix(definition))
+            {
+                bucketsWithExplicitValue.Add(RoutingBucket(definition));
+            }
+        }
+
+        foreach (var definition in list)
+        {
+            if (definition.Encoding is InstructionEncoding.Default or InstructionEncoding.AMD3DNOW
+                && !HasMandatoryPrefixKey(definition) && bucketsWithExplicitValue.Contains(RoutingBucket(definition)))
+            {
+                var pattern = definition.Pattern is null
+                    ? new Dictionary<string, JsonElement>()
+                    : new Dictionary<string, JsonElement>(definition.Pattern);
+                pattern[MandatoryFilterName] = IgnoreMarkerValue;
+
+                var reconstructed = definition with { Pattern = pattern };
+                originalByReconstructed[reconstructed] = definition;
+
+                yield return reconstructed;
+                continue;
+            }
+
+            yield return definition;
+        }
+
+        static (InstructionEncoding, OpcodeMap, RefiningPrefix?, byte) RoutingBucket(InstructionDefinition definition) =>
+            (definition.Encoding, definition.OpcodeMap, OpcodeTableRouting.GetRefiningPrefix(definition), definition.Opcode);
+
+        static bool HasMandatoryPrefixKey(InstructionDefinition definition) =>
+            definition.Pattern?.ContainsKey(MandatoryFilterName) == true;
+
+        static bool HasExplicitMandatoryPrefix(InstructionDefinition definition) =>
+            definition.Pattern?.TryGetValue(MandatoryFilterName, out var value) == true
+            && value.ValueKind is JsonValueKind.String && value.GetString() is not "ignore";
+    }
+
+    private static readonly JsonElement IgnoreMarkerValue = ParseIgnoreMarker();
+
+    private static JsonElement ParseIgnoreMarker()
+    {
+        using var document = JsonDocument.Parse("\"ignore\"");
+        return document.RootElement.Clone();
+    }
+
+    /// <summary>
+    /// Walks every table, replacing <see cref="DefinitionNode"/>s that wrap a synthetic ignore-marker copy (see
+    /// <see cref="ReconstructIgnoreMarkers"/>) with a fresh node wrapping the original definition, so every other
+    /// consumer of the returned tree sees the same definition references the DP side does.
+    /// </summary>
+    private static void RestoreOriginalDefinitions(
+        OpcodeTables tables, IReadOnlyDictionary<InstructionDefinition, InstructionDefinition> originalByReconstructed)
+    {
+        var visited = new HashSet<DecoderTreeNode>(ReferenceEqualityComparer.Instance);
+
+        foreach (var table in tables.Tables)
+        {
+            Rewrite(table);
+        }
+
+        DecoderTreeNode? Rewrite(DecoderTreeNode? node)
+        {
+            switch (node)
+            {
+                case null:
+                    return null;
+
+                case DefinitionNode definitionNode:
+                    return originalByReconstructed.TryGetValue(definitionNode.InstructionDefinition, out var original)
+                        ? new DefinitionNode(original)
+                        : definitionNode;
+
+                case OverflowNode overflowNode when visited.Add(overflowNode):
+                    foreach (var child in overflowNode.Children.ToArray())
+                    {
+                        var replaced = Rewrite(child);
+                        if (!ReferenceEquals(replaced, child))
+                        {
+                            overflowNode.Remove(child);
+                            overflowNode.Add(replaced!);
+                        }
+                    }
+
+                    return overflowNode;
+
+                case DecisionNode decisionNode when visited.Add(decisionNode):
+                    foreach (var (index, child) in decisionNode.EnumerateVirtualSlots())
+                    {
+                        var replaced = Rewrite(child);
+                        if (!ReferenceEquals(replaced, child))
+                        {
+                            decisionNode[index] = replaced;
+                        }
+                    }
+
+                    var replacedElse = Rewrite(decisionNode.ElseEntry);
+                    if (!ReferenceEquals(replacedElse, decisionNode.ElseEntry))
+                    {
+                        decisionNode.ElseEntry = replacedElse;
+                    }
+
+                    return decisionNode;
+
+                default:
+                    return node;
+            }
+        }
     }
 
     /// <summary>
