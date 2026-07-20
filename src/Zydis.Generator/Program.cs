@@ -41,7 +41,17 @@ internal sealed class Program
                     case "lint": mode = TreeMode.Lint; break;
                     default:
                         await Console.Error.WriteLineAsync(
-                                $"unknown --tree value '{value}' (expected dp|verify|migrate-order|lint)")
+                                $"unknown --tree value '{value}'. Available modes:")
+                            .ConfigureAwait(false);
+                        await Console.Error.WriteLineAsync("  dp - generate decoder tables")
+                            .ConfigureAwait(false);
+                        await Console.Error.WriteLineAsync("  verify - verify decoder table equivalence")
+                            .ConfigureAwait(false);
+                        await Console.Error.WriteLineAsync(
+                                "  migrate-order - one-time: reserialize filters in optimizer-chosen order")
+                            .ConfigureAwait(false);
+                        await Console.Error.WriteLineAsync(
+                                "  lint - report definitions whose filter arrangement is no longer optimal")
                             .ConfigureAwait(false);
                         return 1;
                 }
