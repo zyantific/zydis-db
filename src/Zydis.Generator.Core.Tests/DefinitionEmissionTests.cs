@@ -43,6 +43,26 @@ public class DefinitionEmissionTests
         Assert.False(DefinitionEmitter.HasApxScc(definition));
     }
 
+    [Fact]
+    public void HasApxNfCheck_DefinitionWithEvexNfFilter_ReturnsTrue()
+    {
+        // HasNf is deliberately false to prove the derivation relies on the filter, not the evex "nf" property.
+        var definition = CreateDefinition(new Dictionary<string, string> { ["evex_nf"] = "0" }) with
+        {
+            Evex = new InstructionEvexInfo { HasNf = false }
+        };
+
+        Assert.True(DefinitionEmitter.HasApxNfCheck(definition));
+    }
+
+    [Fact]
+    public void HasApxNfCheck_DefinitionWithoutEvexNfFilter_ReturnsFalse()
+    {
+        var definition = CreateDefinition(null);
+
+        Assert.False(DefinitionEmitter.HasApxNfCheck(definition));
+    }
+
     private static InstructionDefinition CreateDefinition(IReadOnlyDictionary<string, string>? filters)
     {
         return new InstructionDefinition
