@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,8 +7,6 @@ using Xunit;
 
 using Zydis.Generator.Core.DecoderTree;
 using Zydis.Generator.Core.DecoderTree.Builder;
-using Zydis.Generator.Core.Definitions;
-using Zydis.Generator.Core.Serialization;
 
 namespace Zydis.Generator.Core.Tests;
 
@@ -218,17 +215,14 @@ public class TreeConstructorTests
     [Fact]
     public async Task Evaluate_ImposedExpensiveOrder_CostsAtLeastOptimal()
     {
-        var members = new[]
-        {
-            await MemberAsync("D1", """{"mode":"64","rex_w":"0"}"""),
-            await MemberAsync("D2", """{"mode":"64","rex_w":"1"}"""),
-            await MemberAsync("D3", """{"mode":"!64"}""")
-        };
+        // Shared with FilterOrderLintTests.Run_RecordedOrderDiffersFromCurrent_ReportsFinding: same known-suboptimal
+        // case, exercised here directly against Evaluate and there through FilterOrderExtractor's public surface.
+        var group = await TestHelpers.BuildKnownSuboptimalGroupAsync();
 
         var constructor = new TreeConstructor(new NodeInterner(), DefaultTieBreak, new ConstructorOptions());
 
         // Forcing rex_w before mode duplicates the not-64 tail the optimal tree shares once.
-        var (optimal, imposed) = constructor.Evaluate(members, [new FilterKey("rex_w"), new FilterKey("mode")]);
+        var (optimal, imposed) = constructor.Evaluate(group.Members, [new FilterKey("rex_w"), new FilterKey("mode")]);
 
         Assert.True(optimal < imposed, $"expected optimal ({optimal}) < imposed ({imposed})");
     }
@@ -317,33 +311,6 @@ public class TreeConstructorTests
         }
     }
 
-    private static string WithMnemonic(string mnemonic, string filtersJson) =>
-        $$$"""{"mnemonic":"{{{mnemonic}}}","opcode":"00","filters":{{{filtersJson}}},"meta_info":{}}""";
-
-    private static async Task<GroupMember> MemberAsync(string mnemonic, string filtersJson)
-    {
-        var definition = await ParseDefinitionAsync(WithMnemonic(mnemonic, filtersJson)).ConfigureAwait(false);
-
-        return new GroupMember(definition, ConstraintSet.Parse(definition));
-    }
-
-    private static async Task<InstructionDefinition> ParseDefinitionAsync(string definitionJson)
-    {
-        var path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.json");
-        try
-        {
-            await File.WriteAllTextAsync(path, $"[{definitionJson}]").ConfigureAwait(false);
-
-            await foreach (var definition in DefinitionReader.ReadAsync<InstructionDefinition>(path).ConfigureAwait(false))
-            {
-                return definition;
-            }
-
-            throw new InvalidOperationException("No definition was parsed from the test fixture.");
-        }
-        finally
-        {
-            File.Delete(path);
-        }
-    }
+    private static Task<GroupMember> MemberAsync(string mnemonic, string filtersJson) =>
+        TestHelpers.MemberAsync(mnemonic, filtersJson);
 }

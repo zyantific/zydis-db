@@ -3,7 +3,6 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.Json;
 
 using Zydis.Generator.Core.Definitions;
 
@@ -121,11 +120,6 @@ internal sealed record FilterConstraint(
 /// </summary>
 internal sealed class ConstraintSet
 {
-    // Informational flags present in the instruction data with no decision-node counterpart. The reference model
-    // never sees them either, since it only consumes keys listed in `FixedFilterOrder`.
-    private static readonly FrozenSet<string> SkippedFilterKeys =
-        new[] { "force_modrm_reg", "force_modrm_rm" }.ToFrozenSet(StringComparer.Ordinal);
-
     private ConstraintSet(IReadOnlyDictionary<FilterKey, FilterConstraint> constraints)
     {
         Constraints = constraints;
@@ -167,7 +161,7 @@ internal sealed class ConstraintSet
     /// of filter constraints.
     /// </summary>
     /// <exception cref="NotSupportedException">
-    /// Thrown if a filter key does not resolve to a known decision node type, or if its value is not a string.
+    /// Thrown if a filter key does not resolve to a known decision node type.
     /// </exception>
     public static ConstraintSet Parse(InstructionDefinition definition)
     {
@@ -177,30 +171,20 @@ internal sealed class ConstraintSet
 
         if (definition.Pattern is not null)
         {
-            // Sorted so that any future diagnostics/debugging output built from this set is deterministic.
-            foreach (var (key, value) in definition.Pattern.OrderBy(x => x.Key, StringComparer.Ordinal))
+            foreach (var entry in definition.Pattern)
             {
-                if (SkippedFilterKeys.Contains(key))
-                {
-                    continue;
-                }
-
-                var (nodeDefinition, arguments) = DecisionNodes.ParseDecisionNodeType(key);
+                var (nodeDefinition, arguments) = DecisionNodes.ParseDecisionNodeType(entry.Filter);
 
                 Debug.Assert(nodeDefinition.NumberOfSlots <= SlotMask.MaxSlotCount,
                     $"Decision node '{nodeDefinition.Name}' has more slots than a {SlotMask.MaxSlotCount}-bit mask can represent.");
 
-                if (value.ValueKind is not JsonValueKind.String)
-                {
-                    throw new NotSupportedException($"Filter '{key}' must have a string value.");
-                }
+                var rawValue = entry.Value;
 
-                var rawValue = value.GetString()!;
-
-                // "ignore" is a transitional alias meaning "no constraint" for the mandatory prefix filter.
-                if (key is "mandatory_prefix" && rawValue is "ignore")
+                if (entry.Filter is "mandatory_prefix" && rawValue is "ignore")
                 {
-                    continue;
+                    throw new NotSupportedException(
+                        $"'{definition.Mnemonic}': mandatory_prefix 'ignore' is retired - omit the filter entirely for " +
+                        "\"no constraint\" instead.");
                 }
 
                 var index = nodeDefinition.ParseSlotIndex(rawValue);
@@ -208,7 +192,7 @@ internal sealed class ConstraintSet
                     ? SlotMask.AllExcept(nodeDefinition.NumberOfSlots, index.Index)
                     : SlotMask.Single(index.Index);
 
-                var filterKey = new FilterKey(key);
+                var filterKey = new FilterKey(entry.Filter);
                 constraints[filterKey] = new FilterConstraint(filterKey, nodeDefinition, arguments, slots, index);
             }
         }

@@ -21,12 +21,12 @@ public sealed record InstructionEvexInfo :
     public EvexMaskFlags? MaskFlags { get; init; } // Nullable to allow setting "AcceptsZeroMask" as the default value.
     public EvexTupleType TupleType { get; init; }
     public EvexElementSize ElementSize { get; init; }
-    public StaticBroadcast StaticBroadcast { get; init; }
     public bool IsEevex { get; init; }
-    public bool HasNf { get; init; }
     public bool HasDfv { get; init; }
-    public bool HasZu { get; init; }
+    public bool HasNf { get; init; }
     public bool HasPpx { get; init; }
+    public bool HasZu { get; init; }
+    public StaticBroadcast StaticBroadcast { get; init; }
 
     public int CompareTo(InstructionEvexInfo? other)
     {

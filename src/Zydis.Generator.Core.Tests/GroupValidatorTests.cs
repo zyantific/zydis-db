@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 
 using Xunit;
 
 using Zydis.Generator.Core.DecoderTree.Builder;
-using Zydis.Generator.Core.Definitions;
-using Zydis.Generator.Core.Serialization;
 
 namespace Zydis.Generator.Core.Tests;
 
@@ -163,33 +160,6 @@ public class GroupValidatorTests
         Assert.Equal(sorted, errors);
     }
 
-    private static string WithMnemonic(string mnemonic, string filtersJson) =>
-        $$$"""{"mnemonic":"{{{mnemonic}}}","opcode":"00","filters":{{{filtersJson}}},"meta_info":{}}""";
-
-    private static async Task<GroupMember> MemberAsync(string mnemonic, string filtersJson)
-    {
-        var definition = await ParseDefinitionAsync(WithMnemonic(mnemonic, filtersJson)).ConfigureAwait(false);
-
-        return new GroupMember(definition, ConstraintSet.Parse(definition));
-    }
-
-    private static async Task<InstructionDefinition> ParseDefinitionAsync(string definitionJson)
-    {
-        var path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.json");
-        try
-        {
-            await File.WriteAllTextAsync(path, $"[{definitionJson}]").ConfigureAwait(false);
-
-            await foreach (var definition in DefinitionReader.ReadAsync<InstructionDefinition>(path).ConfigureAwait(false))
-            {
-                return definition;
-            }
-
-            throw new InvalidOperationException("No definition was parsed from the test fixture.");
-        }
-        finally
-        {
-            File.Delete(path);
-        }
-    }
+    private static Task<GroupMember> MemberAsync(string mnemonic, string filtersJson) =>
+        TestHelpers.MemberAsync(mnemonic, filtersJson);
 }

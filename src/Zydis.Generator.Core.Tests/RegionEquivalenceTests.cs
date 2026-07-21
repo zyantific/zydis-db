@@ -65,7 +65,7 @@ public class RegionEquivalenceTests
         var members = new[]
         {
             await DefinitionAsync("A", "10", """{"mandatory_prefix":"f3","mode":"64"}"""),
-            await DefinitionAsync("B", "10", """{"mandatory_prefix":"ignore"}""")
+            await DefinitionAsync("B", "10", "{}")
         };
 
         var (reference, dp) = BuildBoth(members, 0x10);
@@ -73,6 +73,27 @@ public class RegionEquivalenceTests
         var differences = RegionEquivalenceChecker.CompareGroup("PRIMARY", 0x10, reference, dp);
 
         Assert.Empty(differences);
+    }
+
+    // The frozen legacy builder inserts a mandatory-prefix node purely from whether a definition's raw pattern
+    // carries the key - it has no notion of "ignore" as a value. A definition with no mandatory-prefix opinion at
+    // all (how "no constraint" is expressed once the retired "ignore" alias is gone from the data) sharing a
+    // bucket with an explicit-value sibling would otherwise land at the same tree position as that sibling's node
+    // and collide into an OverflowNode; BuildReferenceModel must reconstruct the retired marker to keep them apart.
+    [Fact]
+    public async Task BuildReferenceModel_UnconstrainedSiblingOfExplicitValue_DoesNotOverflow()
+    {
+        var members = new[]
+        {
+            await DefinitionAsync("A", "10", """{"mandatory_prefix":"f3"}"""),
+            await DefinitionAsync("B", "10", "{}")
+        };
+
+        var tables = RegionEquivalenceChecker.BuildReferenceModel(members);
+
+        var root = tables.GetTable(InstructionEncoding.Default, OpcodeMap.MAP0, null)[DecisionNodeIndex.ForIndex(0x10)];
+
+        Assert.IsNotType<OverflowNode>(root);
     }
 
     // Dropping a branch from the DAG makes a definition unreachable that the legacy tree still reaches;

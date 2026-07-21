@@ -60,6 +60,12 @@ public sealed class DecoderTreeBuildException :
 }
 
 /// <summary>
+/// One bucketed group's construction outcome: its rendered name (as used in diagnostics), its parsed and validated
+/// members, and the cheapest subtree <see cref="TreeConstructor"/> found for them.
+/// </summary>
+internal readonly record struct ConstructedGroup(string Name, IReadOnlyList<GroupMember> Members, ConstructionResult Result);
+
+/// <summary>
 /// Builds the decoder tree by treating every filter as a variable-position constraint. Definitions are bucketed by
 /// their opcode table and opcode byte; each bucket is validated and then handed to a shared
 /// <see cref="TreeConstructor"/> that searches for the cheapest interned sub-DAG. A single <see cref="NodeInterner"/>
@@ -143,8 +149,45 @@ public sealed class VariablePositionTreeBuilder
     /// </exception>
     public void Build()
     {
+        Statistics = ConstructGroups(EnumerateBuildableGroups());
+    }
+
+    /// <summary>
+    /// Validates every bucketed group and constructs the cheapest subtree for each, without assigning anything into
+    /// <see cref="OpcodeTables"/> or <see cref="Statistics"/>. The reusable construction-only counterpart to
+    /// <see cref="Build"/>, for callers that only need each group's members and constructed result - e.g.
+    /// verification, migration, and lint tooling - not a full opcode-table emission.
+    /// </summary>
+    /// <exception cref="DecoderTreeBuildException">
+    /// One or more groups could not be built. Every problem across all groups is aggregated into a single exception,
+    /// raised before any group is constructed.
+    /// </exception>
+    internal IEnumerable<ConstructedGroup> BuildGroups()
+    {
+        foreach (var group in EnumerateBuildableGroups())
+        {
+            var result = _constructor.Construct(group.Members);
+            yield return new ConstructedGroup(group.Name, group.Members, result);
+        }
+    }
+
+    /// <summary>
+    /// Wires the top-level opcode-map switch nodes into <see cref="OpcodeTables"/>, using the shared
+    /// <see cref="OpcodeTableRouting"/> so every builder buckets and routes identically.
+    /// </summary>
+    public void InsertOpcodeTableSwitchNodes()
+    {
+        OpcodeTableRouting.WireSwitchNodes(OpcodeTables);
+    }
+
+    // Buckets every definition into a group, parses and validates its filters, and aggregates every problem across
+    // every group into a single DecoderTreeBuildException - the aggregate-then-throw contract Build() has always had.
+    // Materialized eagerly, before returning, so a later group's failure can never leave an earlier group already
+    // constructed.
+    private IReadOnlyList<BuildableGroup> EnumerateBuildableGroups()
+    {
         var errors = new List<string>(_bucketErrors);
-        var buildable = new List<(int TableId, int Opcode, string Table, IReadOnlyList<GroupMember> Members)>();
+        var buildable = new List<BuildableGroup>();
 
         foreach (var ((tableId, opcode), definitions) in _buckets)
         {
@@ -163,7 +206,7 @@ public sealed class VariablePositionTreeBuilder
                 continue;
             }
 
-            buildable.Add((tableId, opcode, table.ToString()!, members));
+            buildable.Add(new BuildableGroup(tableId, opcode, table.ToString()!, groupName, members));
         }
 
         if (errors.Count > 0)
@@ -172,16 +215,7 @@ public sealed class VariablePositionTreeBuilder
             throw new DecoderTreeBuildException(errors);
         }
 
-        Statistics = ConstructGroups(buildable);
-    }
-
-    /// <summary>
-    /// Wires the top-level opcode-map switch nodes into <see cref="OpcodeTables"/>, using the shared
-    /// <see cref="OpcodeTableRouting"/> so every builder buckets and routes identically.
-    /// </summary>
-    public void InsertOpcodeTableSwitchNodes()
-    {
-        OpcodeTableRouting.WireSwitchNodes(OpcodeTables);
+        return buildable;
     }
 
     private static bool TryParseGroup(
@@ -221,20 +255,19 @@ public sealed class VariablePositionTreeBuilder
         return !failed;
     }
 
-    private BuilderStatistics ConstructGroups(
-        IReadOnlyList<(int TableId, int Opcode, string Table, IReadOnlyList<GroupMember> Members)> buildable)
+    private BuilderStatistics ConstructGroups(IReadOnlyList<BuildableGroup> buildable)
     {
         var accumulators = new SortedDictionary<int, TableStatisticsAccumulator>();
 
-        foreach (var (tableId, opcode, tableName, members) in buildable)
+        foreach (var group in buildable)
         {
-            var result = _constructor.Construct(members);
-            OpcodeTables.Tables[tableId][DecisionNodeIndex.ForIndex(opcode)] = result.Root;
+            var result = _constructor.Construct(group.Members);
+            OpcodeTables.Tables[group.TableId][DecisionNodeIndex.ForIndex(group.Opcode)] = result.Root;
 
-            if (!accumulators.TryGetValue(tableId, out var accumulator))
+            if (!accumulators.TryGetValue(group.TableId, out var accumulator))
             {
-                accumulator = new TableStatisticsAccumulator(tableName);
-                accumulators[tableId] = accumulator;
+                accumulator = new TableStatisticsAccumulator(group.Table);
+                accumulators[group.TableId] = accumulator;
             }
 
             accumulator.Add(Depth(result.Root), result.MemoHits, result.BudgetExhausted);
@@ -324,4 +357,9 @@ public sealed class VariablePositionTreeBuilder
 
         return merged;
     }
+
+    // A bucket that survived parsing and region validation: its opcode-table identity (for routing the constructed
+    // result into OpcodeTables and for per-table statistics), its rendered diagnostic name, and its members.
+    private readonly record struct BuildableGroup(
+        int TableId, int Opcode, string Table, string Name, IReadOnlyList<GroupMember> Members);
 }

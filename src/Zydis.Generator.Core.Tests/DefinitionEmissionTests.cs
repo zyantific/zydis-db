@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 
 using Xunit;
 
@@ -70,15 +69,7 @@ public class DefinitionEmissionTests
             Mnemonic = "test",
             Opcode = 0x00,
             MetaInfo = new InstructionMetaInfo(),
-            Pattern = filters?.ToDictionary(x => x.Key, x => ParseJsonStringValue(x.Value))
+            Pattern = filters?.Select(x => new FilterEntry(x.Key, x.Value)).ToList()
         };
-    }
-
-    // Avoids JsonSerializer.SerializeToElement, which requires reflection-based metadata that this
-    // solution's source-generated JSON context does not provide.
-    private static JsonElement ParseJsonStringValue(string value)
-    {
-        using var document = JsonDocument.Parse($"\"{value}\"");
-        return document.RootElement.Clone();
     }
 }
