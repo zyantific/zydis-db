@@ -47,14 +47,27 @@ public class ConstraintsTests
     }
 
     [Fact]
-    public async Task Parse_InformationalKeys_AreSkipped()
+    public async Task Parse_LegacyFlagMembers_LiftToFlagProperties()
     {
-        // Informational flags with no decision-node counterpart; must not throw and must not constrain.
+        // Legacy object-form flags must land on the flag properties, leaving no constraints behind.
         var definition = await ParseDefinitionAsync(WithFilters("""{"force_modrm_reg":true,"force_modrm_rm":true}"""));
 
         var set = ConstraintSet.Parse(definition);
 
         Assert.Empty(set.Constraints);
+        Assert.True(definition.ForceModrmReg);
+        Assert.True(definition.ForceModrmRm);
+        Assert.Empty(definition.Pattern!);
+    }
+
+    [Fact]
+    public async Task Parse_ArrayForm_MatchesLegacyObjectForm()
+    {
+        var legacy = ConstraintSet.Parse(await ParseDefinitionAsync(WithFilters("""{"modrm_mod":"3","rex_w":"1"}""")));
+        var array = ConstraintSet.Parse(await ParseDefinitionAsync(
+            """{"mnemonic":"test","opcode":"00","filters":[{"filter":"modrm_mod","value":"3"},{"filter":"rex_w","value":"1"}],"meta_info":{}}"""));
+
+        Assert.Equal(RegionRelation.Equal, RegionAlgebra.Relate(legacy, array));
     }
 
     [Fact]

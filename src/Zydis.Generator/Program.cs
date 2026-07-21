@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 using Zydis.Generator.Core;
@@ -178,9 +177,9 @@ internal sealed class Program
         return 0;
     }
 
-    // One-time migration (see docs/superpowers/plans/2026-07-20-filter-order-followups.md, Task 6): records each
-    // definition's optimizer-chosen filter-test order as its own "filters" key order, so a future filter-order
-    // change is visible in the data diff instead of only in decoder table output.
+    // One-time migration: records each definition's optimizer-chosen filter-test order as its own "filters"
+    // entry order, so a future filter-order change is visible in the data diff instead of only in decoder
+    // table output.
     private static async Task<int> RunMigrateOrderAsync(IReadOnlyList<string> positional)
     {
         if (positional.Count != 1)
@@ -232,7 +231,7 @@ internal sealed class Program
         return 0;
     }
 
-    // Rewrites 'definition's Pattern so its key order matches 'order' (the root-to-leaf order the optimizer
+    // Rewrites 'definition's Pattern so its entry order matches 'order' (the root-to-leaf order the optimizer
     // actually tested it in). A definition with no group-derived order (e.g. one that failed to route to any
     // opcode table) or with 0-1 filters is returned unchanged, since there is nothing meaningful to reorder.
     private static InstructionDefinition ReorderPattern(InstructionDefinition definition, IReadOnlyList<FilterKey>? order)
@@ -242,28 +241,28 @@ internal sealed class Program
             return definition;
         }
 
-        var reordered = new Dictionary<string, JsonElement>();
+        var remaining = definition.Pattern.ToList();
+        var reordered = new List<FilterEntry>(definition.Pattern.Count);
         foreach (var key in order)
         {
-            if (definition.Pattern.TryGetValue(key.Name, out var value))
+            var index = remaining.FindIndex(x => x.Filter == key.Name);
+            if (index >= 0)
             {
-                reordered[key.Name] = value;
+                reordered.Add(remaining[index]);
+                remaining.RemoveAt(index);
             }
         }
 
-        // Fails safe rather than silently dropping a filter: every key of 'definition.Pattern' is expected to
-        // already be covered by 'order' per Task 5's invariant, so this loop should be a no-op in practice.
-        foreach (var (key, value) in definition.Pattern)
-        {
-            reordered.TryAdd(key, value);
-        }
+        // Fails safe rather than silently dropping a filter: group construction guarantees 'order' already
+        // covers every entry, so this append should be a no-op in practice.
+        reordered.AddRange(remaining);
 
         return definition with { Pattern = reordered };
     }
 
-    // Advisory check (see docs/superpowers/plans/2026-07-20-filter-order-followups.md, Task 9): compares each
-    // definition's checked-in "filters" key order against what re-running --tree=migrate-order would write, without
-    // touching any file. Always exits 0 so it can run unconditionally in CI without gating the build on findings.
+    // Advisory check: compares each definition's checked-in filter order against what re-running
+    // --tree=migrate-order would write, without touching any file. Always exits 0 so it can run
+    // unconditionally in CI without gating the build on findings.
     private static async Task<int> RunLintAsync(IReadOnlyList<string> positional)
     {
         if (positional.Count != 1)
@@ -353,11 +352,11 @@ internal sealed class Program
         return 0; // always advisory - never fail the build on findings
     }
 
-    private static string FormatPattern(IReadOnlyDictionary<string, JsonElement>? pattern)
+    private static string FormatPattern(IReadOnlyList<FilterEntry>? pattern)
     {
         return pattern is null
             ? string.Empty
-            : string.Join(", ", pattern.Select(kv => $"{kv.Key}={kv.Value}"));
+            : string.Join(", ", pattern.Select(x => $"{x.Filter}={x.Value}"));
     }
 
     private static IAsyncEnumerable<InstructionDefinition> ReadDefinitionsAsync(string datafilesPath)

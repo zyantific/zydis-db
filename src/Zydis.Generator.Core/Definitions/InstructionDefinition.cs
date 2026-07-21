@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using Zydis.Generator.Core.CodeGeneration;
@@ -43,7 +41,12 @@ public sealed record InstructionDefinition
 
     [JsonPropertyName("filters")]
     [JsonConverter(typeof(FilterPatternConverter))]
-    public IReadOnlyDictionary<string, JsonElement>? Pattern { get; init; }
+    public IReadOnlyList<FilterEntry>? Pattern { get; init; }
+
+    // Informational modrm flags with no decision-node counterpart; carried through from the XED import.
+    public bool ForceModrmReg { get; init; }
+
+    public bool ForceModrmRm { get; init; }
 
     public IReadOnlyList<InstructionOperand>? Operands { get; init; }
 
@@ -96,9 +99,34 @@ public sealed record InstructionDefinition
     {
         ArgumentNullException.ThrowIfNull(definition);
 
-        return Pattern?.TryGetValue(definition.Name, out var value) ?? false
-            ? definition.ParseSlotIndex(value.ValueKind is JsonValueKind.String ? value.ToString() : throw new InvalidDataException())
-            : null;
+        return GetFilterValue(definition.Name) is { } value ? definition.ParseSlotIndex(value) : null;
+    }
+
+    /// <summary>
+    /// Returns the value of the filter named <paramref name="name"/>, or <c>null</c> when absent.
+    /// </summary>
+    public string? GetFilterValue(string name) => Pattern?.FirstOrDefault(x => x.Filter == name)?.Value;
+
+    public bool HasFilter(string name) => Pattern?.Any(x => x.Filter == name) ?? false;
+
+    /// <summary>
+    /// Lifts legacy in-filters <c>force_modrm_reg</c> / <c>force_modrm_rm</c> entries (bool-valued members of the
+    /// old object-form "filters") into the top-level flag properties. Invoked by <see cref="Serialization.DefinitionReader"/>
+    /// so the rest of the pipeline only ever sees pure filter lists.
+    /// </summary>
+    internal InstructionDefinition NormalizeLegacyPatternFlags()
+    {
+        if (Pattern is null || !Pattern.Any(x => x.Filter is "force_modrm_reg" or "force_modrm_rm"))
+        {
+            return this;
+        }
+
+        return this with
+        {
+            Pattern = Pattern.Where(x => x.Filter is not ("force_modrm_reg" or "force_modrm_rm")).ToList(),
+            ForceModrmReg = ForceModrmReg || Pattern.Any(x => x.Filter is "force_modrm_reg" && x.Value is "true"),
+            ForceModrmRm = ForceModrmRm || Pattern.Any(x => x.Filter is "force_modrm_rm" && x.Value is "true"),
+        };
     }
 
     public BranchType GetBranchType()

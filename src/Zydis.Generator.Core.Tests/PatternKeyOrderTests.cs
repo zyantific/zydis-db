@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using System.Text.Json;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -13,10 +12,10 @@ public class PatternKeyOrderTests
     [Fact]
     public async Task Changed_UpdatedPatternHasSameKeyOrder_ReturnsFalse()
     {
-        // Mirrors ReorderPattern's real shape: a fresh Dictionary instance whose key order happens to match the
+        // Mirrors ReorderPattern's real shape: a fresh List instance whose entry order happens to match the
         // original's, which is exactly the case record equality/reference equality can't distinguish from a change.
         var original = await TestHelpers.ParseDefinitionAsync("bsf", """{"modrm_mod":"3","rex_w":"1"}""");
-        var updated = original with { Pattern = new Dictionary<string, JsonElement>(original.Pattern!) };
+        var updated = original with { Pattern = original.Pattern!.ToList() };
 
         Assert.False(PatternKeyOrder.Changed(original, updated));
     }

@@ -72,9 +72,13 @@ internal static class RedundancyScanner
             return false;
         }
 
+        // ForceModrmReg/Rm are informational only (no generation consumer reads them), so like Pattern they
+        // are excluded from the identity comparison.
         return narrower with
         {
             Pattern = broader.Pattern,
+            ForceModrmReg = broader.ForceModrmReg,
+            ForceModrmRm = broader.ForceModrmRm,
             Operands = broader.Operands,
             Comment = broader.Comment,
             AffectedFlags = broader.AffectedFlags

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -25,11 +24,10 @@ public class DefinitionWriterTests
             await DefinitionWriter.WriteAsync(path, [original]);
             var roundTripped = await ReadSingleAsync(path);
 
-            // IReadOnlyDictionary and JsonElement carry reference, not value, equality through the
-            // record-generated Equals, so Pattern is compared by content separately from the rest of the
-            // definition.
+            // IReadOnlyList<FilterEntry> carries reference, not value, equality through the record-generated
+            // Equals, so Pattern is compared by content separately from the rest of the definition.
             Assert.Equal(original with { Pattern = null }, roundTripped with { Pattern = null });
-            AssertSamePattern(original.Pattern, roundTripped.Pattern);
+            Assert.Equal(original.Pattern, roundTripped.Pattern);
         }
         finally
         {
@@ -38,15 +36,15 @@ public class DefinitionWriterTests
     }
 
     [Fact]
-    public async Task WriteAsync_PreservesGivenPatternKeyOrder()
+    public async Task WriteAsync_PreservesGivenPatternOrder()
     {
         var definition = await TestHelpers.ParseDefinitionAsync("bsf", """{"rex_w":"1","modrm_mod":"3"}""");
         var reordered = definition with
         {
-            Pattern = new Dictionary<string, JsonElement>
+            Pattern = new List<FilterEntry>
             {
-                ["modrm_mod"] = definition.Pattern!["modrm_mod"],
-                ["rex_w"] = definition.Pattern!["rex_w"],
+                new("modrm_mod", definition.GetFilterValue("modrm_mod")!),
+                new("rex_w", definition.GetFilterValue("rex_w")!),
             }
         };
         var path = TempPath();
@@ -77,9 +75,8 @@ public class DefinitionWriterTests
             var writtenJson = await File.ReadAllTextAsync(path);
             var roundTripped = await ReadSingleAsync(path);
 
-            // The reference file formats an empty filter set across two lines rather than the compact "{}"
-            // the default dictionary writer would otherwise produce.
-            Assert.Contains("\"filters\": {\n    }", writtenJson, StringComparison.Ordinal);
+            // An empty filter set collapses to the compact "[]" rather than being spread across lines.
+            Assert.Contains("\"filters\": []", writtenJson, StringComparison.Ordinal);
             Assert.Empty(roundTripped.Pattern!);
         }
         finally
@@ -115,16 +112,6 @@ public class DefinitionWriterTests
         {
             File.Delete(path);
         }
-    }
-
-    private static void AssertSamePattern(
-        IReadOnlyDictionary<string, JsonElement>? expected, IReadOnlyDictionary<string, JsonElement>? actual)
-    {
-        Assert.NotNull(expected);
-        Assert.NotNull(actual);
-        Assert.Equal(
-            expected.Select(kv => (kv.Key, Value: kv.Value.GetRawText())),
-            actual.Select(kv => (kv.Key, Value: kv.Value.GetRawText())));
     }
 
     private static async Task<InstructionDefinition> ReadSingleAsync(string path)

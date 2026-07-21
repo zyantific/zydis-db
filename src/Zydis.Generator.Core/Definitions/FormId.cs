@@ -275,7 +275,7 @@ public static class FormId
                 continue;
             }
 
-            foreach (var key in definition.Pattern.Keys)
+            foreach (var key in definition.Pattern.Select(entry => entry.Filter))
             {
                 if (ExcludedAxisKeys.Contains(key) || AxisOrder.Any(axis => axis.Key == key))
                 {
@@ -291,9 +291,7 @@ public static class FormId
 
     private static string? GetFilterValue(InstructionDefinition definition, string axisKey)
     {
-        return definition.Pattern is not null && definition.Pattern.TryGetValue(axisKey, out var value)
-            ? value.ToString()
-            : null;
+        return definition.GetFilterValue(axisKey);
     }
 
     private static string? GetAxisTag(InstructionDefinition definition, string axisKey, string prefix)
@@ -312,8 +310,8 @@ public static class FormId
     {
         var filters = definition.Pattern is { Count: > 0 }
             ? string.Join(';', definition.Pattern
-                .OrderBy(kv => kv.Key, StringComparer.Ordinal)
-                .Select(kv => $"{kv.Key}={kv.Value}"))
+                .OrderBy(entry => entry.Filter, StringComparer.Ordinal)
+                .Select(entry => $"{entry.Filter}={entry.Value}"))
             : "none";
 
         return $"{definition.Mnemonic.ToUpperInvariant()} (encoding={definition.Encoding}, opcode={definition.OpcodeMap}/0x{definition.Opcode:X2}, filters=[{filters}])";

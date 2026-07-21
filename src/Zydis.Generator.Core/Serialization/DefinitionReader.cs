@@ -52,6 +52,14 @@ public static partial class DefinitionReader
                 throw new DataException("Element must not be 'null'.");
             }
 
+            if (item is InstructionDefinition definition)
+            {
+                // Transitional: legacy object-form "filters" may still carry force_modrm_* flag members;
+                // lift them here so every consumer sees pure filter lists and real flag properties.
+                yield return (T)(object)definition.NormalizeLegacyPatternFlags();
+                continue;
+            }
+
             yield return item;
         }
     }
