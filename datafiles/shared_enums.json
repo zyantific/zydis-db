@@ -134,6 +134,9 @@
         "name": "float80:FLOAT80"
       },
       {
+        "name": "bfloat16:BFLOAT16"
+      },
+      {
         "name": "bfloat16x2:BFLOAT16X2"
       },
       {
