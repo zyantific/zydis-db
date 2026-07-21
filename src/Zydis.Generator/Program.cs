@@ -19,6 +19,7 @@ internal sealed class Program
         Dp,
         Verify,
         MigrateOrder,
+        MigrateSchema,
         Lint,
         ScanRedundant
     }
@@ -38,6 +39,7 @@ internal sealed class Program
                     case "dp": mode = TreeMode.Dp; break;
                     case "verify": mode = TreeMode.Verify; break;
                     case "migrate-order": mode = TreeMode.MigrateOrder; break;
+                    case "migrate-schema": mode = TreeMode.MigrateSchema; break;
                     case "lint": mode = TreeMode.Lint; break;
                     case "scan-redundant": mode = TreeMode.ScanRedundant; break;
                     default:
@@ -50,6 +52,9 @@ internal sealed class Program
                             .ConfigureAwait(false);
                         await Console.Error.WriteLineAsync(
                                 "  migrate-order - one-time: reserialize filters in optimizer-chosen order")
+                            .ConfigureAwait(false);
+                        await Console.Error.WriteLineAsync(
+                                "  migrate-schema - one-time: rewrite instructions.json in the array filter schema")
                             .ConfigureAwait(false);
                         await Console.Error.WriteLineAsync(
                                 "  lint - report definitions whose filter arrangement is no longer optimal")
@@ -71,6 +76,7 @@ internal sealed class Program
             TreeMode.Dp => await RunDpAsync(positional).ConfigureAwait(false),
             TreeMode.Verify => await RunVerifyAsync(positional).ConfigureAwait(false),
             TreeMode.MigrateOrder => await RunMigrateOrderAsync(positional).ConfigureAwait(false),
+            TreeMode.MigrateSchema => await RunMigrateSchemaAsync(positional).ConfigureAwait(false),
             TreeMode.Lint => await RunLintAsync(positional).ConfigureAwait(false),
             TreeMode.ScanRedundant => await RunScanRedundantAsync(positional).ConfigureAwait(false),
             _ => 1
@@ -258,6 +264,30 @@ internal sealed class Program
         reordered.AddRange(remaining);
 
         return definition with { Pattern = reordered };
+    }
+
+    // One-time migration: rewrites instructions.json from the legacy object-form "filters" to the array
+    // schema (reading lifts legacy force_modrm_* members to definition properties, writing emits the array
+    // form), leaving each definition's recorded filter order untouched.
+    private static async Task<int> RunMigrateSchemaAsync(IReadOnlyList<string> positional)
+    {
+        if (positional.Count != 1)
+        {
+            await Console.Error.WriteLineAsync(
+                "usage: Zydis.Generator --tree=migrate-schema path/to/datafiles/").ConfigureAwait(false);
+            return 1;
+        }
+
+        var definitions = new List<InstructionDefinition>();
+        await foreach (var definition in ReadDefinitionsAsync(positional[0]).ConfigureAwait(false))
+        {
+            definitions.Add(definition);
+        }
+
+        await DefinitionWriter.WriteAsync(Path.Join(positional[0], "instructions.json"), definitions).ConfigureAwait(false);
+
+        Console.WriteLine($"Rewrote {definitions.Count} definitions in the array filter schema.");
+        return 0;
     }
 
     // Advisory check: compares each definition's checked-in filter order against what re-running
