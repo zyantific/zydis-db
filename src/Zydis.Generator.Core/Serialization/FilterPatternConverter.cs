@@ -51,6 +51,11 @@ internal sealed class FilterPatternConverter :
                 var propertyName = reader.GetString();
                 reader.Read();
 
+                if (reader.TokenType is not JsonTokenType.String)
+                {
+                    throw new JsonException($"Filter entry property '{propertyName}' must be a string.");
+                }
+
                 switch (propertyName)
                 {
                     case "filter":
