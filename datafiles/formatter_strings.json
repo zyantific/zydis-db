@@ -1650,6 +1650,19 @@
     ]
   },
   {
+    "name": "size_16_masm_bcst",
+    "tokens": [
+      {
+        "value": "word bcst",
+        "type": "typecast"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
     "name": "size_32_att",
     "string": "l"
   },
@@ -1658,6 +1671,19 @@
     "tokens": [
       {
         "value": "dword ptr",
+        "type": "typecast"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "size_32_masm_bcst",
+    "tokens": [
+      {
+        "value": "dword bcst",
         "type": "typecast"
       },
       {
@@ -1688,6 +1714,19 @@
     "tokens": [
       {
         "value": "qword ptr",
+        "type": "typecast"
+      },
+      {
+        "value": " ",
+        "type": "whitespace"
+      }
+    ]
+  },
+  {
+    "name": "size_64_masm_bcst",
+    "tokens": [
+      {
+        "value": "qword bcst",
         "type": "typecast"
       },
       {
