@@ -18,4 +18,8 @@
     <PackageReference Include="Spectre.Console" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Zydis.Generator.Core.Tests" />
+  </ItemGroup>
+
 </Project>
