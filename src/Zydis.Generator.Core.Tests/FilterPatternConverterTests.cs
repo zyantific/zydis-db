@@ -38,6 +38,13 @@ public class FilterPatternConverterTests
     }
 
     [Fact]
+    public async Task Read_ArrayForm_NonStringValue_Throws()
+    {
+        await Assert.ThrowsAsync<JsonException>(() => ParseAsync(
+            """{"mnemonic":"test","opcode":"00","filters":[{"filter":"modrm_mod","value":3}],"meta_info":{}}"""));
+    }
+
+    [Fact]
     public async Task Read_LegacyObjectForm_PreservesKeyOrderAsEntryOrder()
     {
         var definition = await ParseAsync(
