@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 
 using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.Definitions;
@@ -182,10 +181,7 @@ public static class RegionEquivalenceChecker
             if (definition.Encoding is InstructionEncoding.Default or InstructionEncoding.AMD3DNOW
                 && !HasMandatoryPrefixKey(definition) && bucketsWithExplicitValue.Contains(RoutingBucket(definition)))
             {
-                var pattern = definition.Pattern is null
-                    ? new Dictionary<string, JsonElement>()
-                    : new Dictionary<string, JsonElement>(definition.Pattern);
-                pattern[MandatoryFilterName] = IgnoreMarkerValue;
+                var pattern = new List<FilterEntry>(definition.Pattern ?? []) { new(MandatoryFilterName, "ignore") };
 
                 var reconstructed = definition with { Pattern = pattern };
                 originalByReconstructed[reconstructed] = definition;
@@ -201,19 +197,10 @@ public static class RegionEquivalenceChecker
             (definition.Encoding, definition.OpcodeMap, OpcodeTableRouting.GetRefiningPrefix(definition), definition.Opcode);
 
         static bool HasMandatoryPrefixKey(InstructionDefinition definition) =>
-            definition.Pattern?.ContainsKey(MandatoryFilterName) == true;
+            definition.HasFilter(MandatoryFilterName);
 
         static bool HasExplicitMandatoryPrefix(InstructionDefinition definition) =>
-            definition.Pattern?.TryGetValue(MandatoryFilterName, out var value) == true
-            && value.ValueKind is JsonValueKind.String && value.GetString() is not "ignore";
-    }
-
-    private static readonly JsonElement IgnoreMarkerValue = ParseIgnoreMarker();
-
-    private static JsonElement ParseIgnoreMarker()
-    {
-        using var document = JsonDocument.Parse("\"ignore\"");
-        return document.RootElement.Clone();
+            definition.GetFilterValue(MandatoryFilterName) is { } value && value is not "ignore";
     }
 
     /// <summary>
@@ -625,8 +612,8 @@ public static class RegionEquivalenceChecker
         }
 
         return string.Join(",", definition.Pattern
-            .OrderBy(entry => entry.Key, StringComparer.Ordinal)
-            .Select(entry => FormattableString.Invariant($"{entry.Key}={entry.Value}")));
+            .OrderBy(x => x.Filter, StringComparer.Ordinal)
+            .Select(x => FormattableString.Invariant($"{x.Filter}={x.Value}")));
     }
 
     private static string RenderPoint(FilterKey[] filterList, int[] point)

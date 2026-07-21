@@ -195,8 +195,8 @@ internal sealed class DecoderTreeBuilder
         var lookup = order.Select((x, i) => (x, i)).ToDictionary(k => k.x, v => v.i);
 
         return definition.Pattern
-            .Where(x => order.Contains(x.Key))
-            .Select(x => (type: x.Key, value: x.Value.GetString()!))
+            .Where(x => order.Contains(x.Filter))
+            .Select(x => (type: x.Filter, value: x.Value))
             .OrderBy(x => lookup[x.type]);
     }
 }

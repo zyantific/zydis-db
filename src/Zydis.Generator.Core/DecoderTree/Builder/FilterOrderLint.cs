@@ -7,7 +7,7 @@ using Zydis.Generator.Core.Definitions;
 namespace Zydis.Generator.Core.DecoderTree.Builder;
 
 /// <summary>
-/// A definition whose checked-in filter order (its <see cref="InstructionDefinition"/> <c>Pattern</c>'s key order)
+/// A definition whose checked-in filter order (its <see cref="InstructionDefinition"/> <c>Pattern</c>'s entry order)
 /// disagrees with the order <see cref="TreeConstructor"/> currently tests its filters in.
 /// </summary>
 /// <param name="Definition">The definition whose recorded order has drifted.</param>
@@ -18,7 +18,7 @@ internal readonly record struct LintFinding(
 
 /// <summary>
 /// Compares each definition's checked-in filter order against what <see cref="FilterOrderExtractor"/> derives from
-/// the actual constructed tree today - the same primitive Task 6's migration tool used to write the data, so this
+/// the actual constructed tree today - the same primitive the migrate-order mode used to write the data, so this
 /// check is exactly "does the checked-in data match what re-running the migration would write."
 /// </summary>
 internal static class FilterOrderLint
@@ -45,8 +45,8 @@ internal static class FilterOrderLint
                 }
 
                 var currentSet = new HashSet<FilterKey>(currentOrder);
-                var recordedOrder = (member.Definition.Pattern?.Keys ?? [])
-                    .Select(key => new FilterKey(key))
+                var recordedOrder = (member.Definition.Pattern ?? [])
+                    .Select(x => new FilterKey(x.Filter))
                     .Where(currentSet.Contains)
                     .ToList();
 
