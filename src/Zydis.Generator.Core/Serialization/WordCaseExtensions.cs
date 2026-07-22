@@ -104,7 +104,7 @@ internal static class WordCaseExtensions
             if (currentCategoryUnicode is UnicodeCategory.SpaceSeparator or
                 (>= UnicodeCategory.ConnectorPunctuation and <= UnicodeCategory.OtherPunctuation))
             {
-                WriteWord(chars.Slice(first, index - first), ref result);
+                WriteWord(chars[first..index], ref result);
 
                 previousCategory = CharCategory.Boundary;
                 first = index + 1;
@@ -125,7 +125,7 @@ internal static class WordCaseExtensions
                 _ => previousCategory
             };
 
-            if ((currentCategory == CharCategory.Lowercase) && char.IsUpper(next) || next == '_')
+            if (((currentCategory == CharCategory.Lowercase) && char.IsUpper(next)) || next == '_')
             {
                 WriteWord(chars.Slice(first, index - first + 1), ref result);
 
@@ -139,7 +139,7 @@ internal static class WordCaseExtensions
                 currentCategoryUnicode == UnicodeCategory.UppercaseLetter &&
                 char.IsLower(next))
             {
-                WriteWord(chars.Slice(first, index - first), ref result);
+                WriteWord(chars[first..index], ref result);
 
                 previousCategory = CharCategory.Boundary;
                 first = index;

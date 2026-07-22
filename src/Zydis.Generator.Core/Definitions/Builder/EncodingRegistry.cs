@@ -11,8 +11,8 @@ namespace Zydis.Generator.Core.Definitions.Builder;
 
 internal sealed class EncodingRegistry
 {
-    private readonly SortedSet<PhysicalInstructionEncoding> _encodings = new();
-    private readonly ConditionalWeakTable<InstructionDefinition, PhysicalInstructionEncoding> _lut = new();
+    private readonly SortedSet<PhysicalInstructionEncoding> _encodings = [];
+    private readonly ConditionalWeakTable<InstructionDefinition, PhysicalInstructionEncoding> _lut = [];
 
     public IEnumerable<PhysicalInstructionEncoding> Encodings => _encodings;
 
@@ -268,7 +268,7 @@ public sealed class PhysicalInstructionEncoding :
 
     public override bool Equals(object? obj)
     {
-        return ReferenceEquals(this, obj) || (obj is PhysicalInstructionEncoding other) && Equals(other);
+        return ReferenceEquals(this, obj) || ((obj is PhysicalInstructionEncoding other) && Equals(other));
     }
 
     public override int GetHashCode()
@@ -339,7 +339,7 @@ public sealed class PhysicalInstructionEncodingImm :
 
     public override bool Equals(object? obj)
     {
-        return ReferenceEquals(this, obj) || (obj is PhysicalInstructionEncodingImm other) && Equals(other);
+        return ReferenceEquals(this, obj) || ((obj is PhysicalInstructionEncodingImm other) && Equals(other));
     }
 
     public override int GetHashCode()

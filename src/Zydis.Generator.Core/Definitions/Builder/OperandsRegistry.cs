@@ -10,11 +10,11 @@ namespace Zydis.Generator.Core.Definitions.Builder;
 
 internal sealed class OperandsRegistry
 {
-    private readonly List<InstructionOperand> _operands = new();
+    private readonly List<InstructionOperand> _operands = [];
 
-    private readonly SortedSet<SizeTable> _sizes = new();
+    private readonly SortedSet<SizeTable> _sizes = [];
 
-    private readonly SortedSet<OperandDetails> _details = new();
+    private readonly SortedSet<OperandDetails> _details = [];
 
     public IReadOnlyList<InstructionOperand> Operands => _operands;
 

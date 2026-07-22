@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Zydis.Generator.Core.Serialization;
 
 namespace Zydis.Generator.Core.Definitions.Builder;

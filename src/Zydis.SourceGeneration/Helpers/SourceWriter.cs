@@ -5,7 +5,7 @@ using System.Text;
 
 using Microsoft.CodeAnalysis.Text;
 
-namespace Zydis.Generator.SourceGenerator.Helpers;
+namespace Zydis.SourceGeneration.Helpers;
 
 /// <summary>
 /// A utility class for generating indented source code.

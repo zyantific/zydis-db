@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
-using Zydis.Generator.SourceGenerator.Helpers;
+using Zydis.SourceGeneration.Helpers;
 
 namespace Zydis.Generator.Enums.SourceGenerator;
 
+[SuppressMessage("Performance", "CA1812", Justification = "Instantiated by System.Text.Json during deserialization.")]
 internal sealed record SharedEnumDefinition
 {
     [JsonPropertyName("name")]
@@ -22,6 +24,7 @@ internal sealed record SharedEnumDefinition
     public bool IsSerializable { get; init; }
 }
 
+[SuppressMessage("Performance", "CA1812", Justification = "Instantiated by System.Text.Json during deserialization.")]
 internal sealed record SharedEnumMember
 {
     [JsonPropertyName("name")]

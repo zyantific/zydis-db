@@ -5,21 +5,19 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-using Zydis.Generator.SourceGenerator.CodeGeneration;
-using Zydis.Generator.SourceGenerator.Helpers;
+using Zydis.SourceGeneration.CodeGeneration;
+using Zydis.SourceGeneration.Helpers;
 
 namespace Zydis.Generator.SourceGenerator;
 
 internal sealed class DecisionNodeGenerator
 {
-    private SourceProductionContext Context { get; }
     private DecisionNodeDefinition Definition { get; }
     private string TypeName { get; }
     public bool HasNamedSlots { get; }
 
-    private DecisionNodeGenerator(SourceProductionContext context, DecisionNodeDefinition definition)
+    private DecisionNodeGenerator(DecisionNodeDefinition definition)
     {
-        Context = context;
         Definition = definition;
         TypeName = GeneratorUtils.GetGeneratorIdentifier(definition.Name) + "Node";
         HasNamedSlots = definition.NamedSlots?.Length > 0;
@@ -32,7 +30,7 @@ internal sealed class DecisionNodeGenerator
             throw new ArgumentNullException(nameof(definition));
         }
 
-        var generator = new DecisionNodeGenerator(context, definition);
+        var generator = new DecisionNodeGenerator(definition);
         var source = generator.GenerateSource();
 
         context.AddSource($"DecisionNode.{GeneratorUtils.GetNativeIdentifier(definition.Name).ToPascalCase()}.g.cs", SourceText.From(source, Encoding.UTF8));

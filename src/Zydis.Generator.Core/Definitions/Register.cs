@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 using Zydis.Generator.Core.Serialization;
 
@@ -1015,7 +1012,7 @@ public enum RegisterKind
 
 public static class RegisterExtensions
 {
-    private static FrozenDictionary<RegisterClass, (Register Lo, Register Hi)> RegisterMap = new
+    private static readonly FrozenDictionary<RegisterClass, (Register Lo, Register Hi)> RegisterMap = new
         Dictionary<RegisterClass, (Register Lo, Register Hi)>
         {
             { RegisterClass.Invalid, (Register.None, Register.None) },

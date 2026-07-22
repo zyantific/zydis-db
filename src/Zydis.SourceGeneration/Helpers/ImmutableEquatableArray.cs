@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace Zydis.Generator.SourceGenerator.Helpers;
+namespace Zydis.SourceGeneration.Helpers;
 
 /// <summary>
 /// Defines an immutable array that defines structural equality semantics.

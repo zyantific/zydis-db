@@ -11,11 +11,11 @@ internal sealed class ConditionCodeRegistry
 {
     public record ConditionCodeInfo(string Scc, List<string> Mnemonics);
 
-    public readonly List<ConditionCodeInfo> ConditionCodeInfos = new();
+    public readonly List<ConditionCodeInfo> ConditionCodeInfos = [];
 
     public void Initialize(List<EncodableDefinition> definitions)
     {
-        Dictionary<SourceConditionCode, List<string>> cases = new();
+        Dictionary<SourceConditionCode, List<string>> cases = [];
         foreach (var definition in definitions)
         {
             var sccFilter = definition.GetIntFilter(EvexSccNode.NodeDefinition.Instance, -1);

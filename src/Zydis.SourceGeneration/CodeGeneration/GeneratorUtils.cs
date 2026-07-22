@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-using Zydis.Generator.SourceGenerator.Helpers;
+using Zydis.SourceGeneration.Helpers;
 
-namespace Zydis.Generator.SourceGenerator.CodeGeneration;
+namespace Zydis.SourceGeneration.CodeGeneration;
 
 internal static class GeneratorUtils
 {

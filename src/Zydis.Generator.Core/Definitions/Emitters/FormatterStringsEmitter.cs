@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Zydis.Generator.Core.CodeGeneration;
 using Zydis.Generator.Core.Definitions.Builder;
 using Zydis.Generator.Enums;
@@ -34,7 +35,7 @@ internal static class FormatterStringsEmitter
                 //  - 1 byte for length of the token
                 //  - n bytes for token string contents
                 //  - 1 byte for zero-termination
-                var size = tokens.Length * 3 + fullString.Length;
+                var size = (tokens.Length * 3) + fullString.Length;
                 var initializerListWriter = declarationWriter.BeginDeclaration("static const", $@"struct ZydisPredefinedToken{cName}_
 {{
   ZyanU8 size;

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.Helpers;
 using Zydis.Generator.Enums;
 
@@ -13,12 +12,12 @@ namespace Zydis.Generator.Core.Definitions.Builder;
 /// Maintains a collection of instruction definitions per encoding while ensuring a deterministic order.
 /// Deduplicates definitions during insertion.
 /// </summary>
-internal sealed class DefinitionRegistry: IEnumerable<InstructionDefinition>
+internal sealed class DefinitionRegistry : IEnumerable<InstructionDefinition>
 {
     private static readonly SortedDictionary<InstructionDefinition, int> Empty = new(InstructionDefinitionTableComparer.Instance);
 
     private readonly SortedSet<InstructionDefinition> _instructions = new(InstructionDefinitionTableComparer.Instance);
-    private readonly Dictionary<InstructionEncoding, SortedDictionary<InstructionDefinition, int>> _encodingInstructions = new();
+    private readonly Dictionary<InstructionEncoding, SortedDictionary<InstructionDefinition, int>> _encodingInstructions = [];
 
     public IEnumerable<InstructionDefinition> this[InstructionEncoding encoding] => _encodingInstructions.GetValueOrDefault(encoding, Empty).Keys;
 

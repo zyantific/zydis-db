@@ -11,11 +11,11 @@ namespace Zydis.Generator.Core.Definitions.Builder;
 
 internal sealed class EncoderDefinitionRegistry
 {
-    private readonly SortedDictionary<string, List<EncodableDefinition>> _instructions = new();
+    private readonly SortedDictionary<string, List<EncodableDefinition>> _instructions = [];
 
-    private readonly Dictionary<string, int> _swappableTracker = new();
+    private readonly Dictionary<string, int> _swappableTracker = [];
 
-    public List<EncodableDefinition> Definitions { get; } = new();
+    public List<EncodableDefinition> Definitions { get; } = [];
 
     private static int GetModrmRegOperandPosition(EncodableDefinition definition) =>
         definition.Instruction.Operands?.ToList().FindIndex(x => x.Encoding == OperandEncoding.ModrmReg) ?? -1;

@@ -34,16 +34,16 @@ public static class StaticBroadcastExtensions
         return value switch
         {
             StaticBroadcast.None => "NONE",
-            StaticBroadcast.Broadcast1to2  => "1_TO_2",
-            StaticBroadcast.Broadcast1to4  => "1_TO_4",
-            StaticBroadcast.Broadcast1to8  => "1_TO_8",
+            StaticBroadcast.Broadcast1to2 => "1_TO_2",
+            StaticBroadcast.Broadcast1to4 => "1_TO_4",
+            StaticBroadcast.Broadcast1to8 => "1_TO_8",
             StaticBroadcast.Broadcast1to16 => "1_TO_16",
             StaticBroadcast.Broadcast1to32 => "1_TO_32",
             StaticBroadcast.Broadcast1to64 => "1_TO_64",
-            StaticBroadcast.Broadcast2to4  => "2_TO_4",
-            StaticBroadcast.Broadcast2to8  => "2_TO_8",
+            StaticBroadcast.Broadcast2to4 => "2_TO_4",
+            StaticBroadcast.Broadcast2to8 => "2_TO_8",
             StaticBroadcast.Broadcast2to16 => "2_TO_16",
-            StaticBroadcast.Broadcast4to8  => "4_TO_8",
+            StaticBroadcast.Broadcast4to8 => "4_TO_8",
             StaticBroadcast.Broadcast4to16 => "4_TO_16",
             StaticBroadcast.Broadcast8to16 => "8_TO_16",
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)

@@ -152,8 +152,10 @@ public sealed class ZydisGenerator
 
     private StreamWriter CreateWriter(string path)
     {
-        var writer = new StreamWriter(path, append: false, encoding: new UTF8Encoding(false));
-        writer.NewLine = "\n";
+        var writer = new StreamWriter(path, append: false, encoding: new UTF8Encoding(false))
+        {
+            NewLine = "\n"
+        };
         return writer;
     }
 
