@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text.Json.Serialization;
+
 using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Core.Definitions;

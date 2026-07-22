@@ -4,7 +4,9 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Zydis.Generator.SourceGenerator.Helpers;
+namespace Zydis.SourceGeneration.Helpers;
+
+#pragma warning disable CA1812 // The factory is constructed in the projects that link this file, invisible to CA1812 in this compilation; the converter is created by the factory via reflection.
 
 internal sealed class ImmutableEquatableArrayConverterFactory :
     JsonConverterFactory
@@ -28,8 +30,6 @@ internal sealed class ImmutableEquatableArrayConverterFactory :
         )!;
     }
 }
-
-#pragma warning disable CA1812 // Avoid uninstantiated internal classes.
 
 internal sealed class ImmutableEquatableArrayConverter<T> :
     JsonConverter<ImmutableEquatableArray<T>>

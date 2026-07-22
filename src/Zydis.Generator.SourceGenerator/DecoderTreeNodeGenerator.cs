@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -7,12 +8,13 @@ using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-using Zydis.Generator.SourceGenerator.CodeGeneration;
-using Zydis.Generator.SourceGenerator.Helpers;
+using Zydis.SourceGeneration.CodeGeneration;
+using Zydis.SourceGeneration.Helpers;
 
 namespace Zydis.Generator.SourceGenerator;
 
 [Generator]
+[SuppressMessage("Performance", "CA1812", Justification = "Instantiated by the Roslyn compiler through the [Generator] attribute.")]
 internal sealed class DecoderTreeNodeGenerator :
     IIncrementalGenerator
 {

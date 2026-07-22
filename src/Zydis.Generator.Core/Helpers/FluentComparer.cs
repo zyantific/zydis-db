@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Zydis.Generator.Core.Helpers;
 
@@ -16,12 +13,12 @@ internal static class FluentComparer
             return 0;
         }
 
-        if (ReferenceEquals(null, y))
+        if (y is null)
         {
             return 1;
         }
 
-        if (ReferenceEquals(null, x))
+        if (x is null)
         {
             return -1;
         }

@@ -10,8 +10,8 @@ namespace Zydis.Generator.Core.Definitions.Builder;
 
 internal sealed class AccessedFlagsRegistry
 {
-    private readonly SortedSet<DefinitionAccessedFlags> _accessedFlags = new();
-    private readonly ConditionalWeakTable<InstructionDefinition, DefinitionAccessedFlags> _lut = new();
+    private readonly SortedSet<DefinitionAccessedFlags> _accessedFlags = [];
+    private readonly ConditionalWeakTable<InstructionDefinition, DefinitionAccessedFlags> _lut = [];
 
     public IEnumerable<DefinitionAccessedFlags> AccessedFlags => _accessedFlags;
 
@@ -198,7 +198,7 @@ public sealed class DefinitionAccessedFlags :
 
     public override bool Equals(object? obj)
     {
-        return ReferenceEquals(this, obj) || (obj is DefinitionAccessedFlags other) && Equals(other);
+        return ReferenceEquals(this, obj) || ((obj is DefinitionAccessedFlags other) && Equals(other));
     }
 
     public override int GetHashCode()
@@ -264,7 +264,7 @@ public sealed class AccessedFlags :
 
     public override bool Equals(object? obj)
     {
-        return ReferenceEquals(this, obj) || (obj is AccessedFlags other) && Equals(other);
+        return ReferenceEquals(this, obj) || ((obj is AccessedFlags other) && Equals(other));
     }
 
     public override int GetHashCode()

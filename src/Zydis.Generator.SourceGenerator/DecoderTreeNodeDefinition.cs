@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-using Zydis.Generator.SourceGenerator.Helpers;
+using Zydis.SourceGeneration.Helpers;
 
 namespace Zydis.Generator.SourceGenerator;
 

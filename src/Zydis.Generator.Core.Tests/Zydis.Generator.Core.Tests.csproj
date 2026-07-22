@@ -2,8 +2,14 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <!-- Test methods use underscore names by convention. -->
-    <NoWarn>$(NoWarn);CA1707</NoWarn>
+    <!--
+      CA1707: test methods use underscore names by convention.
+      xUnit1044: theory data uses the InstructionOperand model, which is not
+      xUnit-serializable, so Test Explorer lists the rows as one case. This does
+      not affect test execution, and making the model serializable would change
+      a Core type.
+    -->
+    <NoWarn>$(NoWarn);CA1707;xUnit1044</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

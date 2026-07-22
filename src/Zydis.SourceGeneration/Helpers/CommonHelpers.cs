@@ -1,4 +1,4 @@
-namespace Zydis.Generator.SourceGenerator.Helpers;
+namespace Zydis.SourceGeneration.Helpers;
 
 internal static class CommonHelpers
 {

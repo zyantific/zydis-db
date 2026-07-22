@@ -8,9 +8,9 @@ namespace Zydis.Generator.Core.Definitions.Builder;
 
 internal sealed class RelativeInfoRegistry
 {
-    public readonly List<RelInfo> Infos = new();
+    public readonly List<RelInfo> Infos = [];
 
-    public readonly List<List<string>> Mnemonics = new();
+    public readonly List<List<string>> Mnemonics = [];
 
     internal sealed class RelInfo : IEquatable<RelInfo>
     {

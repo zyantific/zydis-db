@@ -5,6 +5,18 @@
     <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 
+  <!--
+    Analyzer rules that first surfaced when this project began compiling under
+    the Release analyzers. Each would rename a symbol, change the public surface,
+    or alter runtime behavior (collection and array types, enum and member
+    renames, ConfigureAwait, exception messages, parameter lists), so they are
+    suppressed here rather than applied to keep the generated tables and the API
+    unchanged.
+  -->
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CA1002;CA1008;CA1036;CA1051;CA1707;CA1711;CA1725;CA1814;CA1819;CA1822;CA1859;CA2007;CA2208;CS1998;IDE0060</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Zydis.Generator.Enums\Zydis.Generator.Enums.csproj" />
     <ProjectReference Include="..\Zydis.Generator.SourceGenerator\Zydis.Generator.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
