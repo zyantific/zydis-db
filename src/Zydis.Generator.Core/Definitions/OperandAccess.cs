@@ -48,7 +48,13 @@ public enum OperandAccess
     /// The operand is only read conditionally but always written.
     /// </summary>
     [JsonStringEnumMemberName("condread_write")]
-    CondReadWrite
+    CondReadWrite,
+
+    /// <summary>
+    /// The operand is conditionally read and conditionally written.
+    /// </summary>
+    [JsonStringEnumMemberName("condread_condwrite")]
+    CondReadCondWrite
 }
 
 public static class OperandAccessExtensions
@@ -64,6 +70,7 @@ public static class OperandAccessExtensions
             OperandAccess.CondWrite => "CONDWRITE",
             OperandAccess.ReadCondWrite => "READ_CONDWRITE",
             OperandAccess.CondReadWrite => "CONDREAD_WRITE",
+            OperandAccess.CondReadCondWrite => "CONDREAD_CONDWRITE",
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
     }
