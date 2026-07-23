@@ -184,9 +184,8 @@ class _ZydisShortStringTableWriter(_ZydisTableWriter):
         return super().__exit__(exc_type, exc_value, tb)
 
     def emit_value(self, value):
-        self._f.write('ZYDIS_DEFINE_SHORTSTRING_DATA({sym}, {length}, "{value}");\n'.format(
+        self._f.write('ZYDIS_MAKE_SHORTSTRING({sym}, "{value}");\n'.format(
             sym = self.__value_symbol_name(self.__values_count),
-            length = len(value),
             value = value.lower()
         ))
         self.__values_count += 1
