@@ -114,7 +114,7 @@ public sealed class DeclarationWriter
     {
         ArgumentNullException.ThrowIfNull(identifier);
         ArgumentNullException.ThrowIfNull(value);
-        _writer.Write("ZYDIS_DEFINE_SHORTSTRING_DATA({0}, {1}, ", identifier, value.Length);
+        _writer.Write("ZYDIS_MAKE_SHORTSTRING({0}, ", identifier);
         WriterExtensions.WriteString(_writer, value);
         _writer.Write(")");
         this.EndDeclaration();
