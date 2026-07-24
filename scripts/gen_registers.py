@@ -35,7 +35,7 @@ class _ZydisEnumWriter():
         self.__last = None
         
     def __enter__(self):
-        self.__f = open(self.__file_name, 'w')
+        self.__f = open(self.__file_name, 'w', newline='\n')
         self.__emit_header()
         return self
 
@@ -108,7 +108,7 @@ class _ZydisTableWriter():
         self.__expect_delim = False
         
     def __enter__(self):
-        self._f = open(self._file_name, 'w')
+        self._f = open(self._file_name, 'w', newline='\n')
         self.__emit_header()
         return self
 
@@ -173,7 +173,7 @@ class _ZydisShortStringTableWriter(_ZydisTableWriter):
         return f'{self.__symbol_name.removeprefix("STR_")}_VALUE_{i}'
 
     def __enter__(self):
-        self._f = open(self._file_name, 'w')
+        self._f = open(self._file_name, 'w', newline='\n')
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
