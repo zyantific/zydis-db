@@ -38,3 +38,21 @@ jobs:
         working-directory: ${{ inputs.root-path }}
         run: >-
           dotnet build
+
+      - name: .NET Test
+        working-directory: ${{ inputs.root-path }}
+        run: >-
+          dotnet test --no-build
+
+      - name: Decoder-table determinism gate
+        working-directory: ${{ inputs.root-path }}
+        run: |
+          out1="${RUNNER_TEMP}/dp-run-1"
+          out2="${RUNNER_TEMP}/dp-run-2"
+          for out in "$out1" "$out2"; do
+            rm -rf "$out"
+            mkdir -p "$out/src/Generated" "$out/include/Zydis/Generated"
+          done
+          dotnet run --project src/Zydis.Generator -c "${BUILD_CONFIG}" -- --tree=dp datafiles "$out1"
+          dotnet run --project src/Zydis.Generator -c "${BUILD_CONFIG}" -- --tree=dp datafiles "$out2"
+          diff -r "$out1" "$out2"

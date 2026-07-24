@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Zydis.Generator.Core.CodeGeneration;
+using Zydis.Generator.Core.DecoderTree;
 using Zydis.Generator.Core.DecoderTree.Builder;
 using Zydis.Generator.Core.DecoderTree.Emitters;
 using Zydis.Generator.Core.Definitions;
@@ -20,7 +21,7 @@ namespace Zydis.Generator.Core;
 public sealed class ZydisGenerator
 {
     private readonly DefinitionRegistry _definitionRegistry = new();
-    private readonly DecoderTreeBuilder _decoderTreeBuilder = new();
+    private readonly VariablePositionTreeBuilder _variablePositionTreeBuilder = new();
     private readonly EncodingRegistry _encodingRegistry = new();
     private readonly OperandsRegistry _operandsRegistry = new();
     private readonly AccessedFlagsRegistry _accessedFlagsRegistry = new();
@@ -29,6 +30,19 @@ public sealed class ZydisGenerator
     private readonly RelativeInfoRegistry _relativeInfoRegistry = new();
     private readonly FormatterStringsRegistry _formatterStringsRegistry = new();
 
+    /// <summary>
+    /// The variable-position construction statistics from the most recent <see cref="ReadDefinitionsAsync"/>;
+    /// <see cref="BuilderStatistics.Empty"/> until definitions have been read.
+    /// </summary>
+    public BuilderStatistics DecoderTreeStatistics { get; private set; } = BuilderStatistics.Empty;
+
+    /// <summary>
+    /// The per-table decoder-table emission measurements from the most recent <see cref="GenerateDataTablesAsync"/>.
+    /// </summary>
+    public IReadOnlyList<TableEmissionStatistics> DecoderTableEmissionStatistics { get; private set; } = [];
+
+    private OpcodeTables OpcodeTables => _variablePositionTreeBuilder.OpcodeTables;
+
     public async Task ReadDefinitionsAsync(string datafilesPath, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(datafilesPath);
@@ -36,12 +50,15 @@ public sealed class ZydisGenerator
         await foreach (var definition in DefinitionReader.ReadAsync<InstructionDefinition>(Path.Join(datafilesPath, "instructions.json"), cancellationToken).ConfigureAwait(false))
         {
             _definitionRegistry.InsertDefinition(definition);
-            _decoderTreeBuilder.InsertDefinition(definition);
             _encoderRegistry.InsertDefinition(definition);
+            _variablePositionTreeBuilder.InsertDefinition(definition);
         }
 
-        _decoderTreeBuilder.InsertOpcodeTableSwitchNodes();
-        _decoderTreeBuilder.Optimize();
+        // The variable-position builder compacts each group inside its constructor, so it needs no separate
+        // optimization pass.
+        _variablePositionTreeBuilder.Build();
+        _variablePositionTreeBuilder.InsertOpcodeTableSwitchNodes();
+        DecoderTreeStatistics = _variablePositionTreeBuilder.Statistics;
 
         var allDefinitions = Enum.GetValues<InstructionEncoding>()
             .SelectMany(encoding => _definitionRegistry[encoding])
@@ -56,7 +73,7 @@ public sealed class ZydisGenerator
         _relativeInfoRegistry.Initialize(_encoderRegistry.Definitions);
 
         //var emitter = new OpcodeTableConsoleEmitter(_definitionRegistry, _encodingRegistry, null);
-        //emitter.Emit(_decoderTreeBuilder.OpcodeTables.GetTable(InstructionEncoding.Default, OpcodeMap.MAP0, null));
+        //emitter.Emit(OpcodeTables.GetTable(InstructionEncoding.Default, OpcodeMap.MAP0, null));
 
         await _formatterStringsRegistry.ReadAsync(Path.Join(datafilesPath, "formatter_strings.json"), cancellationToken);
     }
@@ -161,7 +178,9 @@ public sealed class ZydisGenerator
 
     private async Task GenerateOpcodeTables(StreamWriter writer, DecoderTableEmitterStatistics statistics)
     {
-        foreach (var table in _decoderTreeBuilder.OpcodeTables.Tables)
+        var emissionStatistics = new List<TableEmissionStatistics>();
+
+        foreach (var table in OpcodeTables.Tables)
         {
             if (table.EnumerateSlots().All(x => x is null))
             {
@@ -175,13 +194,18 @@ public sealed class ZydisGenerator
             var initializerListWriter = declarationWriter.WriteInitializerList().BeginList();
 
             var emitter = new DecoderTableCodeEmitter(initializerListWriter, _definitionRegistry, _encodingRegistry, statistics);
-            emitter.Emit(table);
+            var size = emitter.Emit(table);
+
+            emissionStatistics.Add(
+                new TableEmissionStatistics(table.ToString()!, size, emitter.EmittedNodeCount, emitter.CloneCount));
 
             initializerListWriter.EndList();
             declarationWriter.EndDeclaration();
 
             await writer.WriteLineAsync().ConfigureAwait(false);
         }
+
+        DecoderTableEmissionStatistics = emissionStatistics;
     }
 
     private async Task GenerateOpcodeTableLookup(StreamWriter writer)
@@ -194,7 +218,7 @@ public sealed class ZydisGenerator
 
         var initializerListWriter = declarationWriter.WriteInitializerList().BeginList();
 
-        foreach (var table in _decoderTreeBuilder.OpcodeTables.Tables)
+        foreach (var table in OpcodeTables.Tables)
         {
             initializerListWriter.WriteInlineComment("{0,-12}", table);
 
