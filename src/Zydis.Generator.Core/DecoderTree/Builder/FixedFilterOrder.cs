@@ -42,7 +42,7 @@ internal static class FixedFilterOrder
             ],
             [InstructionEncoding.AMD3DNOW] =
             [
-                "rex2",
+                "rex_2",
                 "modrm_mod",
                 "mode_cldemote",
                 "prefix_group1",
