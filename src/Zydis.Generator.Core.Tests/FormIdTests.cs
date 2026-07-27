@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -131,7 +130,7 @@ public sealed class FormIdTests
     private static InstructionDefinition Definition(
         string mnemonic, byte opcode = 0, InstructionEncoding encoding = InstructionEncoding.Default,
         OpcodeMap opcodeMap = OpcodeMap.MAP0, IReadOnlyList<InstructionOperand>? operands = null,
-        IReadOnlyDictionary<string, JsonElement>? pattern = null)
+        IReadOnlyList<FilterEntry>? pattern = null)
     {
         return new InstructionDefinition
         {
@@ -145,16 +144,8 @@ public sealed class FormIdTests
         };
     }
 
-    private static Dictionary<string, JsonElement> Pattern(params (string Key, string Value)[] filters)
+    private static IReadOnlyList<FilterEntry> Pattern(params (string Filter, string Value)[] filters)
     {
-        return filters.ToDictionary(f => f.Key, f => JsonStringElement(f.Value));
-    }
-
-    // JsonSerializer.SerializeToElement needs a JsonTypeInfo here, since reflection-based
-    // serialization is disabled for this codebase; parsing a literal is the simpler alternative.
-    private static JsonElement JsonStringElement(string value)
-    {
-        using var document = JsonDocument.Parse($"\"{JsonEncodedText.Encode(value)}\"");
-        return document.RootElement.Clone();
+        return filters.Select(f => new FilterEntry(f.Filter, f.Value)).ToList();
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 using Zydis.Generator.Core.CodeGeneration;
@@ -325,7 +324,7 @@ internal static class DefinitionEmitter
     // decoder can consume it up front instead of re-deriving it from the opcode-table shape.
     internal static int GetMandatoryPrefixEncoding(InstructionDefinition definition)
     {
-        return GetRawFilterValue(definition, "mandatory_prefix") switch
+        return definition.GetFilterValue("mandatory_prefix") switch
         {
             null or "none" or "ignore" => 0,
             "66" => 1,
@@ -342,7 +341,7 @@ internal static class DefinitionEmitter
     // evex_scc only ever appears as a decoder filter, so presence in the filter set is the only signal.
     internal static bool HasApxScc(InstructionDefinition definition)
     {
-        return definition.Pattern?.ContainsKey("evex_scc") ?? false;
+        return definition.HasFilter("evex_scc");
     }
 
     // The walk-time NF validation (reject z/L/mask-low-bits, then clear mask) moved to definition time for
@@ -350,16 +349,6 @@ internal static class DefinitionEmitter
     // this mirrors HasApxScc's filter-presence derivation rather than reusing has_apx_nf.
     internal static bool HasApxNfCheck(InstructionDefinition definition)
     {
-        return definition.Pattern?.ContainsKey("evex_nf") ?? false;
-    }
-
-    private static string? GetRawFilterValue(InstructionDefinition definition, string filterName)
-    {
-        if (!(definition.Pattern?.TryGetValue(filterName, out var value) ?? false))
-        {
-            return null;
-        }
-
-        return value.ValueKind is JsonValueKind.String ? value.ToString() : throw new InvalidDataException();
+        return definition.HasFilter("evex_nf");
     }
 }

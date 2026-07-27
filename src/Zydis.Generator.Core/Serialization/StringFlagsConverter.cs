@@ -57,7 +57,36 @@ internal sealed class StringFlagsConverter<TEnum> :
 
     public override void Write(Utf8JsonWriter writer, TEnum value, JsonSerializerOptions options)
     {
-        throw new NotImplementedException();
+        // An explicit "no flags set" value (distinct from the property being entirely absent, e.g. a
+        // nullable flags value set to the zero member) is still written as an empty array. The reference
+        // file formats it across two lines at the enclosing indent depth rather than the compact "[]"
+        // this writer would otherwise produce, so that case is special-cased below.
+        if (Convert.ToUInt64(value) is 0 && writer.Options.Indented)
+        {
+            var depth = writer.CurrentDepth;
+            var indent = new string(writer.Options.IndentCharacter, depth * writer.Options.IndentSize);
+            writer.WriteRawValue($"[{writer.Options.NewLine}{indent}]", skipInputValidation: true);
+            return;
+        }
+
+        writer.WriteStartArray();
+
+        // Enumerate in declaration order (ascending bit value) since a bitmask carries no record of the
+        // order flags were originally written in.
+        foreach (var flag in Enum.GetValues<TEnum>())
+        {
+            if (Convert.ToUInt64(flag) is 0)
+            {
+                continue;
+            }
+
+            if (value.HasFlag(flag))
+            {
+                _valueConverter.Write(writer, flag, options);
+            }
+        }
+
+        writer.WriteEndArray();
     }
 
     private static void SetFlag<T>(ref T value, T flag) where T : Enum

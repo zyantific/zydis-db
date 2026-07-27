@@ -20,15 +20,23 @@ public sealed class InstructionOperand :
 
 #pragma warning restore CA1036
 {
-    [Emittable(0)]
-    [JsonPropertyName("operand_type")]
-    public OperandType Type { get; init; }
-
     [Emittable(2, "actions")]
     [JsonPropertyName("action")]
     public OperandAccess Access { get; init; }
 
+    [Emittable(0)]
+    [JsonPropertyName("operand_type")]
+    public OperandType Type { get; init; }
+
     public OperandEncoding Encoding { get; init; }
+
+    [JsonPropertyName("mem_segment")]
+    public SegmentRegister? MemorySegment { get; init; }
+
+    [JsonPropertyName("mem_base")]
+    public BaseRegister? MemoryBase { get; init; }
+
+    public Register Register { get; init; }
 
     [Emittable(3)]
     public ElementType ElementType { get; init; }
@@ -39,24 +47,16 @@ public sealed class InstructionOperand :
     public int Width32 { get; init; }
     public int Width64 { get; init; }
 
-    [JsonPropertyName("visible")]
-    public bool? IsVisible { get; init; }
-
     [Emittable(4, "is_multisource4")]
     [JsonPropertyName("is_multisource4")]
     public bool IsMultiSource4 { get; init; }
 
+    [JsonPropertyName("visible")]
+    public bool? IsVisible { get; init; }
+
     [Emittable(5, "ignore_seg_override")]
     [JsonPropertyName("ignore_seg_override")]
     public bool IgnoreSegmentOverride { get; init; }
-
-    public Register Register { get; init; }
-
-    [JsonPropertyName("mem_segment")]
-    public SegmentRegister? MemorySegment { get; init; }
-
-    [JsonPropertyName("mem_base")]
-    public BaseRegister? MemoryBase { get; init; }
 
     [Emittable(1)]
     [JsonIgnore]

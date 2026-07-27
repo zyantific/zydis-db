@@ -38,24 +38,36 @@ public class ConstraintsTests
     }
 
     [Fact]
-    public async Task Parse_MandatoryIgnore_YieldsNoConstraint()
+    public async Task Parse_MandatoryIgnore_ThrowsNotSupported()
     {
-        var definition = await ParseDefinitionAsync(WithFilters("""{"mandatory_prefix":"ignore"}"""));
+        var definition = await TestHelpers.ParseDefinitionAsync("bsf", """{"modrm_mod":"3","mandatory_prefix":"ignore"}""");
 
-        var set = ConstraintSet.Parse(definition);
-
-        Assert.Empty(set.Constraints);
+        var ex = Assert.Throws<NotSupportedException>(() => ConstraintSet.Parse(definition));
+        Assert.Contains("retired", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
-    public async Task Parse_InformationalKeys_AreSkipped()
+    public async Task Parse_LegacyFlagMembers_LiftToFlagProperties()
     {
-        // Informational flags with no decision-node counterpart; must not throw and must not constrain.
+        // Legacy object-form flags must land on the flag properties, leaving no constraints behind.
         var definition = await ParseDefinitionAsync(WithFilters("""{"force_modrm_reg":true,"force_modrm_rm":true}"""));
 
         var set = ConstraintSet.Parse(definition);
 
         Assert.Empty(set.Constraints);
+        Assert.True(definition.ForceModrmReg);
+        Assert.True(definition.ForceModrmRm);
+        Assert.Empty(definition.Pattern!);
+    }
+
+    [Fact]
+    public async Task Parse_ArrayForm_MatchesLegacyObjectForm()
+    {
+        var legacy = ConstraintSet.Parse(await ParseDefinitionAsync(WithFilters("""{"modrm_mod":"3","rex_w":"1"}""")));
+        var array = ConstraintSet.Parse(await ParseDefinitionAsync(
+            """{"mnemonic":"test","opcode":"00","filters":[{"filter":"modrm_mod","value":"3"},{"filter":"rex_w","value":"1"}],"meta_info":{}}"""));
+
+        Assert.Equal(RegionRelation.Equal, RegionAlgebra.Relate(legacy, array));
     }
 
     [Fact]
@@ -96,6 +108,20 @@ public class ConstraintsTests
         Assert.True(secondMode.Slots.IsSubsetOf(firstMode.Slots));
 
         Assert.Equal(RegionRelation.FirstContainsSecond, RegionAlgebra.Relate(first, second));
+    }
+
+    [Fact]
+    public async Task Parse_KeyOrderDoesNotAffectResult()
+    {
+        var forward = await TestHelpers.ParseDefinitionAsync(
+            "test", """{"modrm_mod":"3","mandatory_prefix":"66","rex_w":"1"}""");
+        var reversed = await TestHelpers.ParseDefinitionAsync(
+            "test", """{"rex_w":"1","mandatory_prefix":"66","modrm_mod":"3"}""");
+
+        var a = ConstraintSet.Parse(forward);
+        var b = ConstraintSet.Parse(reversed);
+
+        Assert.Equal(RegionRelation.Equal, RegionAlgebra.Relate(a, b));
     }
 
     private static string WithFilters(string filtersJson) =>

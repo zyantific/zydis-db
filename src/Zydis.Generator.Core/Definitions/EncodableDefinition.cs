@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
 
 using Zydis.Generator.Core.CodeGeneration;
 using Zydis.Generator.Core.DecoderTree;
@@ -482,12 +480,7 @@ public sealed class EncodableDefinition :
     {
         ArgumentNullException.ThrowIfNull(selector);
 
-        if (!(Instruction.Pattern?.TryGetValue(selector.Name, out var value) ?? false))
-        {
-            return null;
-        }
-
-        return value.ValueKind is JsonValueKind.String ? value.ToString() : throw new InvalidDataException();
+        return Instruction.GetFilterValue(selector.Name);
     }
 
     public bool Merge(EncodableDefinition definition)
@@ -517,7 +510,20 @@ public sealed class EncodableDefinition :
 
     public Dictionary<string, string> GetSelectors()
     {
-        return Instruction.Pattern?.Select(x => (x.Key, x.Value.ToString())).ToDictionary() ?? [];
+        var selectors = Instruction.Pattern?.ToDictionary(x => x.Filter, x => x.Value) ?? [];
+
+        // Encoder merge comparisons treat the force_modrm flags as selector-set members; only key presence
+        // matters to the Compare-based callers, so the value is a fixed placeholder.
+        if (Instruction.ForceModrmReg)
+        {
+            selectors["force_modrm_reg"] = "true";
+        }
+        if (Instruction.ForceModrmRm)
+        {
+            selectors["force_modrm_rm"] = "true";
+        }
+
+        return selectors;
     }
 
     public Dictionary<string, string> GetSelectors(params string[] ignoreList)
