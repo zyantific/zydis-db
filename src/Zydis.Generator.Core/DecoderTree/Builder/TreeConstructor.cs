@@ -41,7 +41,6 @@ internal sealed record ConstructionResult(
 internal sealed class TreeConstructor
 {
     private readonly NodeInterner _interner;
-    private readonly IReadOnlyList<string> _tieBreakPriority;
     private readonly ConstructorOptions _options;
     private readonly Dictionary<string, int> _priorityByName;
 
@@ -61,7 +60,6 @@ internal sealed class TreeConstructor
         ArgumentNullException.ThrowIfNull(options);
 
         _interner = interner;
-        _tieBreakPriority = tieBreakPriority;
         _options = options;
         _priorityByName = BuildPriorityLookup(tieBreakPriority);
     }
