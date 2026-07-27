@@ -1,27 +1,161 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Zydis.Generator.Core;
+using Zydis.Generator.Core.DecoderTree.Builder;
+using Zydis.Generator.Core.DecoderTree.Emitters;
+using Zydis.Generator.Core.Definitions;
+using Zydis.Generator.Core.Serialization;
 
 namespace Zydis.Generator;
 
 internal sealed class Program
 {
+    private enum TreeMode
+    {
+        Dp,
+        Verify
+    }
+
     private static async Task<int> Main(string[] args)
     {
-        if (args.Length != 2)
+        var mode = TreeMode.Dp;
+        var positional = new List<string>();
+
+        foreach (var arg in args)
         {
-            await System.Console.Error.WriteLineAsync("usage: Zydis.Generator [path/to/datafiles/] [path/to/zydis/]").ConfigureAwait(false);
+            if (arg.StartsWith("--tree=", StringComparison.Ordinal))
+            {
+                var value = arg["--tree=".Length..];
+                switch (value)
+                {
+                    case "dp": mode = TreeMode.Dp; break;
+                    case "verify": mode = TreeMode.Verify; break;
+                    default:
+                        await Console.Error.WriteLineAsync($"unknown --tree value '{value}' (expected dp|verify)")
+                            .ConfigureAwait(false);
+                        return 1;
+                }
+
+                continue;
+            }
+
+            positional.Add(arg);
+        }
+
+        return mode switch
+        {
+            TreeMode.Dp => await RunDpAsync(positional).ConfigureAwait(false),
+            TreeMode.Verify => await RunVerifyAsync(positional).ConfigureAwait(false),
+            _ => 1
+        };
+    }
+
+    private static async Task<int> RunDpAsync(IReadOnlyList<string> positional)
+    {
+        if (positional.Count != 2)
+        {
+            await Console.Error.WriteLineAsync(
+                "usage: Zydis.Generator path/to/datafiles/ path/to/zydis/").ConfigureAwait(false);
             return 1;
         }
 
         var generator = new ZydisGenerator();
 
-        await generator.ReadDefinitionsAsync(args[0]).ConfigureAwait(false);
+        await generator.ReadDefinitionsAsync(positional[0]).ConfigureAwait(false);
+        await generator.GenerateDataTablesAsync(positional[1]).ConfigureAwait(false);
 
-        await generator.GenerateDataTablesAsync(args[1]).ConfigureAwait(false);
+        var report = GenerationReport.Create(
+            generator.DecoderTreeStatistics, generator.DecoderTableEmissionStatistics);
 
-        //var emitter = new DecoderTableConsoleEmitter{ SkipEmpty = true };
-        //emitter.Emit(builder.OpcodeTables.GetTable(InstructionEncoding.VEX, OpcodeMap.M0F, RefiningPrefix.P66));
+        Console.WriteLine("decoder tables (variable-position):");
+        Console.WriteLine(report.Render());
+
         return 0;
+    }
+
+    private static async Task<int> RunVerifyAsync(IReadOnlyList<string> positional)
+    {
+        if (positional.Count is < 1 or > 2)
+        {
+            await Console.Error.WriteLineAsync(
+                "usage: Zydis.Generator --tree=verify path/to/datafiles/ [path/to/zydis/ (ignored)]").ConfigureAwait(false);
+            return 1;
+        }
+
+        var definitions = new List<InstructionDefinition>();
+        await foreach (var definition in ReadDefinitionsAsync(positional[0]).ConfigureAwait(false))
+        {
+            definitions.Add(definition);
+        }
+
+        var referenceTables = RegionEquivalenceChecker.BuildReferenceModel(definitions);
+
+        var dpBuilder = new VariablePositionTreeBuilder();
+        foreach (var definition in definitions)
+        {
+            dpBuilder.InsertDefinition(definition);
+        }
+
+        dpBuilder.Build();
+        dpBuilder.InsertOpcodeTableSwitchNodes();
+
+        var results = RegionEquivalenceChecker.Verify(referenceTables, dpBuilder.OpcodeTables);
+
+        var equivalent = true;
+        var maxPoints = 0L;
+
+        foreach (var result in results.OrderBy(result => result.Table, StringComparer.Ordinal))
+        {
+            maxPoints = Math.Max(maxPoints, result.MaxPointCount);
+
+            if (result.Differences.Count == 0)
+            {
+                Console.WriteLine($"REGION EQUIVALENCE OK {result.Table}");
+                continue;
+            }
+
+            equivalent = false;
+            Console.WriteLine($"REGION EQUIVALENCE FAILED {result.Table} ({result.Differences.Count} difference(s))");
+            foreach (var difference in result.Differences)
+            {
+                Console.WriteLine($"  {difference}");
+            }
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("variable-position tree:");
+        Console.WriteLine(dpBuilder.Statistics.Render());
+        Console.WriteLine();
+        Console.WriteLine($"max per-definition point cross-product: {maxPoints}");
+
+        // Emitted sizes come from laying out both trees into throwaway buffers, so verify mode never writes output.
+        var comparison = SizeComparisonReport.Create(
+            DecoderTableEmissionMeasurer.Measure(referenceTables),
+            DecoderTableEmissionMeasurer.Measure(dpBuilder.OpcodeTables));
+
+        Console.WriteLine();
+        Console.WriteLine("decoder table size (reference vs variable-position):");
+        Console.WriteLine(comparison.Render());
+
+        if (!equivalent)
+        {
+            Console.WriteLine();
+            Console.WriteLine("result: DIFFERENCES FOUND");
+            return 2;
+        }
+
+        Console.WriteLine();
+
+        Console.WriteLine("result: ALL TABLES EQUIVALENT");
+        return 0;
+    }
+
+    private static IAsyncEnumerable<InstructionDefinition> ReadDefinitionsAsync(string datafilesPath)
+    {
+        return DefinitionReader.ReadAsync<InstructionDefinition>(Path.Join(datafilesPath, "instructions.json"));
     }
 }
