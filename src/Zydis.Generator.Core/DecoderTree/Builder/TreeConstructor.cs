@@ -5,8 +5,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-using Zydis.Generator.Core.Definitions;
-
 namespace Zydis.Generator.Core.DecoderTree.Builder;
 
 /// <summary>
