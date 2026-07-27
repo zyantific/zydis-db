@@ -105,19 +105,38 @@ dotnet run --project src/Zydis.Generator -- [--tree=<mode>] <arguments>
 
 Table generation and verification:
 
-| Mode               | Arguments                        | Effect                                                          |
-| ------------------ | -------------------------------- | --------------------------------------------------------------- |
-| `dp` (default)     | `datafiles/ path/to/zydis/`      | Generates all tables and enums into a Zydis checkout and prints per-table construction statistics. |
-| `verify`           | `datafiles/`                     | Verifies region equivalence between the variable-position tree and the frozen fixed-order reference, and prints a size comparison. |
+| Mode               | Arguments                     | Effect                                                          |
+| ------------------ | ----------------------------- | --------------------------------------------------------------- |
+| `dp` (default)     | `<datafiles> <zydis>`         | Generates all tables and enums into a Zydis checkout and prints per-table construction statistics. |
+| `verify`           | `<datafiles> [<zydis>]`       | Verifies region equivalence between the variable-position tree and the frozen fixed-order reference, and prints a size comparison. Writes no files. |
 
-Data maintenance (all operate on `datafiles/` only):
+Data maintenance:
 
-| Mode             | Effect                                                                                          |
-| ---------------- | ----------------------------------------------------------------------------------------------- |
-| `lint`           | Reports definitions whose recorded filter order differs from the current optimizer-chosen order. Advisory: always exits 0. |
-| `migrate-order`  | Rewrites `instructions.json` so every definition's filter order matches the optimizer-chosen order. Idempotent: re-running on already-migrated data is a byte-for-byte no-op. |
-| `migrate-schema` | Reserializes `instructions.json` in the canonical array filter schema.                          |
-| `scan-redundant` | Reports definitions whose filter region is a strict subset of an otherwise identical sibling's, i.e. rows that add no decoding value. Advisory: always exits 0. |
+| Mode             | Arguments      | Effect                                                                         |
+| ---------------- | -------------- | ------------------------------------------------------------------------------ |
+| `lint`           | `<datafiles>`  | Reports definitions whose recorded filter order differs from the current optimizer-chosen order. Advisory: always exits 0. |
+| `migrate-order`  | `<datafiles>`  | Rewrites `instructions.json` so every definition's filter order matches the optimizer-chosen order, and prints how many definitions changed on disk. Idempotent: re-running on already-migrated data is a byte-for-byte no-op. |
+| `migrate-schema` | `<datafiles>`  | Reserializes `instructions.json` in the canonical array filter schema.         |
+| `scan-redundant` | `<datafiles>`  | Reports definitions whose filter region is a strict subset of an otherwise identical sibling's, i.e. rows that add no decoding value. Advisory: always exits 0. |
+
+### Arguments
+
+| Argument       | Used by                                   | Description                                                |
+| -------------- | ----------------------------------------- | ---------------------------------------------------------- |
+| `--tree=<mode>` | all modes                                | Selects the operating mode: `dp`, `lint`, `migrate-order`, `migrate-schema`, `scan-redundant`, or `verify`. Optional; defaults to `dp`. An unknown value prints the mode list and exits with code 1. |
+| `<datafiles>`  | all modes                                 | Path to this repository's `datafiles/` directory. `instructions.json` is read from it in every mode (`dp` also reads `formatter_strings.json`), and the `migrate-*` modes rewrite `instructions.json` inside it in place. |
+| `<zydis>`      | `dp` (required), `verify` (optional)      | Path to a Zydis checkout, or any directory containing `src/Generated/` and `include/Zydis/Generated/`. The directory must already exist; generated files are overwritten in place. `verify` accepts the argument but ignores it, so both modes can be invoked with the same argument list. |
+
+All arguments other than `--tree=<mode>` are positional and mode-specific; a wrong argument count prints the mode's
+usage line and exits with code 1.
+
+### Exit codes
+
+| Code | Meaning                                                                                              |
+| ---- | ---------------------------------------------------------------------------------------------------- |
+| 0    | Success. `lint` and `scan-redundant` also exit 0 when they report findings, since both are advisory.  |
+| 1    | Usage error: unknown `--tree` value or wrong number of positional arguments.                          |
+| 2    | `verify` only: region differences between the two builders were found.                                |
 
 ### Generated output
 
@@ -183,10 +202,10 @@ The typical workflow for adding or changing instruction definitions:
 
 ## Scripts
 
-| Script                      | Purpose                                                                                |
-| --------------------------- | -------------------------------------------------------------------------------------- |
-| `gen_registers.py`          | Generates the register enum and lookup tables from `registers.json` into a Zydis checkout. |
-| `generate_encoder_types.py` | Parses a Zydis checkout's C sources to derive encoder-related type definitions used by the generator. |
+| Script                      | Arguments                             | Purpose                                                  |
+| --------------------------- | ------------------------------------- | -------------------------------------------------------- |
+| `gen_registers.py`          | `<registers.json> <zydis>` (both required) | Generates the register enum and lookup tables (`EnumRegister.h`, `EnumRegister.inc`, `RegisterLookup.inc`, `RegisterClassLookup.inc`) from `registers.json` into a Zydis checkout. |
+| `generate_encoder_types.py` | `[zydis_path]` (defaults to `../../zydis`) | Parses a Zydis checkout's C sources to derive encoder-related type definitions used by the generator. |
 
 ## License
 
