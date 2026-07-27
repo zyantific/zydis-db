@@ -42,18 +42,7 @@ internal static class FixedFilterOrder
             ],
             [InstructionEncoding.AMD3DNOW] =
             [
-                "rex_2",
-                "modrm_mod",
-                "mode_cldemote",
-                "prefix_group1",
-                "mandatory_prefix",
-                "modrm_reg",
-                "modrm_rm",
-                "mode",
-                "address_size",
-                "operand_size",
-                "rex_w",
-                "rex_b",
+                "modrm_mod"
             ],
             [InstructionEncoding.VEX] =
             [
