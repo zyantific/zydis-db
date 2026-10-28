@@ -220,7 +220,52 @@ public enum ExceptionClass
     USERMSREVEX,
 
     [JsonStringEnumMemberName("legacy-rao-int")]
-    LEGACYRAOINT
+    LEGACYRAOINT,
+
+    [JsonStringEnumMemberName("ace-e1")]
+    ACEE1,
+
+    [JsonStringEnumMemberName("ace-e2")]
+    ACEE2,
+
+    [JsonStringEnumMemberName("ace-e3")]
+    ACEE3,
+
+    [JsonStringEnumMemberName("ace-e4")]
+    ACEE4,
+
+    [JsonStringEnumMemberName("ace-e5")]
+    ACEE5,
+
+    [JsonStringEnumMemberName("ace-e6")]
+    ACEE6,
+
+    [JsonStringEnumMemberName("amxe7_evex")]
+    AMXE7EVEX,
+
+    [JsonStringEnumMemberName("amxe8_evex")]
+    AMXE8EVEX,
+
+    [JsonStringEnumMemberName("apx-evex-movrs")]
+    APXEVEXMOVRS,
+
+    [JsonStringEnumMemberName("legacy-movrs")]
+    LEGACYMOVRS,
+
+    [JsonStringEnumMemberName("legacy-prefetch")]
+    LEGACYPREFETCH,
+
+    [JsonStringEnumMemberName("msr-imm-evex")]
+    MSRIMMEVEX,
+
+    [JsonStringEnumMemberName("msr-imm-vex")]
+    MSRIMMVEX,
+
+    [JsonStringEnumMemberName("user-msr-legacy")]
+    USERMSRLEGACY,
+
+    [JsonStringEnumMemberName("user-msr-vex")]
+    USERMSRVEX
 }
 
 public static class ExceptionClassExtensions
@@ -301,6 +346,21 @@ public static class ExceptionClassExtensions
             ExceptionClass.APXEVEXRAOINT => "APX_EVEX_RAO_INT",
             ExceptionClass.USERMSREVEX => "USER_MSR_EVEX",
             ExceptionClass.LEGACYRAOINT => "LEGACY_RAO_INT",
+            ExceptionClass.ACEE1 => "ACE_E1",
+            ExceptionClass.ACEE2 => "ACE_E2",
+            ExceptionClass.ACEE3 => "ACE_E3",
+            ExceptionClass.ACEE4 => "ACE_E4",
+            ExceptionClass.ACEE5 => "ACE_E5",
+            ExceptionClass.ACEE6 => "ACE_E6",
+            ExceptionClass.AMXE7EVEX => "AMXE7_EVEX",
+            ExceptionClass.AMXE8EVEX => "AMXE8_EVEX",
+            ExceptionClass.APXEVEXMOVRS => "APX_EVEX_MOVRS",
+            ExceptionClass.LEGACYMOVRS => "LEGACY_MOVRS",
+            ExceptionClass.LEGACYPREFETCH => "LEGACY_PREFETCH",
+            ExceptionClass.MSRIMMEVEX => "MSR_IMM_EVEX",
+            ExceptionClass.MSRIMMVEX => "MSR_IMM_VEX",
+            ExceptionClass.USERMSRLEGACY => "USER_MSR_LEGACY",
+            ExceptionClass.USERMSRVEX => "USER_MSR_VEX",
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
     }
