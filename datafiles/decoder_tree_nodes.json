@@ -31,18 +31,26 @@
       "np_0f:PNP_0F",
       "np_0f38:PNP_0F38",
       "np_0f3a:PNP_0F3A",
+      "np_map5:PNP_MAP5",
+      "np_map7:PNP_MAP7",
       "66:P66",
       "66_0f:P66_0F",
       "66_0f38:P66_0F38",
       "66_0f3a:P66_0F3A",
+      "66_map5:P66_MAP5",
+      "66_map7:P66_MAP7",
       "f3:PF3",
       "f3_0f:PF3_0F",
       "f3_0f38:PF3_0F38",
       "f3_0f3a:PF3_0F3A",
+      "f3_map5:PF3_MAP5",
+      "f3_map7:PF3_MAP7",
       "f2:PF2",
       "f2_0f:PF2_0F",
       "f2_0f38:PF2_0F38",
-      "f2_0f3a:PF2_0F3A"
+      "f2_0f3a:PF2_0F3A",
+      "f2_map5:PF2_MAP5",
+      "f2_map7:PF2_MAP7"
     ]
   },
   {

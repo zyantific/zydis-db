@@ -78,7 +78,14 @@ public sealed class OpcodeTables
             return false;
         }
 
-        var index = (MapIndex(map) * PrefixCount(encoding)) + PrefixIndex(prefix);
+        var mapIndex = MapIndex(encoding, map);
+        if (mapIndex < 0)
+        {
+            result = null;
+            return false;
+        }
+
+        var index = (mapIndex * PrefixCount(encoding)) + PrefixIndex(prefix);
 
         var tableCount = PrefixCount(encoding) * MapCount(encoding);
         if (index >= tableCount)
@@ -119,7 +126,13 @@ public sealed class OpcodeTables
             throw new ArgumentException($"Encoding '{encoding}' does not support refining prefixes.", nameof(prefix));
         }
 
-        var index = (PrefixIndex(prefix) * MapCount(encoding)) + MapIndex(map);
+        var mapIndex = MapIndex(encoding, map);
+        if (mapIndex < 0)
+        {
+            throw new ArgumentException($"Encoding '{encoding}' does not support opcode map '{map}'.", nameof(map));
+        }
+
+        var index = (PrefixIndex(prefix) * MapCount(encoding)) + mapIndex;
 
         var tableCount = PrefixCount(encoding) * MapCount(encoding);
         if (index >= tableCount)
@@ -198,7 +211,9 @@ public sealed class OpcodeTables
                 OpcodeMap.MAP0,
                 OpcodeMap.M0F,
                 OpcodeMap.M0F38,
-                OpcodeMap.M0F3A
+                OpcodeMap.M0F3A,
+                OpcodeMap.MAP5,
+                OpcodeMap.MAP7
             ],
             InstructionEncoding.EVEX => [
                 OpcodeMap.MAP0,
@@ -270,26 +285,11 @@ public sealed class OpcodeTables
         return SupportedPrefixes(encoding).Count();
     }
 
-    private static int MapIndex(OpcodeMap map)
+    private static int MapIndex(InstructionEncoding encoding, OpcodeMap map)
     {
-        return map switch
-        {
-#pragma warning disable IDE0055
-            OpcodeMap.MAP0  => 0, // ......................
-            OpcodeMap.M0F   => 1, //    :                 :
-            OpcodeMap.M0F38 => 2, //    :- Legacy | VEX   :
-            OpcodeMap.M0F3A => 3, // ...:                 :- EVEX | MVEX
-            OpcodeMap.MAP4  => 4, //                      :
-            OpcodeMap.MAP5  => 5, //                      :
-            OpcodeMap.MAP6  => 6, //                      :
-            OpcodeMap.MAP7  => 7, // .....................:
-            OpcodeMap.M0F0F => 0, // ....- 3DNow!
-            OpcodeMap.XOP8  => 0, // ....
-            OpcodeMap.XOP9  => 1, //    :- XOP
-            OpcodeMap.XOPA  => 2, // ...:
-#pragma warning restore IDE0055
-            _ => throw new ArgumentOutOfRangeException(nameof(map), map, null)
-        };
+        // Counting only the encoding's own maps keeps each block dense, and a map the encoding lacks (VEX MAP4, for
+        // example) gets -1 instead of an index that lands on another table of the same encoding.
+        return SupportedMaps(encoding).ToList().IndexOf(map);
     }
 
     private static int PrefixIndex(RefiningPrefix? prefix)
