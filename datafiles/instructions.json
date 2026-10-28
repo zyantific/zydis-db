@@ -97034,6 +97034,25 @@
     "comment": "SUNMQVNTOkhTVUJQUw0KQ1BMOjMNCkNBVEVHT1JZOlNTRQ0KRVhURU5TSU9OOlNTRTMNCkVYQ0VQVElPTlM6U1NFX1RZUEVfMg0KQVRUUklCVVRFUzpSRVFVSVJFU19BTElHTk1FTlQgTVhDU1INClBBVFRFUk46MHgwRiAweDdEIGYyX3JlZmluaW5nX3ByZWZpeCBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dIElHTk9SRTY2KCkgTU9EUk0oKQ0KT1BFUkFORFM6UkVHMD1YTU1fUigpOnJ3OnBzIE1FTTA6cjpwcw=="
   },
   {
+    "mnemonic": "ibhf",
+    "opcode_map": "0f",
+    "opcode": "1E",
+    "filters": {
+      "modrm_mod": "3",
+      "modrm_reg": "7",
+      "modrm_rm": "0",
+      "mandatory_prefix": "f3",
+      "rex_w": "1",
+      "feature_ibhf": "1"
+    },
+    "meta_info": {
+      "category": "LEGACY",
+      "extension": "IBHF",
+      "isa_set": "IBHF"
+    },
+    "comment": "SUNMQVNTOklCSEYNCkNQTDozDQpDQVRFR09SWTpMRUdBQ1kNCkVYVEVOU0lPTjpJQkhGDQpJU0FfU0VUOklCSEYNClJFQUxfT1BDT0RFOlkNCklGT1JNOklCSEYNClBBVFRFUk46MHgwRiAweDFFIE1PRFswYjExXSBNT0Q9MyBSRUdbMGIxMTFdIFJNWzBiMDAwXSByZXh3X3ByZWZpeCBmM19yZWZpbmluZ19wcmVmaXggSUJIRj0xDQpPUEVSQU5EUzo="
+  },
+  {
     "mnemonic": "idiv",
     "opcode": "F6",
     "filters": {
@@ -128587,7 +128606,37 @@
       "modrm_mod": "3",
       "modrm_reg": "7",
       "modrm_rm": "0",
-      "mandatory_prefix": "f3"
+      "mandatory_prefix": "f3",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "operand_type": "gpr16_32_64",
+        "encoding": "modrm_rm"
+      },
+      {
+        "operand_type": "gpr16_32_64",
+        "encoding": "modrm_reg"
+      }
+    ],
+    "meta_info": {
+      "category": "WIDENOP",
+      "extension": "BASE",
+      "isa_set": "PPRO"
+    },
+    "comment": "SUNMQVNTOk5PUA0KQ1BMOjMNCkNBVEVHT1JZOldJREVOT1ANCkVYVEVOU0lPTjpCQVNFDQpBVFRSSUJVVEVTOk5PUA0KSVNBX1NFVDpQUFJPDQpDT01NRU5UOnJlZyBmb3JtIE1PRFJNLk1PRD0zICYgTU9EUk0uUkVHPTBiMDAxICBmMyBwcmVmaXggaXMgUkRTU1B7RCxRfQ0KSUZPUk06Tk9QX01FTXZfR1BSdl8wRjFFDQpJRk9STTpOT1BfR1BSdl9HUFJ2XzBGMUUNCklGT1JNOk5PUF9HUFJ2X0dQUnZfMEYxRQ0KSUZPUk06Tk9QX0dQUnZfR1BSdl8wRjFFDQpJRk9STTpOT1BfR1BSdl9HUFJ2XzBGMUUNCklGT1JNOk5PUF9HUFJ2X0dQUnZfMEYxRQ0KSUZPUk06Tk9QX0dQUnZfR1BSdl8wRjFFDQpJRk9STTpOT1BfR1BSdl9HUFJ2XzBGMUUNCklGT1JNOk5PUF9HUFJ2X0dQUnZfMEYxRQ0KSUZPUk06Tk9QX0dQUnZfR1BSdl8wRjFFDQpJRk9STTpOT1BfR1BSdl9HUFJ2XzBGMUUNCklGT1JNOk5PUF9HUFJ2X0dQUnZfMEYxRQ0KSUZPUk06Tk9QX0dQUnZfR1BSdl8wRjFFDQpJRk9STTpOT1BfR1BSdl9HUFJ2XzBGMUUNCklGT1JNOk5PUF9HUFJ2X0dQUnZfMEYxRQ0KSUZPUk06Tk9QX0dQUnZfR1BSdl8wRjFFDQpQQVRURVJOOjB4MEYgMHgxRSBNT0RbMGIxMV0gTU9EPTMgUkVHWzBiMTExXSBSTVswYjAwMF0gZjNfcmVmaW5pbmdfcHJlZml4DQpPUEVSQU5EUzpSRUcwPUdQUnZfQigpOnIgUkVHMT1HUFJ2X1IoKTpy"
+  },
+  {
+    "mnemonic": "nop",
+    "opcode_map": "0f",
+    "opcode": "1E",
+    "filters": {
+      "modrm_mod": "3",
+      "modrm_reg": "7",
+      "modrm_rm": "0",
+      "mandatory_prefix": "f3",
+      "rex_w": "1",
+      "feature_ibhf": "0"
     },
     "operands": [
       {
