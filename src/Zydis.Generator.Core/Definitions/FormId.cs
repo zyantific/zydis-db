@@ -48,7 +48,8 @@ public static class FormId
         ("feature_cldemote", "CLDEMOTE"),
         ("feature_ud0_compat", "UD0COMPAT"),
         ("feature_lzcnt", "LZCNT"),
-        ("feature_tzcnt", "TZCNT")
+        ("feature_tzcnt", "TZCNT"),
+        ("feature_wbnoinvd", "WBNOINVD")
     ];
 
     /// <summary>
