@@ -218970,6 +218970,88 @@
     "comment": "SUNMQVNTOlREUEJGMTZQUw0KQ1BMOjMNCkNBVEVHT1JZOkFNWF9USUxFDQpFWFRFTlNJT046QU1YX0JGMTYNCklTQV9TRVQ6QU1YX0JGMTYNCkVYQ0VQVElPTlM6QU1YLUU0DQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOk5PVFNYDQpJRk9STTpURFBCRjE2UFNfVE1NZjMyX1RNTXUzMl9UTU11MzINClBBVFRFUk46VlYxIDB4NUMgVkYzIFYwRjM4IE1PRFswYjExXSBNT0Q9MyBSRUdbcnJyXSBSTVtubm5dIFZMMTI4IFcwIG1vZGU2NA0KT1BFUkFORFM6UkVHMD1UTU1fUigpOnJ3OnR2OmYzMiBSRUcxPVRNTV9CKCk6cjp0djp1MzIgUkVHMj1UTU1fTigpOnI6dHY6dTMy"
   },
   {
+    "mnemonic": "tdpbf8ps",
+    "encoding": "vex",
+    "opcode_map": "map5",
+    "opcode": "FD",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "3",
+      "mandatory_prefix": "none",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "tmm",
+        "encoding": "modrm_reg",
+        "element_type": "float32"
+      },
+      {
+        "operand_type": "tmm",
+        "encoding": "modrm_rm",
+        "element_type": "bfloat8x4"
+      },
+      {
+        "operand_type": "tmm",
+        "encoding": "ndsndd",
+        "element_type": "bfloat8x4"
+      }
+    ],
+    "flags": [
+      "no_source_source_match"
+    ],
+    "meta_info": {
+      "category": "AMX_TILE",
+      "extension": "AMX_TILE",
+      "isa_set": "AMX_FP8"
+    },
+    "exception_class": "amxe4",
+    "comment": "SUNMQVNTOlREUEJGOFBTDQpDUEw6Mw0KQ0FURUdPUlk6QU1YX1RJTEUNCkVYVEVOU0lPTjpBTVhfVElMRQ0KSVNBX1NFVDpBTVhfRlA4DQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkZJWEVEX1JPVU5ESU5HX1JORSBOT1RTWCBOT19SRUdfTUFUQ0gNCklGT1JNOlREUEJGOFBTX1RNTWYzMl9UTU00YmY4X1RNTTRiZjgNClBBVFRFUk46VlYxIDB4RkQgVk5QIE1BUDUgTU9EWzBiMTFdIE1PRD0zIFJFR1tycnJdIFJNW25ubl0gVzAgVkwxMjggbW9kZTY0DQpPUEVSQU5EUzpSRUcwPVRNTV9SKCk6cnc6dHY6ZjMyIFJFRzE9VE1NX0IoKTpyOnR2OjRiZjggUkVHMj1UTU1fTigpOnI6dHY6NGJmOA0KRVhDRVBUSU9OUzpBTVgtRTQ="
+  },
+  {
+    "mnemonic": "tdpbhf8ps",
+    "encoding": "vex",
+    "opcode_map": "map5",
+    "opcode": "FD",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "3",
+      "mandatory_prefix": "f2",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "tmm",
+        "encoding": "modrm_reg",
+        "element_type": "float32"
+      },
+      {
+        "operand_type": "tmm",
+        "encoding": "modrm_rm",
+        "element_type": "bfloat8x4"
+      },
+      {
+        "operand_type": "tmm",
+        "encoding": "ndsndd",
+        "element_type": "hfloat8x4"
+      }
+    ],
+    "flags": [
+      "no_source_source_match"
+    ],
+    "meta_info": {
+      "category": "AMX_TILE",
+      "extension": "AMX_TILE",
+      "isa_set": "AMX_FP8"
+    },
+    "exception_class": "amxe4",
+    "comment": "SUNMQVNTOlREUEJIRjhQUw0KQ1BMOjMNCkNBVEVHT1JZOkFNWF9USUxFDQpFWFRFTlNJT046QU1YX1RJTEUNCklTQV9TRVQ6QU1YX0ZQOA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpGSVhFRF9ST1VORElOR19STkUgTk9UU1ggTk9fUkVHX01BVENIDQpJRk9STTpURFBCSEY4UFNfVE1NZjMyX1RNTTRiZjhfVE1NNGhmOA0KUEFUVEVSTjpWVjEgMHhGRCBWRjIgTUFQNSBNT0RbMGIxMV0gTU9EPTMgUkVHW3Jycl0gUk1bbm5uXSBXMCBWTDEyOCBtb2RlNjQNCk9QRVJBTkRTOlJFRzA9VE1NX1IoKTpydzp0djpmMzIgUkVHMT1UTU1fQigpOnI6dHY6NGJmOCBSRUcyPVRNTV9OKCk6cjp0djo0aGY4DQpFWENFUFRJT05TOkFNWC1FNA=="
+  },
+  {
     "mnemonic": "tdpbssd",
     "encoding": "vex",
     "opcode_map": "0f38",
@@ -219170,6 +219252,88 @@
     },
     "exception_class": "amxe4",
     "comment": "SUNMQVNTOlREUEZQMTZQUw0KQ1BMOjMNCkNBVEVHT1JZOkFNWF9USUxFDQpFWFRFTlNJT046QU1YX0ZQMTYNCklTQV9TRVQ6QU1YX0ZQMTYNCkVYQ0VQVElPTlM6QU1YLUU0DQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOk5PVFNYDQpJRk9STTpURFBGUDE2UFNfVE1NZjMyX1RNTTJmMTZfVE1NMmYxNg0KUEFUVEVSTjpWVjEgMHg1QyBWRjIgVjBGMzggTU9EWzBiMTFdIE1PRD0zIFJFR1tycnJdIFJNW25ubl0gVkwxMjggVzAgbW9kZTY0DQpPUEVSQU5EUzpSRUcwPVRNTV9SKCk6cnc6dHY6ZjMyIFJFRzE9VE1NX0IoKTpyOnR2OjJmMTYgUkVHMj1UTU1fTigpOnI6dHY6MmYxNg=="
+  },
+  {
+    "mnemonic": "tdphbf8ps",
+    "encoding": "vex",
+    "opcode_map": "map5",
+    "opcode": "FD",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "3",
+      "mandatory_prefix": "f3",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "tmm",
+        "encoding": "modrm_reg",
+        "element_type": "float32"
+      },
+      {
+        "operand_type": "tmm",
+        "encoding": "modrm_rm",
+        "element_type": "hfloat8x4"
+      },
+      {
+        "operand_type": "tmm",
+        "encoding": "ndsndd",
+        "element_type": "bfloat8x4"
+      }
+    ],
+    "flags": [
+      "no_source_source_match"
+    ],
+    "meta_info": {
+      "category": "AMX_TILE",
+      "extension": "AMX_TILE",
+      "isa_set": "AMX_FP8"
+    },
+    "exception_class": "amxe4",
+    "comment": "SUNMQVNTOlREUEhCRjhQUw0KQ1BMOjMNCkNBVEVHT1JZOkFNWF9USUxFDQpFWFRFTlNJT046QU1YX1RJTEUNCklTQV9TRVQ6QU1YX0ZQOA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpGSVhFRF9ST1VORElOR19STkUgTk9UU1ggTk9fUkVHX01BVENIDQpJRk9STTpURFBIQkY4UFNfVE1NZjMyX1RNTTRoZjhfVE1NNGJmOA0KUEFUVEVSTjpWVjEgMHhGRCBWRjMgTUFQNSBNT0RbMGIxMV0gTU9EPTMgUkVHW3Jycl0gUk1bbm5uXSBXMCBWTDEyOCBtb2RlNjQNCk9QRVJBTkRTOlJFRzA9VE1NX1IoKTpydzp0djpmMzIgUkVHMT1UTU1fQigpOnI6dHY6NGhmOCBSRUcyPVRNTV9OKCk6cjp0djo0YmY4DQpFWENFUFRJT05TOkFNWC1FNA=="
+  },
+  {
+    "mnemonic": "tdphf8ps",
+    "encoding": "vex",
+    "opcode_map": "map5",
+    "opcode": "FD",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "tmm",
+        "encoding": "modrm_reg",
+        "element_type": "float32"
+      },
+      {
+        "operand_type": "tmm",
+        "encoding": "modrm_rm",
+        "element_type": "hfloat8x4"
+      },
+      {
+        "operand_type": "tmm",
+        "encoding": "ndsndd",
+        "element_type": "hfloat8x4"
+      }
+    ],
+    "flags": [
+      "no_source_source_match"
+    ],
+    "meta_info": {
+      "category": "AMX_TILE",
+      "extension": "AMX_TILE",
+      "isa_set": "AMX_FP8"
+    },
+    "exception_class": "amxe4",
+    "comment": "SUNMQVNTOlREUEhGOFBTDQpDUEw6Mw0KQ0FURUdPUlk6QU1YX1RJTEUNCkVYVEVOU0lPTjpBTVhfVElMRQ0KSVNBX1NFVDpBTVhfRlA4DQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkZJWEVEX1JPVU5ESU5HX1JORSBOT1RTWCBOT19SRUdfTUFUQ0gNCklGT1JNOlREUEhGOFBTX1RNTWYzMl9UTU00aGY4X1RNTTRoZjgNClBBVFRFUk46VlYxIDB4RkQgVjY2IE1BUDUgTU9EWzBiMTFdIE1PRD0zIFJFR1tycnJdIFJNW25ubl0gVzAgVkwxMjggbW9kZTY0DQpPUEVSQU5EUzpSRUcwPVRNTV9SKCk6cnc6dHY6ZjMyIFJFRzE9VE1NX0IoKTpyOnR2OjRoZjggUkVHMj1UTU1fTigpOnI6dHY6NGhmOA0KRVhDRVBUSU9OUzpBTVgtRTQ="
   },
   {
     "mnemonic": "test",
