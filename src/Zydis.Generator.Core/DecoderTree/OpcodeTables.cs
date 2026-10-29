@@ -67,34 +67,14 @@ public sealed class OpcodeTables
     /// <returns><see langword="true"/> if the opcode table node was successfully retrieved; otherwise, <see langword="false"/>.</returns>
     public bool TryGetTable(InstructionEncoding encoding, OpcodeMap map, RefiningPrefix? prefix, [NotNullWhen(true)] out OpcodeTableNode? result)
     {
-        // Note:
-        // For default encoding, the prefix must always be `null`. Mandatory (refining) prefixes are used with default
-        // encoding, but very rarely and only in specific cases. We do not wire them in the opcode tables.
-
-        var requiresPrefix = SupportedPrefixes(encoding).Any(x => x is not null);
-        if (requiresPrefix != prefix.HasValue)
+        var id = ResolveTableId(encoding, map, prefix, throwOnFailure: false);
+        if (id < 0)
         {
             result = null;
             return false;
         }
 
-        var mapIndex = MapIndex(encoding, map);
-        if (mapIndex < 0)
-        {
-            result = null;
-            return false;
-        }
-
-        var index = (mapIndex * PrefixCount(encoding)) + PrefixIndex(prefix);
-
-        var tableCount = PrefixCount(encoding) * MapCount(encoding);
-        if (index >= tableCount)
-        {
-            result = null;
-            return false;
-        }
-
-        result = _tables[Lut[encoding] + index];
+        result = _tables[id];
         return true;
     }
 
@@ -111,6 +91,22 @@ public sealed class OpcodeTables
     /// <returns>The opcode table id corresponding to the specified parameters.</returns>
     public static int GetTableId(InstructionEncoding encoding, OpcodeMap map, RefiningPrefix? prefix)
     {
+        return ResolveTableId(encoding, map, prefix, throwOnFailure: true);
+    }
+
+    /// <summary>
+    /// Resolves the opcode table id for the specified <paramref name="encoding"/>, opcode <paramref name="map"/>, and
+    /// optional refining <paramref name="prefix"/>.
+    /// </summary>
+    /// <returns>
+    /// The opcode table id, or <c>-1</c> if the request is invalid and <paramref name="throwOnFailure"/> is
+    /// <see langword="false"/>.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// The request is invalid and <paramref name="throwOnFailure"/> is <see langword="true"/>.
+    /// </exception>
+    private static int ResolveTableId(InstructionEncoding encoding, OpcodeMap map, RefiningPrefix? prefix, bool throwOnFailure)
+    {
         // Note:
         // For default encoding, the prefix must always be `null`. Mandatory (refining) prefixes are used with default
         // encoding, but very rarely and only in specific cases. We do not wire them in the opcode tables.
@@ -118,6 +114,11 @@ public sealed class OpcodeTables
         var requiresPrefix = SupportedPrefixes(encoding).Any(x => x is not null);
         if (requiresPrefix != prefix.HasValue)
         {
+            if (!throwOnFailure)
+            {
+                return -1;
+            }
+
             if (requiresPrefix)
             {
                 throw new ArgumentException($"Encoding '{encoding}' requires a refining prefix.", nameof(prefix));
@@ -129,14 +130,26 @@ public sealed class OpcodeTables
         var mapIndex = MapIndex(encoding, map);
         if (mapIndex < 0)
         {
+            if (!throwOnFailure)
+            {
+                return -1;
+            }
+
             throw new ArgumentException($"Encoding '{encoding}' does not support opcode map '{map}'.", nameof(map));
         }
 
+        // Prefix-major, with the map as the inner dimension, because that is the order the constructor's cartesian
+        // product lays the tables out in.
         var index = (PrefixIndex(prefix) * MapCount(encoding)) + mapIndex;
 
         var tableCount = PrefixCount(encoding) * MapCount(encoding);
         if (index >= tableCount)
         {
+            if (!throwOnFailure)
+            {
+                return -1;
+            }
+
             throw new ArgumentException("Invalid map or prefix for the given encoding.");
         }
 
