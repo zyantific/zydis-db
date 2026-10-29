@@ -63214,6 +63214,120 @@
   },
   {
     "mnemonic": "cmpbexadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E6",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUEJFWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF80Qg0KSUZPUk06Q01QQkVYQUREX01FTXUzMl9HUFIzMnUzMl9HUFIzMnUzMg0KUEFUVEVSTjpWVjEgMHhFNiBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcwICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6ZDp1MzIgUkVHMD1WR1BSMzJfUigpOnJ3OmQ6dTMyIFJFRzE9VkdQUjMyX04oKTpyOmQ6dTMyDQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
+  },
+  {
+    "mnemonic": "cmpbexadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E6",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUEJFWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF84Qg0KSUZPUk06Q01QQkVYQUREX01FTXU2NF9HUFI2NHU2NF9HUFI2NHU2NA0KUEFUVEVSTjpWVjEgMHhFNiBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcxICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6cTp1NjQgUkVHMD1WR1BSNjRfUigpOnJ3OnE6dTY0IFJFRzE9VkdQUjY0X04oKTpyOnE6dTY0DQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
+  },
+  {
+    "mnemonic": "cmpbexadd",
     "encoding": "evex",
     "opcode_map": "0f38",
     "opcode": "E6",
@@ -63341,6 +63455,120 @@
       "is_eevex": true
     },
     "comment": "SUNMQVNTOkNNUEJFWEFERA0KQ1BMOjMNCkNBVEVHT1JZOkFQWA0KRVhURU5TSU9OOkFQWEVWRVgNCklTQV9TRVQ6QVBYX0ZfQ01QQ0NYQUREDQpFWENFUFRJT05TOkFQWC1FVkVYLUNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpBVFRSSUJVVEVTOkFUT01JQyBESVNQOF9OT19TQ0FMRSBSRVFVSVJFU19BTElHTk1FTlRfOEINCklGT1JNOkNNUEJFWEFERF9NRU11NjRfR1BSNjR1NjRfR1BSNjR1NjRfQVBYDQpQQVRURVJOOkVWViAweEU2IFY2NiBWMEYzOCBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dIE1PRFJNKCkgTkQ9MCBORj0wIFcxIFZMMTI4IG1vZGU2NCBaRVJPSU5HPTAgRVZBUFgoKQ0KT1BFUkFORFM6TUVNMDpydzpxOnU2NCBSRUcwPUdQUjY0X1IoKTpydzpxOnU2NCBSRUcxPUdQUjY0X04oKTpyOnE6dTY0"
+  },
+  {
+    "mnemonic": "cmpbxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E2",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUEJYQUREDQpDUEw6Mw0KQ0FURUdPUlk6VkVYDQpFWFRFTlNJT046Q01QQ0NYQUREDQpJU0FfU0VUOkNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpBVE9NSUMgUkVRVUlSRVNfQUxJR05NRU5UXzRCDQpJRk9STTpDTVBCWEFERF9NRU11MzJfR1BSMzJ1MzJfR1BSMzJ1MzINClBBVFRFUk46VlYxIDB4RTIgVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gIE1PRFJNKCkgIFZMMTI4ICBXMCAgbW9kZTY0DQpPUEVSQU5EUzpNRU0wOnJ3OmQ6dTMyIFJFRzA9VkdQUjMyX1IoKTpydzpkOnUzMiBSRUcxPVZHUFIzMl9OKCk6cjpkOnUzMg0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpFWENFUFRJT05TOmF2eC10eXBlLTE0"
+  },
+  {
+    "mnemonic": "cmpbxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E2",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUEJYQUREDQpDUEw6Mw0KQ0FURUdPUlk6VkVYDQpFWFRFTlNJT046Q01QQ0NYQUREDQpJU0FfU0VUOkNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpBVE9NSUMgUkVRVUlSRVNfQUxJR05NRU5UXzhCDQpJRk9STTpDTVBCWEFERF9NRU11NjRfR1BSNjR1NjRfR1BSNjR1NjQNClBBVFRFUk46VlYxIDB4RTIgVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gIE1PRFJNKCkgIFZMMTI4ICBXMSAgbW9kZTY0DQpPUEVSQU5EUzpNRU0wOnJ3OnE6dTY0IFJFRzA9VkdQUjY0X1IoKTpydzpxOnU2NCBSRUcxPVZHUFI2NF9OKCk6cjpxOnU2NA0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpFWENFUFRJT05TOmF2eC10eXBlLTE0"
   },
   {
     "mnemonic": "cmpbxadd",
@@ -63474,6 +63702,120 @@
   },
   {
     "mnemonic": "cmplexadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "EE",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUExFWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF80Qg0KSUZPUk06Q01QTEVYQUREX01FTXUzMl9HUFIzMnUzMl9HUFIzMnUzMg0KUEFUVEVSTjpWVjEgMHhFRSBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcwICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6ZDp1MzIgUkVHMD1WR1BSMzJfUigpOnJ3OmQ6dTMyIFJFRzE9VkdQUjMyX04oKTpyOmQ6dTMyDQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
+  },
+  {
+    "mnemonic": "cmplexadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "EE",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUExFWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF84Qg0KSUZPUk06Q01QTEVYQUREX01FTXU2NF9HUFI2NHU2NF9HUFI2NHU2NA0KUEFUVEVSTjpWVjEgMHhFRSBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcxICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6cTp1NjQgUkVHMD1WR1BSNjRfUigpOnJ3OnE6dTY0IFJFRzE9VkdQUjY0X04oKTpyOnE6dTY0DQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
+  },
+  {
+    "mnemonic": "cmplexadd",
     "encoding": "evex",
     "opcode_map": "0f38",
     "opcode": "EE",
@@ -63601,6 +63943,120 @@
       "is_eevex": true
     },
     "comment": "SUNMQVNTOkNNUExFWEFERA0KQ1BMOjMNCkNBVEVHT1JZOkFQWA0KRVhURU5TSU9OOkFQWEVWRVgNCklTQV9TRVQ6QVBYX0ZfQ01QQ0NYQUREDQpFWENFUFRJT05TOkFQWC1FVkVYLUNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpBVFRSSUJVVEVTOkFUT01JQyBESVNQOF9OT19TQ0FMRSBSRVFVSVJFU19BTElHTk1FTlRfOEINCklGT1JNOkNNUExFWEFERF9NRU11NjRfR1BSNjR1NjRfR1BSNjR1NjRfQVBYDQpQQVRURVJOOkVWViAweEVFIFY2NiBWMEYzOCBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dIE1PRFJNKCkgTkQ9MCBORj0wIFcxIFZMMTI4IG1vZGU2NCBaRVJPSU5HPTAgRVZBUFgoKQ0KT1BFUkFORFM6TUVNMDpydzpxOnU2NCBSRUcwPUdQUjY0X1IoKTpydzpxOnU2NCBSRUcxPUdQUjY0X04oKTpyOnE6dTY0"
+  },
+  {
+    "mnemonic": "cmplxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "EC",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUExYQUREDQpDUEw6Mw0KQ0FURUdPUlk6VkVYDQpFWFRFTlNJT046Q01QQ0NYQUREDQpJU0FfU0VUOkNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpBVE9NSUMgUkVRVUlSRVNfQUxJR05NRU5UXzRCDQpJRk9STTpDTVBMWEFERF9NRU11MzJfR1BSMzJ1MzJfR1BSMzJ1MzINClBBVFRFUk46VlYxIDB4RUMgVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gIE1PRFJNKCkgIFZMMTI4ICBXMCAgbW9kZTY0DQpPUEVSQU5EUzpNRU0wOnJ3OmQ6dTMyIFJFRzA9VkdQUjMyX1IoKTpydzpkOnUzMiBSRUcxPVZHUFIzMl9OKCk6cjpkOnUzMg0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpFWENFUFRJT05TOmF2eC10eXBlLTE0"
+  },
+  {
+    "mnemonic": "cmplxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "EC",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUExYQUREDQpDUEw6Mw0KQ0FURUdPUlk6VkVYDQpFWFRFTlNJT046Q01QQ0NYQUREDQpJU0FfU0VUOkNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpBVE9NSUMgUkVRVUlSRVNfQUxJR05NRU5UXzhCDQpJRk9STTpDTVBMWEFERF9NRU11NjRfR1BSNjR1NjRfR1BSNjR1NjQNClBBVFRFUk46VlYxIDB4RUMgVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gIE1PRFJNKCkgIFZMMTI4ICBXMSAgbW9kZTY0DQpPUEVSQU5EUzpNRU0wOnJ3OnE6dTY0IFJFRzA9VkdQUjY0X1IoKTpydzpxOnU2NCBSRUcxPVZHUFI2NF9OKCk6cjpxOnU2NA0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpFWENFUFRJT05TOmF2eC10eXBlLTE0"
   },
   {
     "mnemonic": "cmplxadd",
@@ -63734,6 +64190,120 @@
   },
   {
     "mnemonic": "cmpnbexadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E7",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5CRVhBREQNCkNQTDozDQpDQVRFR09SWTpWRVgNCkVYVEVOU0lPTjpDTVBDQ1hBREQNCklTQV9TRVQ6Q01QQ0NYQUREDQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkFUT01JQyBSRVFVSVJFU19BTElHTk1FTlRfNEINCklGT1JNOkNNUE5CRVhBRERfTUVNdTMyX0dQUjMydTMyX0dQUjMydTMyDQpQQVRURVJOOlZWMSAweEU3IFY2NiBWMEYzOCBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dICBNT0RSTSgpICBWTDEyOCAgVzAgIG1vZGU2NA0KT1BFUkFORFM6TUVNMDpydzpkOnUzMiBSRUcwPVZHUFIzMl9SKCk6cnc6ZDp1MzIgUkVHMT1WR1BSMzJfTigpOnI6ZDp1MzINCkZMQUdTOk1VU1QgWyAgemYtbW9kICBjZi1tb2QgIHBmLW1vZCAgb2YtbW9kICBzZi1tb2QgIGFmLW1vZCAgXQ0KRVhDRVBUSU9OUzphdngtdHlwZS0xNA=="
+  },
+  {
+    "mnemonic": "cmpnbexadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E7",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5CRVhBREQNCkNQTDozDQpDQVRFR09SWTpWRVgNCkVYVEVOU0lPTjpDTVBDQ1hBREQNCklTQV9TRVQ6Q01QQ0NYQUREDQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkFUT01JQyBSRVFVSVJFU19BTElHTk1FTlRfOEINCklGT1JNOkNNUE5CRVhBRERfTUVNdTY0X0dQUjY0dTY0X0dQUjY0dTY0DQpQQVRURVJOOlZWMSAweEU3IFY2NiBWMEYzOCBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dICBNT0RSTSgpICBWTDEyOCAgVzEgIG1vZGU2NA0KT1BFUkFORFM6TUVNMDpydzpxOnU2NCBSRUcwPVZHUFI2NF9SKCk6cnc6cTp1NjQgUkVHMT1WR1BSNjRfTigpOnI6cTp1NjQNCkZMQUdTOk1VU1QgWyAgemYtbW9kICBjZi1tb2QgIHBmLW1vZCAgb2YtbW9kICBzZi1tb2QgIGFmLW1vZCAgXQ0KRVhDRVBUSU9OUzphdngtdHlwZS0xNA=="
+  },
+  {
+    "mnemonic": "cmpnbexadd",
     "encoding": "evex",
     "opcode_map": "0f38",
     "opcode": "E7",
@@ -63861,6 +64431,120 @@
       "is_eevex": true
     },
     "comment": "SUNMQVNTOkNNUE5CRVhBREQNCkNQTDozDQpDQVRFR09SWTpBUFgNCkVYVEVOU0lPTjpBUFhFVkVYDQpJU0FfU0VUOkFQWF9GX0NNUENDWEFERA0KRVhDRVBUSU9OUzpBUFgtRVZFWC1DTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkZMQUdTOk1VU1QgWyAgemYtbW9kICBjZi1tb2QgIHBmLW1vZCAgb2YtbW9kICBzZi1tb2QgIGFmLW1vZCAgXQ0KQVRUUklCVVRFUzpBVE9NSUMgRElTUDhfTk9fU0NBTEUgUkVRVUlSRVNfQUxJR05NRU5UXzhCDQpJRk9STTpDTVBOQkVYQUREX01FTXU2NF9HUFI2NHU2NF9HUFI2NHU2NF9BUFgNClBBVFRFUk46RVZWIDB4RTcgVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gTU9EUk0oKSBORD0wIE5GPTAgVzEgVkwxMjggbW9kZTY0IFpFUk9JTkc9MCBFVkFQWCgpDQpPUEVSQU5EUzpNRU0wOnJ3OnE6dTY0IFJFRzA9R1BSNjRfUigpOnJ3OnE6dTY0IFJFRzE9R1BSNjRfTigpOnI6cTp1NjQ="
+  },
+  {
+    "mnemonic": "cmpnbxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E3",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5CWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF80Qg0KSUZPUk06Q01QTkJYQUREX01FTXUzMl9HUFIzMnUzMl9HUFIzMnUzMg0KUEFUVEVSTjpWVjEgMHhFMyBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcwICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6ZDp1MzIgUkVHMD1WR1BSMzJfUigpOnJ3OmQ6dTMyIFJFRzE9VkdQUjMyX04oKTpyOmQ6dTMyDQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
+  },
+  {
+    "mnemonic": "cmpnbxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E3",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5CWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF84Qg0KSUZPUk06Q01QTkJYQUREX01FTXU2NF9HUFI2NHU2NF9HUFI2NHU2NA0KUEFUVEVSTjpWVjEgMHhFMyBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcxICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6cTp1NjQgUkVHMD1WR1BSNjRfUigpOnJ3OnE6dTY0IFJFRzE9VkdQUjY0X04oKTpyOnE6dTY0DQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
   },
   {
     "mnemonic": "cmpnbxadd",
@@ -63994,6 +64678,120 @@
   },
   {
     "mnemonic": "cmpnlexadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "EF",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5MRVhBREQNCkNQTDozDQpDQVRFR09SWTpWRVgNCkVYVEVOU0lPTjpDTVBDQ1hBREQNCklTQV9TRVQ6Q01QQ0NYQUREDQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkFUT01JQyBSRVFVSVJFU19BTElHTk1FTlRfNEINCklGT1JNOkNNUE5MRVhBRERfTUVNdTMyX0dQUjMydTMyX0dQUjMydTMyDQpQQVRURVJOOlZWMSAweEVGIFY2NiBWMEYzOCBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dICBNT0RSTSgpICBWTDEyOCAgVzAgIG1vZGU2NA0KT1BFUkFORFM6TUVNMDpydzpkOnUzMiBSRUcwPVZHUFIzMl9SKCk6cnc6ZDp1MzIgUkVHMT1WR1BSMzJfTigpOnI6ZDp1MzINCkZMQUdTOk1VU1QgWyAgemYtbW9kICBjZi1tb2QgIHBmLW1vZCAgb2YtbW9kICBzZi1tb2QgIGFmLW1vZCAgXQ0KRVhDRVBUSU9OUzphdngtdHlwZS0xNA=="
+  },
+  {
+    "mnemonic": "cmpnlexadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "EF",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5MRVhBREQNCkNQTDozDQpDQVRFR09SWTpWRVgNCkVYVEVOU0lPTjpDTVBDQ1hBREQNCklTQV9TRVQ6Q01QQ0NYQUREDQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkFUT01JQyBSRVFVSVJFU19BTElHTk1FTlRfOEINCklGT1JNOkNNUE5MRVhBRERfTUVNdTY0X0dQUjY0dTY0X0dQUjY0dTY0DQpQQVRURVJOOlZWMSAweEVGIFY2NiBWMEYzOCBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dICBNT0RSTSgpICBWTDEyOCAgVzEgIG1vZGU2NA0KT1BFUkFORFM6TUVNMDpydzpxOnU2NCBSRUcwPVZHUFI2NF9SKCk6cnc6cTp1NjQgUkVHMT1WR1BSNjRfTigpOnI6cTp1NjQNCkZMQUdTOk1VU1QgWyAgemYtbW9kICBjZi1tb2QgIHBmLW1vZCAgb2YtbW9kICBzZi1tb2QgIGFmLW1vZCAgXQ0KRVhDRVBUSU9OUzphdngtdHlwZS0xNA=="
+  },
+  {
+    "mnemonic": "cmpnlexadd",
     "encoding": "evex",
     "opcode_map": "0f38",
     "opcode": "EF",
@@ -64121,6 +64919,120 @@
       "is_eevex": true
     },
     "comment": "SUNMQVNTOkNNUE5MRVhBREQNCkNQTDozDQpDQVRFR09SWTpBUFgNCkVYVEVOU0lPTjpBUFhFVkVYDQpJU0FfU0VUOkFQWF9GX0NNUENDWEFERA0KRVhDRVBUSU9OUzpBUFgtRVZFWC1DTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkZMQUdTOk1VU1QgWyAgemYtbW9kICBjZi1tb2QgIHBmLW1vZCAgb2YtbW9kICBzZi1tb2QgIGFmLW1vZCAgXQ0KQVRUUklCVVRFUzpBVE9NSUMgRElTUDhfTk9fU0NBTEUgUkVRVUlSRVNfQUxJR05NRU5UXzhCDQpJRk9STTpDTVBOTEVYQUREX01FTXU2NF9HUFI2NHU2NF9HUFI2NHU2NF9BUFgNClBBVFRFUk46RVZWIDB4RUYgVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gTU9EUk0oKSBORD0wIE5GPTAgVzEgVkwxMjggbW9kZTY0IFpFUk9JTkc9MCBFVkFQWCgpDQpPUEVSQU5EUzpNRU0wOnJ3OnE6dTY0IFJFRzA9R1BSNjRfUigpOnJ3OnE6dTY0IFJFRzE9R1BSNjRfTigpOnI6cTp1NjQ="
+  },
+  {
+    "mnemonic": "cmpnlxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "ED",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5MWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF80Qg0KSUZPUk06Q01QTkxYQUREX01FTXUzMl9HUFIzMnUzMl9HUFIzMnUzMg0KUEFUVEVSTjpWVjEgMHhFRCBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcwICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6ZDp1MzIgUkVHMD1WR1BSMzJfUigpOnJ3OmQ6dTMyIFJFRzE9VkdQUjMyX04oKTpyOmQ6dTMyDQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
+  },
+  {
+    "mnemonic": "cmpnlxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "ED",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5MWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF84Qg0KSUZPUk06Q01QTkxYQUREX01FTXU2NF9HUFI2NHU2NF9HUFI2NHU2NA0KUEFUVEVSTjpWVjEgMHhFRCBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcxICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6cTp1NjQgUkVHMD1WR1BSNjRfUigpOnJ3OnE6dTY0IFJFRzE9VkdQUjY0X04oKTpyOnE6dTY0DQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
   },
   {
     "mnemonic": "cmpnlxadd",
@@ -64254,6 +65166,120 @@
   },
   {
     "mnemonic": "cmpnoxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E1",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5PWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF80Qg0KSUZPUk06Q01QTk9YQUREX01FTXUzMl9HUFIzMnUzMl9HUFIzMnUzMg0KUEFUVEVSTjpWVjEgMHhFMSBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcwICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6ZDp1MzIgUkVHMD1WR1BSMzJfUigpOnJ3OmQ6dTMyIFJFRzE9VkdQUjMyX04oKTpyOmQ6dTMyDQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
+  },
+  {
+    "mnemonic": "cmpnoxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E1",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5PWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF84Qg0KSUZPUk06Q01QTk9YQUREX01FTXU2NF9HUFI2NHU2NF9HUFI2NHU2NA0KUEFUVEVSTjpWVjEgMHhFMSBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcxICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6cTp1NjQgUkVHMD1WR1BSNjRfUigpOnJ3OnE6dTY0IFJFRzE9VkdQUjY0X04oKTpyOnE6dTY0DQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
+  },
+  {
+    "mnemonic": "cmpnoxadd",
     "encoding": "evex",
     "opcode_map": "0f38",
     "opcode": "E1",
@@ -64381,6 +65407,120 @@
       "is_eevex": true
     },
     "comment": "SUNMQVNTOkNNUE5PWEFERA0KQ1BMOjMNCkNBVEVHT1JZOkFQWA0KRVhURU5TSU9OOkFQWEVWRVgNCklTQV9TRVQ6QVBYX0ZfQ01QQ0NYQUREDQpFWENFUFRJT05TOkFQWC1FVkVYLUNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpBVFRSSUJVVEVTOkFUT01JQyBESVNQOF9OT19TQ0FMRSBSRVFVSVJFU19BTElHTk1FTlRfOEINCklGT1JNOkNNUE5PWEFERF9NRU11NjRfR1BSNjR1NjRfR1BSNjR1NjRfQVBYDQpQQVRURVJOOkVWViAweEUxIFY2NiBWMEYzOCBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dIE1PRFJNKCkgTkQ9MCBORj0wIFcxIFZMMTI4IG1vZGU2NCBaRVJPSU5HPTAgRVZBUFgoKQ0KT1BFUkFORFM6TUVNMDpydzpxOnU2NCBSRUcwPUdQUjY0X1IoKTpydzpxOnU2NCBSRUcxPUdQUjY0X04oKTpyOnE6dTY0"
+  },
+  {
+    "mnemonic": "cmpnpxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "EB",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5QWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF80Qg0KSUZPUk06Q01QTlBYQUREX01FTXUzMl9HUFIzMnUzMl9HUFIzMnUzMg0KUEFUVEVSTjpWVjEgMHhFQiBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcwICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6ZDp1MzIgUkVHMD1WR1BSMzJfUigpOnJ3OmQ6dTMyIFJFRzE9VkdQUjMyX04oKTpyOmQ6dTMyDQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
+  },
+  {
+    "mnemonic": "cmpnpxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "EB",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5QWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF84Qg0KSUZPUk06Q01QTlBYQUREX01FTXU2NF9HUFI2NHU2NF9HUFI2NHU2NA0KUEFUVEVSTjpWVjEgMHhFQiBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcxICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6cTp1NjQgUkVHMD1WR1BSNjRfUigpOnJ3OnE6dTY0IFJFRzE9VkdQUjY0X04oKTpyOnE6dTY0DQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
   },
   {
     "mnemonic": "cmpnpxadd",
@@ -64514,6 +65654,120 @@
   },
   {
     "mnemonic": "cmpnsxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E9",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5TWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF80Qg0KSUZPUk06Q01QTlNYQUREX01FTXUzMl9HUFIzMnUzMl9HUFIzMnUzMg0KUEFUVEVSTjpWVjEgMHhFOSBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcwICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6ZDp1MzIgUkVHMD1WR1BSMzJfUigpOnJ3OmQ6dTMyIFJFRzE9VkdQUjMyX04oKTpyOmQ6dTMyDQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
+  },
+  {
+    "mnemonic": "cmpnsxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E9",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5TWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF84Qg0KSUZPUk06Q01QTlNYQUREX01FTXU2NF9HUFI2NHU2NF9HUFI2NHU2NA0KUEFUVEVSTjpWVjEgMHhFOSBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcxICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6cTp1NjQgUkVHMD1WR1BSNjRfUigpOnJ3OnE6dTY0IFJFRzE9VkdQUjY0X04oKTpyOnE6dTY0DQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
+  },
+  {
+    "mnemonic": "cmpnsxadd",
     "encoding": "evex",
     "opcode_map": "0f38",
     "opcode": "E9",
@@ -64644,6 +65898,120 @@
   },
   {
     "mnemonic": "cmpnzxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E5",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5aWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF80Qg0KSUZPUk06Q01QTlpYQUREX01FTXUzMl9HUFIzMnUzMl9HUFIzMnUzMg0KUEFUVEVSTjpWVjEgMHhFNSBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcwICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6ZDp1MzIgUkVHMD1WR1BSMzJfUigpOnJ3OmQ6dTMyIFJFRzE9VkdQUjMyX04oKTpyOmQ6dTMyDQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
+  },
+  {
+    "mnemonic": "cmpnzxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E5",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE5aWEFERA0KQ1BMOjMNCkNBVEVHT1JZOlZFWA0KRVhURU5TSU9OOkNNUENDWEFERA0KSVNBX1NFVDpDTVBDQ1hBREQNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QVRPTUlDIFJFUVVJUkVTX0FMSUdOTUVOVF84Qg0KSUZPUk06Q01QTlpYQUREX01FTXU2NF9HUFI2NHU2NF9HUFI2NHU2NA0KUEFUVEVSTjpWVjEgMHhFNSBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSAgTU9EUk0oKSAgVkwxMjggIFcxICBtb2RlNjQNCk9QRVJBTkRTOk1FTTA6cnc6cTp1NjQgUkVHMD1WR1BSNjRfUigpOnJ3OnE6dTY0IFJFRzE9VkdQUjY0X04oKTpyOnE6dTY0DQpGTEFHUzpNVVNUIFsgIHpmLW1vZCAgY2YtbW9kICBwZi1tb2QgIG9mLW1vZCAgc2YtbW9kICBhZi1tb2QgIF0NCkVYQ0VQVElPTlM6YXZ4LXR5cGUtMTQ="
+  },
+  {
+    "mnemonic": "cmpnzxadd",
     "encoding": "evex",
     "opcode_map": "0f38",
     "opcode": "E5",
@@ -64771,6 +66139,120 @@
       "is_eevex": true
     },
     "comment": "SUNMQVNTOkNNUE5aWEFERA0KQ1BMOjMNCkNBVEVHT1JZOkFQWA0KRVhURU5TSU9OOkFQWEVWRVgNCklTQV9TRVQ6QVBYX0ZfQ01QQ0NYQUREDQpFWENFUFRJT05TOkFQWC1FVkVYLUNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpBVFRSSUJVVEVTOkFUT01JQyBESVNQOF9OT19TQ0FMRSBSRVFVSVJFU19BTElHTk1FTlRfOEINCklGT1JNOkNNUE5aWEFERF9NRU11NjRfR1BSNjR1NjRfR1BSNjR1NjRfQVBYDQpQQVRURVJOOkVWViAweEU1IFY2NiBWMEYzOCBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dIE1PRFJNKCkgTkQ9MCBORj0wIFcxIFZMMTI4IG1vZGU2NCBaRVJPSU5HPTAgRVZBUFgoKQ0KT1BFUkFORFM6TUVNMDpydzpxOnU2NCBSRUcwPUdQUjY0X1IoKTpydzpxOnU2NCBSRUcxPUdQUjY0X04oKTpyOnE6dTY0"
+  },
+  {
+    "mnemonic": "cmpoxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E0",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE9YQUREDQpDUEw6Mw0KQ0FURUdPUlk6VkVYDQpFWFRFTlNJT046Q01QQ0NYQUREDQpJU0FfU0VUOkNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpBVE9NSUMgUkVRVUlSRVNfQUxJR05NRU5UXzRCDQpJRk9STTpDTVBPWEFERF9NRU11MzJfR1BSMzJ1MzJfR1BSMzJ1MzINClBBVFRFUk46VlYxIDB4RTAgVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gIE1PRFJNKCkgIFZMMTI4ICBXMCAgbW9kZTY0DQpPUEVSQU5EUzpNRU0wOnJ3OmQ6dTMyIFJFRzA9VkdQUjMyX1IoKTpydzpkOnUzMiBSRUcxPVZHUFIzMl9OKCk6cjpkOnUzMg0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpFWENFUFRJT05TOmF2eC10eXBlLTE0"
+  },
+  {
+    "mnemonic": "cmpoxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E0",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUE9YQUREDQpDUEw6Mw0KQ0FURUdPUlk6VkVYDQpFWFRFTlNJT046Q01QQ0NYQUREDQpJU0FfU0VUOkNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpBVE9NSUMgUkVRVUlSRVNfQUxJR05NRU5UXzhCDQpJRk9STTpDTVBPWEFERF9NRU11NjRfR1BSNjR1NjRfR1BSNjR1NjQNClBBVFRFUk46VlYxIDB4RTAgVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gIE1PRFJNKCkgIFZMMTI4ICBXMSAgbW9kZTY0DQpPUEVSQU5EUzpNRU0wOnJ3OnE6dTY0IFJFRzA9VkdQUjY0X1IoKTpydzpxOnU2NCBSRUcxPVZHUFI2NF9OKCk6cjpxOnU2NA0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpFWENFUFRJT05TOmF2eC10eXBlLTE0"
   },
   {
     "mnemonic": "cmpoxadd",
@@ -65073,6 +66555,120 @@
     },
     "exception_class": "sse2",
     "comment": "SUNMQVNTOkNNUFBTDQpDUEw6Mw0KQ0FURUdPUlk6U1NFDQpFWFRFTlNJT046U1NFDQpFWENFUFRJT05TOlNTRV9UWVBFXzINCkFUVFJJQlVURVM6UkVRVUlSRVNfQUxJR05NRU5UIE1YQ1NSDQpQQVRURVJOOjB4MEYgMHhDMiBub19yZWZpbmluZ19wcmVmaXggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSBNT0RSTSgpIFVJTU04KCkNCk9QRVJBTkRTOlJFRzA9WE1NX1IoKTpydzpwcyBNRU0wOnI6cHMgSU1NMDpyOmI="
+  },
+  {
+    "mnemonic": "cmppxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "EA",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUFBYQUREDQpDUEw6Mw0KQ0FURUdPUlk6VkVYDQpFWFRFTlNJT046Q01QQ0NYQUREDQpJU0FfU0VUOkNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpBVE9NSUMgUkVRVUlSRVNfQUxJR05NRU5UXzRCDQpJRk9STTpDTVBQWEFERF9NRU11MzJfR1BSMzJ1MzJfR1BSMzJ1MzINClBBVFRFUk46VlYxIDB4RUEgVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gIE1PRFJNKCkgIFZMMTI4ICBXMCAgbW9kZTY0DQpPUEVSQU5EUzpNRU0wOnJ3OmQ6dTMyIFJFRzA9VkdQUjMyX1IoKTpydzpkOnUzMiBSRUcxPVZHUFIzMl9OKCk6cjpkOnUzMg0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpFWENFUFRJT05TOmF2eC10eXBlLTE0"
+  },
+  {
+    "mnemonic": "cmppxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "EA",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUFBYQUREDQpDUEw6Mw0KQ0FURUdPUlk6VkVYDQpFWFRFTlNJT046Q01QQ0NYQUREDQpJU0FfU0VUOkNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpBVE9NSUMgUkVRVUlSRVNfQUxJR05NRU5UXzhCDQpJRk9STTpDTVBQWEFERF9NRU11NjRfR1BSNjR1NjRfR1BSNjR1NjQNClBBVFRFUk46VlYxIDB4RUEgVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gIE1PRFJNKCkgIFZMMTI4ICBXMSAgbW9kZTY0DQpPUEVSQU5EUzpNRU0wOnJ3OnE6dTY0IFJFRzA9VkdQUjY0X1IoKTpydzpxOnU2NCBSRUcxPVZHUFI2NF9OKCk6cjpxOnU2NA0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpFWENFUFRJT05TOmF2eC10eXBlLTE0"
   },
   {
     "mnemonic": "cmppxadd",
@@ -66214,6 +67810,120 @@
   },
   {
     "mnemonic": "cmpsxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E8",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUFNYQUREDQpDUEw6Mw0KQ0FURUdPUlk6VkVYDQpFWFRFTlNJT046Q01QQ0NYQUREDQpJU0FfU0VUOkNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpBVE9NSUMgUkVRVUlSRVNfQUxJR05NRU5UXzRCDQpJRk9STTpDTVBTWEFERF9NRU11MzJfR1BSMzJ1MzJfR1BSMzJ1MzINClBBVFRFUk46VlYxIDB4RTggVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gIE1PRFJNKCkgIFZMMTI4ICBXMCAgbW9kZTY0DQpPUEVSQU5EUzpNRU0wOnJ3OmQ6dTMyIFJFRzA9VkdQUjMyX1IoKTpydzpkOnUzMiBSRUcxPVZHUFIzMl9OKCk6cjpkOnUzMg0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpFWENFUFRJT05TOmF2eC10eXBlLTE0"
+  },
+  {
+    "mnemonic": "cmpsxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E8",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUFNYQUREDQpDUEw6Mw0KQ0FURUdPUlk6VkVYDQpFWFRFTlNJT046Q01QQ0NYQUREDQpJU0FfU0VUOkNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpBVE9NSUMgUkVRVUlSRVNfQUxJR05NRU5UXzhCDQpJRk9STTpDTVBTWEFERF9NRU11NjRfR1BSNjR1NjRfR1BSNjR1NjQNClBBVFRFUk46VlYxIDB4RTggVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gIE1PRFJNKCkgIFZMMTI4ICBXMSAgbW9kZTY0DQpPUEVSQU5EUzpNRU0wOnJ3OnE6dTY0IFJFRzA9VkdQUjY0X1IoKTpydzpxOnU2NCBSRUcxPVZHUFI2NF9OKCk6cjpxOnU2NA0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpFWENFUFRJT05TOmF2eC10eXBlLTE0"
+  },
+  {
+    "mnemonic": "cmpsxadd",
     "encoding": "evex",
     "opcode_map": "0f38",
     "opcode": "E8",
@@ -66888,6 +68598,120 @@
       "zf": "m"
     },
     "comment": "SUNMQVNTOkNNUFhDSEc4Ql9MT0NLDQpESVNBU006Y21weGNoZzhiDQpDUEw6Mw0KQ0FURUdPUlk6U0VNQVBIT1JFDQpFWFRFTlNJT046QkFTRQ0KSVNBX1NFVDpQRU5USVVNUkVBTA0KQVRUUklCVVRFUzpMT0NLRUQgSExFX0FDUV9BQkxFIEhMRV9SRUxfQUJMRQ0KRkxBR1M6TVVTVCBbIHpmLW1vZCBdDQpQQVRURVJOOjB4MEYgMHhDNyBNT0RbbW1dIE1PRCE9MyBSRUdbMGIwMDFdIFJNW25ubl0gbm90NjQgSU1NVU5FNjYoKSBNT0RSTSgpIGxvY2tfcHJlZml4DQpPUEVSQU5EUzpNRU0wOnJjdzpxIFJFRzA9WEVEX1JFR19FRFg6cmN3OlNVUFAgUkVHMT1YRURfUkVHX0VBWDpyY3c6U1VQUCBSRUcyPVhFRF9SRUdfRUNYOnI6U1VQUCBSRUczPVhFRF9SRUdfRUJYOnI6U1VQUA=="
+  },
+  {
+    "mnemonic": "cmpzxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E4",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr32",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr32",
+        "encoding": "ndsndd",
+        "element_type": "uint32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUFpYQUREDQpDUEw6Mw0KQ0FURUdPUlk6VkVYDQpFWFRFTlNJT046Q01QQ0NYQUREDQpJU0FfU0VUOkNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpBVE9NSUMgUkVRVUlSRVNfQUxJR05NRU5UXzRCDQpJRk9STTpDTVBaWEFERF9NRU11MzJfR1BSMzJ1MzJfR1BSMzJ1MzINClBBVFRFUk46VlYxIDB4RTQgVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gIE1PRFJNKCkgIFZMMTI4ICBXMCAgbW9kZTY0DQpPUEVSQU5EUzpNRU0wOnJ3OmQ6dTMyIFJFRzA9VkdQUjMyX1IoKTpydzpkOnUzMiBSRUcxPVZHUFIzMl9OKCk6cjpkOnUzMg0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpFWENFUFRJT05TOmF2eC10eXBlLTE0"
+  },
+  {
+    "mnemonic": "cmpzxadd",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "E4",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "1"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "action": "read_write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "ndsndd",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "VEX",
+      "extension": "CMPCCXADD",
+      "isa_set": "CMPCCXADD"
+    },
+    "exception_class": "avx14",
+    "affected_flags": {
+      "access": "must_write",
+      "cf": "m",
+      "pf": "m",
+      "af": "m",
+      "zf": "m",
+      "sf": "m",
+      "of": "m"
+    },
+    "comment": "SUNMQVNTOkNNUFpYQUREDQpDUEw6Mw0KQ0FURUdPUlk6VkVYDQpFWFRFTlNJT046Q01QQ0NYQUREDQpJU0FfU0VUOkNNUENDWEFERA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpBVE9NSUMgUkVRVUlSRVNfQUxJR05NRU5UXzhCDQpJRk9STTpDTVBaWEFERF9NRU11NjRfR1BSNjR1NjRfR1BSNjR1NjQNClBBVFRFUk46VlYxIDB4RTQgVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gIE1PRFJNKCkgIFZMMTI4ICBXMSAgbW9kZTY0DQpPUEVSQU5EUzpNRU0wOnJ3OnE6dTY0IFJFRzA9VkdQUjY0X1IoKTpydzpxOnU2NCBSRUcxPVZHUFI2NF9OKCk6cjpxOnU2NA0KRkxBR1M6TVVTVCBbICB6Zi1tb2QgIGNmLW1vZCAgcGYtbW9kICBvZi1tb2QgIHNmLW1vZCAgYWYtbW9kICBdDQpFWENFUFRJT05TOmF2eC10eXBlLTE0"
   },
   {
     "mnemonic": "cmpzxadd",
