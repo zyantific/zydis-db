@@ -201,6 +201,7 @@ internal static class DefinitionEmitter
                 OperandType.YMM or
                 OperandType.ZMM => "ZYDIS_REGKIND_VR",
                 OperandType.TMM => "ZYDIS_REGKIND_TMM",
+                OperandType.BSR => "ZYDIS_REGKIND_BSR",
                 OperandType.BND => "ZYDIS_REGKIND_BOUND",
                 OperandType.SREG => "ZYDIS_REGKIND_SEGMENT" + ((operand.Access is OperandAccess.Write) ? " | (1 << 4)" : null),
                 OperandType.CR => "ZYDIS_REGKIND_CONTROL",

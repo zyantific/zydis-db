@@ -220,6 +220,7 @@ public static class FormId
             case OperandType.YMM: return "ymm";
             case OperandType.ZMM: return "zmm";
             case OperandType.TMM: return "tmm";
+            case OperandType.BSR: return "bsr";
             case OperandType.BND: return "bnd";
             case OperandType.SREG: return "sreg";
             case OperandType.CR: return "cr";

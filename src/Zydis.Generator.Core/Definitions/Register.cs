@@ -1006,6 +1006,7 @@ public enum RegisterKind
     MMX,
     VR,
     TMM,
+    BSR,
     SEGMENT,
     TEST,
     CONTROL,
@@ -1096,6 +1097,7 @@ public static class RegisterExtensions
                 RegisterClass.YMM or
                 RegisterClass.ZMM => RegisterKind.VR,
             RegisterClass.TMM => RegisterKind.TMM,
+            RegisterClass.BSR => RegisterKind.BSR,
             RegisterClass.SEGMENT => RegisterKind.SEGMENT,
             RegisterClass.TEST => RegisterKind.TEST,
             RegisterClass.CONTROL => RegisterKind.CONTROL,
