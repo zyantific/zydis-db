@@ -83,6 +83,7 @@ public sealed class EncodableDefinition :
                 !GetBoolFilter(FeatureCldemoteNode.NodeDefinition.Instance, true) ||
                 !GetBoolFilter(FeatureCetNode.NodeDefinition.Instance, true) ||
                 !GetBoolFilter(FeatureIbhfNode.NodeDefinition.Instance, true) ||
+                !GetBoolFilter(FeaturePrefetchrstNode.NodeDefinition.Instance, true) ||
                 !GetBoolFilter(FeatureKncNode.NodeDefinition.Instance, true) ||
                 (GetFilter(ModrmRegNode.NodeDefinition.Instance)?.StartsWith('!') ?? false))
             {
