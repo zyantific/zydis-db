@@ -39,7 +39,8 @@ internal static class FixedFilterOrder
                 "feature_wbnoinvd",
                 "feature_centaur",
                 "feature_iprefetch",
-                "feature_ibhf"
+                "feature_ibhf",
+                "feature_prefetchrst"
             ],
             [InstructionEncoding.AMD3DNOW] =
             [

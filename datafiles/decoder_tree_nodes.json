@@ -437,5 +437,14 @@
     "named_slots": [
       "0:B0", "1:B1"
     ]
+  },
+  {
+    "type": "decision",
+    "name": "feature_prefetchrst",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:B0", "1:B1"
+    ]
   }
 ]
