@@ -123513,7 +123513,7 @@
     },
     "operands": [
       {
-        "action": "write",
+        "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
         "element_type": "float32",
@@ -123585,7 +123585,7 @@
     },
     "operands": [
       {
-        "action": "write",
+        "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_rm",
         "element_type": "float32",
