@@ -21,22 +21,22 @@ public class ViewTreeBuilderTests
     public void SecondFormWithSameFirstFilterJoinsTheDecisionNode()
     {
         var table = Build(
-            Make("adc", 0x10, ("modrm_mod", "3")),
-            Make("adc", 0x10, ("modrm_mod", "!3")));
+            Make("adc", 0x10, ("modrm_mod", "0")),
+            Make("adc", 0x10, ("modrm_mod", "!0")));
 
         var decision = Assert.Single(Find(table, "10").Children);
         Assert.Equal(ViewNodeKind.Decision, decision.Kind);
         Assert.Equal("modrm_mod", decision.Filter);
-        Assert.Equal(["03 (3)", "!03 (not 3)"], decision.Children.Select(x => x.Label));
-        Assert.Equal(0, DefinitionAt(decision, "03 (3)").DefinitionIndex);
-        Assert.Equal(1, DefinitionAt(decision, "!03 (not 3)").DefinitionIndex);
+        Assert.Equal(["00 (0)", "!00 (not 0)"], decision.Children.Select(x => x.Label));
+        Assert.Equal(0, DefinitionAt(decision, "00 (0)").DefinitionIndex);
+        Assert.Equal(1, DefinitionAt(decision, "!00 (not 0)").DefinitionIndex);
     }
 
     [Fact]
     public void FormWithoutTestForTheSlotFilterGoesToElse()
     {
         var table = Build(
-            Make("a", 0x10, ("modrm_mod", "3"), ("rex_w", "1")),
+            Make("a", 0x10, ("modrm_mod", "0"), ("rex_w", "1")),
             Make("b", 0x10, ("rex_w", "0")));
 
         Assert.Equal("b", DefinitionAt(table, "10/modrm_mod/else/rex_w/00 (0)").Definition!.Mnemonic);
@@ -46,20 +46,20 @@ public class ViewTreeBuilderTests
     public void StaleOrderUsesTheLaterEntryAtTheSlot()
     {
         var table = Build(
-            Make("a", 0x10, ("modrm_mod", "3"), ("rex_w", "1")),
-            Make("b", 0x10, ("rex_w", "0"), ("modrm_mod", "3")));
+            Make("a", 0x10, ("modrm_mod", "0"), ("rex_w", "1")),
+            Make("b", 0x10, ("rex_w", "0"), ("modrm_mod", "0")));
 
-        Assert.Equal("b", DefinitionAt(table, "10/modrm_mod/03 (3)/rex_w/00 (0)").Definition!.Mnemonic);
+        Assert.Equal("b", DefinitionAt(table, "10/modrm_mod/00 (0)/rex_w/00 (0)").Definition!.Mnemonic);
     }
 
     [Fact]
     public void IdenticalPathsProduceAConflictNodeAndFlagAncestors()
     {
         var table = Build(
-            Make("a", 0x10, ("modrm_mod", "3")),
-            Make("a", 0x10, ("modrm_mod", "3")));
+            Make("a", 0x10, ("modrm_mod", "0")),
+            Make("a", 0x10, ("modrm_mod", "0")));
 
-        var slot = Find(table, "10/modrm_mod/03 (3)");
+        var slot = Find(table, "10/modrm_mod/00 (0)");
         var conflict = Assert.Single(slot.Children);
         Assert.Equal(ViewNodeKind.Conflict, conflict.Kind);
         Assert.All(conflict.Children, x => Assert.Equal(ViewNodeKind.Definition, x.Kind));
@@ -75,11 +75,11 @@ public class ViewTreeBuilderTests
     public void ThirdIdenticalFormJoinsTheExistingConflict()
     {
         var table = Build(
-            Make("a", 0x10, ("modrm_mod", "3")),
-            Make("a", 0x10, ("modrm_mod", "3")),
-            Make("a", 0x10, ("modrm_mod", "3")));
+            Make("a", 0x10, ("modrm_mod", "0")),
+            Make("a", 0x10, ("modrm_mod", "0")),
+            Make("a", 0x10, ("modrm_mod", "0")));
 
-        var conflict = Assert.Single(Find(table, "10/modrm_mod/03 (3)").Children);
+        var conflict = Assert.Single(Find(table, "10/modrm_mod/00 (0)").Children);
         Assert.Equal(ViewNodeKind.Conflict, conflict.Kind);
         Assert.Equal([0, 1, 2], conflict.Children.Select(x => x.DefinitionIndex));
     }
@@ -88,11 +88,11 @@ public class ViewTreeBuilderTests
     public void MoreSpecificFormPromotesAConflictIntoElse()
     {
         var table = Build(
-            Make("a", 0x10, ("modrm_mod", "3")),
-            Make("a", 0x10, ("modrm_mod", "3")),
-            Make("b", 0x10, ("modrm_mod", "3"), ("rex_w", "1")));
+            Make("a", 0x10, ("modrm_mod", "0")),
+            Make("a", 0x10, ("modrm_mod", "0")),
+            Make("b", 0x10, ("modrm_mod", "0"), ("rex_w", "1")));
 
-        var rexW = Assert.Single(Find(table, "10/modrm_mod/03 (3)").Children);
+        var rexW = Assert.Single(Find(table, "10/modrm_mod/00 (0)").Children);
         Assert.Equal("rex_w", rexW.Filter);
         var conflict = Assert.Single(Find(rexW, "else").Children);
         Assert.Equal(ViewNodeKind.Conflict, conflict.Kind);

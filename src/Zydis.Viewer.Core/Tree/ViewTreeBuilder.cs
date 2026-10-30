@@ -16,13 +16,18 @@ namespace Zydis.Viewer.Core.Tree;
 /// <remarks>
 /// Each form appears once in the tree. The generator copies a form that does not test the filter of a node into every
 /// claimed slot of that node as well as into its <c>else</c> slot, and the view keeps only the <c>else</c> copy.
+/// <para>
+/// The generator wires its opcode tables into a graph, in which the <c>C4</c> and <c>C5</c> rows share the VEX tables
+/// and the <c>D5</c> row leads back to <c>PRIMARY</c> and <c>0F</c>. The view gives each table one owner, the first row
+/// that leads to it, and every later row that leads to it becomes a <see cref="ViewNodeKind.Reference"/> row.
+/// </para>
 /// </remarks>
 public sealed class ViewTreeBuilder
 {
     private const string ElseLabel = "else";
     private const string ConflictLabel = "conflict";
 
-    private readonly Dictionary<byte, Cell> _primaryTable = [];
+    private readonly Dictionary<int, Dictionary<byte, Cell>> _tables = [];
 
     /// <summary>
     /// Inserts <paramref name="definition"/> at the slot its filter entries lead to, in their recorded order.
@@ -34,25 +39,38 @@ public sealed class ViewTreeBuilder
     /// filter.
     /// </exception>
     /// <exception cref="NotSupportedException">
-    /// Thrown if the form does not belong to the primary opcode table.
+    /// Thrown if the <c>mandatory_prefix</c> filter of a form with an encoding other than the default one is
+    /// <c>ignore</c> or negated.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown if the form belongs to no opcode table of the generator, for example a vector form without a
+    /// <c>mandatory_prefix</c> filter.
     /// </exception>
     public void Insert(InstructionDefinition definition, int definitionIndex)
     {
         ArgumentNullException.ThrowIfNull(definition);
 
-        if (definition.Encoding is not InstructionEncoding.Default || definition.OpcodeMap is not OpcodeMap.MAP0)
-        {
-            throw new NotSupportedException(
-                $"Form '{definition.Mnemonic}' does not belong to the primary opcode table.");
-        }
-
         // Parsed before the tree changes, so a form with a bad entry leaves no partial path behind.
         var pending = ParseEntries(definition);
+        var tableId = OpcodeTableLayout.TableIdOf(definition);
 
-        if (!_primaryTable.TryGetValue(definition.Opcode, out var cell))
+        // The mandatory prefix of a vector form selects its table, and the generator drops the entry from the tests
+        // inside that table.
+        if (definition.Encoding is not (InstructionEncoding.Default or InstructionEncoding.AMD3DNOW))
+        {
+            pending.RemoveAll(x => ReferenceEquals(x.NodeDefinition, MandatoryPrefixNode.NodeDefinition.Instance));
+        }
+
+        if (!_tables.TryGetValue(tableId, out var table))
+        {
+            table = [];
+            _tables.Add(tableId, table);
+        }
+
+        if (!table.TryGetValue(definition.Opcode, out var cell))
         {
             cell = new Cell();
-            _primaryTable.Add(definition.Opcode, cell);
+            table.Add(definition.Opcode, cell);
         }
 
         while (pending.Count > 0)
@@ -107,20 +125,16 @@ public sealed class ViewTreeBuilder
     /// <summary>
     /// Creates the view tree of the inserted forms.
     /// </summary>
-    /// <returns>The root rows in display order.</returns>
+    /// <returns>The root rows in display order: the primary opcode table, which leads to every other table.</returns>
     public IReadOnlyList<ViewNode> Build()
     {
-        var table = ViewNode.CreateRoot(ViewNodeKind.Table,
-            OpcodeTables.FormatTableString(InstructionEncoding.Default, OpcodeMap.MAP0, null));
+        var primary = ViewNode.CreateRoot(ViewNodeKind.Table, OpcodeTableLayout.Primary.Label);
+        var owners = new Dictionary<int, ViewNode> { [OpcodeTableLayout.Primary.TableId] = primary };
 
-        foreach (var (opcode, cell) in _primaryTable.OrderBy(x => x.Key))
-        {
-            AddSlotRow(table, ViewNodeKind.Opcode, opcode.ToString("X2", CultureInfo.InvariantCulture), cell);
-        }
+        AddOpcodeRows(primary, OpcodeTableLayout.Primary.TableId, owners);
+        Summarize(primary);
 
-        Summarize(table);
-
-        return [table];
+        return [primary];
     }
 
     private static List<PendingEntry> ParseEntries(InstructionDefinition definition)
@@ -158,6 +172,94 @@ public sealed class ViewTreeBuilder
         return entries;
     }
 
+    /// <remarks>
+    /// The rows are added depth first in opcode order. That order reaches <c>PRIMARY/0F</c> before the <c>D5</c> row
+    /// and <c>C4</c> before <c>C5</c>, so the first row that leads to a table owns it.
+    /// </remarks>
+    private void AddOpcodeRows(ViewNode tableRow, int tableId, Dictionary<int, ViewNode> owners)
+    {
+        var cells = _tables.GetValueOrDefault(tableId) ?? [];
+        var links = OpcodeTableLayout.LinksOf(tableId);
+
+        foreach (var opcode in cells.Keys.Union(links.Keys).Order())
+        {
+            var label = opcode.ToString("X2", CultureInfo.InvariantCulture);
+            var cell = cells.GetValueOrDefault(opcode);
+
+            switch (links.GetValueOrDefault(opcode))
+            {
+                case EscapeLink escape when HoldsForm(escape.Target.TableId):
+                    var escapeRow = tableRow.AddChild(ViewNodeKind.Opcode, label);
+                    // The decoder never reaches a form at an escape opcode. Showing it next to the table keeps it
+                    // in the view instead of dropping it.
+                    if (cell?.Content is { } content)
+                    {
+                        AddContent(escapeRow, content);
+                    }
+                    AddTableRow(escapeRow, escape.Target, owners);
+                    break;
+
+                case SwitchLink switchLink:
+                    AddSwitchRow(tableRow, label, switchLink, cell, owners);
+                    break;
+
+                default:
+                    if (cell is not null)
+                    {
+                        AddSlotRow(tableRow, ViewNodeKind.Opcode, label, cell);
+                    }
+                    break;
+            }
+        }
+    }
+
+    private void AddSwitchRow(ViewNode tableRow, string label, SwitchLink link, Cell? cell,
+        Dictionary<int, ViewNode> owners)
+    {
+        var slots = link.Slots.Where(x => HoldsForm(x.Target.TableId)).ToList();
+        if ((cell?.Content is null) && (slots.Count == 0))
+        {
+            return;
+        }
+
+        var switchRow = tableRow.AddChild(ViewNodeKind.Opcode, label).AddChild(ViewNodeKind.Switch, link.Name);
+
+        if (cell is not null)
+        {
+            AddSlotRow(switchRow, ViewNodeKind.Slot, link.DefaultSlot, cell);
+        }
+
+        foreach (var slot in slots)
+        {
+            AddTableRow(switchRow.AddChild(ViewNodeKind.Slot, slot.Name), slot.Target, owners);
+        }
+    }
+
+    private void AddTableRow(ViewNode parent, TableTarget target, Dictionary<int, ViewNode> owners)
+    {
+        if (owners.TryGetValue(target.TableId, out var owner))
+        {
+            var reference = parent.AddChild(ViewNodeKind.Reference, owner.Label);
+            // The root table has no row above it, so a reference to it names the table row itself.
+            reference.Detail = (owner.Parent ?? owner).Path;
+            return;
+        }
+
+        var tableRow = parent.AddChild(ViewNodeKind.Table, target.Label);
+        owners.Add(target.TableId, tableRow);
+        AddOpcodeRows(tableRow, target.TableId, owners);
+    }
+
+    /// <remarks>
+    /// A form behind an escape opcode counts, so <c>PRIMARY/0F</c> shows when only the <c>0F38</c> table holds forms.
+    /// A form behind a switch does not, so the <c>D5</c> rows lead back only to tables that hold legacy forms.
+    /// </remarks>
+    private bool HoldsForm(int tableId)
+    {
+        return (_tables.TryGetValue(tableId, out var cells) && (cells.Count > 0)) ||
+            OpcodeTableLayout.LinksOf(tableId).Values.OfType<EscapeLink>().Any(x => HoldsForm(x.Target.TableId));
+    }
+
     private static void AddSlotRow(ViewNode parent, ViewNodeKind kind, string label, Cell cell)
     {
         // An else slot stays empty when no form reaches it.
@@ -186,17 +288,92 @@ public sealed class ViewTreeBuilder
                 break;
 
             case DecisionContent decision:
-                var decisionRow = parent.AddChild(ViewNodeKind.Decision, decision.Filter, decision.Filter);
-                var slots = decision.Slots
+                var shown = Compact(decision);
+                var decisionRow = parent.AddChild(ViewNodeKind.Decision, shown.Filter, shown.Filter);
+                var slots = shown.Slots
                     .OrderBy(x => x.Key.IsNegated)
                     .ThenBy(x => x.Key.Index);
                 foreach (var (index, cell) in slots)
                 {
-                    AddSlotRow(decisionRow, ViewNodeKind.Slot, SlotLabel(decision.NodeDefinition, index), cell);
+                    AddSlotRow(decisionRow, ViewNodeKind.Slot, SlotLabel(shown.NodeDefinition, index), cell);
                 }
-                AddSlotRow(decisionRow, ViewNodeKind.Slot, ElseLabel, decision.Else);
+                AddSlotRow(decisionRow, ViewNodeKind.Slot, ElseLabel, shown.Else);
                 break;
         }
+    }
+
+    /// <summary>
+    /// Applies the compact rules of the generator: a <c>mode</c> node that only tells <c>64</c> from the rest and a
+    /// <c>modrm_mod</c> node that only tells <c>3</c> from the rest become two-slot nodes.
+    /// </summary>
+    /// <returns>
+    /// A new compact node that shares the slots of <paramref name="decision"/>, or <paramref name="decision"/> itself
+    /// when no rule applies. The node is left as it is, so a later insertion still finds its filter.
+    /// </returns>
+    private static DecisionContent Compact(DecisionContent decision)
+    {
+        return decision.NodeDefinition switch
+        {
+            ModeNode.NodeDefinition => Compact(decision,
+                ModeNode.NodeDefinition.Instance.GetSlotIndex(ModeNode.Slot.M64),
+                ModeCompactNode.NodeDefinition.Instance,
+                ModeCompactNode.NodeDefinition.Instance.GetSlotIndex(ModeCompactNode.Slot.M64),
+                ModeCompactNode.NodeDefinition.Instance.GetSlotIndex(ModeCompactNode.Slot.MNot64)),
+
+            ModrmModNode.NodeDefinition => Compact(decision,
+                ModrmModNode.NodeDefinition.Instance.GetSlotIndex(ModrmModNode.Slot.M3),
+                ModrmModCompactNode.NodeDefinition.Instance,
+                ModrmModCompactNode.NodeDefinition.Instance.GetSlotIndex(ModrmModCompactNode.Slot.Register),
+                ModrmModCompactNode.NodeDefinition.Instance.GetSlotIndex(ModrmModCompactNode.Slot.Memory)),
+
+            _ => decision
+        };
+    }
+
+    private static DecisionContent Compact(DecisionContent decision, int slot,
+        DecisionNodeDefinition compactDefinition, int compactSlot, int compactRest)
+    {
+        Cell? match = null;
+        Cell? negated = null;
+
+        foreach (var (index, cell) in decision.Slots)
+        {
+            if (cell.Content is null)
+            {
+                continue;
+            }
+
+            if (index.Index != slot)
+            {
+                return decision;
+            }
+
+            if (index.IsNegated)
+            {
+                negated = cell;
+            }
+            else
+            {
+                match = cell;
+            }
+        }
+
+        // The negated slot and else both stand for the rest, and a single compact slot cannot hold both of them.
+        if ((negated is not null) && (decision.Else.Content is not null))
+        {
+            return decision;
+        }
+
+        var compact = new DecisionContent(compactDefinition.Name, compactDefinition);
+
+        if (match is not null)
+        {
+            compact.Slots.Add(DecisionNodeIndex.ForIndex(compactSlot), match);
+        }
+
+        compact.Slots.Add(DecisionNodeIndex.ForIndex(compactRest), negated ?? decision.Else);
+
+        return compact;
     }
 
     private static string SlotLabel(DecisionNodeDefinition nodeDefinition, DecisionNodeIndex index)

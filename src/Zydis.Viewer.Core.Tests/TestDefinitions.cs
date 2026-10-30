@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 
 using Xunit;
@@ -38,6 +39,14 @@ internal static class TestDefinitions
     /// </summary>
     public static ViewNode Build(params InstructionDefinition[] definitions)
     {
+        return BuildRoots(definitions)[0];
+    }
+
+    /// <summary>
+    /// Inserts <paramref name="definitions"/> like <see cref="Build"/> and returns the root list.
+    /// </summary>
+    public static IReadOnlyList<ViewNode> BuildRoots(params InstructionDefinition[] definitions)
+    {
         var builder = new ViewTreeBuilder();
 
         for (var i = 0; i < definitions.Length; i++)
@@ -45,7 +54,7 @@ internal static class TestDefinitions
             builder.Insert(definitions[i], i);
         }
 
-        return builder.Build()[0];
+        return builder.Build();
     }
 
     /// <summary>
