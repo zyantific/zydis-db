@@ -33,6 +33,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Zydis.Generator.Core.Tests" />
     <InternalsVisibleTo Include="Zydis.Generator" />
+    <InternalsVisibleTo Include="Zydis.Viewer.Core" />
   </ItemGroup>
 
 </Project>

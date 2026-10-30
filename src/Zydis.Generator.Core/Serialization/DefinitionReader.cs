@@ -33,6 +33,10 @@ public static partial class DefinitionReader
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
+    /// <summary>
+    /// Reads the JSON array of <typeparamref name="T"/> in <paramref name="filename"/>, with the element handling of
+    /// <see cref="ReadAsync{T}(Stream, CancellationToken)"/>.
+    /// </summary>
     public static async IAsyncEnumerable<T> ReadAsync<T>(string filename, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(filename);
@@ -41,8 +45,24 @@ public static partial class DefinitionReader
             .AsAsyncDisposable(out var fs)
             .ConfigureAwait(false);
 
+        await foreach (var item in ReadAsync<T>(fs, cancellationToken).ConfigureAwait(false))
+        {
+            yield return item;
+        }
+    }
+
+    /// <summary>
+    /// Reads a JSON array of <typeparamref name="T"/> from <paramref name="stream"/> and throws
+    /// <see cref="DataException"/> on a <c>null</c> element. Legacy <c>force_modrm_*</c> flag members in the
+    /// object-form filters of an <see cref="InstructionDefinition"/> are lifted onto its flag properties. The stream
+    /// stays open for the caller to dispose.
+    /// </summary>
+    public static async IAsyncEnumerable<T> ReadAsync<T>(Stream stream, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(stream);
+
         var items = JsonSerializer
-            .DeserializeAsyncEnumerable<T>(fs, Options, cancellationToken)
+            .DeserializeAsyncEnumerable<T>(stream, Options, cancellationToken)
             .ConfigureAwait(false);
 
         await foreach (var item in items)
