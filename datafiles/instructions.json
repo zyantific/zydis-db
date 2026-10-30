@@ -525268,6 +525268,9 @@
     "mnemonic": "wbinvd",
     "opcode_map": "0f",
     "opcode": "09",
+    "filters": {
+      "mandatory_prefix": "ignore"
+    },
     "cpl": 0,
     "meta_info": {
       "category": "SYSTEM",
@@ -525275,6 +525278,22 @@
       "isa_set": "I486REAL"
     },
     "comment": "SUNMQVNTOldCSU5WRA0KQ1BMOjANCkNBVEVHT1JZOlNZU1RFTQ0KRVhURU5TSU9OOkJBU0UNCklTQV9TRVQ6STQ4NlJFQUwNCkFUVFJJQlVURVM6UklORzAgTk9UU1gNClBBVFRFUk46MHgwRiAweDA5DQpPUEVSQU5EUzo="
+  },
+  {
+    "mnemonic": "wbnoinvd",
+    "opcode_map": "0f",
+    "opcode": "09",
+    "filters": {
+      "mandatory_prefix": "f3",
+      "feature_wbnoinvd": "1"
+    },
+    "cpl": 0,
+    "meta_info": {
+      "category": "SYSTEM",
+      "extension": "WBNOINVD",
+      "isa_set": "WBNOINVD"
+    },
+    "comment": "SUNMQVNTOldCTk9JTlZEDQpDUEw6MA0KQ0FURUdPUlk6U1lTVEVNDQpFWFRFTlNJT046V0JOT0lOVkQNCklTQV9TRVQ6V0JOT0lOVkQNCkFUVFJJQlVURVM6UklORzAgTk9UU1gNClBBVFRFUk46MHgwRiAweDA5IFdCTk9JTlZEPTEgZjNfcmVmaW5pbmdfcHJlZml4DQpPUEVSQU5EUzo="
   },
   {
     "mnemonic": "wrfsbase",
