@@ -77,6 +77,9 @@
         "name": "int8:INT8"
       },
       {
+        "name": "int8x2:INT8X2"
+      },
+      {
         "name": "int8x4:INT8X4"
       },
       {
@@ -140,6 +143,27 @@
         "name": "bfloat16x2:BFLOAT16X2"
       },
       {
+        "name": "bfloat8:BFLOAT8"
+      },
+      {
+        "name": "hfloat8:HFLOAT8"
+      },
+      {
+        "name": "bfloat8x4:BFLOAT8X4"
+      },
+      {
+        "name": "hfloat8x4:HFLOAT8X4"
+      },
+      {
+        "name": "bfloat4:BFLOAT4"
+      },
+      {
+        "name": "bfloat6:BFLOAT6"
+      },
+      {
+        "name": "hfloat6:HFLOAT6"
+      },
+      {
         "name": "bcd80:BCD80"
       },
       {
@@ -156,6 +180,9 @@
     "members": [
       {
         "name": "invalid"
+      },
+      {
+        "name": "4:E4"
       },
       {
         "name": "8:E8"
