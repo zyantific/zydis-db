@@ -44,7 +44,6 @@ internal static class DefinitionEmitter
             string[] extraFields = encoding switch
             {
                 InstructionEncoding.Default => [
-                    "is_privileged",
                     "accepts_LOCK",
                     "accepts_REP",
                     "accepts_REPEREPZ",
@@ -106,7 +105,8 @@ internal static class DefinitionEmitter
                     .Conditional().WriteExpression("cpu_state", "ZYDIS_RW_ACTION_{0}", GetCpuState(definition))
                     .Conditional().WriteExpression("fpu_state", "ZYDIS_RW_ACTION_{0}", GetFpuState(definition))
                     .Conditional().WriteExpression("xmm_state", "ZYDIS_RW_ACTION_{0}", GetXmmState(definition))
-                    .Conditional().WriteBool("accepts_segment", AcceptsSegment(definition));
+                    .Conditional().WriteBool("accepts_segment", AcceptsSegment(definition))
+                    .Conditional().WriteBool("is_privileged", definition.Cpl is 0);
 
                 if (encoding is InstructionEncoding.VEX or InstructionEncoding.EVEX or InstructionEncoding.MVEX or InstructionEncoding.XOP)
                 {
@@ -125,7 +125,6 @@ internal static class DefinitionEmitter
                 {
                     case InstructionEncoding.Default:
                         definitionEntry
-                            .Conditional().WriteBool("is_privileged", definition.Cpl is 0)
                             .WriteBool("accepts_LOCK", definition.PrefixFlags.HasFlag(PrefixFlags.AcceptsLOCK))
                             .Conditional().WriteBool("accepts_REP", definition.PrefixFlags.HasFlag(PrefixFlags.AcceptsREP))
                             .Conditional().WriteBool("accepts_REPEREPZ", definition.PrefixFlags.HasFlag(PrefixFlags.AcceptsREPEREPZ))

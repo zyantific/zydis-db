@@ -26,6 +26,7 @@ namespace Zydis.Generator.Core.Definitions;
 [Emittable(17, "fpu_state")]
 [Emittable(18, "xmm_state")]
 [Emittable(19, "accepts_segment")]
+[Emittable(20, "is_privileged")]
 public sealed record InstructionDefinition
 {
     [Emittable(0)]

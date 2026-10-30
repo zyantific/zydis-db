@@ -90012,6 +90012,7 @@
         "width64": 64
       }
     ],
+    "cpl": 0,
     "meta_info": {
       "category": "ENQCMD",
       "extension": "ENQCMD",
@@ -115128,6 +115129,7 @@
       }
     ],
     "opsize_map": "force64",
+    "cpl": 0,
     "meta_info": {
       "category": "SYSTEM",
       "extension": "BASE",
@@ -115162,6 +115164,7 @@
         "visible": false
       }
     ],
+    "cpl": 0,
     "meta_info": {
       "category": "SYSTEM",
       "extension": "BASE",
@@ -344565,6 +344568,7 @@
       "modrm_rm": "1",
       "mandatory_prefix": "none"
     },
+    "cpl": 0,
     "meta_info": {
       "category": "VTX",
       "extension": "VTX",
