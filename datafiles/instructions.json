@@ -139081,7 +139081,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "uint8",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -139089,7 +139089,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "uint8",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -139115,7 +139115,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "uint8",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -139123,7 +139123,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "uint8",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -139287,7 +139287,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139295,7 +139295,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139303,7 +139303,7 @@
       {
         "operand_type": "implicit_reg",
         "register": "xmm0",
-        "element_type": "int32",
+        "element_type": "uint8",
         "width16": 16,
         "width32": 16,
         "width64": 16,
@@ -139331,7 +139331,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139339,7 +139339,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139347,7 +139347,7 @@
       {
         "operand_type": "implicit_reg",
         "register": "xmm0",
-        "element_type": "int32",
+        "element_type": "uint8",
         "width16": 16,
         "width32": 16,
         "width64": 16,
@@ -139375,7 +139375,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139383,7 +139383,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139418,7 +139418,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139426,7 +139426,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139520,7 +139520,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139528,7 +139528,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139563,7 +139563,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139571,7 +139571,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139882,7 +139882,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139890,7 +139890,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139917,7 +139917,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -139925,7 +139925,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140090,7 +140090,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140098,7 +140098,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140159,7 +140159,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140167,7 +140167,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140228,7 +140228,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140236,7 +140236,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140297,7 +140297,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140305,7 +140305,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140366,7 +140366,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140374,7 +140374,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140401,7 +140401,7 @@
         "action": "write",
         "operand_type": "implicit_reg",
         "register": "xmm0",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16,
@@ -140439,7 +140439,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140447,7 +140447,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140474,7 +140474,7 @@
         "action": "write",
         "operand_type": "implicit_reg",
         "register": "xmm0",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16,
@@ -140512,7 +140512,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140520,7 +140520,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140547,7 +140547,7 @@
         "action": "write",
         "operand_type": "implicit_reg",
         "register": "xmm0",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16,
@@ -140585,7 +140585,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140593,7 +140593,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140620,7 +140620,7 @@
         "action": "write",
         "operand_type": "implicit_reg",
         "register": "xmm0",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16,
@@ -140934,7 +140934,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140942,7 +140942,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140969,7 +140969,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -140977,7 +140977,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -141141,7 +141141,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -141149,7 +141149,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -141199,7 +141199,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -141207,7 +141207,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -141257,7 +141257,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -141265,7 +141265,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -141282,7 +141282,7 @@
         "action": "write",
         "operand_type": "implicit_reg",
         "register": "xmm0",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16,
@@ -141319,7 +141319,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -141327,7 +141327,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -141344,7 +141344,7 @@
         "action": "write",
         "operand_type": "implicit_reg",
         "register": "xmm0",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16,
@@ -142550,7 +142550,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "uint32",
+        "element_type": "uint8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -142593,7 +142593,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "uint32",
+        "element_type": "uint8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -142629,7 +142629,7 @@
         "action": "write",
         "operand_type": "gpr32",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint32",
         "width16": 4,
         "width32": 4,
         "width64": 4
@@ -142637,7 +142637,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint32",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -142673,7 +142673,7 @@
         "action": "write",
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint32",
         "width16": 4,
         "width32": 4,
         "width64": 4
@@ -142681,7 +142681,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint32",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -142717,7 +142717,7 @@
         "action": "write",
         "operand_type": "gpr64",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "uint64",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -142725,7 +142725,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -142761,7 +142761,7 @@
         "action": "write",
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "uint64",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -142769,7 +142769,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -142804,7 +142804,7 @@
         "action": "write",
         "operand_type": "gpr32",
         "encoding": "modrm_reg",
-        "element_type": "uint"
+        "element_type": "uint32"
       },
       {
         "operand_type": "mmx",
@@ -142843,7 +142843,7 @@
         "action": "write",
         "operand_type": "gpr32",
         "encoding": "modrm_reg",
-        "element_type": "uint"
+        "element_type": "uint32"
       },
       {
         "operand_type": "xmm",
@@ -142883,7 +142883,7 @@
         "action": "write",
         "operand_type": "gpr32",
         "encoding": "modrm_rm",
-        "element_type": "uint"
+        "element_type": "uint32"
       },
       {
         "operand_type": "xmm",
@@ -142966,7 +142966,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "int32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -142974,7 +142974,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143000,7 +143000,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "int32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143008,7 +143008,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143034,7 +143034,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "int32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143042,7 +143042,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143068,7 +143068,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "int32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143076,7 +143076,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143102,7 +143102,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143110,7 +143110,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143136,7 +143136,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143144,7 +143144,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143170,7 +143170,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143178,7 +143178,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143204,7 +143204,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143212,7 +143212,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143238,7 +143238,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143246,7 +143246,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143272,7 +143272,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143280,7 +143280,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143306,7 +143306,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143314,7 +143314,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143340,7 +143340,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143348,7 +143348,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143374,7 +143374,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143382,7 +143382,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143408,7 +143408,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143416,7 +143416,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143442,7 +143442,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143450,7 +143450,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143476,7 +143476,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143484,7 +143484,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143510,7 +143510,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143518,7 +143518,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143544,7 +143544,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143552,7 +143552,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143578,7 +143578,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143586,7 +143586,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143612,7 +143612,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143620,7 +143620,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143646,7 +143646,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143654,7 +143654,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143680,7 +143680,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143688,7 +143688,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143714,7 +143714,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143722,7 +143722,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143748,7 +143748,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143756,7 +143756,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143782,7 +143782,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143790,7 +143790,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143816,7 +143816,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143824,7 +143824,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143850,7 +143850,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143858,7 +143858,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143884,7 +143884,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143892,7 +143892,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143918,7 +143918,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143926,7 +143926,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143952,7 +143952,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143960,7 +143960,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143986,7 +143986,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143994,7 +143994,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144020,7 +144020,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144028,7 +144028,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144054,7 +144054,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144062,7 +144062,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144088,7 +144088,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144096,7 +144096,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144122,7 +144122,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144130,7 +144130,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144156,7 +144156,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144164,7 +144164,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144190,7 +144190,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144198,7 +144198,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144224,7 +144224,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144232,7 +144232,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -144672,7 +144672,7 @@
         "action": "write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -144680,7 +144680,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -144707,7 +144707,7 @@
         "action": "write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -144715,7 +144715,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -145156,7 +145156,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -145164,7 +145164,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "int32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -145190,7 +145190,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -145198,7 +145198,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "int32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -145224,7 +145224,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -145232,7 +145232,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "int16",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -145258,7 +145258,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "float32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -145266,7 +145266,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "int16",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -145292,7 +145292,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "uint32",
+        "element_type": "uint8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -145335,7 +145335,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "uint32",
+        "element_type": "uint8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -145467,7 +145467,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "uint32",
+        "element_type": "uint64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -145511,7 +145511,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "uint32",
+        "element_type": "uint64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -145562,7 +145562,7 @@
       {
         "operand_type": "gpr32",
         "encoding": "modrm_rm",
-        "element_type": "uint"
+        "element_type": "uint32"
       },
       {
         "operand_type": "imm",
@@ -145643,7 +145643,7 @@
       {
         "operand_type": "gpr32",
         "encoding": "modrm_rm",
-        "element_type": "uint"
+        "element_type": "uint32"
       },
       {
         "operand_type": "imm",
@@ -145994,7 +145994,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146002,7 +146002,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146029,7 +146029,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146037,7 +146037,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146410,7 +146410,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint32",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146418,7 +146418,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint32",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146445,7 +146445,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint32",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146453,7 +146453,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint32",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146480,7 +146480,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146488,7 +146488,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146515,7 +146515,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146523,7 +146523,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146550,7 +146550,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146558,7 +146558,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146585,7 +146585,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146593,7 +146593,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int8",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146966,7 +146966,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint32",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -146974,7 +146974,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint32",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -147001,7 +147001,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint32",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -147009,7 +147009,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint32",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -147036,7 +147036,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -147044,7 +147044,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -147071,7 +147071,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -147079,7 +147079,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "uint16",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -148007,7 +148007,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -148042,7 +148042,7 @@
         "action": "read_write",
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int64",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -148215,7 +148215,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "int16",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -148223,7 +148223,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "int16",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -148249,7 +148249,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "int16",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -148257,7 +148257,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "int16",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -152945,7 +152945,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -152980,7 +152980,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -153190,7 +153190,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -153225,7 +153225,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -153399,7 +153399,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -153434,7 +153434,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -153642,7 +153642,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -153677,7 +153677,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -153851,7 +153851,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -153886,7 +153886,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -154060,7 +154060,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -154095,7 +154095,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -154305,7 +154305,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -154340,7 +154340,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -154514,7 +154514,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -154549,7 +154549,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "uint64",
+        "element_type": "uint128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -155680,7 +155680,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "uint32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -155688,7 +155688,7 @@
       {
         "operand_type": "mmx",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "uint32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -155714,7 +155714,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int64",
+        "element_type": "uint32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -155722,7 +155722,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int64",
+        "element_type": "uint32",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -155747,7 +155747,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -155755,7 +155755,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -155790,7 +155790,7 @@
       {
         "operand_type": "xmm",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
@@ -155798,7 +155798,7 @@
       {
         "operand_type": "mem",
         "encoding": "modrm_rm",
-        "element_type": "int32",
+        "element_type": "int128",
         "width16": 16,
         "width32": 16,
         "width64": 16
