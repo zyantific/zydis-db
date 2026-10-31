@@ -108,6 +108,11 @@ public sealed class ViewNode
     public IReadOnlyList<ViewNode> Children => _children;
 
     /// <summary>
+    /// The opcode table of a table row, or <see langword="null"/> for any other row.
+    /// </summary>
+    public TableInfo? Table { get; internal set; }
+
+    /// <summary>
     /// The form of a definition row, or <see langword="null"/> for any other row.
     /// </summary>
     public InstructionDefinition? Definition { get; }

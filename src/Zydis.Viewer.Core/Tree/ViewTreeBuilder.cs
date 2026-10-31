@@ -129,6 +129,7 @@ public sealed class ViewTreeBuilder
     public IReadOnlyList<ViewNode> Build()
     {
         var primary = ViewNode.CreateRoot(ViewNodeKind.Table, OpcodeTableLayout.Primary.Label);
+        primary.Table = OpcodeTableLayout.Primary.Table;
         var owners = new Dictionary<int, ViewNode> { [OpcodeTableLayout.Primary.TableId] = primary };
 
         AddOpcodeRows(primary, OpcodeTableLayout.Primary.TableId, owners);
@@ -246,6 +247,7 @@ public sealed class ViewTreeBuilder
         }
 
         var tableRow = parent.AddChild(ViewNodeKind.Table, target.Label);
+        tableRow.Table = target.Table;
         owners.Add(target.TableId, tableRow);
         AddOpcodeRows(tableRow, target.TableId, owners);
     }

@@ -168,7 +168,8 @@ public static class OpcodeTableLayout
 
     private static TableTarget CreateTarget(InstructionEncoding encoding, OpcodeMap map, RefiningPrefix? prefix)
     {
-        return new TableTarget(OpcodeTables.GetTableId(encoding, map, prefix), TableLabel(encoding, map, prefix));
+        return new TableTarget(OpcodeTables.GetTableId(encoding, map, prefix), TableLabel(encoding, map, prefix),
+            new TableInfo(encoding, map, prefix));
     }
 
     /// <summary>
@@ -193,7 +194,8 @@ public static class OpcodeTableLayout
 /// </summary>
 /// <param name="TableId">The generator's id of the table.</param>
 /// <param name="Label">The label of the table.</param>
-internal sealed record TableTarget(int TableId, string Label);
+/// <param name="Table">The encoding, the opcode map and the refining prefix that select the table.</param>
+internal sealed record TableTarget(int TableId, string Label, TableInfo Table);
 
 /// <summary>
 /// A row of an opcode table that leads to other tables.
