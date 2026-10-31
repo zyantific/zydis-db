@@ -1,0 +1,74 @@
+import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { chromium } from 'playwright';
+import { preview } from 'vite';
+
+const webRoot = fileURLToPath(new URL('..', import.meta.url));
+const distDir = path.join(webRoot, 'dist');
+const database = path.join(webRoot, '..', '..', 'datafiles', 'instructions.json');
+// Covers the runtime download and the parse of the whole database.
+const timeout = 60_000;
+
+if (!existsSync(path.join(distDir, '_framework', 'dotnet.js'))) {
+  console.error('dist/_framework/dotnet.js is missing. Run npm run build first.');
+  process.exit(1);
+}
+
+// Taken from the file so the check follows the database as it changes.
+const definitions = JSON.parse(readFileSync(database, 'utf8')).length;
+const expected = `${definitions.toLocaleString('en-US')} definitions`;
+
+mkdirSync(path.join(distDir, 'datafiles'), { recursive: true });
+copyFileSync(database, path.join(distDir, 'datafiles', 'instructions.json'));
+
+const server = await preview({ root: webRoot, logLevel: 'warn', preview: { port: 4173, strictPort: true } });
+let browser;
+try {
+  browser = await chromium.launch();
+  const page = await browser.newPage();
+
+  // The list catches an error that arrives after the status bar check. The promise ends a failed start without
+  // waiting for the timeout.
+  const problems = [];
+  const failure = new Promise((_, reject) => {
+    const fail = (problem) => {
+      problems.push(problem);
+      reject(new Error(problem));
+    };
+    page.on('pageerror', (error) => fail(`Page error: ${error.message}`));
+    page.on('console', (message) => {
+      if (message.type() === 'error') {
+        fail(`Console error: ${message.text()}`);
+      } else if (message.type() === 'warning') {
+        console.log(`Console warning: ${message.text()}`);
+      }
+    });
+  });
+  // A failed goto skips the race, and a later rejection without a handler would end the process before the cleanup.
+  failure.catch(() => {});
+
+  const statusBar = page.locator('.status-bar');
+  const started = performance.now();
+  await page.goto(server.resolvedUrls.local[0]);
+  await Promise.race([
+    failure,
+    statusBar.filter({ hasText: expected }).waitFor({ timeout }),
+    statusBar.locator('.error').waitFor({ timeout }).then(async () => {
+      throw new Error(`Load error: ${await statusBar.locator('.error').innerText()}`);
+    }),
+  ]);
+  const seconds = ((performance.now() - started) / 1000).toFixed(1);
+
+  console.log(`Status bar after ${seconds} s: ${(await statusBar.innerText()).replace(/\s+/g, ' ')}`);
+  if (problems.length > 0) {
+    throw new Error(problems.join('\n'));
+  }
+} catch (error) {
+  console.error(error instanceof Error ? error.message : error);
+  process.exitCode = 1;
+} finally {
+  await browser?.close();
+  await server.close();
+}

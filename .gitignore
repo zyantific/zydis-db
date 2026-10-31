@@ -377,3 +377,10 @@ FodyWeavers.xsd
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+##
+## Zydis.Viewer.Web
+##
+src/Zydis.Viewer.Web/.publish/
+src/Zydis.Viewer.Web/dist/
+src/Zydis.Viewer.Web/public/_framework/

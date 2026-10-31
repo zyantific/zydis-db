@@ -1,0 +1,22 @@
+{
+  "name": "zydis-viewer-web",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "build": "node scripts/sync-framework.mjs && vite build",
+    "dev": "node scripts/sync-framework.mjs && vite",
+    "smoke": "node smoke/smoke.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "jsdom": "27.4.0",
+    "playwright": "1.64.1",
+    "typescript": "5.9.3",
+    "vite": "7.3.7",
+    "vitest": "4.1.12"
+  }
+}
