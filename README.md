@@ -158,6 +158,85 @@ The `dp` mode writes into a Zydis checkout:
 | `InstructionEncodings.inc`   | Deduplicated instruction-encoding records.     |
 | `OperandDefinitions.inc`     | Deduplicated operand records.                  |
 
+## Instruction viewer
+
+The instruction viewer is a read-only browser app for `datafiles/instructions.json`. It parses the file with
+`Zydis.Generator.Core` on the .NET WebAssembly runtime and shows the decoder tree as a tree grid: opcode tables,
+opcodes, decision nodes with their slots, and definition rows with the mnemonic, the operands, and the comment.
+
+Ctrl+F focuses the search box. A search looks at one scope, which is the mnemonic by default and can be the category,
+extension, form id, ISA set, or opcode. Its match mode is exact, starts with, contains (the default), or regular
+expression. The grid then keeps the matching rows and the paths that lead to them.
+
+The inspector shows the form of the selected definition row in sections: definition, filters, operands, meta info,
+affected flags, encoding info, flags, annotations, comment, and raw. Top-level keys the viewer does not know go to an
+Other section. The address bar follows the selected form as `#form=<form id>`, so the URL links to that form.
+
+### Running the local host
+
+`src/Zydis.Viewer.Host` serves the built app together with the checkout's `datafiles/` folder and the git revisions
+the compare dialog reads its base from. Build the web app once, then start the host from the repository root:
+
+```
+cd src/Zydis.Viewer.Web
+npm ci
+npm run build
+cd ../..
+dotnet run --project src/Zydis.Viewer.Host -- --open
+```
+
+The host listens on `http://127.0.0.1:5280`, a loopback address that other machines cannot reach. When the web root
+holds no `index.html`, the host prints how to build the app and answers only the datafiles and git requests.
+
+| Argument            | Default                            | Description                                              |
+| ------------------- | ---------------------------------- | -------------------------------------------------------- |
+| `--open`            | off                                | Opens the viewer in the default browser at start.        |
+| `--port <n>`        | `5280`                             | The port on `127.0.0.1`, from 1 to 65535.                |
+| `--repo <path>`     | the checkout of the host build     | The checkout to serve `datafiles/` and git history from. |
+| `--web-root <path>` | `<repo>/src/Zydis.Viewer.Web/dist` | The folder of the built web app.                         |
+
+### Static hosting
+
+`npm run build` writes the app to `src/Zydis.Viewer.Web/dist/`. The build uses relative URLs, so the folder runs from
+any static server, at the site root or under a sub-path. At start the app loads `datafiles/instructions.json` relative
+to the page, so a static deployment copies the database to `dist/datafiles/instructions.json`. Without that file the
+app starts with a drop zone: drop an `instructions.json` on the window or pick one with the Open button.
+
+### Comparing two databases
+
+The Compare button opens a dialog for the base, A, and the loaded database is the head, B. Under the host the dialog
+lists the local branches and tags of the checkout, with `master` preselected, and compares the working tree's
+`datafiles/instructions.json` with the file at the chosen revision. The dialog also takes a second file as the base.
+In standalone mode, when a static server or `npm run dev` serves the app, the file is the only choice.
+
+The diff view shows both databases in one tree and tints the rows of added, changed, moved, and removed forms. The
+toolbar adds a Changes only toggle and Previous and Next buttons that step through the changed rows, and the inspector
+shows both sides of the selected form in two columns.
+
+### Filter order
+
+Each form enters the tree along the filter order it records in the array schema,
+`"filters": [{ "filter": ..., "value": ... }]` (see [Filters](#filters)). The legacy object schema records no order,
+so the tree takes the filters in the order of the members in the file, and the status bar says
+`filters: object form, file order`.
+
+### Development
+
+The web app in `src/Zydis.Viewer.Web` needs Node 20.19 or 22.12 and later, the range Vite 7 supports. `npm run build`
+and `npm run dev` publish `Zydis.Viewer.Wasm` first, which needs the `wasm-tools` workload
+(`dotnet workload install wasm-tools`). Run the commands in that folder after `npm ci`:
+
+| Command             | Effect                                                                                  |
+| ------------------- | --------------------------------------------------------------------------------------- |
+| `npm run build`     | Publishes `Zydis.Viewer.Wasm` into `public/_framework` and builds the app into `dist/`. |
+| `npm run dev`       | Starts the Vite dev server, which serves the checkout's `datafiles/` as the host does.  |
+| `npm run smoke`     | Checks the built `dist/` with Playwright. Needs `npx playwright install chromium` once. |
+| `npm run typecheck` | Type-checks the app, its tests, and the Vite config.                                    |
+| `npm test`          | Runs the Vitest unit tests.                                                             |
+
+npm 11 prints a warning that the postinstall script of esbuild was skipped. The warning is harmless, since esbuild
+falls back to its platform package.
+
 ## Projects
 
 | Project                                | Purpose                                                                    |
@@ -169,6 +248,12 @@ The `dp` mode writes into a Zydis checkout:
 | `Zydis.Generator.Enums.SourceGenerator` | Roslyn source generator that turns `shared_enums.json` into C# enums.     |
 | `Zydis.Generator.SourceGenerator`      | Roslyn source generator that turns `decoder_tree_nodes.json` into decision-node types. |
 | `Zydis.SourceGeneration`               | Shared helpers for the Roslyn source generators.                           |
+| `Zydis.Viewer.Core`                    | View tree, view model, and database diff on top of the core library.       |
+| `Zydis.Viewer.Core.Tests`              | xUnit tests of the viewer core.                                            |
+| `Zydis.Viewer.Host`                    | Local ASP.NET host for the viewer, the datafiles, and the git revisions.   |
+| `Zydis.Viewer.Host.Tests`              | xUnit tests of the viewer host.                                            |
+| `Zydis.Viewer.Wasm`                    | WebAssembly build of the viewer core that the web app calls.               |
+| `Zydis.Viewer.Web`                     | Vite and TypeScript browser app of the viewer, built with npm.             |
 
 ## Building and testing
 
@@ -180,6 +265,10 @@ dotnet build
 dotnet test
 ```
 
+The viewer's web app in `src/Zydis.Viewer.Web` builds and tests with npm (see [Development](#development)): `npm ci`,
+then `npm test`, `npm run typecheck`, `npm run build`, and `npm run smoke`. The build publishes `Zydis.Viewer.Wasm`,
+which needs the `wasm-tools` workload (`dotnet workload install wasm-tools`).
+
 ## Continuous integration
 
 CI builds the solution, runs the test suite, and enforces two gates on every pull request:
@@ -187,6 +276,9 @@ CI builds the solution, runs the test suite, and enforces two gates on every pul
 - Decoder-table determinism: the `dp` mode is run twice into separate directories and the outputs are diffed; any
   difference fails the build.
 - Filter-order lint: the `lint` mode runs as an advisory step; findings are reported without failing the build.
+
+After the .NET tests, CI installs the web app with `npm ci` on Node 22 and runs `npm test` and `npm run build`, so a
+failing web test or a broken wasm publish fails the build.
 
 ## Maintaining the instruction data
 

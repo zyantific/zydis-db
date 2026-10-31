@@ -13,6 +13,8 @@ env:
   BUILD_CONFIG: Debug
   DOTNET_GLOBAL_JSON: ${{ inputs.root-path != '' && format('{0}/global.json', inputs.root-path) || 'global.json' }}
   RESTORE_PATTERN: ${{ inputs.root-path != '' && format('{0}/**/packages.lock.json', inputs.root-path) || '**/packages.lock.json' }}
+  VIEWER_WEB_LOCK_FILE: ${{ inputs.root-path != '' && format('{0}/src/Zydis.Viewer.Web/package-lock.json', inputs.root-path) || 'src/Zydis.Viewer.Web/package-lock.json' }}
+  VIEWER_WEB_PATH: ${{ inputs.root-path != '' && format('{0}/src/Zydis.Viewer.Web', inputs.root-path) || 'src/Zydis.Viewer.Web' }}
 
 jobs:
   build:
@@ -26,6 +28,11 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: ${{ env.DOTNET_GLOBAL_JSON }}
+
+      - name: .NET Install Workload
+        working-directory: ${{ inputs.root-path }}
+        run: >-
+          dotnet workload install wasm-tools
 
       - name: .NET Cache Packages
         uses: actions/cache@v4
@@ -43,6 +50,28 @@ jobs:
         working-directory: ${{ inputs.root-path }}
         run: >-
           dotnet test --no-build
+
+      - name: Node Setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ env.VIEWER_WEB_LOCK_FILE }}
+
+      - name: Node Install
+        working-directory: ${{ env.VIEWER_WEB_PATH }}
+        run: >-
+          npm ci
+
+      - name: Node Test
+        working-directory: ${{ env.VIEWER_WEB_PATH }}
+        run: >-
+          npm test
+
+      - name: Node Build
+        working-directory: ${{ env.VIEWER_WEB_PATH }}
+        run: >-
+          npm run build
 
       - name: Decoder-table determinism gate
         working-directory: ${{ inputs.root-path }}
