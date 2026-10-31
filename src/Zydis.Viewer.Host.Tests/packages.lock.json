@@ -8,6 +8,12 @@
         "resolved": "6.0.2",
         "contentHash": "bJShQ6uWRTQ100ZeyiMqcFlhP7WJ+bCuabUs885dJiBEzMsJMSFr7BOyeCw4rgvQokteGi5rKQTlkhfQPUXg2A=="
       },
+      "Microsoft.AspNetCore.TestHost": {
+        "type": "Direct",
+        "requested": "[9.0.7, )",
+        "resolved": "9.0.7",
+        "contentHash": "TpQn08b02eGJoMegZxxTxDVLboNg34kS/gUQfbjLvCxpsaZJ/Ir58hj/9i9pltLo6+PS3YN+PtxYVRu5axxh1A=="
+      },
       "Microsoft.Build.CopyOnWrite": {
         "type": "Direct",
         "requested": "[1.0.334, )",

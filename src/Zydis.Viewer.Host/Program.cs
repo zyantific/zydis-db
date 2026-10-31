@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 
 namespace Zydis.Viewer.Host;
 
@@ -67,17 +68,50 @@ internal static partial class Program
         }
 
         repo = Path.GetFullPath(repo ?? FindRepository());
-        webRoot = Path.GetFullPath(webRoot ?? Path.Combine(repo, "src", "Zydis.Viewer.Web", "dist"));
-        var datafiles = Path.Combine(repo, "datafiles");
-        var url = $"http://127.0.0.1:{port}";
-        var serveApp = Directory.Exists(webRoot);
+        var options = new HostOptions(
+            repo, Path.GetFullPath(webRoot ?? Path.Combine(repo, "src", "Zydis.Viewer.Web", "dist")), port, open);
 
-        if (!File.Exists(Path.Combine(webRoot, "index.html")))
+        if (!File.Exists(Path.Combine(options.WebRoot, "index.html")))
         {
             Console.WriteLine(
-                $"{webRoot} holds no index.html, so only the datafiles and the git endpoints answer. " +
+                $"{options.WebRoot} holds no index.html, so only the datafiles and the git endpoints answer. " +
                 "Run npm run build in src/Zydis.Viewer.Web to build the app.");
         }
+
+        var app = CreateApp(options);
+        await using (app.ConfigureAwait(false))
+        {
+            // Kestrel listens once the application has started, so a browser opened here finds the server.
+            app.Lifetime.ApplicationStarted.Register(() =>
+            {
+                Console.WriteLine($"Zydis viewer: {options.Address}");
+                if (options.Open)
+                {
+                    OpenBrowser(options.Address);
+                }
+            });
+
+            // RunAsync would dispose the app a second time, so the using block disposes it after the two steps RunAsync
+            // runs.
+            await app.StartAsync().ConfigureAwait(false);
+            await app.WaitForShutdownAsync().ConfigureAwait(false);
+        }
+
+        return 0;
+    }
+
+    /// <summary>
+    /// Builds the host for <paramref name="options"/> with its routes, without starting it.
+    /// </summary>
+    /// <param name="options">The parsed command line.</param>
+    /// <param name="configureHost">
+    /// Runs on the web host builder after the host's own settings, for example to replace Kestrel with a test server.
+    /// </param>
+    /// <returns>The built application, which the caller starts and disposes.</returns>
+    internal static WebApplication CreateApp(HostOptions options, Action<IWebHostBuilder>? configureHost = null)
+    {
+        var datafiles = Path.Combine(options.Repo, "datafiles");
+        var serveApp = Directory.Exists(options.WebRoot);
 
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions
         {
@@ -85,12 +119,13 @@ internal static partial class Program
             // from cannot replace the bind address.
             ContentRootPath = AppContext.BaseDirectory,
             // The host creates a web root that does not exist, which would leave an empty folder behind a typo.
-            WebRootPath = serveApp ? webRoot : null,
+            WebRootPath = serveApp ? options.WebRoot : null,
         });
-        builder.WebHost.UseUrls(url);
+        builder.WebHost.UseUrls(options.Address);
         // Host filtering answers 400 to other Host headers, so a web page that rebinds its own name to 127.0.0.1
         // cannot read the checkout through the visitor's browser.
         builder.Configuration["AllowedHosts"] = "127.0.0.1;localhost";
+        configureHost?.Invoke(builder.WebHost);
         var app = builder.Build();
 
         if (serveApp)
@@ -115,7 +150,7 @@ internal static partial class Program
         {
             try
             {
-                var refs = await GitRevision.ListRefsAsync(repo, ct).ConfigureAwait(false);
+                var refs = await GitRevision.ListRefsAsync(options.Repo, ct).ConfigureAwait(false);
                 return Results.Json(new RefsResponse(refs), HostSerializerContext.Default.RefsResponse);
             }
             catch (InvalidOperationException exception)
@@ -133,7 +168,7 @@ internal static partial class Program
 
             try
             {
-                var content = await GitRevision.ShowAsync(repo, rev, "datafiles/instructions.json", ct)
+                var content = await GitRevision.ShowAsync(options.Repo, rev, "datafiles/instructions.json", ct)
                     .ConfigureAwait(false);
                 return Results.Text(content, "application/json");
             }
@@ -143,22 +178,15 @@ internal static partial class Program
             }
         });
 
-        // Kestrel listens once the application has started, so a browser opened here finds the server.
-        app.Lifetime.ApplicationStarted.Register(() =>
-        {
-            Console.WriteLine($"Zydis viewer: {url}");
-            if (open)
-            {
-                OpenBrowser(url);
-            }
-        });
-
-        await app.RunAsync().ConfigureAwait(false);
-        return 0;
+        return app;
     }
 
-    // dotnet run starts the host from its build output, which lies inside the checkout.
-    private static string FindRepository()
+    /// <summary>
+    /// Returns the first folder at or above the base directory of the process that holds a <c>datafiles</c> folder.
+    /// </summary>
+    /// <returns>That folder, or the current directory when no ancestor holds one.</returns>
+    /// <remarks>dotnet run starts the host from its build output, which lies inside the checkout.</remarks>
+    internal static string FindRepository()
     {
         for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null;
              directory = directory.Parent)
@@ -187,6 +215,21 @@ internal static partial class Program
 
     [GeneratedRegex(@"^[A-Za-z0-9_-]+\.json\z")]
     private static partial Regex DatafileName();
+}
+
+/// <summary>
+/// The parsed command line of the host.
+/// </summary>
+/// <param name="Repo">The absolute path of the checkout to serve <c>datafiles</c> and git history from.</param>
+/// <param name="WebRoot">The absolute path of the folder of the built web app, which need not exist.</param>
+/// <param name="Port">The port on <c>127.0.0.1</c>.</param>
+/// <param name="Open">Whether the host opens the viewer in the default browser once it listens.</param>
+internal sealed record HostOptions(string Repo, string WebRoot, int Port, bool Open)
+{
+    /// <summary>
+    /// Gets the address the host listens on, a loopback address that other machines cannot reach.
+    /// </summary>
+    public string Address => $"http://127.0.0.1:{Port}";
 }
 
 /// <summary>
