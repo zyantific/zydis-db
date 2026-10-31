@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <!--
+    The host is a developer tool started through dotnet run. With EnableAotSupport left on, App.Directory.Build.targets
+    would turn on PublishAot and pull the native AOT packages into the restore of a project that never ships natively.
+  -->
+  <PropertyGroup>
+    <EnableAotSupport>false</EnableAotSupport>
+  </PropertyGroup>
+
+  <!--
+    The Web SDK runs the app from the project folder, which would resolve a relative repository or web root path
+    against src/Zydis.Viewer.Host instead of the folder dotnet run was started from.
+  -->
+  <PropertyGroup>
+    <RunWorkingDirectory>$(MSBuildStartupDirectory)</RunWorkingDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Zydis.Viewer.Host.Tests" />
+  </ItemGroup>
+
+</Project>
