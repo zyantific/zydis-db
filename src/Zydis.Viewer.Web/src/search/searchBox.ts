@@ -50,6 +50,10 @@ export function createSearchBox(onEnter: () => void, onEscape: () => void): HTML
   scopeSelect.addEventListener('change', apply);
 
   input.addEventListener('keydown', (event) => {
+    // The Enter or Escape that ends an IME composition belongs to the composition.
+    if (event.isComposing) {
+      return;
+    }
     if (event.key === 'Enter') {
       onEnter();
     } else if (event.key === 'Escape') {

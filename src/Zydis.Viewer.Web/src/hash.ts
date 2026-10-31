@@ -1,3 +1,4 @@
+import type { DiffModel, ViewModel } from './model';
 import { store } from './store';
 import { ancestorsOf } from './tree/rows';
 
@@ -31,11 +32,16 @@ export function revealHashForm(): void {
 // is selected. A load clears the selection before revealHashForm reads the hash, so no selection leaves it alone. A
 // diff leaves it alone as well, so the link of the single view survives a comparison.
 export function trackSelectionInHash(): void {
+  // The merged tree of a diff numbers its rows as the single view does up to the first row only the base has, so the
+  // tree tells two selections with the same id apart.
+  let tree: DiffModel | ViewModel | null = null;
   let selectedNodeId: number | null = null;
   store.subscribe((state) => {
-    if (state.selectedNodeId === selectedNodeId) {
+    const selectedTree = state.diff?.model ?? state.database?.model ?? null;
+    if (state.selectedNodeId === selectedNodeId && selectedTree === tree) {
       return;
     }
+    tree = selectedTree;
     selectedNodeId = state.selectedNodeId;
 
     const model = state.database?.model;

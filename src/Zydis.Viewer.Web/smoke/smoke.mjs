@@ -27,13 +27,15 @@ mkdirSync(path.join(distDir, 'datafiles'), { recursive: true });
 copyFileSync(database, path.join(distDir, 'datafiles', 'instructions.json'));
 
 // The head of the diff check is a copy of the database with a changed operand action in the first cfcmovb form and
-// without aaa, compared with the database itself as the base. It lives outside the checkout, since the viewer and its
-// checks never write the database.
+// without hlt, compared with the database itself as the base. It lives outside the checkout, since the viewer and its
+// checks never write the database. hlt sits at opcode F4 of the primary table, after the subtree of opcode 62 that
+// holds cfcmovb, so the merged tree numbers its rows up to the changed one as the head does, and the Close diff check
+// sees a selection whose id stays while its tree changes.
 const headForms = JSON.parse(readFileSync(database, 'utf8'));
 const changedOperand = headForms.find((form) => form.mnemonic === searchText).operands[0];
 const baseAction = changedOperand.action;
 changedOperand.action = baseAction === 'condwrite' ? 'write' : 'condwrite';
-const removedMnemonic = 'aaa';
+const removedMnemonic = 'hlt';
 const removedForms = headForms.filter((form) => form.mnemonic === removedMnemonic).length;
 
 const server = await preview({ root: webRoot, logLevel: 'warn', preview: { port: 4173, strictPort: true } });
@@ -344,33 +346,65 @@ try {
     + ` ${baseAction} in A and ${changedOperand.action} in B`);
 
   // The changed row is still selected, so the single view selects the row of its head form and opens the path to it.
+  // Eleven other cfcmovb forms share the mnemonic, so the form id tells the carried form apart.
+  const carriedForm = await inspectorTitle.innerText();
+  const carriedHash = `${formPrefix}${encodeURIComponent(carriedForm)}`;
   await page.getByRole('button', { name: 'Close diff' }).click();
   await statusBar.filter({ hasText: headDefinitions }).waitFor({ timeout: 5_000 });
   const reopened = page.locator('.grid-row.selected');
-  if ((await reopened.count()) === 0) {
-    throw new Error(`Close diff left no row selected, expected the changed ${searchText} row.`);
+  if ((await reopened.count()) === 0 || (await inspectorTitle.innerText()) !== carriedForm
+    || !(await insideViewport(reopened))) {
+    throw new Error(`Close diff selected "${await inspectorTitle.innerText()}", expected ${carriedForm} in view.`);
   }
-  const reopenedMnemonic = await reopened.locator('.grid-cell:nth-child(2)').innerText();
-  if (reopenedMnemonic !== searchText || !(await insideViewport(reopened))) {
-    throw new Error(`Close diff selected a ${reopenedMnemonic} row, expected the ${searchText} row in view.`);
+  if (new URL(page.url()).hash !== carriedHash) {
+    throw new Error(`Close diff left the hash at "${new URL(page.url()).hash}" with ${carriedForm} selected.`);
   }
   const reopenedRow = await describeRow(reopened);
   const closedRows = await rowCount();
 
   // A link opens the ancestors of its form and nothing else. The one root of the tree is an ancestor of every form, so
   // after Collapse all the link to the selected form shows the rows Close diff has to leave.
-  const closedForm = await inspectorTitle.innerText();
   await page.getByRole('button', { name: 'Collapse all' }).click();
   await page.evaluate((hash) => {
     location.hash = hash;
-  }, `${formPrefix}${encodeURIComponent(closedForm)}`);
-  await page.waitForFunction((id) => document.querySelector('.inspector-title')?.textContent === id, closedForm,
+  }, carriedHash);
+  await page.waitForFunction((id) => document.querySelector('.inspector-title')?.textContent === id, carriedForm,
     { timeout: 5_000 });
   const linkRows = await rowCount();
   if (closedRows !== linkRows) {
-    throw new Error(`Close diff left ${closedRows} rows, expected the ${linkRows} the link to ${closedForm} shows.`);
+    throw new Error(`Close diff left ${closedRows} rows, expected the ${linkRows} the link to ${carriedForm} shows.`);
   }
-  console.log(`Close diff: "${reopenedRow}" selected in ${closedRows} rows, as the link to ${closedForm} shows`);
+  console.log(`Close diff: "${reopenedRow}" selected in ${closedRows} rows, as the link to ${carriedForm} shows`);
+
+  // A second comparison closes under an active search. The cfcmovo and cfcmovno forms at opcodes 40 and 41 come before
+  // the cfcmovb forms at 42, so they put the carried row below the first screen of the result, where the grid has to
+  // scroll to show it.
+  const familyText = 'cfcmov';
+  const familyMatches = forms.filter((form) => form.mnemonic.includes(familyText)).length;
+  await page.getByRole('combobox', { name: 'Match mode' }).selectOption('contains');
+  await searchBox.fill(familyText);
+  await statusBar.filter({ hasText: `${familyMatches.toLocaleString('en-US')} matches` }).waitFor({ timeout: 5_000 });
+  await page.locator('.toolbar').getByRole('button', { name: 'Compare', exact: true }).click();
+  await dialog.waitFor({ timeout: 5_000 });
+  await dialog.locator('input[type=file]').setInputFiles(database);
+  await dialog.getByRole('button', { name: 'Compare', exact: true }).click();
+  await Promise.race([failure, dialog.waitFor({ state: 'hidden', timeout })]);
+  // The search hides the removed hlt row, so the first step selects the changed row.
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  if ((await inspectorTitle.innerText()) !== carriedForm) {
+    throw new Error(`The first step under the search selected "${await inspectorTitle.innerText()}", expected`
+      + ` ${carriedForm}.`);
+  }
+  await page.getByRole('button', { name: 'Close diff' }).click();
+  await statusBar.filter({ hasText: headDefinitions }).waitFor({ timeout: 5_000 });
+  const searchedRow = page.locator('.grid-row.selected');
+  if ((await searchedRow.count()) === 0 || (await inspectorTitle.innerText()) !== carriedForm
+    || !(await insideViewport(searchedRow))) {
+    throw new Error(`Close diff under the search ${familyText} selected "${await inspectorTitle.innerText()}", expected`
+      + ` ${carriedForm} in view.`);
+  }
+  console.log(`Close diff under the search ${familyText}: "${await describeRow(searchedRow)}" selected in view at`
+    + ` scroll offset ${await page.locator('.grid-viewport').evaluate((viewport) => viewport.scrollTop)}`);
 
   if (problems.length > 0) {
     throw new Error(problems.join('\n'));

@@ -1,6 +1,6 @@
 import { readSourceOrNotFound, type LoadSource } from '../loader';
 import type { DiffCounts, DiffModel, DiffNode, DiffPair, ViewDefinition, ViewModel } from '../model';
-import { setSearch } from '../search/searchState';
+import { searchUpdate, setSearch, type Search } from '../search/searchState';
 import { store, type AppState, type LoadedDatabase } from '../store';
 import { ancestorsOf } from '../tree/rows';
 
@@ -199,33 +199,39 @@ export async function compareWith(source: LoadSource): Promise<void> {
 }
 
 export function closeDiff(): void {
-  const { database, diff, runtime, selectedNodeId } = store.state;
+  const { database, diff, runtime, search, selectedNodeId } = store.state;
   if (diff === null) {
     return;
   }
 
-  const model = database?.model;
-  const nodeId = model === undefined || selectedNodeId === null ? null : headFormRow(diff.model, model, selectedNodeId);
-  // Opens the path to the selection the way revealHashForm does, so the form stays in view.
-  const opened = model === undefined || nodeId === null ? [] : ancestorsOf(model, nodeId);
   try {
-    store.set({
-      diff: null,
-      expanded: new Set([...(model?.rootIds ?? []), ...opened]),
-      searchInclude: null,
-      selectedNodeId: nodeId,
-    });
+    store.set(database === null
+      ? { diff: null, expanded: new Set(), searchInclude: null, selectedNodeId: null }
+      : singleViewAfter(diff.model, database.model, search, selectedNodeId));
   } finally {
     runtime?.release(diff.base.handle);
   }
-  // The text in the search box stays, so the search runs again on the single view.
-  setSearch(store.state.search);
+}
+
+// The text in the search box stays, so the search runs again on the single view. Its result and the selection arrive
+// in one update, since the grid scrolls to the top for a new search result and would leave a selection set before it
+// out of view.
+function singleViewAfter(diffModel: DiffModel, model: ViewModel, search: Search, selectedNodeId: number | null):
+  Partial<AppState> {
+  const searched = searchUpdate({ expanded: new Set(), search, selectedNodeId: null }, model, search);
+  const searchInclude = searched.searchInclude ?? null;
+  const carried = selectedNodeId === null ? null : headFormRow(diffModel, model, selectedNodeId);
   // The search of a diff also matches a row by its base form, which the search of the single view can leave out. Like
   // revealHashForm, the close selects no form out of sight.
-  const { searchInclude } = store.state;
-  if (nodeId !== null && searchInclude !== null && !searchInclude.has(nodeId)) {
-    store.set({ selectedNodeId: null });
-  }
+  const nodeId = carried !== null && (searchInclude === null || searchInclude.has(carried)) ? carried : null;
+  return {
+    ...searched,
+    diff: null,
+    // Opens the path to the selection the way revealHashForm does, so the row shows without a search as well.
+    expanded: new Set([...model.rootIds, ...(nodeId === null ? [] : ancestorsOf(model, nodeId))]),
+    searchInclude,
+    selectedNodeId: nodeId,
+  };
 }
 
 // The node ids of the merged tree name other rows than those of the single view, so the selection carries over through

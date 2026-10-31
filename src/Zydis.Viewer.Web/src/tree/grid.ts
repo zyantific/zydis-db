@@ -156,9 +156,12 @@ export function mountGrid(container: HTMLElement): HTMLElement {
 
     let changed = false;
     const filtersCleared = include !== null && nextInclude === null;
+    // The merged tree of a diff numbers its rows as the single view does up to the first row only the base has, so a
+    // selection carried from one tree to the other can keep its id.
+    const treeChanged = nextSource?.tree !== source?.tree;
     if (nextSource !== source || state.expanded !== expanded || nextInclude !== include) {
       // A filter turned on after a deep scroll would otherwise open at the clamped end of the shorter row list.
-      if (nextSource?.tree !== source?.tree || (include === null && nextInclude !== null)) {
+      if (treeChanged || (include === null && nextInclude !== null)) {
         viewport.scrollTop = 0;
       }
       source = nextSource;
@@ -176,8 +179,9 @@ export function mountGrid(container: HTMLElement): HTMLElement {
       widths.forEach((width, column) => grid.style.setProperty(`--column-${column}`, `${width}px`));
       grid.style.setProperty('--grid-width', `${widths.reduce((sum, width) => sum + width, 0)}px`);
     }
-    // Clearing the filters moves the selected row to a new index, so it scrolls into view as a new selection does.
-    if (state.selectedNodeId !== selectedNodeId || filtersCleared) {
+    // Clearing the filters or a new tree moves the selected row to a new index, so it scrolls into view as a new
+    // selection does.
+    if (state.selectedNodeId !== selectedNodeId || filtersCleared || treeChanged) {
       selectedNodeId = state.selectedNodeId;
       // Runs after the row list update, so a selection that arrives with new rows finds its index.
       scrollSelectionIntoView();
@@ -296,18 +300,21 @@ export function mountGrid(container: HTMLElement): HTMLElement {
   return viewport;
 }
 
-// Selects the first definition row of the grid while no row is selected, so Enter in the search box lands on the first
-// match.
+// Selects the first definition row of the grid while no shown row is selected, so Enter in the search box lands on the
+// first match. A search keeps a selection it hides, so a selection outside the shown rows counts as none.
 export function selectFirstDefinition(): void {
   const { expanded, selectedNodeId } = store.state;
   const source = sourceOf(store.state);
-  if (source === null || selectedNodeId !== null) {
+  if (source === null) {
     return;
   }
 
+  const rows = computeVisibleRows(source.tree, expanded, rowFilter(store.state) ?? undefined);
+  if (rows.some((row) => row.nodeId === selectedNodeId)) {
+    return;
+  }
   const { nodes } = source.tree;
-  const first = computeVisibleRows(source.tree, expanded, rowFilter(store.state) ?? undefined)
-    .find((row) => nodes[row.nodeId].kind === 'definition');
+  const first = rows.find((row) => nodes[row.nodeId].kind === 'definition');
   if (first !== undefined) {
     store.set({ selectedNodeId: first.nodeId });
   }
