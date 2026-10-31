@@ -49,7 +49,9 @@ body {
 
 .content {
   position: relative;
+  display: flex;
   flex: 1;
+  flex-direction: column;
   min-height: 0;
   overflow: hidden;
 }
@@ -75,6 +77,141 @@ body {
 /* The display of .drop-zone would otherwise win over the hidden attribute. */
 .drop-zone[hidden] {
   display: none;
+}
+
+.grid {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* The display of .grid would otherwise win over the hidden attribute. */
+.grid[hidden] {
+  display: none;
+}
+
+.grid-header {
+  flex: none;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-weight: 600;
+}
+
+.grid-header-row {
+  display: flex;
+  width: var(--grid-width);
+}
+
+.grid-header .grid-cell {
+  position: relative;
+  border-right: 1px solid var(--color-border);
+}
+
+/* Inside its cell, since the overflow clip of the cell would hide anything past the border. */
+.column-resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+}
+
+.grid-viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Inset, since the content area clips anything outside the viewport. */
+.grid-viewport:focus-visible {
+  outline-offset: -2px;
+}
+
+.grid-canvas {
+  position: relative;
+  width: var(--grid-width);
+}
+
+.grid-row {
+  position: absolute;
+  left: 0;
+  display: flex;
+  width: var(--grid-width);
+  cursor: default;
+}
+
+.grid-cell {
+  flex: none;
+  overflow: hidden;
+  height: var(--row-height);
+  padding: 0 4px;
+  line-height: var(--row-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grid-cell:nth-child(1) {
+  width: var(--column-0);
+}
+
+.grid-cell:nth-child(2) {
+  width: var(--column-1);
+}
+
+.grid-cell:nth-child(3) {
+  width: var(--column-2);
+}
+
+.grid-cell:nth-child(4) {
+  width: var(--column-3);
+}
+
+.grid-row.conflict {
+  color: var(--color-error);
+}
+
+.grid-row.selected {
+  background: var(--color-accent);
+  color: var(--color-background);
+}
+
+.expander {
+  display: inline-block;
+  width: 14px;
+  color: var(--color-muted);
+  text-align: center;
+  cursor: pointer;
+}
+
+.icon {
+  display: inline-block;
+  width: 16px;
+  margin-right: 4px;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.icon-conflict {
+  color: var(--color-error);
+}
+
+.icon-reference,
+.icon-table {
+  color: var(--color-accent);
+}
+
+.grid-row .detail {
+  margin-left: 8px;
+  color: var(--color-muted);
+}
+
+.grid-row.selected .detail,
+.grid-row.selected .expander,
+.grid-row.selected .icon {
+  color: inherit;
 }
 
 .status-bar {

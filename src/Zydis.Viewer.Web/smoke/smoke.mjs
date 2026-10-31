@@ -62,6 +62,33 @@ try {
   const seconds = ((performance.now() - started) / 1000).toFixed(1);
 
   console.log(`Status bar after ${seconds} s: ${(await statusBar.innerText()).replace(/\s+/g, ' ')}`);
+
+  // Only the rows in view exist in the DOM, so the count comes from the height of the scroll canvas.
+  const rowCount = () => page.locator('.grid-canvas').evaluate((canvas) => canvas.offsetHeight / 22);
+  const firstRow = page.locator('.grid-row[data-index="0"]');
+  const primaryLabel = await firstRow.locator('.label').innerText();
+  if (primaryLabel !== 'PRIMARY') {
+    throw new Error(`The first row is ${primaryLabel}, expected PRIMARY.`);
+  }
+
+  // A load opens the root rows, so the glyph click closes PRIMARY before the second click opens it again.
+  const loaded = await rowCount();
+  await firstRow.locator('.expander').click();
+  const collapsed = await rowCount();
+  if (collapsed !== 1) {
+    throw new Error(`Collapsing PRIMARY left ${collapsed} rows, expected 1.`);
+  }
+  await firstRow.locator('.expander').click();
+  await page.locator('.grid-row[data-index="1"]').waitFor({ timeout: 5_000 });
+
+  await firstRow.locator('.label').click();
+  await page.keyboard.press('*');
+  const subtree = await rowCount();
+  if (!(subtree > Math.max(100, loaded))) {
+    throw new Error(`* on PRIMARY shows ${subtree} rows, expected more than 100 and more than ${loaded}.`);
+  }
+  console.log(`Grid rows: ${loaded} after load, ${collapsed} with PRIMARY collapsed, ${subtree} after * on PRIMARY`);
+
   if (problems.length > 0) {
     throw new Error(problems.join('\n'));
   }

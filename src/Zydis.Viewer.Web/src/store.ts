@@ -6,6 +6,11 @@ export interface AppState {
   database: LoadedDatabase | null;
   error: string | null;
   loading: string | null;
+  // Replaced on every change, never mutated, so a subscriber can tell a change by identity.
+  expanded: Set<number>;
+  selectedNodeId: number | null;
+  // The widths of the item, mnemonic, operands and comment columns in px.
+  columnWidths: number[];
 }
 
 export interface LoadedDatabase {
@@ -23,7 +28,15 @@ export const store: {
   subscribe(fn: Listener): () => void;
   set(partial: Partial<AppState>): void;
 } = {
-  state: { runtime: null, database: null, error: null, loading: null },
+  state: {
+    runtime: null,
+    database: null,
+    error: null,
+    loading: null,
+    expanded: new Set(),
+    selectedNodeId: null,
+    columnWidths: [420, 120, 260, 400],
+  },
 
   subscribe(fn) {
     listeners.add(fn);

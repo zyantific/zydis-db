@@ -2,6 +2,7 @@ import { describeLoadError, readSource, type LoadSource } from './loader';
 import type { ViewModel } from './model';
 import { startRuntime } from './runtime';
 import { store, type AppState } from './store';
+import { collapseAll, collapseSubtree, expandAll, expandSubtree, mountGrid } from './tree/grid';
 
 export function mountApp(root: HTMLElement): void {
   const fileInput = document.createElement('input');
@@ -13,9 +14,15 @@ export function mountApp(root: HTMLElement): void {
   openButton.type = 'button';
   openButton.textContent = 'Open';
 
+  const treeButtons = [toolbarButton('Expand all', expandAll), toolbarButton('Collapse all', collapseAll)];
+  const subtreeButtons = [
+    toolbarButton('Expand subtree', expandSubtree),
+    toolbarButton('Collapse subtree', collapseSubtree),
+  ];
+
   const toolbar = document.createElement('header');
   toolbar.className = 'toolbar';
-  toolbar.append(openButton, fileInput);
+  toolbar.append(openButton, ...treeButtons, ...subtreeButtons, fileInput);
 
   const dropZone = document.createElement('div');
   dropZone.className = 'drop-zone';
@@ -24,6 +31,7 @@ export function mountApp(root: HTMLElement): void {
   const content = document.createElement('main');
   content.className = 'content';
   content.append(dropZone);
+  mountGrid(content);
 
   const statusBar = document.createElement('footer');
   statusBar.className = 'status-bar';
@@ -33,6 +41,12 @@ export function mountApp(root: HTMLElement): void {
 
   const render = (state: AppState): void => {
     dropZone.hidden = state.database !== null;
+    for (const button of treeButtons) {
+      button.disabled = state.database === null;
+    }
+    for (const button of subtreeButtons) {
+      button.disabled = state.database === null || state.selectedNodeId === null;
+    }
     renderStatus(statusBar, state);
   };
   store.subscribe(render);
@@ -76,7 +90,14 @@ export function mountApp(root: HTMLElement): void {
 
       const previous = store.state.database;
       try {
-        store.set({ database: { name: read.name, handle, model }, error: null, loading: null });
+        store.set({
+          database: { name: read.name, handle, model },
+          error: null,
+          loading: null,
+          // The node ids of the previous database name other nodes in this one, so expansion and selection start over.
+          expanded: new Set(model.rootIds),
+          selectedNodeId: null,
+        });
       } finally {
         // A subscriber that throws must not keep the old database alive in the runtime heap.
         if (previous !== null) {
@@ -158,6 +179,14 @@ function renderStatus(statusBar: HTMLElement, state: AppState): void {
   }
 
   statusBar.replaceChildren(...items);
+}
+
+function toolbarButton(text: string, action: () => void): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = text;
+  button.addEventListener('click', action);
+  return button;
 }
 
 function statusItem(text: string, className?: string): HTMLElement {
