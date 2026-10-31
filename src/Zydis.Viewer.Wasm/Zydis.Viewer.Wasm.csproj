@@ -16,6 +16,14 @@
     <PublishTrimmed>true</PublishTrimmed>
   </PropertyGroup>
 
+  <!--
+    The viewer shows .NET exception messages to the user, and the browser-wasm default of UseSystemResourceKeys
+    replaces them with resource keys. Keeping the messages costs about 450 KB of wasm.
+  -->
+  <PropertyGroup>
+    <UseSystemResourceKeys>false</UseSystemResourceKeys>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Zydis.Viewer.Core\Zydis.Viewer.Core.csproj" />
   </ItemGroup>
