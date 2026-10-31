@@ -1,3 +1,5 @@
+import { revealHashForm, trackSelectionInHash } from './hash';
+import { mountInspector } from './inspector/inspector';
 import { describeLoadError, readSource, type LoadSource } from './loader';
 import type { ViewModel } from './model';
 import { startRuntime } from './runtime';
@@ -30,6 +32,7 @@ export function mountApp(root: HTMLElement): void {
   content.className = 'content';
   content.append(dropZone);
   const gridViewport = mountGrid(content);
+  mountInspector(content);
 
   const toolbar = document.createElement('header');
   toolbar.className = 'toolbar';
@@ -56,6 +59,7 @@ export function mountApp(root: HTMLElement): void {
   };
   store.subscribe(render);
   render(store.state);
+  trackSelectionInHash();
 
   const runtimeReady = startRuntime().then((runtime) => {
     store.set({ runtime });
@@ -113,6 +117,7 @@ export function mountApp(root: HTMLElement): void {
       }
       // The text in the search box stays, so the search runs again on the new tree.
       setSearch(store.state.search);
+      revealHashForm();
     } catch (error) {
       if (ticket === latestLoad) {
         store.set({ error: describeLoadError(error), loading: null });
@@ -155,6 +160,9 @@ export function mountApp(root: HTMLElement): void {
     event.preventDefault();
     void load({ kind: 'file', file });
   });
+
+  // A pasted link that differs only in the hash changes the hash without a reload.
+  window.addEventListener('hashchange', revealHashForm);
 
   void load({ kind: 'url', url: 'datafiles/instructions.json', name: 'instructions.json' });
 }

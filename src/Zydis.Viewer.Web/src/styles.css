@@ -7,6 +7,7 @@
   --color-surface: #f3f3f3;
   --color-text: #1e1e1e;
   --color-warning: #9a5b00;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   color-scheme: light;
@@ -83,7 +84,7 @@ body {
   position: relative;
   display: flex;
   flex: 1;
-  flex-direction: column;
+  flex-direction: row;
   min-height: 0;
   overflow: hidden;
 }
@@ -116,6 +117,8 @@ body {
   flex: 1;
   flex-direction: column;
   min-height: 0;
+  /* Lets the grid shrink below the width of its columns, so the viewport scrolls and the inspector keeps its width. */
+  min-width: 0;
 }
 
 /* The display of .grid would otherwise win over the hidden attribute. */
@@ -263,4 +266,147 @@ body {
 
 .status-bar .warning {
   color: var(--color-warning);
+}
+
+.inspector {
+  position: relative;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  /* A width stored on a wider screen would otherwise leave no room for the grid. */
+  max-width: calc(100% - 200px);
+  min-height: 0;
+  border-left: 1px solid var(--color-border);
+}
+
+/* The display of .inspector would otherwise win over the hidden attribute. */
+.inspector[hidden] {
+  display: none;
+}
+
+.inspector-resizer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 5px;
+  cursor: col-resize;
+}
+
+.inspector-header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-weight: 600;
+}
+
+/* A form id has no spaces to break at. */
+.inspector-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.inspector .copy {
+  flex: none;
+  font: inherit;
+  font-weight: normal;
+  padding: 0 8px;
+}
+
+.inspector-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 8px 8px;
+}
+
+.inspector-hint {
+  padding: 8px 0;
+  color: var(--color-muted);
+}
+
+.inspector-section-title {
+  margin: 8px 0 2px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: inherit;
+  font-variant-caps: all-small-caps;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.inspector-rows {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 1px 12px;
+}
+
+.inspector-key {
+  color: var(--color-muted);
+}
+
+.inspector-value.text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.inspector-value.wide {
+  grid-column: 1 / -1;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.inspector-table {
+  border-collapse: collapse;
+}
+
+.inspector-table th,
+.inspector-table td {
+  padding: 1px 6px;
+  border: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.inspector-table th {
+  background: var(--color-surface);
+  font-weight: 600;
+}
+
+.inspector-table .hidden-operand {
+  color: var(--color-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.chip {
+  padding: 0 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: var(--color-surface);
+}
+
+.comment-text,
+.raw-json {
+  margin: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font: 12px/1.4 var(--font-mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.raw summary {
+  padding: 2px 0;
+  cursor: pointer;
 }

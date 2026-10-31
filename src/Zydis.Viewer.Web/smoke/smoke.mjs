@@ -135,9 +135,12 @@ try {
   }
   // The grid scrolls by clientHeight, which rounds the fractional height of the viewport, so a row at the bottom
   // edge can overhang it by less than a pixel.
-  const rowBox = await selected.boundingBox();
-  const viewportBox = await page.locator('.grid-viewport').boundingBox();
-  if (rowBox.y < viewportBox.y || rowBox.y + rowBox.height > viewportBox.y + viewportBox.height + 1) {
+  const insideViewport = async (row) => {
+    const rowBox = await row.boundingBox();
+    const viewportBox = await page.locator('.grid-viewport').boundingBox();
+    return rowBox.y >= viewportBox.y && rowBox.y + rowBox.height <= viewportBox.y + viewportBox.height + 1;
+  };
+  if (!(await insideViewport(selected))) {
     throw new Error('The selected row is outside the viewport after the clear.');
   }
   if (!(await page.locator('.grid-viewport').evaluate((viewport) => viewport === document.activeElement))) {
@@ -149,6 +152,87 @@ try {
   const restored = await rowCount();
   console.log(`Search ${searchText}: ${searchMatches} matches in ${searched} rows, ${restored} rows after the clear`
     + ` with "${kept}" selected`);
+
+  // The selection wrote the form id of the picked row from the view model into the hash.
+  const formPrefix = '#form=';
+  const hash = new URL(page.url()).hash;
+  if (!hash.startsWith(formPrefix)) {
+    throw new Error(`Selecting ${searchText} left the hash at "${hash}".`);
+  }
+  const formId = decodeURIComponent(hash.slice(formPrefix.length));
+  const inspectorTitle = page.locator('.inspector-title');
+  if ((await inspectorTitle.innerText()) !== formId) {
+    throw new Error(`The inspector header shows "${await inspectorTitle.innerText()}", expected ${formId}.`);
+  }
+
+  // A change of the hash alone does not reload the page, so the blank page in between makes the link a fresh load.
+  await page.goto('about:blank');
+  await page.goto(`${server.resolvedUrls.local[0]}${formPrefix}${encodeURIComponent(formId)}`);
+  await Promise.race([failure, statusBar.filter({ hasText: expected }).waitFor({ timeout })]);
+  await page.waitForFunction((id) => document.querySelector('.inspector-title')?.textContent === id, formId,
+    { timeout: 5_000 });
+  const linked = page.locator('.grid-row.selected');
+  await linked.waitFor({ timeout: 5_000 });
+  const linkedMnemonic = await linked.locator('.grid-cell:nth-child(2)').innerText();
+  if (linkedMnemonic !== searchText) {
+    throw new Error(`The link ${formPrefix}${formId} selected a ${linkedMnemonic} row, expected ${searchText}.`);
+  }
+  if (!(await insideViewport(linked))) {
+    throw new Error(`The row the link ${formPrefix}${formId} selected is outside the viewport.`);
+  }
+  console.log(`Link ${formPrefix}${formId}: inspector header "${await inspectorTitle.innerText()}", selected`
+    + ` "${await describeRow(linked)}"`);
+
+  // The aaa form tests mode, so the decision row above it lists the slots of that filter. The row and its child labels
+  // come from the loaded tree, whichever form of the mode node the tree builder chose.
+  const decisionText = 'aaa';
+  await page.getByRole('combobox', { name: 'Match mode' }).selectOption('exact');
+  await searchBox.fill(decisionText);
+  const decisionForm = page.locator('.grid-row')
+    .filter({ has: page.locator('.grid-cell:nth-child(2)', { hasText: new RegExp(`^${decisionText}$`) }) })
+    .first();
+  await decisionForm.waitFor({ timeout: 5_000 });
+  await decisionForm.click();
+  await searchBox.press('Escape');
+  // Left selects the parent row or closes an open one, so a few presses reach the decision row from the form.
+  const selectedRow = page.locator('.grid-row.selected');
+  for (let press = 0; press < 4 && (await selectedRow.locator('.icon-decision').count()) === 0; press++) {
+    await page.keyboard.press('ArrowLeft');
+  }
+  const decision = await selectedRow.evaluate((row) => {
+    const depthOf = (element) => parseFloat(element.querySelector('.expander').style.marginLeft);
+    const children = [];
+    let childDepth;
+    for (let next = row.nextElementSibling; next !== null && depthOf(next) > depthOf(row);
+      next = next.nextElementSibling) {
+      childDepth ??= depthOf(next);
+      if (depthOf(next) === childDepth) {
+        children.push(next.querySelector('.label').textContent);
+      }
+    }
+    return { isDecision: row.querySelector('.icon-decision') !== null, label: row.querySelector('.label').textContent,
+      children };
+  });
+  if (!decision.isDecision || decision.children.length === 0) {
+    throw new Error(`Left from ${decisionText} stopped at ${decision.label} with children ${decision.children}.`);
+  }
+  if (new URL(page.url()).hash !== '') {
+    throw new Error(`Selecting the decision row ${decision.label} left the hash at ${new URL(page.url()).hash}.`);
+  }
+  const slots = await page.locator('.inspector-section')
+    .filter({ has: page.locator('.inspector-section-title', { hasText: /^Slots$/ }) })
+    .evaluate((section) => Array.from(section.querySelectorAll('.inspector-key'),
+      (key) => [key.textContent, key.nextElementSibling.textContent]));
+  const occupied = new Set(decision.children);
+  const misread = slots.filter(([key, value]) => value !== (occupied.has(key) ? 'occupied' : 'empty'));
+  // The inspector appends a child label it could not rebuild from filterSlots after else, which means the slot label
+  // format of the tree builder changed.
+  if (slots.length === 0 || slots[slots.length - 1][0] !== 'else' || misread.length > 0) {
+    throw new Error(`The slots of ${decision.label} read ${JSON.stringify(slots)}, its child rows are`
+      + ` ${JSON.stringify(decision.children)}.`);
+  }
+  console.log(`Decision ${decision.label} above ${decisionText}: `
+    + `${slots.map(([key, value]) => `${key} ${value}`).join(', ')}`);
 
   if (problems.length > 0) {
     throw new Error(problems.join('\n'));
