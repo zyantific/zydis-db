@@ -16,9 +16,11 @@ if (!existsSync(path.join(distDir, '_framework', 'dotnet.js'))) {
   process.exit(1);
 }
 
-// Taken from the file so the check follows the database as it changes.
-const definitions = JSON.parse(readFileSync(database, 'utf8')).length;
-const expected = `${definitions.toLocaleString('en-US')} definitions`;
+// Taken from the file so the checks follow the database as it changes.
+const forms = JSON.parse(readFileSync(database, 'utf8'));
+const expected = `${forms.length.toLocaleString('en-US')} definitions`;
+const searchText = 'cfcmovb';
+const searchMatches = forms.filter((form) => form.mnemonic.includes(searchText)).length;
 
 mkdirSync(path.join(distDir, 'datafiles'), { recursive: true });
 copyFileSync(database, path.join(distDir, 'datafiles', 'instructions.json'));
@@ -88,6 +90,65 @@ try {
     throw new Error(`* on PRIMARY shows ${subtree} rows, expected more than 100 and more than ${loaded}.`);
   }
   console.log(`Grid rows: ${loaded} after load, ${collapsed} with PRIMARY collapsed, ${subtree} after * on PRIMARY`);
+
+  // With everything collapsed the result sits in a branch that is closed before the search, so only the clear can
+  // bring it back into the tree.
+  await page.getByRole('button', { name: 'Collapse all' }).click();
+  const searchBox = page.getByRole('searchbox', { name: 'Search' });
+  await page.keyboard.press('Control+f');
+  if (!(await searchBox.evaluate((box) => box === document.activeElement))) {
+    throw new Error('Ctrl+F did not focus the search box.');
+  }
+  await page.keyboard.type(searchText);
+  const matchesText = `${searchMatches.toLocaleString('en-US')} ${searchMatches === 1 ? 'match' : 'matches'}`;
+  await statusBar.filter({ hasText: matchesText }).waitFor({ timeout: 5_000 });
+  const result = page.locator('.grid-row')
+    .filter({ has: page.locator('.grid-cell:nth-child(2)', { hasText: new RegExp(`^${searchText}$`) }) })
+    .first();
+  await result.waitFor({ timeout: 5_000 });
+  const searched = await rowCount();
+  if (!(await page.getByRole('button', { name: 'Expand all' }).isDisabled())) {
+    throw new Error('Expand all stays enabled during a search.');
+  }
+
+  // An invalid pattern shows the error and keeps the rows of the last valid one.
+  await page.getByRole('combobox', { name: 'Match mode' }).selectOption('regex');
+  await searchBox.press('(');
+  await page.locator('.search-error').waitFor({ timeout: 5_000 });
+  if ((await rowCount()) !== searched) {
+    throw new Error(`An invalid pattern changed the grid from ${searched} to ${await rowCount()} rows.`);
+  }
+  await searchBox.press('Backspace');
+  await page.locator('.search-error').waitFor({ state: 'hidden', timeout: 5_000 });
+
+  // Every definition row carries the same label, so the depth and the cell texts tell the picked form apart.
+  const describeRow = (row) => row.evaluate((element) =>
+    `${element.querySelector('.expander').style.marginLeft} ${element.innerText.replace(/\s+/g, ' ')}`);
+  const picked = await describeRow(result);
+  await result.click();
+  await searchBox.press('Escape');
+  const selected = page.locator('.grid-row.selected');
+  await selected.waitFor({ timeout: 5_000 });
+  const kept = await describeRow(selected);
+  if (kept !== picked) {
+    throw new Error(`After the clear "${kept}" is selected, expected "${picked}".`);
+  }
+  // The grid scrolls by clientHeight, which rounds the fractional height of the viewport, so a row at the bottom
+  // edge can overhang it by less than a pixel.
+  const rowBox = await selected.boundingBox();
+  const viewportBox = await page.locator('.grid-viewport').boundingBox();
+  if (rowBox.y < viewportBox.y || rowBox.y + rowBox.height > viewportBox.y + viewportBox.height + 1) {
+    throw new Error('The selected row is outside the viewport after the clear.');
+  }
+  if (!(await page.locator('.grid-viewport').evaluate((viewport) => viewport === document.activeElement))) {
+    throw new Error('Escape did not return the focus to the grid.');
+  }
+  if (/\bmatch(es)?\b/.test(await statusBar.innerText())) {
+    throw new Error('The status bar still counts matches after the clear.');
+  }
+  const restored = await rowCount();
+  console.log(`Search ${searchText}: ${searchMatches} matches in ${searched} rows, ${restored} rows after the clear`
+    + ` with "${kept}" selected`);
 
   if (problems.length > 0) {
     throw new Error(problems.join('\n'));

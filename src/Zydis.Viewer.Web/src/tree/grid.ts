@@ -20,7 +20,8 @@ const KIND_ICONS: Record<NodeKind, string> = {
   table: '▤',
 };
 
-export function mountGrid(container: HTMLElement): void {
+// Returns the viewport, the element that holds the keyboard focus of the grid.
+export function mountGrid(container: HTMLElement): HTMLElement {
   const headerRow = element('div', 'grid-header-row');
   COLUMN_TITLES.forEach((title, column) => {
     const cell = element('div', 'grid-cell', title);
@@ -50,6 +51,9 @@ export function mountGrid(container: HTMLElement): void {
 
   let model: ViewModel | null = null;
   let expanded: ReadonlySet<number> | null = null;
+  // The kept rows of an active search. They show open whatever expanded holds, and a collapse would hide the path to a
+  // match, so the glyph, Enter, Left and * leave the expansion alone until the search clears.
+  let include: ReadonlySet<number> | null = null;
   let selectedNodeId: number | null = null;
   let widths: number[] | null = null;
   let rows: Row[] = [];
@@ -128,13 +132,18 @@ export function mountGrid(container: HTMLElement): void {
     grid.hidden = nextModel === null;
 
     let changed = false;
-    if (nextModel !== model || state.expanded !== expanded) {
-      if (nextModel !== model) {
+    const searchCleared = include !== null && state.searchInclude === null;
+    if (nextModel !== model || state.expanded !== expanded || state.searchInclude !== include) {
+      // A search started after a deep scroll would otherwise open at the clamped end of the shorter result list.
+      if (nextModel !== model || (include === null && state.searchInclude !== null)) {
         viewport.scrollTop = 0;
       }
       model = nextModel;
       expanded = state.expanded;
-      rows = model === null ? [] : computeVisibleRows(model, expanded);
+      const kept = state.searchInclude;
+      include = kept;
+      const keep = kept === null ? undefined : (nodeId: number): boolean => kept.has(nodeId);
+      rows = model === null ? [] : computeVisibleRows(model, expanded, keep);
       canvas.style.height = `${rows.length * ROW_HEIGHT}px`;
       changed = true;
     }
@@ -143,7 +152,8 @@ export function mountGrid(container: HTMLElement): void {
       widths.forEach((width, column) => grid.style.setProperty(`--column-${column}`, `${width}px`));
       grid.style.setProperty('--grid-width', `${widths.reduce((sum, width) => sum + width, 0)}px`);
     }
-    if (state.selectedNodeId !== selectedNodeId) {
+    // Clearing a search moves the selected row to a new index, so it scrolls into view as a new selection does.
+    if (state.selectedNodeId !== selectedNodeId || searchCleared) {
       selectedNodeId = state.selectedNodeId;
       // Runs after the row list update, so a selection that arrives with new rows finds its index.
       scrollSelectionIntoView();
@@ -161,7 +171,7 @@ export function mountGrid(container: HTMLElement): void {
   };
 
   const toggle = (index: number): void => {
-    if (rows[index].hasChildren) {
+    if (include === null && rows[index].hasChildren) {
       setOpen(rows[index].nodeId, !isOpen(index));
     }
   };
@@ -221,7 +231,7 @@ export function mountGrid(container: HTMLElement): void {
         select(rows.length - 1);
         break;
       case 'ArrowLeft':
-        if (index >= 0 && isOpen(index)) {
+        if (index >= 0 && isOpen(index) && include === null) {
           setOpen(rows[index].nodeId, false);
         } else if (index >= 0 && parentIndex(index) >= 0) {
           select(parentIndex(index));
@@ -240,7 +250,9 @@ export function mountGrid(container: HTMLElement): void {
         }
         break;
       case '*':
-        expandSubtree();
+        if (include === null) {
+          expandSubtree();
+        }
         break;
       default:
         return;
@@ -257,6 +269,7 @@ export function mountGrid(container: HTMLElement): void {
 
   store.subscribe(update);
   update(store.state);
+  return viewport;
 }
 
 export function expandAll(): void {

@@ -1,5 +1,6 @@
 import type { ViewModel } from './model';
 import type { ViewerRuntime } from './runtime';
+import type { MatchMode, SearchScope } from './search/matcher';
 
 export interface AppState {
   runtime: ViewerRuntime | null;
@@ -11,6 +12,10 @@ export interface AppState {
   selectedNodeId: number | null;
   // The widths of the item, mnemonic, operands and comment columns in px.
   columnWidths: number[];
+  search: { text: string; mode: MatchMode; scope: SearchScope };
+  searchError: string | null;
+  // The matches of the last valid search and their ancestors. Null while no valid search is active.
+  searchInclude: Set<number> | null;
 }
 
 export interface LoadedDatabase {
@@ -36,6 +41,9 @@ export const store: {
     expanded: new Set(),
     selectedNodeId: null,
     columnWidths: [420, 120, 260, 400],
+    search: { text: '', mode: 'contains', scope: 'mnemonic' },
+    searchError: null,
+    searchInclude: null,
   },
 
   subscribe(fn) {

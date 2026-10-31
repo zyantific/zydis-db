@@ -36,6 +36,7 @@ body {
 
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   padding: 4px 6px;
   border-bottom: 1px solid var(--color-border);
@@ -43,8 +44,39 @@ body {
 }
 
 .toolbar button {
+  flex: none;
   font: inherit;
   padding: 2px 10px;
+}
+
+.toolbar input,
+.toolbar select {
+  font: inherit;
+}
+
+.search {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.search input {
+  flex: none;
+  width: 220px;
+}
+
+.search select {
+  flex: none;
+}
+
+/* A line of its own below the other toolbar items, so a long message wraps in full and the first row keeps its layout
+   whether or not an error shows. A pattern without spaces can be longer than the line, hence the break anywhere. */
+.search-error {
+  flex: 1 1 100%;
+  order: 1;
+  color: var(--color-error);
+  overflow-wrap: anywhere;
 }
 
 .content {

@@ -1,6 +1,8 @@
 import { describeLoadError, readSource, type LoadSource } from './loader';
 import type { ViewModel } from './model';
 import { startRuntime } from './runtime';
+import { createSearchBox } from './search/searchBox';
+import { setSearch } from './search/searchState';
 import { store, type AppState } from './store';
 import { collapseAll, collapseSubtree, expandAll, expandSubtree, mountGrid } from './tree/grid';
 
@@ -20,10 +22,6 @@ export function mountApp(root: HTMLElement): void {
     toolbarButton('Collapse subtree', collapseSubtree),
   ];
 
-  const toolbar = document.createElement('header');
-  toolbar.className = 'toolbar';
-  toolbar.append(openButton, ...treeButtons, ...subtreeButtons, fileInput);
-
   const dropZone = document.createElement('div');
   dropZone.className = 'drop-zone';
   dropZone.textContent = 'Drop an instructions.json file anywhere on the window, or pick one with Open.';
@@ -31,7 +29,12 @@ export function mountApp(root: HTMLElement): void {
   const content = document.createElement('main');
   content.className = 'content';
   content.append(dropZone);
-  mountGrid(content);
+  const gridViewport = mountGrid(content);
+
+  const toolbar = document.createElement('header');
+  toolbar.className = 'toolbar';
+  const search = createSearchBox(() => gridViewport.focus());
+  toolbar.append(openButton, ...search, ...treeButtons, ...subtreeButtons, fileInput);
 
   const statusBar = document.createElement('footer');
   statusBar.className = 'status-bar';
@@ -41,11 +44,13 @@ export function mountApp(root: HTMLElement): void {
 
   const render = (state: AppState): void => {
     dropZone.hidden = state.database !== null;
+    // The grid shows the kept rows of a search open whatever expanded holds, so these would act unseen until it clears.
+    const searching = state.searchInclude !== null;
     for (const button of treeButtons) {
-      button.disabled = state.database === null;
+      button.disabled = state.database === null || searching;
     }
     for (const button of subtreeButtons) {
-      button.disabled = state.database === null || state.selectedNodeId === null;
+      button.disabled = state.database === null || searching || state.selectedNodeId === null;
     }
     renderStatus(statusBar, state);
   };
@@ -94,8 +99,10 @@ export function mountApp(root: HTMLElement): void {
           database: { name: read.name, handle, model },
           error: null,
           loading: null,
-          // The node ids of the previous database name other nodes in this one, so expansion and selection start over.
+          // The node ids of the previous database name other nodes in this one, so expansion, selection and the
+          // search result start over.
           expanded: new Set(model.rootIds),
+          searchInclude: null,
           selectedNodeId: null,
         });
       } finally {
@@ -104,6 +111,8 @@ export function mountApp(root: HTMLElement): void {
           runtime.release(previous.handle);
         }
       }
+      // The text in the search box stays, so the search runs again on the new tree.
+      setSearch(store.state.search);
     } catch (error) {
       if (ticket === latestLoad) {
         store.set({ error: describeLoadError(error), loading: null });
@@ -162,6 +171,10 @@ function renderStatus(statusBar: HTMLElement, state: AppState): void {
       statusItem(`${formatCount(stats.nodes)} nodes`),
       statusItem(`${formatCount(stats.conflicts)} conflicts`),
     );
+    if (state.searchInclude !== null) {
+      const matches = countMatches(database.model, state.searchInclude);
+      items.push(statusItem(`${formatCount(matches)} ${matches === 1 ? 'match' : 'matches'}`));
+    }
     if (schema === 'object') {
       items.push(statusItem('filters: object form, file order'));
     }
@@ -179,6 +192,17 @@ function renderStatus(statusBar: HTMLElement, state: AppState): void {
   }
 
   statusBar.replaceChildren(...items);
+}
+
+// The include set also holds the ancestors of the matches, and of its nodes only the matches are definition rows.
+function countMatches(model: ViewModel, include: ReadonlySet<number>): number {
+  let matches = 0;
+  for (const nodeId of include) {
+    if (model.nodes[nodeId].definitionIndex !== undefined) {
+      matches++;
+    }
+  }
+  return matches;
 }
 
 function toolbarButton(text: string, action: () => void): HTMLButtonElement {
