@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { changedNodeIdsInOrder, changesInclude, definitionFor, type DiffSession } from '../src/diff/diffState';
-import type { DiffModel, DiffNode, DiffPair, DiffStatus, NodeKind, ViewDefinition } from '../src/model';
-import type { LoadedDatabase } from '../src/store';
+import {
+  changedNodeIdsInOrder, changesInclude, closeDiff, definitionFor, setChangesOnly, type DiffSession,
+} from '../src/diff/diffState';
+import type { DiffModel, DiffNode, DiffPair, DiffStatus, NodeKind, ViewDefinition, ViewModel } from '../src/model';
+import { store, type LoadedDatabase } from '../src/store';
 
 interface Indices {
   base?: number;
@@ -105,5 +107,63 @@ describe('diff state', () => {
     expect(definitionFor(session, head, 1)).toEqual(moved);
     expect(definitionFor(session, head, 2)).toEqual({ base: null, head: head.model.definitions[1], pair: pairs[1] });
     expect(definitionFor(session, head, 4)).toEqual({ base: base.model.definitions[0], head: null, pair: pairs[2] });
+  });
+
+  it('clearing changes only opens the ancestors of the selection', () => {
+    // The filter showed the changed row 3 with its ancestors open while expanded held the root only.
+    const base = database('base', []);
+    store.set({
+      diff: { base, model: tree, changesOnly: true, cursor: -1 },
+      expanded: new Set([0]),
+      selectedNodeId: 3,
+      searchInclude: null,
+    });
+
+    setChangesOnly(false);
+
+    expect(store.state.expanded).toEqual(new Set([0, 1, 2]));
+  });
+
+  it('Close diff from the old row of a moved form selects the row of its head form', () => {
+    // The merged tree:
+    // 0 PRIMARY
+    //   1 opcode 20
+    //     2 moved
+    //   3 opcode 10, only in the base
+    //     4 moved, the old row
+    const model = diffModel([
+      node(0, null, 'table', 'unchanged', [1, 3]),
+      node(1, 0, 'opcode', 'added', [2]),
+      node(2, 1, 'definition', 'moved', [], { base: 0, head: 0 }),
+      node(3, 0, 'opcode', 'removed', [4]),
+      node(4, 3, 'definition', 'moved', [], { base: 0 }),
+    ], [{ baseIndex: 0, headIndex: 0, status: 'moved', basePath: '10', headPath: '20', changedPaths: ['opcode'] }]);
+    // The single view of the head.
+    const single: ViewModel = {
+      schema: 'array', stats: { definitions: 1, nodes: 3, conflicts: 0 }, rootIds: [0],
+      nodes: [
+        { id: 0, parentId: null, kind: 'table', label: '0', childIds: [1], conflict: false, formCount: 1 },
+        { id: 1, parentId: 0, kind: 'opcode', label: '20', childIds: [2], conflict: false, formCount: 1 },
+        {
+          id: 2, parentId: 1, kind: 'definition', label: 'a', childIds: [], definitionIndex: 0, conflict: false,
+          formCount: 1,
+        },
+      ],
+      definitions: [definition(0, 'HEAD0')],
+      filterSlots: {},
+    };
+    store.set({
+      runtime: null,
+      database: { name: 'head', handle: 0, model: single },
+      diff: { base: database('base', [definition(0, 'BASE0')]), model, changesOnly: false, cursor: -1 },
+      expanded: new Set([0, 3]),
+      selectedNodeId: 4,
+      search: { text: '', mode: 'contains', scope: 'mnemonic' },
+      searchInclude: null,
+    });
+
+    closeDiff();
+
+    expect(store.state.selectedNodeId).toBe(2);
   });
 });

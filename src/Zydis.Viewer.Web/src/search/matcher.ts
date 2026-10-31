@@ -73,7 +73,8 @@ export function matchingNodeIds(model: ViewModel, scope: SearchScope, matcher: M
 }
 
 // The same for the merged tree of a diff. A row matches when the form it has on either side matches, so a form whose
-// mnemonic changed is found by the old mnemonic as well.
+// mnemonic changed is found by the old mnemonic as well. The old row of a moved form names its base form only and
+// matches through the head form of its pair too, so the search keeps both rows the inspector links.
 export function diffMatchingNodeIds(
   diff: DiffModel,
   base: ViewModel,
@@ -84,9 +85,18 @@ export function diffMatchingNodeIds(
   const matches = (definitions: ViewDefinition[], index: number | undefined): boolean =>
     index !== undefined && matcher.test(scopeValue(definitions[index], scope));
 
+  const headOfBase = new Map<number, number>();
+  for (const pair of diff.pairs) {
+    if (pair.baseIndex !== undefined && pair.headIndex !== undefined) {
+      headOfBase.set(pair.baseIndex, pair.headIndex);
+    }
+  }
+
   const nodeIds = new Set<number>();
   for (const node of diff.nodes) {
-    if (matches(head.definitions, node.headDefinitionIndex) || matches(base.definitions, node.baseDefinitionIndex)) {
+    const headIndex = node.headDefinitionIndex
+      ?? (node.baseDefinitionIndex === undefined ? undefined : headOfBase.get(node.baseDefinitionIndex));
+    if (matches(head.definitions, headIndex) || matches(base.definitions, node.baseDefinitionIndex)) {
       keepWithAncestors(diff, node.id, nodeIds);
     }
   }

@@ -235,9 +235,12 @@ function singleViewAfter(diffModel: DiffModel, model: ViewModel, search: Search,
 }
 
 // The node ids of the merged tree name other rows than those of the single view, so the selection carries over through
-// the head form of the selected row. A row without one, such as a removed form or an inner row, carries nothing over.
+// the head form of the selected row. The old row of a moved form carries the head form of its pair over. A row without
+// a head form, such as a removed form or an inner row, carries nothing over.
 function headFormRow(model: DiffModel, head: ViewModel, nodeId: number): number | null {
-  const headIndex = model.nodes[nodeId].headDefinitionIndex;
+  const { baseDefinitionIndex, headDefinitionIndex } = model.nodes[nodeId];
+  const headIndex = headDefinitionIndex
+    ?? (baseDefinitionIndex === undefined ? undefined : indexOf(model).pairOfBase.get(baseDefinitionIndex)?.headIndex);
   if (headIndex === undefined) {
     return null;
   }
@@ -246,10 +249,15 @@ function headFormRow(model: DiffModel, head: ViewModel, nodeId: number): number 
 }
 
 export function setChangesOnly(changesOnly: boolean): void {
-  const { diff } = store.state;
-  if (diff !== null) {
-    store.set({ diff: { ...diff, changesOnly } });
+  const { diff, expanded, selectedNodeId } = store.state;
+  if (diff === null) {
+    return;
   }
+  // The grid opens the kept rows of the filter by itself, so expanded still holds the state from before the filter.
+  // Opening the ancestors of the selection keeps a row picked from a branch that was collapsed then visible.
+  store.set(changesOnly || selectedNodeId === null
+    ? { diff: { ...diff, changesOnly } }
+    : { diff: { ...diff, changesOnly }, expanded: new Set([...expanded, ...ancestorsOf(diff.model, selectedNodeId)]) });
 }
 
 // Under an active search the step skips the changed rows the search hides, so it selects no row out of sight.
