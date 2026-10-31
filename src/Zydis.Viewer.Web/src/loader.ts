@@ -1,14 +1,25 @@
 export type LoadSource = { kind: 'url'; url: string; name: string } | { kind: 'file'; file: File };
 
-export async function readSource(source: LoadSource): Promise<{ name: string; json: string } | null> {
+export interface SourceText {
+  name: string;
+  json: string;
+}
+
+// A missing file is the normal case when the app is served without a checkout, so it leads to the empty state.
+export async function readSource(source: LoadSource): Promise<SourceText | null> {
+  const read = await readSourceOrNotFound(source);
+  return 'notFound' in read ? null : read;
+}
+
+// Returns the body of a 404 answer as notFound, since the local host writes the cause of a failed git read there.
+export async function readSourceOrNotFound(source: LoadSource): Promise<SourceText | { notFound: string }> {
   if (source.kind === 'file') {
     return { name: source.file.name, json: await source.file.text() };
   }
 
   const response = await fetch(source.url);
-  // A missing file is the normal case when the app is served without a checkout, so it leads to the empty state.
   if (response.status === 404) {
-    return null;
+    return { notFound: await response.text() };
   }
   if (!response.ok) {
     throw new Error(`${source.url}: ${response.status} ${response.statusText}`);

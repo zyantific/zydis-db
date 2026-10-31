@@ -19,9 +19,9 @@ const SCOPES: ReadonlyArray<readonly [SearchScope, string]> = [
 ];
 
 // Returns the search controls and the error line for the toolbar, in that order. The error is a toolbar item of its
-// own, so the stylesheet can give it a line below the controls. Escape in the box clears the search and then calls
-// onEscape.
-export function createSearchBox(onEscape: () => void): HTMLElement[] {
+// own, so the stylesheet can give it a line below the controls. Enter in the box calls onEnter, and Escape clears the
+// search and then calls onEscape.
+export function createSearchBox(onEnter: () => void, onEscape: () => void): HTMLElement[] {
   const input = document.createElement('input');
   input.type = 'search';
   input.placeholder = 'Search (Ctrl+F)';
@@ -50,7 +50,9 @@ export function createSearchBox(onEscape: () => void): HTMLElement[] {
   scopeSelect.addEventListener('change', apply);
 
   input.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
+    if (event.key === 'Enter') {
+      onEnter();
+    } else if (event.key === 'Escape') {
       input.value = '';
       apply();
       onEscape();
@@ -68,10 +70,6 @@ export function createSearchBox(onEscape: () => void): HTMLElement[] {
   });
 
   const render = (state: AppState): void => {
-    // A comparison clears the search text in the store, since the rows of the merged tree have other node ids.
-    if (input.value !== state.search.text) {
-      input.value = state.search.text;
-    }
     const disabled = state.database === null;
     input.disabled = disabled;
     modeSelect.disabled = disabled;

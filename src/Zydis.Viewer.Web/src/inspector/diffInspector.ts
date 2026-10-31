@@ -52,8 +52,10 @@ export function createDiffPanel(): DiffPanelRenderer {
     const { base, head, pair } = definitionFor(diff, database, selectedNodeId);
     const shown = head ?? base;
     if (pair === null || shown === null) {
-      // The decision rows read the slot names of their filter, which are the same on both sides.
-      const tree = { filterSlots: database.model.filterSlots, nodes: diff.model.nodes, rootIds: diff.model.rootIds };
+      // The decision rows read the slot names of their filter, which are the same on both sides. A filter only the base
+      // tree tests has its names in the base model alone.
+      const filterSlots = { ...diff.base.model.filterSlots, ...database.model.filterSlots };
+      const tree = { filterSlots, nodes: diff.model.nodes, rootIds: diff.model.rootIds };
       header.replaceChildren(element('span', 'inspector-title', node.label));
       body.replaceChildren(...renderSections([...nodeSections(tree, selectedNodeId), changeSection(node)]));
       return;

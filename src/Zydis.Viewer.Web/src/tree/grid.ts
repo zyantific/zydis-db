@@ -62,8 +62,10 @@ export function mountGrid(container: HTMLElement): HTMLElement {
   let source: GridSource | null = null;
   let expanded: ReadonlySet<number> | null = null;
   // The kept rows of the filters. They show open whatever expanded holds, and a collapse would hide the path to a
-  // kept row, so the glyph, Enter, Left and * leave the expansion alone until the filters clear.
+  // kept row, so Enter, the glyph, Left, Right and * leave the expansion alone until the filters clear.
   let include: ((nodeId: number) => boolean) | null = null;
+  // Shown when changes only keeps no row, so the user can tell an empty result from a grid that failed to load.
+  let hint: string | null = null;
   let selectedNodeId: number | null = null;
   let widths: number[] | null = null;
   let rows: Row[] = [];
@@ -127,6 +129,9 @@ export function mountGrid(container: HTMLElement): HTMLElement {
         elements.push(renderRow(source, index));
       }
     }
+    if (hint !== null) {
+      elements.push(element('div', 'grid-hint', hint));
+    }
     canvas.replaceChildren(...elements);
   };
 
@@ -161,6 +166,9 @@ export function mountGrid(container: HTMLElement): HTMLElement {
       include = nextInclude;
       rows = source === null ? [] : computeVisibleRows(source.tree, expanded, include ?? undefined);
       canvas.style.height = `${rows.length * ROW_HEIGHT}px`;
+      hint = rows.length > 0 || state.diff?.changesOnly !== true
+        ? null
+        : state.searchInclude === null ? 'No changed forms' : 'No changed form matches the search';
       changed = true;
     }
     if (state.columnWidths !== widths) {
@@ -256,7 +264,7 @@ export function mountGrid(container: HTMLElement): HTMLElement {
       case 'ArrowRight':
         if (index >= 0 && isOpen(index)) {
           select(index + 1);
-        } else if (index >= 0 && rows[index].hasChildren) {
+        } else if (index >= 0 && rows[index].hasChildren && include === null) {
           setOpen(rows[index].nodeId, true);
         }
         break;
@@ -286,6 +294,23 @@ export function mountGrid(container: HTMLElement): HTMLElement {
   store.subscribe(update);
   update(store.state);
   return viewport;
+}
+
+// Selects the first definition row of the grid while no row is selected, so Enter in the search box lands on the first
+// match.
+export function selectFirstDefinition(): void {
+  const { expanded, selectedNodeId } = store.state;
+  const source = sourceOf(store.state);
+  if (source === null || selectedNodeId !== null) {
+    return;
+  }
+
+  const { nodes } = source.tree;
+  const first = computeVisibleRows(source.tree, expanded, rowFilter(store.state) ?? undefined)
+    .find((row) => nodes[row.nodeId].kind === 'definition');
+  if (first !== undefined) {
+    store.set({ selectedNodeId: first.nodeId });
+  }
 }
 
 export function expandAll(): void {

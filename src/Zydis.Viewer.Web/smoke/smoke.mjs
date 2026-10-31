@@ -260,7 +260,13 @@ try {
   const hashBeforeDiff = new URL(page.url()).hash;
   await page.locator('.toolbar input[type=file]').setInputFiles(headFile);
   await Promise.race([failure, statusBar.filter({ hasText: headDefinitions }).waitFor({ timeout })]);
-  const headRows = await rowCount();
+
+  // The match mode is still exact from the decision step. The head keeps every cfcmovb form and changes only an operand
+  // of one, so the single view and the diff count the same matches.
+  const exactMatches = forms.filter((form) => form.mnemonic === searchText).length;
+  const exactText = `${exactMatches.toLocaleString('en-US')} ${exactMatches === 1 ? 'match' : 'matches'}`;
+  await searchBox.fill(searchText);
+  await statusBar.filter({ hasText: exactText }).waitFor({ timeout: 5_000 });
 
   // The picker would show only after the answer to the refs request, so the check waits for it.
   const refsAnswered = page.waitForResponse((response) => response.url().endsWith('/api/git/refs'));
@@ -286,7 +292,13 @@ try {
   if (!statusText.includes(`A: ${path.basename(database)}`) || !statusText.includes(`B: ${headName}`)) {
     throw new Error(`The status bar of the diff reads "${statusText}", expected the names of A and B.`);
   }
+  if (!statusText.includes(exactText)) {
+    throw new Error(`The status bar of the diff reads "${statusText}", expected the ${exactText} of the search typed`
+      + ' before the comparison.');
+  }
   console.log(`Diff after ${compareSeconds} s from the Compare click: ${statusText}`);
+  // Expand all stays disabled while a search is active.
+  await searchBox.press('Escape');
 
   await page.getByRole('button', { name: 'Expand all' }).click();
   const expandedRows = await rowCount();
@@ -331,13 +343,34 @@ try {
   console.log(`Changes only: ${changesRows} of ${expandedRows} rows, ${searchText} operand 0 action`
     + ` ${baseAction} in A and ${changedOperand.action} in B`);
 
+  // The changed row is still selected, so the single view selects the row of its head form and opens the path to it.
   await page.getByRole('button', { name: 'Close diff' }).click();
   await statusBar.filter({ hasText: headDefinitions }).waitFor({ timeout: 5_000 });
-  const closedRows = await rowCount();
-  if (closedRows !== headRows) {
-    throw new Error(`Close diff left ${closedRows} rows, expected the ${headRows} of the head before the diff.`);
+  const reopened = page.locator('.grid-row.selected');
+  if ((await reopened.count()) === 0) {
+    throw new Error(`Close diff left no row selected, expected the changed ${searchText} row.`);
   }
-  console.log(`Close diff: ${closedRows} rows, as before the diff`);
+  const reopenedMnemonic = await reopened.locator('.grid-cell:nth-child(2)').innerText();
+  if (reopenedMnemonic !== searchText || !(await insideViewport(reopened))) {
+    throw new Error(`Close diff selected a ${reopenedMnemonic} row, expected the ${searchText} row in view.`);
+  }
+  const reopenedRow = await describeRow(reopened);
+  const closedRows = await rowCount();
+
+  // A link opens the ancestors of its form and nothing else. The one root of the tree is an ancestor of every form, so
+  // after Collapse all the link to the selected form shows the rows Close diff has to leave.
+  const closedForm = await inspectorTitle.innerText();
+  await page.getByRole('button', { name: 'Collapse all' }).click();
+  await page.evaluate((hash) => {
+    location.hash = hash;
+  }, `${formPrefix}${encodeURIComponent(closedForm)}`);
+  await page.waitForFunction((id) => document.querySelector('.inspector-title')?.textContent === id, closedForm,
+    { timeout: 5_000 });
+  const linkRows = await rowCount();
+  if (closedRows !== linkRows) {
+    throw new Error(`Close diff left ${closedRows} rows, expected the ${linkRows} the link to ${closedForm} shows.`);
+  }
+  console.log(`Close diff: "${reopenedRow}" selected in ${closedRows} rows, as the link to ${closedForm} shows`);
 
   if (problems.length > 0) {
     throw new Error(problems.join('\n'));

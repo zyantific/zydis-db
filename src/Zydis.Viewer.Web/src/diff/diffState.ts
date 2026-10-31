@@ -1,4 +1,4 @@
-import { readSource, type LoadSource } from '../loader';
+import { readSourceOrNotFound, type LoadSource } from '../loader';
 import type { DiffCounts, DiffModel, DiffNode, DiffPair, ViewDefinition, ViewModel } from '../model';
 import { setSearch } from '../search/searchState';
 import { store, type AppState, type LoadedDatabase } from '../store';
@@ -152,9 +152,14 @@ export async function compareWith(source: LoadSource): Promise<void> {
     throw new Error('The .NET runtime has not started yet.');
   }
 
-  const read = await readSource(source);
-  if (read === null) {
-    throw new Error(`No datafiles/instructions.json at ${source.kind === 'url' ? source.name : source.file.name}.`);
+  const read = await readSourceOrNotFound(source);
+  if ('notFound' in read) {
+    // The local host answers 404 with the cause in the body when git fails, times out or does not start, so a missing
+    // file is one cause among several.
+    const cause = read.notFound.trim();
+    throw new Error(cause !== ''
+      ? cause
+      : `No datafiles/instructions.json at ${source.kind === 'url' ? source.name : source.file.name}.`);
   }
   // Read after the wait, since a file opened meanwhile replaces the head.
   const head = store.state.database;
@@ -178,11 +183,9 @@ export async function compareWith(source: LoadSource): Promise<void> {
     store.set({
       diff: { base: { name: read.name, handle, model: baseModel }, model, changesOnly: false, cursor: -1 },
       // The node ids of the merged tree name other rows than those of the single view, so the expansion, the selection
-      // and the search start over.
+      // and the search result start over.
       expanded: new Set(model.rootIds),
       selectedNodeId: null,
-      search: { ...store.state.search, text: '' },
-      searchError: null,
       searchInclude: null,
     });
   } finally {
@@ -191,26 +194,49 @@ export async function compareWith(source: LoadSource): Promise<void> {
       runtime.release(previous.base.handle);
     }
   }
+  // The text in the search box stays, so the search runs again on the merged tree.
+  setSearch(store.state.search);
 }
 
 export function closeDiff(): void {
-  const { database, diff, runtime } = store.state;
+  const { database, diff, runtime, selectedNodeId } = store.state;
   if (diff === null) {
     return;
   }
 
+  const model = database?.model;
+  const nodeId = model === undefined || selectedNodeId === null ? null : headFormRow(diff.model, model, selectedNodeId);
+  // Opens the path to the selection the way revealHashForm does, so the form stays in view.
+  const opened = model === undefined || nodeId === null ? [] : ancestorsOf(model, nodeId);
   try {
     store.set({
       diff: null,
-      expanded: new Set(database?.model.rootIds ?? []),
+      expanded: new Set([...(model?.rootIds ?? []), ...opened]),
       searchInclude: null,
-      selectedNodeId: null,
+      selectedNodeId: nodeId,
     });
   } finally {
     runtime?.release(diff.base.handle);
   }
   // The text in the search box stays, so the search runs again on the single view.
   setSearch(store.state.search);
+  // The search of a diff also matches a row by its base form, which the search of the single view can leave out. Like
+  // revealHashForm, the close selects no form out of sight.
+  const { searchInclude } = store.state;
+  if (nodeId !== null && searchInclude !== null && !searchInclude.has(nodeId)) {
+    store.set({ selectedNodeId: null });
+  }
+}
+
+// The node ids of the merged tree name other rows than those of the single view, so the selection carries over through
+// the head form of the selected row. A row without one, such as a removed form or an inner row, carries nothing over.
+function headFormRow(model: DiffModel, head: ViewModel, nodeId: number): number | null {
+  const headIndex = model.nodes[nodeId].headDefinitionIndex;
+  if (headIndex === undefined) {
+    return null;
+  }
+  const row = head.nodes.findIndex((node) => node.definitionIndex === headIndex);
+  return row < 0 ? null : row;
 }
 
 export function setChangesOnly(changesOnly: boolean): void {

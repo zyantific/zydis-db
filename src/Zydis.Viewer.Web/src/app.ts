@@ -9,7 +9,7 @@ import { startRuntime } from './runtime';
 import { createSearchBox } from './search/searchBox';
 import { setSearch } from './search/searchState';
 import { store, type AppState } from './store';
-import { collapseAll, collapseSubtree, expandAll, expandSubtree, mountGrid } from './tree/grid';
+import { collapseAll, collapseSubtree, expandAll, expandSubtree, mountGrid, selectFirstDefinition } from './tree/grid';
 
 export function mountApp(root: HTMLElement): void {
   const fileInput = document.createElement('input');
@@ -42,7 +42,10 @@ export function mountApp(root: HTMLElement): void {
 
   const toolbar = document.createElement('header');
   toolbar.className = 'toolbar';
-  const search = createSearchBox(() => gridViewport.focus());
+  const search = createSearchBox(() => {
+    gridViewport.focus();
+    selectFirstDefinition();
+  }, () => gridViewport.focus());
   toolbar.append(openButton, ...search, ...treeButtons, ...subtreeButtons, compareButton, diffControls.element,
     fileInput);
 

@@ -234,6 +234,13 @@ body {
   width: var(--column-3);
 }
 
+.grid-hint {
+  padding: 0 8px;
+  line-height: var(--row-height);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
 .grid-row.conflict {
   color: var(--color-error);
 }
