@@ -21,7 +21,7 @@ public class TreeConstructorTests
         "rex_2", "feature_mpx", "feature_ud0_compat", "modrm_mod", "feature_cldemote", "prefix_group1",
         "mandatory_prefix", "modrm_reg", "modrm_rm", "mode", "address_size", "operand_size", "rex_w", "rex_b",
         "feature_amd", "feature_knc", "feature_cet", "feature_lzcnt", "feature_tzcnt", "feature_wbnoinvd",
-        "feature_centaur", "feature_iprefetch"
+        "feature_centaur", "feature_iprefetch", "feature_ibhf"
     ];
 
     [Fact]
