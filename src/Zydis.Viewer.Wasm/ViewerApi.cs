@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Runtime.Versioning;
 using System.Text.Json;
 
 using Zydis.Viewer.Core;
+using Zydis.Viewer.Core.Diff;
 
 namespace Zydis.Viewer.Wasm;
 
@@ -71,11 +73,13 @@ internal static partial class ViewerApi
     /// <param name="baseHandle">The handle of the database to compare from.</param>
     /// <param name="headHandle">The handle of the database to compare to.</param>
     /// <returns>The difference of the two databases as JSON.</returns>
-    /// <exception cref="NotImplementedException">Thrown on every call until the database comparison exists.</exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown if no loaded database has <paramref name="baseHandle"/> or <paramref name="headHandle"/>.
+    /// </exception>
     [JSExport]
     public static string Diff(int baseHandle, int headHandle)
     {
-        throw new NotImplementedException();
+        return DatabaseDiff.Compare(Get(baseHandle), Get(headHandle)).ToJson();
     }
 
     /// <summary>
@@ -92,11 +96,12 @@ internal static partial class ViewerApi
         database.Dispose();
     }
 
-    private static ViewerDatabase Get(int handle)
+    // The caller's argument expression names the parameter, so the exception of Diff tells its two handles apart.
+    private static ViewerDatabase Get(int handle, [CallerArgumentExpression(nameof(handle))] string parameterName = "")
     {
         if (!Databases.TryGetValue(handle, out var database))
         {
-            throw new ArgumentException($"No loaded database has the handle {handle}.", nameof(handle));
+            throw new ArgumentException($"No loaded database has the handle {handle}.", parameterName);
         }
 
         return database;

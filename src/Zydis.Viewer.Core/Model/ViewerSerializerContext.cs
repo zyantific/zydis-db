@@ -12,11 +12,19 @@ namespace Zydis.Viewer.Core.Model;
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-    Converters = [typeof(ViewNodeKindConverter)])]
-[JsonSerializable(typeof(ViewModel))]
+    Converters = [typeof(DiffStatusConverter), typeof(ViewNodeKindConverter)])]
+[JsonSerializable(typeof(DiffModel))]
 [JsonSerializable(typeof(JsonElement))]
+[JsonSerializable(typeof(ViewModel))]
 internal sealed partial class ViewerSerializerContext :
     JsonSerializerContext;
+
+/// <summary>
+/// Writes a <see cref="DiffStatus"/> as its camel case name, which for the one-word status names is the lower-case
+/// name the web app compares against.
+/// </summary>
+internal sealed class DiffStatusConverter() :
+    JsonStringEnumConverter<DiffStatus>(JsonNamingPolicy.CamelCase);
 
 /// <summary>
 /// Writes a <see cref="ViewNodeKind"/> as its camel case name, which for the one-word kind names is the lower-case
