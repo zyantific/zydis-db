@@ -63,9 +63,20 @@ public sealed class HostEndpointTests :
     [Fact]
     public async Task DatafilesRejectsANameOutsideTheJsonPattern()
     {
-        using var response = await GetAsync("/datafiles/x.txt");
+        // The file exists, so the name gate is all that answers 404 for it.
+        var repo = Directory.CreateTempSubdirectory("zydis-viewer-host-tests-repo-");
+        try
+        {
+            await File.WriteAllTextAsync(Path.Combine(repo.CreateSubdirectory("datafiles").FullName, "x.txt"), "x");
 
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            using var response = await GetAsync("/datafiles/x.txt", repo: repo.FullName);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+        finally
+        {
+            repo.Delete(recursive: true);
+        }
     }
 
     [Fact]
@@ -77,10 +88,10 @@ public sealed class HostEndpointTests :
         Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
     }
 
-    private async Task<HttpResponseMessage> GetAsync(string path, string? host = null)
+    private async Task<HttpResponseMessage> GetAsync(string path, string? host = null, string? repo = null)
     {
         // The walk of the host finds the checkout above the build output of the tests as well.
-        var options = new HostOptions(Program.FindRepository(), _webRoot.FullName, 5280, false);
+        var options = new HostOptions(repo ?? Program.FindRepository(), _webRoot.FullName, 5280, false);
         var app = Program.CreateApp(options, builder => builder.UseTestServer());
         await using (app.ConfigureAwait(false))
         {

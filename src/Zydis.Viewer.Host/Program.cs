@@ -79,6 +79,8 @@ internal static partial class Program
         }
 
         var app = CreateApp(options);
+        // The block disposes the app where CA2000 sees it. RunAsync is left out because it disposes the app itself,
+        // which would be a second dispose inside the block.
         await using (app.ConfigureAwait(false))
         {
             // Kestrel listens once the application has started, so a browser opened here finds the server.
@@ -91,8 +93,6 @@ internal static partial class Program
                 }
             });
 
-            // RunAsync would dispose the app a second time, so the using block disposes it after the two steps RunAsync
-            // runs.
             await app.StartAsync().ConfigureAwait(false);
             await app.WaitForShutdownAsync().ConfigureAwait(false);
         }
