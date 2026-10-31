@@ -28,10 +28,10 @@ public sealed class DatabaseDiff
     /// view trees.
     /// </summary>
     /// <remarks>
-    /// Forms pair by form id first. The forms left over pair by region key, the encoding, the opcode map, the opcode,
-    /// the mnemonic and the filter entries as a set, and forms with equal region keys pair in file order. The rest are
-    /// added or removed. When either side has a <see cref="ViewerDatabase.FormIdError"/>, the pairing starts at the
-    /// region key.
+    /// Forms with equal JSON pair first, in file order. The forms left over pair by form id, unless either side has a
+    /// <see cref="ViewerDatabase.FormIdError"/>. The forms still left over pair by region key, the encoding, the opcode
+    /// map, the opcode, the mnemonic and the filter entries as a set, and forms with equal region keys pair in file
+    /// order. The rest are added or removed.
     /// <para>
     /// The merged tree holds the rows of the head tree other than its definition rows, followed under each row by the
     /// rows only the base tree has. Each form of the head has a definition row at its head path. A removed form and
@@ -101,18 +101,50 @@ public sealed class DatabaseDiff
         Array.Fill(headOfBase, -1);
         Array.Fill(baseOfHead, -1);
 
+        // Indexing the root array walks it from the start, so the forms are read once in order.
+        var baseRaw = baseDb.Document.RootElement.EnumerateArray().ToArray();
+        var headRaw = headDb.Document.RootElement.EnumerateArray().ToArray();
+
+        // A form id depends on the sibling forms, so a deletion can hand a survivor the id of the deleted form. Pairing
+        // equal forms first keeps the survivor out of the id pass. The pass reads no ids, so with positional ids it
+        // keeps the region pass from pairing an unchanged form with a changed one.
+        var headByContent = new Dictionary<string, Queue<int>>(headCount, StringComparer.Ordinal);
+        for (var h = 0; h < headCount; h++)
+        {
+            var key = CompactJson(headRaw[h]);
+            if (!headByContent.TryGetValue(key, out var queue))
+            {
+                queue = new Queue<int>();
+                headByContent.Add(key, queue);
+            }
+
+            queue.Enqueue(h);
+        }
+
+        for (var b = 0; b < baseCount; b++)
+        {
+            if (headByContent.TryGetValue(CompactJson(baseRaw[b]), out var queue) && queue.TryDequeue(out var h))
+            {
+                headOfBase[b] = h;
+                baseOfHead[h] = b;
+            }
+        }
+
         // The fallback ids hold the position of the form, so after a reorder equal ids name different forms.
         if ((baseDb.FormIdError is null) && (headDb.FormIdError is null))
         {
             var headById = new Dictionary<string, int>(headCount, StringComparer.Ordinal);
             for (var h = 0; h < headCount; h++)
             {
-                headById.Add(headDb.FormIds[h], h);
+                if (baseOfHead[h] < 0)
+                {
+                    headById.Add(headDb.FormIds[h], h);
+                }
             }
 
             for (var b = 0; b < baseCount; b++)
             {
-                if (headById.TryGetValue(baseDb.FormIds[b], out var h))
+                if ((headOfBase[b] < 0) && headById.TryGetValue(baseDb.FormIds[b], out var h))
                 {
                     headOfBase[b] = h;
                     baseOfHead[h] = b;
@@ -149,10 +181,6 @@ public sealed class DatabaseDiff
             }
         }
 
-        // Indexing the root array walks it from the start, so the forms are read once in order.
-        var baseRaw = baseDb.Document.RootElement.EnumerateArray().ToArray();
-        var headRaw = headDb.Document.RootElement.EnumerateArray().ToArray();
-
         var pairs = new List<DiffPairDto>(headCount + baseCount);
         var pairOfBase = new int[baseCount];
 
@@ -184,6 +212,11 @@ public sealed class DatabaseDiff
         }
 
         return (pairs, pairOfBase);
+    }
+
+    private static string CompactJson(JsonElement element)
+    {
+        return JsonSerializer.Serialize(element, ViewerSerializerContext.Default.JsonElement);
     }
 
     /// <summary>

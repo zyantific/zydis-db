@@ -60,6 +60,38 @@ public class DatabaseDiffTests
     }
 
     [Fact]
+    public void DeletionThatShortensAnIdPairsTheSurvivorWithItself()
+    {
+        using var baseDb = ViewerDatabase.Load(
+            """
+            [{"mnemonic":"a","opcode":"10","filters":[{"filter":"rex_w","value":"0"}],
+              "meta_info":{"category":"BINARY","extension":"BASE","isa_set":"I86"}},
+             {"mnemonic":"a","opcode":"10","filters":[{"filter":"rex_w","value":"1"}],
+              "meta_info":{"category":"BINARY","extension":"BASE","isa_set":"I86"}},
+             {"mnemonic":"a","opcode":"20","filters":[{"filter":"rex_w","value":"0"}],
+              "meta_info":{"category":"BINARY","extension":"BASE","isa_set":"I86"}}]
+            """);
+        using var headDb = ViewerDatabase.Load(
+            """
+            [{"mnemonic":"a","opcode":"10","filters":[{"filter":"rex_w","value":"1"}],
+              "meta_info":{"category":"BINARY","extension":"BASE","isa_set":"I86"}},
+             {"mnemonic":"a","opcode":"20","filters":[{"filter":"rex_w","value":"0"}],
+              "meta_info":{"category":"BINARY","extension":"BASE","isa_set":"I86"}}]
+            """);
+
+        // Without the first form, rex_w no longer tells the forms at opcode 10 apart, so the survivor drops its rex_w
+        // part and takes the id the deleted form had in the base.
+        Assert.Equal(baseDb.FormIds[0], headDb.FormIds[0]);
+
+        var model = Diff(baseDb, headDb);
+
+        Assert.Equal(
+            [(1, 0, DiffStatus.Unchanged), (2, 1, DiffStatus.Unchanged), (0, null, DiffStatus.Removed)],
+            model.Pairs.Select(x => (x.BaseIndex, x.HeadIndex, x.Status)));
+        Assert.Equal(new DiffStats(Added: 0, Removed: 1, Changed: 0, Moved: 0, Unchanged: 2), model.Stats);
+    }
+
+    [Fact]
     public void ReportsMovedWhenTheRecordedOrderChanged()
     {
         using var baseDb = ViewerDatabase.Load(
@@ -230,6 +262,40 @@ public class DatabaseDiffTests
                 (3, 3, DiffStatus.Unchanged)
             ],
             model.Pairs.Select(x => (x.BaseIndex, x.HeadIndex, x.Status)));
+    }
+
+    [Fact]
+    public void FallbackIdsPairEqualFormsBeforeTheRegionKey()
+    {
+        // The duplicate x forms give the base positional ids. The two a forms share a region key and swap their order,
+        // and the gpr16 form also gains a comment, so pairing the region group in file order would pair each a form
+        // with the other one.
+        using var baseDb = ViewerDatabase.Load(
+            """
+            [{"mnemonic":"a","opcode":"10","operands":[{"operand_type":"gpr8"}],
+              "meta_info":{"category":"BINARY","extension":"BASE","isa_set":"I86"}},
+             {"mnemonic":"a","opcode":"10","operands":[{"operand_type":"gpr16"}],
+              "meta_info":{"category":"BINARY","extension":"BASE","isa_set":"I86"}},
+             {"mnemonic":"x","opcode":"30","meta_info":{"category":"BINARY","extension":"BASE","isa_set":"I86"}},
+             {"mnemonic":"x","opcode":"30","meta_info":{"category":"BINARY","extension":"BASE","isa_set":"I86"}}]
+            """);
+        using var headDb = ViewerDatabase.Load(
+            """
+            [{"mnemonic":"a","opcode":"10","operands":[{"operand_type":"gpr16"}],"comment":"QQ==",
+              "meta_info":{"category":"BINARY","extension":"BASE","isa_set":"I86"}},
+             {"mnemonic":"a","opcode":"10","operands":[{"operand_type":"gpr8"}],
+              "meta_info":{"category":"BINARY","extension":"BASE","isa_set":"I86"}},
+             {"mnemonic":"x","opcode":"30","meta_info":{"category":"BINARY","extension":"BASE","isa_set":"I86"}}]
+            """);
+
+        Assert.NotNull(baseDb.FormIdError);
+        Assert.Null(headDb.FormIdError);
+
+        var model = Diff(baseDb, headDb);
+
+        Assert.Equal(
+            [(1, 0), (0, 1), (2, 2), (3, null)],
+            model.Pairs.Select(x => (x.BaseIndex, x.HeadIndex)));
     }
 
     /// <summary>
