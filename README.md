@@ -12,7 +12,7 @@ turns them into the C tables and enums that are committed into the Zydis reposit
 | `assets/`    | Project logo.                                                                       |
 | `datafiles/` | The instruction database and supporting data files.                                 |
 | `scripts/`   | Python utilities that exchange data with a Zydis checkout.                          |
-| `src/`       | The .NET solution: generator CLI, core library, source generators, and test suite.  |
+| `src/`       | The .NET solution and the viewer web app: generator, instruction viewer, and tests. |
 
 ## Data files
 
@@ -174,8 +174,9 @@ Other section. The address bar follows the selected form as `#form=<form id>`, s
 
 ### Running the local host
 
-`src/Zydis.Viewer.Host` serves the built app together with the checkout's `datafiles/` folder and the git revisions
-the compare dialog reads its base from. Build the web app once, then start the host from the repository root:
+`src/Zydis.Viewer.Host` serves the built app together with the checkout's `datafiles/` folder and the git revisions the
+compare dialog reads its base from. Build the web app once (this needs Node and the `wasm-tools` workload, see
+[Development](#development)), then start the host from the repository root:
 
 ```
 cd src/Zydis.Viewer.Web
@@ -197,21 +198,22 @@ holds no `index.html`, the host prints how to build the app and answers only the
 
 ### Static hosting
 
-`npm run build` writes the app to `src/Zydis.Viewer.Web/dist/`. The build uses relative URLs, so the folder runs from
-any static server, at the site root or under a sub-path. At start the app loads `datafiles/instructions.json` relative
-to the page, so a static deployment copies the database to `dist/datafiles/instructions.json`. Without that file the
-app starts with a drop zone: drop an `instructions.json` on the window or pick one with the Open button.
+`npm run build` writes the app to `src/Zydis.Viewer.Web/dist/`. The build uses relative URLs, so the folder runs from a
+static server at the site root or under a sub-path. At start the app loads `datafiles/instructions.json` relative to the
+page, so a static deployment copies the database to `dist/datafiles/instructions.json`. Without that file the app starts
+with a drop zone: drop an `instructions.json` on the window or pick one with the Open button.
 
 ### Comparing two databases
 
 The Compare button opens a dialog for the base, A, and the loaded database is the head, B. Under the host the dialog
-lists the local branches and tags of the checkout, with `master` preselected, and compares the working tree's
-`datafiles/instructions.json` with the file at the chosen revision. The dialog also takes a second file as the base.
-In standalone mode, when a static server or `npm run dev` serves the app, the file is the only choice.
+lists the local branches and tags of the checkout, with `master` preselected, and compares the loaded database with
+`datafiles/instructions.json` at the chosen revision. The dialog also takes a second file as the base. In standalone
+mode, when a static server or `npm run dev` serves the app, the file is the only choice.
 
-The diff view shows both databases in one tree and tints the rows of added, changed, moved, and removed forms. The
-toolbar adds a Changes only toggle and Previous and Next buttons that step through the changed rows, and the inspector
-shows both sides of the selected form in two columns.
+The diff view shows both databases in one tree and tints the rows of added, changed, moved, and removed forms. A form
+counts as moved when its path in the tree differs between the two databases, so adding one form can mark its siblings as
+moved when their node changes shape. The toolbar adds a Changes only toggle and Previous and Next buttons that step
+through the changed rows, and the inspector shows both sides of the selected form in two columns.
 
 ### Filter order
 
@@ -266,8 +268,8 @@ dotnet test
 ```
 
 The viewer's web app in `src/Zydis.Viewer.Web` builds and tests with npm (see [Development](#development)): `npm ci`,
-then `npm test`, `npm run typecheck`, `npm run build`, and `npm run smoke`. The build publishes `Zydis.Viewer.Wasm`,
-which needs the `wasm-tools` workload (`dotnet workload install wasm-tools`).
+then `npm test`, `npm run typecheck`, `npm run build`, and `npm run smoke`. `npm run build` publishes
+`Zydis.Viewer.Wasm`, which needs the `wasm-tools` workload (`dotnet workload install wasm-tools`).
 
 ## Continuous integration
 
