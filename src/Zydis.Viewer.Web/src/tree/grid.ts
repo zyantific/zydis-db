@@ -1,4 +1,4 @@
-import { COUNT_SIGNS } from '../diff/diffState';
+import { COUNT_SIGNS, isMovedFrom } from '../diff/diffState';
 import type { DiffNode, NodeKind, ViewDefinition, ViewNode } from '../model';
 import { store, type AppState } from '../store';
 import { rowFilter, sourceOf } from './gridSource';
@@ -22,7 +22,7 @@ const KIND_ICONS: Record<NodeKind, string> = {
   table: '▤',
 };
 
-type GridNode = ViewNode & Partial<Pick<DiffNode, 'counts' | 'status'>>;
+type GridNode = ViewNode & Partial<Pick<DiffNode, 'counts' | 'headDefinitionIndex' | 'status'>>;
 
 // The rows of the single view or of a diff. The node ids of a tree index its nodes.
 export interface GridSource {
@@ -82,6 +82,7 @@ export function mountGrid(container: HTMLElement): HTMLElement {
     rowElement.classList.toggle('selected', node.id === selectedNodeId);
     if (node.status !== undefined && node.status !== 'unchanged') {
       rowElement.classList.add(`status-${node.status}`);
+      rowElement.classList.toggle('moved-from', isMovedFrom(node));
     }
 
     const expander = element('span', 'expander', row.hasChildren ? (isOpen(index) ? '▾' : '▸') : '');

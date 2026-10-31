@@ -1,5 +1,5 @@
 import { readSource, type LoadSource } from '../loader';
-import type { DiffCounts, DiffModel, DiffPair, ViewDefinition, ViewModel } from '../model';
+import type { DiffCounts, DiffModel, DiffNode, DiffPair, ViewDefinition, ViewModel } from '../model';
 import { setSearch } from '../search/searchState';
 import { store, type AppState, type LoadedDatabase } from '../store';
 import { ancestorsOf } from '../tree/rows';
@@ -22,11 +22,14 @@ export const COUNT_SIGNS: ReadonlyArray<readonly [keyof DiffCounts, string]> = [
 ];
 
 interface DiffIndex {
+  // The definition rows with a status other than unchanged, in preorder.
+  changedRows: number[];
+  // The same without the old rows of moved forms, so a moved form is one step.
   changedNodeIds: number[];
   // The pairs list a removed form after the head forms, so its position in pairs differs from its base index.
   pairOfBase: Map<number, DiffPair>;
   headRowOf: Map<number, number>;
-  // The rows at a base path: removed forms and the base side of moved forms.
+  // The rows at a base path: removed forms and the old rows of moved forms.
   baseRowOf: Map<number, number>;
 }
 
@@ -38,12 +41,12 @@ function indexOf(model: DiffModel): DiffIndex {
     return cached;
   }
 
-  const changedNodeIds: number[] = [];
+  const changedRows: number[] = [];
   const pending = [...model.rootIds].reverse();
   for (let nodeId = pending.pop(); nodeId !== undefined; nodeId = pending.pop()) {
     const node = model.nodes[nodeId];
     if (node.definitionIndex !== undefined && node.status !== 'unchanged') {
-      changedNodeIds.push(nodeId);
+      changedRows.push(nodeId);
     }
     // Pushed in reverse, so the first child is the next one popped.
     for (let child = node.childIds.length - 1; child >= 0; child--) {
@@ -68,9 +71,15 @@ function indexOf(model: DiffModel): DiffIndex {
     }
   }
 
-  const index = { changedNodeIds, pairOfBase, headRowOf, baseRowOf };
+  const changedNodeIds = changedRows.filter((nodeId) => !isMovedFrom(model.nodes[nodeId]));
+  const index = { changedRows, changedNodeIds, pairOfBase, headRowOf, baseRowOf };
   indexes.set(model, index);
   return index;
+}
+
+// The row a moved form leaves at its base path has the status of the pair but no head form.
+export function isMovedFrom(node: Partial<Pick<DiffNode, 'headDefinitionIndex' | 'status'>>): boolean {
+  return node.status === 'moved' && node.headDefinitionIndex === undefined;
 }
 
 // The callers of one model share the returned array.
@@ -78,8 +87,10 @@ export function changedNodeIdsInOrder(model: DiffModel): number[] {
   return indexOf(model).changedNodeIds;
 }
 
+// Keeps the old rows of moved forms as well, which the steps skip, so the link from the inspector to the old row
+// selects a row the grid shows.
 export function changesInclude(model: DiffModel): (nodeId: number) => boolean {
-  return includeWithAncestors(model, changedNodeIdsInOrder(model));
+  return includeWithAncestors(model, indexOf(model).changedRows);
 }
 
 // The search keeps its matches and their ancestors, so a changed row it keeps is a match. The intersection of the two
@@ -87,7 +98,7 @@ export function changesInclude(model: DiffModel): (nodeId: number) => boolean {
 // without children.
 export function changedMatchesInclude(model: DiffModel, searchInclude: ReadonlySet<number>):
   (nodeId: number) => boolean {
-  return includeWithAncestors(model, changedNodeIdsInOrder(model).filter((nodeId) => searchInclude.has(nodeId)));
+  return includeWithAncestors(model, indexOf(model).changedRows.filter((nodeId) => searchInclude.has(nodeId)));
 }
 
 function includeWithAncestors(model: DiffModel, nodeIds: readonly number[]): (nodeId: number) => boolean {

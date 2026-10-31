@@ -45,31 +45,40 @@ function database(name: string, definitions: ViewDefinition[]): LoadedDatabase {
 //     5 added
 //   6 opcode 40, only in the base
 //     7 removed
-//   8 opcode 41
-//     9 unchanged
+//     8 moved, the old row
+//   9 opcode 41
+//     10 unchanged
+//     11 moved
+//   12 opcode 42
+//     13 unchanged
 const tree = diffModel([
-  node(0, null, 'table', 'unchanged', [1, 6, 8]),
+  node(0, null, 'table', 'unchanged', [1, 6, 9, 12]),
   node(1, 0, 'opcode', 'unchanged', [2, 4, 5]),
   node(2, 1, 'decision', 'unchanged', [3]),
   node(3, 2, 'definition', 'changed', [], { base: 0, head: 0 }),
   node(4, 1, 'definition', 'unchanged', [], { base: 1, head: 1 }),
   node(5, 1, 'definition', 'added', [], { head: 2 }),
-  node(6, 0, 'opcode', 'removed', [7]),
+  node(6, 0, 'opcode', 'removed', [7, 8]),
   node(7, 6, 'definition', 'removed', [], { base: 2 }),
-  node(8, 0, 'opcode', 'unchanged', [9]),
-  node(9, 8, 'definition', 'unchanged', [], { base: 3, head: 3 }),
+  node(8, 6, 'definition', 'moved', [], { base: 3 }),
+  node(9, 0, 'opcode', 'unchanged', [10, 11]),
+  node(10, 9, 'definition', 'unchanged', [], { base: 4, head: 3 }),
+  node(11, 9, 'definition', 'moved', [], { base: 3, head: 4 }),
+  node(12, 0, 'opcode', 'unchanged', [13]),
+  node(13, 12, 'definition', 'unchanged', [], { base: 5, head: 5 }),
 ]);
 
 describe('diff state', () => {
   it('changedNodeIdsInOrder follows preorder and skips unchanged', () => {
-    // A level-order walk gives 5, 7, 3, a stack walk that pushes the children in order gives 7, 5, 3, and a status
-    // filter that ignores the kind adds the opcode row 6.
-    expect(changedNodeIdsInOrder(tree)).toEqual([3, 5, 7]);
+    // A level-order walk gives 5, 7, 11, 3, a stack walk that pushes the children in order gives 11, 7, 5, 3, a
+    // status filter that ignores the kind adds the opcode row 6, and a step onto the old row of the moved form adds 8.
+    expect(changedNodeIdsInOrder(tree)).toEqual([3, 5, 7, 11]);
   });
 
   it('changesInclude keeps ancestors of changed rows', () => {
+    // The old row 8 of the moved form stays, so the inspector link to it selects a row on screen.
     const include = changesInclude(tree);
-    expect([0, 1, 2, 3, 4, 5, 6, 7, 8, 9].filter(include)).toEqual([0, 1, 2, 3, 5, 6, 7]);
+    expect([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].filter(include)).toEqual([0, 1, 2, 3, 5, 6, 7, 8, 9, 11]);
   });
 
   it('definitionFor resolves base and head through the pair', () => {
@@ -84,7 +93,7 @@ describe('diff state', () => {
       node(0, null, 'table', 'unchanged', [1, 2, 3, 4]),
       node(1, 0, 'definition', 'moved', [], { base: 1, head: 0 }),
       node(2, 0, 'definition', 'added', [], { head: 1 }),
-      node(3, 0, 'definition', 'removed', [], { base: 1 }),
+      node(3, 0, 'definition', 'moved', [], { base: 1 }),
       node(4, 0, 'definition', 'removed', [], { base: 0 }),
     ], pairs);
     const base = database('base', [definition(0, 'BASE0'), definition(1, 'BASE1')]);

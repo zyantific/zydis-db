@@ -90,9 +90,13 @@ public class DatabaseDiffTests
 
         var rows = model.Nodes.Where(x => x.Kind is ViewNodeKind.Definition).ToList();
         Assert.Equal(
-            [(DiffStatus.Moved, 0, 0), (DiffStatus.Removed, 0, null)],
+            [(DiffStatus.Moved, 0, 0), (DiffStatus.Moved, 0, null)],
             rows.Select(x => (x.Status, x.BaseDefinitionIndex, x.HeadDefinitionIndex)));
         Assert.Equal("gpr8", rows[1].Detail);
+        // The old row counts nowhere, so the root counts the form once, as the stats do.
+        Assert.Equal(
+            new DiffCounts(Added: 0, Removed: 0, Changed: 0, Moved: 1),
+            model.Nodes[Assert.Single(model.RootIds)].Counts);
     }
 
     [Fact]

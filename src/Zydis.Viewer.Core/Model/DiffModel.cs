@@ -75,10 +75,12 @@ public sealed record DiffStats(int Added, int Removed, int Changed, int Moved, i
 /// <summary>
 /// The number of definition rows of each status in the subtree of a merged tree row.
 /// </summary>
+/// <remarks>
+/// The row a moved form leaves at its base path counts in none of the four, so each form counts once and the counts
+/// of a root row add up to the <see cref="DiffStats"/> of the forms below it.
+/// </remarks>
 /// <param name="Added">The number of rows of added forms.</param>
-/// <param name="Removed">
-/// The number of rows of removed forms, including the row a moved form leaves at its base path.
-/// </param>
+/// <param name="Removed">The number of rows of removed forms.</param>
 /// <param name="Changed">The number of rows of changed forms.</param>
 /// <param name="Moved">The number of rows of moved forms at their head path.</param>
 public sealed record DiffCounts(int Added, int Removed, int Changed, int Moved);
@@ -100,10 +102,11 @@ public sealed record DiffCounts(int Added, int Removed, int Changed, int Moved);
 /// <param name="Conflict">Signals whether this row is a conflict row or has one below it.</param>
 /// <param name="FormCount">The number of definition rows in the subtree of this row.</param>
 /// <param name="Status">
-/// The status of the pair for a definition row at a head path, and <see cref="DiffStatus.Removed"/> for a definition
-/// row at a base path. Any other row is <see cref="DiffStatus.Removed"/> when only the base tree has it,
-/// <see cref="DiffStatus.Added"/> when only the head tree has it, and <see cref="DiffStatus.Unchanged"/> when both
-/// trees have it.
+/// The status of the pair for a definition row. A definition row at a base path is <see cref="DiffStatus.Removed"/>
+/// for a removed form and <see cref="DiffStatus.Moved"/> for the old row of a moved form, which differs from the row
+/// at the head path by its missing <paramref name="HeadDefinitionIndex"/>. Any other row is
+/// <see cref="DiffStatus.Removed"/> when only the base tree has it, <see cref="DiffStatus.Added"/> when only the head
+/// tree has it, and <see cref="DiffStatus.Unchanged"/> when both trees have it.
 /// </param>
 /// <param name="Counts">
 /// The statuses of the definition rows in the subtree of this row, the row itself included.

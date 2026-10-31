@@ -255,8 +255,10 @@ body {
   background: var(--tint-removed);
 }
 
-/* Inline blocks take no decoration from their parent, so the glyphs and the badges stay readable. */
-.grid-row.status-removed .grid-cell {
+/* Inline blocks take no decoration from their parent, so the glyphs and the badges stay readable. The old row of a
+   moved form keeps the moved tint and is struck through like a removed row. */
+.grid-row.status-removed .grid-cell,
+.grid-row.moved-from .grid-cell {
   text-decoration: line-through;
 }
 

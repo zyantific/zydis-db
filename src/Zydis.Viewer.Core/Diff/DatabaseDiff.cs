@@ -209,7 +209,8 @@ public sealed class DatabaseDiff
             node.Added = (node.Status is DiffStatus.Added) ? 1 : 0;
             node.Removed = (node.Status is DiffStatus.Removed) ? 1 : 0;
             node.Changed = (node.Status is DiffStatus.Changed) ? 1 : 0;
-            node.Moved = (node.Status is DiffStatus.Moved) ? 1 : 0;
+            // The row a moved form leaves at its base path counts nowhere, so the counts of a root equal the stats.
+            node.Moved = (node.Status is DiffStatus.Moved) && (node.HeadDefinitionIndex is not null) ? 1 : 0;
             return;
         }
 
@@ -319,7 +320,7 @@ public sealed class DatabaseDiff
                     continue;
                 }
 
-                row.Children.Add(new MergedNode(child.Kind, child.Label, child.Detail, null, DiffStatus.Removed)
+                row.Children.Add(new MergedNode(child.Kind, child.Label, child.Detail, null, status)
                 {
                     BaseDefinitionIndex = child.DefinitionIndex
                 });
