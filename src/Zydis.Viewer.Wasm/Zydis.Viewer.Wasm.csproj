@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <!--
+    App.Directory.Build.targets turns on PublishAot for every executable while EnableAotSupport is true, and native
+    AOT does not support browser-wasm. That file sets PublishTrimmed only together with PublishAot, and without
+    trimming a publish ships about 18 MB of framework assemblies, in Debug as in Release.
+  -->
+  <PropertyGroup>
+    <EnableAotSupport>false</EnableAotSupport>
+    <PublishTrimmed>true</PublishTrimmed>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Zydis.Viewer.Core\Zydis.Viewer.Core.csproj" />
+  </ItemGroup>
+
+</Project>
