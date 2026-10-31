@@ -1,4 +1,4 @@
-import type { ViewDefinition, ViewModel, ViewNode } from '../model';
+import type { DiffModel, ViewDefinition, ViewModel, ViewNode } from '../model';
 import { store, type AppState } from '../store';
 import { ancestorsOf } from '../tree/rows';
 
@@ -63,7 +63,8 @@ export function definitionSections(def: ViewDefinition): Section[] {
   return sections.filter((section) => section.rows.length > 0);
 }
 
-export function nodeSections(model: ViewModel, nodeId: number): Section[] {
+// Takes the nodes of a merged tree as well, with the filter slots of the head.
+export function nodeSections(model: Pick<ViewModel, 'filterSlots' | 'nodes' | 'rootIds'>, nodeId: number): Section[] {
   const node = model.nodes[nodeId];
   const path = [...ancestorsOf(model, nodeId), nodeId].map((id) => model.nodes[id].label).join('/');
   const rows: Row[] = [
@@ -87,7 +88,10 @@ export function nodeSections(model: ViewModel, nodeId: number): Section[] {
   return [{ title: 'Node', rows }, { title: 'Slots', rows: slotRows(model, node) }];
 }
 
-export function mountInspector(container: HTMLElement): void {
+// Fills the header and the body of the panel for the selection of a diff, which names a row of the merged tree.
+export type DiffPanelRenderer = (state: AppState, header: HTMLElement, body: HTMLElement) => void;
+
+export function mountInspector(container: HTMLElement, renderDiff: DiffPanelRenderer): void {
   const resizer = element('div', 'inspector-resizer');
   const header = element('div', 'inspector-header');
   const body = element('div', 'inspector-body');
@@ -99,21 +103,30 @@ export function mountInspector(container: HTMLElement): void {
   resizer.addEventListener('pointerdown', (event) => startResize(event, resizer, panel, container));
 
   let model: ViewModel | null | undefined;
+  let diffModel: DiffModel | null | undefined;
   let selectedNodeId: number | null | undefined;
 
   const update = (state: AppState): void => {
     const nextModel = state.database?.model ?? null;
+    const nextDiffModel = state.diff?.model ?? null;
     panel.hidden = nextModel === null;
-    // Other changes, such as an expansion, leave the panel alone, so an open raw block stays open.
-    if (nextModel === model && state.selectedNodeId === selectedNodeId) {
+    // Other changes, such as an expansion or a step of the diff cursor to the same row, leave the panel alone, so an
+    // open raw block stays open.
+    if (nextModel === model && nextDiffModel === diffModel && state.selectedNodeId === selectedNodeId) {
       return;
     }
     model = nextModel;
+    diffModel = nextDiffModel;
     selectedNodeId = state.selectedNodeId;
 
     if (model === null || selectedNodeId === null) {
       header.replaceChildren();
       body.replaceChildren(element('div', 'inspector-hint', 'Select a row'));
+      return;
+    }
+    if (diffModel !== null) {
+      renderDiff(state, header, body);
+      body.scrollTop = 0;
       return;
     }
 
@@ -267,7 +280,7 @@ function rawBlock(raw: unknown): HTMLElement {
 
 // The labels of the slot rows below a decision row name the occupied slots. ViewTreeBuilder.SlotLabel writes the
 // index in two hex digits and the slot name, and marks a negated slot with a leading ! and "not".
-function slotRows(model: ViewModel, node: ViewNode): Row[] {
+function slotRows(model: Pick<ViewModel, 'filterSlots' | 'nodes'>, node: ViewNode): Row[] {
   const occupied = new Set(node.childIds.map((id) => model.nodes[id].label));
   const row = (label: string): Row => ({ key: label, value: occupied.has(label) ? 'occupied' : 'empty' });
 
@@ -295,7 +308,7 @@ function slotRows(model: ViewModel, node: ViewNode): Row[] {
   return rows;
 }
 
-function renderSections(sections: Section[]): HTMLElement[] {
+export function renderSections(sections: Section[]): HTMLElement[] {
   return sections.map((section) => {
     const rows = element('div', 'inspector-rows');
     for (const { key, value } of section.rows) {
@@ -315,7 +328,7 @@ function renderSections(sections: Section[]): HTMLElement[] {
   });
 }
 
-function copyButton(text: string): HTMLButtonElement {
+export function copyButton(text: string): HTMLButtonElement {
   const button = element('button', 'copy', 'Copy');
   button.type = 'button';
   let reset: number | undefined;

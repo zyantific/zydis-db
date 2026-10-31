@@ -1,4 +1,5 @@
-import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -25,9 +26,25 @@ const searchMatches = forms.filter((form) => form.mnemonic.includes(searchText))
 mkdirSync(path.join(distDir, 'datafiles'), { recursive: true });
 copyFileSync(database, path.join(distDir, 'datafiles', 'instructions.json'));
 
+// The head of the diff check is a copy of the database with a changed operand action in the first cfcmovb form and
+// without aaa, compared with the database itself as the base. It lives outside the checkout, since the viewer and its
+// checks never write the database.
+const headForms = JSON.parse(readFileSync(database, 'utf8'));
+const changedOperand = headForms.find((form) => form.mnemonic === searchText).operands[0];
+const baseAction = changedOperand.action;
+changedOperand.action = baseAction === 'condwrite' ? 'write' : 'condwrite';
+const removedMnemonic = 'aaa';
+const removedForms = headForms.filter((form) => form.mnemonic === removedMnemonic).length;
+
 const server = await preview({ root: webRoot, logLevel: 'warn', preview: { port: 4173, strictPort: true } });
 let browser;
+let scratchDir;
 try {
+  // Inside the try, so the cleanup removes it whatever fails after it.
+  scratchDir = mkdtempSync(path.join(os.tmpdir(), 'zydis-viewer-smoke-'));
+  const headFile = path.join(scratchDir, 'instructions-head.json');
+  writeFileSync(headFile, JSON.stringify(headForms.filter((form) => form.mnemonic !== removedMnemonic)));
+
   browser = await chromium.launch();
   const page = await browser.newPage();
 
@@ -41,7 +58,10 @@ try {
     };
     page.on('pageerror', (error) => fail(`Page error: ${error.message}`));
     page.on('console', (message) => {
-      if (message.type() === 'error') {
+      // The compare dialog asks for the git references of the local host, which the preview server does not have.
+      if (message.type() === 'error' && message.location().url.endsWith('/api/git/refs')) {
+        console.log(`Expected console error: ${message.text()}`);
+      } else if (message.type() === 'error') {
         fail(`Console error: ${message.text()}`);
       } else if (message.type() === 'warning') {
         console.log(`Console warning: ${message.text()}`);
@@ -234,6 +254,91 @@ try {
   console.log(`Decision ${decision.label} above ${decisionText}: `
     + `${slots.map(([key, value]) => `${key} ${value}`).join(', ')}`);
 
+  // The modified copy becomes the loaded database, the head. The real database is the base the dialog picks.
+  const headName = path.basename(headFile);
+  const headDefinitions = `${(forms.length - removedForms).toLocaleString('en-US')} definitions`;
+  const hashBeforeDiff = new URL(page.url()).hash;
+  await page.locator('.toolbar input[type=file]').setInputFiles(headFile);
+  await Promise.race([failure, statusBar.filter({ hasText: headDefinitions }).waitFor({ timeout })]);
+  const headRows = await rowCount();
+
+  // The picker would show only after the answer to the refs request, so the check waits for it.
+  const refsAnswered = page.waitForResponse((response) => response.url().endsWith('/api/git/refs'));
+  await page.locator('.toolbar').getByRole('button', { name: 'Compare', exact: true }).click();
+  const dialog = page.locator('dialog.compare-dialog');
+  await dialog.waitFor({ timeout: 5_000 });
+  await refsAnswered;
+  if (await dialog.getByRole('combobox', { name: 'Base reference' }).isVisible()) {
+    throw new Error('The compare dialog shows the git reference picker without the local host.');
+  }
+  await dialog.locator('input[type=file]').setInputFiles(database);
+  const compareStarted = performance.now();
+  await dialog.getByRole('button', { name: 'Compare', exact: true }).click();
+  await Promise.race([failure, dialog.waitFor({ state: 'hidden', timeout })]);
+  const compareSeconds = ((performance.now() - compareStarted) / 1000).toFixed(1);
+
+  const counts = await statusBar.locator('.badge').allInnerTexts();
+  const expectedCounts = ['+0 added', `\u2212${removedForms} removed`, '~1 changed', '>0 moved'];
+  if (JSON.stringify(counts) !== JSON.stringify(expectedCounts)) {
+    throw new Error(`The diff counts read ${JSON.stringify(counts)}, expected ${JSON.stringify(expectedCounts)}.`);
+  }
+  const statusText = (await statusBar.innerText()).replace(/\s+/g, ' ');
+  if (!statusText.includes(`A: ${path.basename(database)}`) || !statusText.includes(`B: ${headName}`)) {
+    throw new Error(`The status bar of the diff reads "${statusText}", expected the names of A and B.`);
+  }
+  console.log(`Diff after ${compareSeconds} s from the Compare click: ${statusText}`);
+
+  await page.getByRole('button', { name: 'Expand all' }).click();
+  const expandedRows = await rowCount();
+  await page.getByRole('checkbox', { name: 'Changes only' }).check();
+  const changesRows = await rowCount();
+  if (!(changesRows < 40 && expandedRows > 1000)) {
+    throw new Error(`Changes only shows ${changesRows} of ${expandedRows} rows, expected fewer than 40 of more than`
+      + ' 1000.');
+  }
+
+  // The removed row and the changed row are the two steps.
+  const counter = page.locator('.diff-counter');
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  if ((await counter.innerText()) !== '1 / 2') {
+    throw new Error(`The step counter reads ${await counter.innerText()} after the first step, expected 1 / 2.`);
+  }
+  const changedRow = page.locator('.grid-row.status-changed');
+  await changedRow.click();
+  const changedMnemonic = await changedRow.locator('.grid-cell:nth-child(2)').innerText();
+  if (changedMnemonic !== searchText) {
+    throw new Error(`The changed row shows ${changedMnemonic}, expected ${searchText}.`);
+  }
+
+  // The first operand row of both operand tables is tinted, and its action cell holds the value of each side.
+  const operandCells = (column) => page.locator(`.diff-grid .${column} tbody tr.diff-changed`)
+    .evaluateAll((rows) => rows.map((row) => [row.cells[0].textContent, row.cells[1].textContent]));
+  const tinted = [await operandCells('diff-a'), await operandCells('diff-b')];
+  const expectedTint = [[['0', baseAction]], [['0', changedOperand.action]]];
+  if (JSON.stringify(tinted) !== JSON.stringify(expectedTint)) {
+    throw new Error(`The tinted operand rows read ${JSON.stringify(tinted)}, expected`
+      + ` ${JSON.stringify(expectedTint)}.`);
+  }
+  const mnemonicKey = page.locator('.diff-grid .inspector-key', { hasText: /^mnemonic$/ });
+  if (await mnemonicKey.isVisible()) {
+    throw new Error('The unchanged mnemonic row shows before Show unchanged is checked.');
+  }
+  await page.getByRole('checkbox', { name: 'Show unchanged' }).check();
+  await mnemonicKey.waitFor({ timeout: 5_000 });
+  if (new URL(page.url()).hash !== hashBeforeDiff) {
+    throw new Error(`Selecting a diff row changed the hash from "${hashBeforeDiff}" to "${new URL(page.url()).hash}".`);
+  }
+  console.log(`Changes only: ${changesRows} of ${expandedRows} rows, ${searchText} operand 0 action`
+    + ` ${baseAction} in A and ${changedOperand.action} in B`);
+
+  await page.getByRole('button', { name: 'Close diff' }).click();
+  await statusBar.filter({ hasText: headDefinitions }).waitFor({ timeout: 5_000 });
+  const closedRows = await rowCount();
+  if (closedRows !== headRows) {
+    throw new Error(`Close diff left ${closedRows} rows, expected the ${headRows} of the head before the diff.`);
+  }
+  console.log(`Close diff: ${closedRows} rows, as before the diff`);
+
   if (problems.length > 0) {
     throw new Error(problems.join('\n'));
   }
@@ -241,6 +346,9 @@ try {
   console.error(error instanceof Error ? error.message : error);
   process.exitCode = 1;
 } finally {
+  if (scratchDir !== undefined) {
+    rmSync(scratchDir, { recursive: true, force: true });
+  }
   await browser?.close();
   await server.close();
 }

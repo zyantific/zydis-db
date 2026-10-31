@@ -1,4 +1,4 @@
-import type { ViewDefinition, ViewModel } from '../model';
+import type { DiffModel, ViewDefinition, ViewModel } from '../model';
 
 export type MatchMode = 'exact' | 'startsWith' | 'contains' | 'regex';
 export type SearchScope = 'mnemonic' | 'category' | 'extension' | 'formId' | 'isaSet' | 'opcode';
@@ -64,17 +64,40 @@ export function matchingNodeIds(model: ViewModel, scope: SearchScope, matcher: M
     if (node.definitionIndex === undefined) {
       continue;
     }
-    if (!matcher.test(scopeValue(model.definitions[node.definitionIndex], scope))) {
-      continue;
-    }
-
-    // Stops at the first ancestor already kept, since the match that kept it also kept the rest of its chain.
-    let nodeId: number | null = node.id;
-    while (nodeId !== null && !nodeIds.has(nodeId)) {
-      nodeIds.add(nodeId);
-      nodeId = model.nodes[nodeId].parentId;
+    if (matcher.test(scopeValue(model.definitions[node.definitionIndex], scope))) {
+      keepWithAncestors(model, node.id, nodeIds);
     }
   }
 
   return nodeIds;
+}
+
+// The same for the merged tree of a diff. A row matches when the form it has on either side matches, so a form whose
+// mnemonic changed is found by the old mnemonic as well.
+export function diffMatchingNodeIds(
+  diff: DiffModel,
+  base: ViewModel,
+  head: ViewModel,
+  scope: SearchScope,
+  matcher: Matcher,
+): Set<number> {
+  const matches = (definitions: ViewDefinition[], index: number | undefined): boolean =>
+    index !== undefined && matcher.test(scopeValue(definitions[index], scope));
+
+  const nodeIds = new Set<number>();
+  for (const node of diff.nodes) {
+    if (matches(head.definitions, node.headDefinitionIndex) || matches(base.definitions, node.baseDefinitionIndex)) {
+      keepWithAncestors(diff, node.id, nodeIds);
+    }
+  }
+
+  return nodeIds;
+}
+
+function keepWithAncestors(tree: { nodes: Array<{ parentId: number | null }> }, nodeId: number, kept: Set<number>):
+  void {
+  // Stops at the first ancestor already kept, since the match that kept it also kept the rest of its chain.
+  for (let id: number | null = nodeId; id !== null && !kept.has(id); id = tree.nodes[id].parentId) {
+    kept.add(id);
+  }
 }

@@ -68,6 +68,10 @@ export function createSearchBox(onEscape: () => void): HTMLElement[] {
   });
 
   const render = (state: AppState): void => {
+    // A comparison clears the search text in the store, since the rows of the merged tree have other node ids.
+    if (input.value !== state.search.text) {
+      input.value = state.search.text;
+    }
     const disabled = state.database === null;
     input.disabled = disabled;
     modeSelect.disabled = disabled;

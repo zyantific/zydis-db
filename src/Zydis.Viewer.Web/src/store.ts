@@ -1,10 +1,13 @@
+import type { DiffSession } from './diff/diffState';
 import type { ViewModel } from './model';
 import type { ViewerRuntime } from './runtime';
 import type { MatchMode, SearchScope } from './search/matcher';
 
 export interface AppState {
   runtime: ViewerRuntime | null;
+  // The head during a diff.
   database: LoadedDatabase | null;
+  diff: DiffSession | null;
   error: string | null;
   loading: string | null;
   // Replaced on every change, never mutated, so a subscriber can tell a change by identity.
@@ -36,6 +39,7 @@ export const store: {
   state: {
     runtime: null,
     database: null,
+    diff: null,
     error: null,
     loading: null,
     expanded: new Set(),

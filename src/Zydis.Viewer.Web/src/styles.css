@@ -9,6 +9,10 @@
   --color-warning: #9a5b00;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --tint-added: #dcf4dc;
+  --tint-changed: #fbefc6;
+  --tint-moved: #dae8fb;
+  --tint-removed: #f9dada;
 
   color-scheme: light;
 }
@@ -78,6 +82,32 @@ body {
   order: 1;
   color: var(--color-error);
   overflow-wrap: anywhere;
+}
+
+.diff-controls {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+
+/* The display of .diff-controls would otherwise win over the hidden attribute. */
+.diff-controls[hidden] {
+  display: none;
+}
+
+.diff-controls label {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin: 0 4px;
+}
+
+/* Tabular digits keep the buttons on either side in place while the count steps. */
+.diff-counter {
+  min-width: 5em;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
 .content {
@@ -208,6 +238,28 @@ body {
   color: var(--color-error);
 }
 
+/* Before .selected, so the selection colour wins on a tinted row. */
+.grid-row.status-added {
+  background: var(--tint-added);
+}
+
+.grid-row.status-changed {
+  background: var(--tint-changed);
+}
+
+.grid-row.status-moved {
+  background: var(--tint-moved);
+}
+
+.grid-row.status-removed {
+  background: var(--tint-removed);
+}
+
+/* Inline blocks take no decoration from their parent, so the glyphs and the badges stay readable. */
+.grid-row.status-removed .grid-cell {
+  text-decoration: line-through;
+}
+
 .grid-row.selected {
   background: var(--color-accent);
   color: var(--color-background);
@@ -247,6 +299,41 @@ body {
 .grid-row.selected .expander,
 .grid-row.selected .icon {
   color: inherit;
+}
+
+/* The text colour is set, so a badge on a selected row keeps dark text on its tint. */
+.badge {
+  display: inline-block;
+  padding: 0 5px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.grid-row .badge {
+  margin-left: 6px;
+}
+
+.badge.status-added,
+.diff-status.status-added {
+  background: var(--tint-added);
+}
+
+.badge.status-changed,
+.diff-status.status-changed {
+  background: var(--tint-changed);
+}
+
+.badge.status-moved,
+.diff-status.status-moved {
+  background: var(--tint-moved);
+}
+
+.badge.status-removed,
+.diff-status.status-removed {
+  background: var(--tint-removed);
 }
 
 .status-bar {
@@ -409,4 +496,141 @@ body {
 .raw summary {
   padding: 2px 0;
   cursor: pointer;
+}
+
+.diff-status {
+  padding: 0 6px;
+  border-radius: 8px;
+  font-weight: normal;
+}
+
+.diff-side {
+  font-weight: normal;
+  overflow-wrap: anywhere;
+}
+
+.show-unchanged-toggle {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+/* The display of .show-unchanged-toggle would otherwise win over the hidden attribute. */
+.show-unchanged-toggle[hidden] {
+  display: none;
+}
+
+.diff-grid {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1px 12px;
+}
+
+/* The section and row wrappers only group cells for hiding, so their cells take part in the grid of the panel. */
+.diff-section,
+.diff-row {
+  display: contents;
+}
+
+.diff-grid:not(.show-unchanged) .unchanged {
+  display: none;
+}
+
+.diff-caption {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 4px 0 2px;
+  background: var(--color-background);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.diff-span {
+  grid-column: 1 / -1;
+}
+
+.diff-wide {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.diff-changed,
+.inspector-table tr.diff-changed {
+  background: var(--tint-changed);
+}
+
+.link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  overflow-wrap: anywhere;
+  text-align: left;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.compare-dialog {
+  width: min(460px, calc(100vw - 32px));
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font: 13px/1.4 var(--font-ui);
+}
+
+.compare-dialog h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.compare-dialog fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  border: 1px solid var(--color-border);
+}
+
+.compare-dialog button,
+.compare-dialog input,
+.compare-dialog select {
+  font: inherit;
+}
+
+.compare-choice {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* The display of .compare-choice would otherwise win over the hidden attribute. */
+.compare-choice[hidden] {
+  display: none;
+}
+
+.compare-choice select {
+  min-width: 0;
+}
+
+.compare-error {
+  color: var(--color-error);
+  overflow-wrap: anywhere;
+}
+
+.compare-error:empty {
+  display: none;
+}
+
+.compare-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
 }

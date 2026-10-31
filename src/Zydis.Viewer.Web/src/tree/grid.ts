@@ -1,5 +1,7 @@
-import type { NodeKind, ViewModel, ViewNode } from '../model';
+import { COUNT_SIGNS } from '../diff/diffState';
+import type { DiffNode, NodeKind, ViewDefinition, ViewNode } from '../model';
 import { store, type AppState } from '../store';
+import { rowFilter, sourceOf } from './gridSource';
 import { ancestorsOf, computeVisibleRows, innerNodeIds, type Row } from './rows';
 
 const ROW_HEIGHT = 22;
@@ -19,6 +21,14 @@ const KIND_ICONS: Record<NodeKind, string> = {
   switch: '⇄',
   table: '▤',
 };
+
+type GridNode = ViewNode & Partial<Pick<DiffNode, 'counts' | 'status'>>;
+
+// The rows of the single view or of a diff. The node ids of a tree index its nodes.
+export interface GridSource {
+  tree: { rootIds: number[]; nodes: GridNode[] };
+  definitionOf(nodeId: number): ViewDefinition | undefined;
+}
 
 // Returns the viewport, the element that holds the keyboard focus of the grid.
 export function mountGrid(container: HTMLElement): HTMLElement {
@@ -49,11 +59,11 @@ export function mountGrid(container: HTMLElement): HTMLElement {
     store.set({ columnWidths: stored });
   }
 
-  let model: ViewModel | null = null;
+  let source: GridSource | null = null;
   let expanded: ReadonlySet<number> | null = null;
-  // The kept rows of an active search. They show open whatever expanded holds, and a collapse would hide the path to a
-  // match, so the glyph, Enter, Left and * leave the expansion alone until the search clears.
-  let include: ReadonlySet<number> | null = null;
+  // The kept rows of the filters. They show open whatever expanded holds, and a collapse would hide the path to a
+  // kept row, so the glyph, Enter, Left and * leave the expansion alone until the filters clear.
+  let include: ((nodeId: number) => boolean) | null = null;
   let selectedNodeId: number | null = null;
   let widths: number[] | null = null;
   let rows: Row[] = [];
@@ -62,14 +72,17 @@ export function mountGrid(container: HTMLElement): HTMLElement {
 
   const isOpen = (index: number): boolean => index + 1 < rows.length && rows[index + 1].depth > rows[index].depth;
 
-  const renderRow = (source: ViewModel, index: number): HTMLElement => {
+  const renderRow = (rowSource: GridSource, index: number): HTMLElement => {
     const row = rows[index];
-    const node = source.nodes[row.nodeId];
+    const node = rowSource.tree.nodes[row.nodeId];
     const rowElement = element('div', 'grid-row');
     rowElement.dataset.index = String(index);
     rowElement.style.top = `${index * ROW_HEIGHT}px`;
     rowElement.classList.toggle('conflict', node.conflict);
     rowElement.classList.toggle('selected', node.id === selectedNodeId);
+    if (node.status !== undefined && node.status !== 'unchanged') {
+      rowElement.classList.add(`status-${node.status}`);
+    }
 
     const expander = element('span', 'expander', row.hasChildren ? (isOpen(index) ? '▾' : '▸') : '');
     expander.style.marginLeft = `${row.depth * INDENT}px`;
@@ -80,8 +93,11 @@ export function mountGrid(container: HTMLElement): HTMLElement {
     if (detail !== undefined) {
       item.append(element('span', 'detail', detail));
     }
+    if (node.counts !== undefined && node.kind !== 'definition') {
+      item.append(...countBadges(node.counts));
+    }
 
-    const definition = node.definitionIndex === undefined ? undefined : source.definitions[node.definitionIndex];
+    const definition = rowSource.definitionOf(node.id);
     rowElement.append(
       item,
       element('div', 'grid-cell', definition?.mnemonic),
@@ -105,9 +121,9 @@ export function mountGrid(container: HTMLElement): HTMLElement {
     renderedLast = Math.min(rows.length, visibleLast + OVERSCAN);
 
     const elements: HTMLElement[] = [];
-    if (model !== null) {
+    if (source !== null) {
       for (let index = renderedFirst; index < renderedLast; index++) {
-        elements.push(renderRow(model, index));
+        elements.push(renderRow(source, index));
       }
     }
     canvas.replaceChildren(...elements);
@@ -128,22 +144,21 @@ export function mountGrid(container: HTMLElement): HTMLElement {
   };
 
   const update = (state: AppState): void => {
-    const nextModel = state.database?.model ?? null;
-    grid.hidden = nextModel === null;
+    const nextSource = sourceOf(state);
+    const nextInclude = rowFilter(state);
+    grid.hidden = nextSource === null;
 
     let changed = false;
-    const searchCleared = include !== null && state.searchInclude === null;
-    if (nextModel !== model || state.expanded !== expanded || state.searchInclude !== include) {
-      // A search started after a deep scroll would otherwise open at the clamped end of the shorter result list.
-      if (nextModel !== model || (include === null && state.searchInclude !== null)) {
+    const filtersCleared = include !== null && nextInclude === null;
+    if (nextSource !== source || state.expanded !== expanded || nextInclude !== include) {
+      // A filter turned on after a deep scroll would otherwise open at the clamped end of the shorter row list.
+      if (nextSource?.tree !== source?.tree || (include === null && nextInclude !== null)) {
         viewport.scrollTop = 0;
       }
-      model = nextModel;
+      source = nextSource;
       expanded = state.expanded;
-      const kept = state.searchInclude;
-      include = kept;
-      const keep = kept === null ? undefined : (nodeId: number): boolean => kept.has(nodeId);
-      rows = model === null ? [] : computeVisibleRows(model, expanded, keep);
+      include = nextInclude;
+      rows = source === null ? [] : computeVisibleRows(source.tree, expanded, include ?? undefined);
       canvas.style.height = `${rows.length * ROW_HEIGHT}px`;
       changed = true;
     }
@@ -152,8 +167,8 @@ export function mountGrid(container: HTMLElement): HTMLElement {
       widths.forEach((width, column) => grid.style.setProperty(`--column-${column}`, `${width}px`));
       grid.style.setProperty('--grid-width', `${widths.reduce((sum, width) => sum + width, 0)}px`);
     }
-    // Clearing a search moves the selected row to a new index, so it scrolls into view as a new selection does.
-    if (state.selectedNodeId !== selectedNodeId || searchCleared) {
+    // Clearing the filters moves the selected row to a new index, so it scrolls into view as a new selection does.
+    if (state.selectedNodeId !== selectedNodeId || filtersCleared) {
       selectedNodeId = state.selectedNodeId;
       // Runs after the row list update, so a selection that arrives with new rows finds its index.
       scrollSelectionIntoView();
@@ -273,9 +288,9 @@ export function mountGrid(container: HTMLElement): HTMLElement {
 }
 
 export function expandAll(): void {
-  const model = store.state.database?.model;
-  if (model !== undefined) {
-    store.set({ expanded: new Set(innerNodeIds(model, model.rootIds)) });
+  const tree = sourceOf(store.state)?.tree;
+  if (tree !== undefined) {
+    store.set({ expanded: new Set(innerNodeIds(tree, tree.rootIds)) });
   }
 }
 
@@ -293,13 +308,14 @@ export function collapseSubtree(): void {
 }
 
 function setSubtreeOpen(open: boolean): void {
-  const { database, expanded, selectedNodeId } = store.state;
-  if (database === null || selectedNodeId === null) {
+  const { expanded, selectedNodeId } = store.state;
+  const tree = sourceOf(store.state)?.tree;
+  if (tree === undefined || selectedNodeId === null) {
     return;
   }
 
   const next = new Set(expanded);
-  for (const nodeId of innerNodeIds(database.model, [selectedNodeId])) {
+  for (const nodeId of innerNodeIds(tree, [selectedNodeId])) {
     if (open) {
       next.add(nodeId);
     } else {
@@ -323,14 +339,15 @@ function setOpen(nodeId: number, open: boolean): void {
 // A collapse that hides the selected row moves the selection to its deepest ancestor still on screen, so the keyboard
 // and the subtree actions keep a visible row to act on.
 function selectionAfterCollapse(next: ReadonlySet<number>): number | null {
-  const { database, selectedNodeId } = store.state;
-  if (database === null || selectedNodeId === null) {
+  const { selectedNodeId } = store.state;
+  const tree = sourceOf(store.state)?.tree;
+  if (tree === undefined || selectedNodeId === null) {
     return selectedNodeId;
   }
 
   // The roots always show and an open node shows its children, so the first closed ancestor, root first, is the
   // deepest one left in the row list.
-  return ancestorsOf(database.model, selectedNodeId).find((ancestorId) => !next.has(ancestorId)) ?? selectedNodeId;
+  return ancestorsOf(tree, selectedNodeId).find((ancestorId) => !next.has(ancestorId)) ?? selectedNodeId;
 }
 
 // The operand summary, the detail of a definition row, has its own column. On the rows that count forms the count
@@ -346,6 +363,12 @@ function detailOf(node: ViewNode): string | undefined {
     default:
       return node.detail;
   }
+}
+
+function countBadges(counts: NonNullable<GridNode['counts']>): HTMLElement[] {
+  return COUNT_SIGNS
+    .filter(([status]) => counts[status] > 0)
+    .map(([status, sign]) => element('span', `badge status-${status}`, `${sign}${counts[status]}`));
 }
 
 function startResize(event: PointerEvent, handle: HTMLElement, column: number): void {

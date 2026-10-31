@@ -3,11 +3,12 @@ import { ancestorsOf } from './tree/rows';
 
 const FORM_PREFIX = '#form=';
 
-// Selects and reveals the form the location hash names. An id that names no form of the loaded database is ignored.
+// Selects and reveals the form the location hash names. An id that names no form of the loaded database is ignored,
+// and so is the hash during a diff, whose rows have other node ids.
 export function revealHashForm(): void {
-  const { database, expanded, searchInclude } = store.state;
+  const { database, diff, expanded, searchInclude } = store.state;
   const formId = hashFormId(location.hash);
-  if (database === null || formId === null) {
+  if (database === null || diff !== null || formId === null) {
     return;
   }
 
@@ -27,7 +28,8 @@ export function revealHashForm(): void {
 }
 
 // Keeps the hash on the selected form, so the address bar holds a link to it, and clears it while another kind of row
-// is selected. A load clears the selection before revealHashForm reads the hash, so no selection leaves it alone.
+// is selected. A load clears the selection before revealHashForm reads the hash, so no selection leaves it alone. A
+// diff leaves it alone as well, so the link of the single view survives a comparison.
 export function trackSelectionInHash(): void {
   let selectedNodeId: number | null = null;
   store.subscribe((state) => {
@@ -37,7 +39,7 @@ export function trackSelectionInHash(): void {
     selectedNodeId = state.selectedNodeId;
 
     const model = state.database?.model;
-    if (model === undefined || selectedNodeId === null) {
+    if (model === undefined || state.diff !== null || selectedNodeId === null) {
       return;
     }
 
