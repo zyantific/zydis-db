@@ -94,18 +94,26 @@ internal static class OpcodeTableRouting
             [SwitchTableVEXNode.Slot.PNP_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F  , RefiningPrefix.PNP),
             [SwitchTableVEXNode.Slot.PNP_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F38, RefiningPrefix.PNP),
             [SwitchTableVEXNode.Slot.PNP_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F3A, RefiningPrefix.PNP),
+            [SwitchTableVEXNode.Slot.PNP_MAP5] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP5 , RefiningPrefix.PNP),
+            [SwitchTableVEXNode.Slot.PNP_MAP7] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP7 , RefiningPrefix.PNP),
             [SwitchTableVEXNode.Slot.P66     ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP0 , RefiningPrefix.P66),
             [SwitchTableVEXNode.Slot.P66_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F  , RefiningPrefix.P66),
             [SwitchTableVEXNode.Slot.P66_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F38, RefiningPrefix.P66),
             [SwitchTableVEXNode.Slot.P66_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F3A, RefiningPrefix.P66),
+            [SwitchTableVEXNode.Slot.P66_MAP5] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP5 , RefiningPrefix.P66),
+            [SwitchTableVEXNode.Slot.P66_MAP7] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP7 , RefiningPrefix.P66),
             [SwitchTableVEXNode.Slot.PF3     ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP0 , RefiningPrefix.PF3),
             [SwitchTableVEXNode.Slot.PF3_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F  , RefiningPrefix.PF3),
             [SwitchTableVEXNode.Slot.PF3_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F38, RefiningPrefix.PF3),
             [SwitchTableVEXNode.Slot.PF3_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F3A, RefiningPrefix.PF3),
+            [SwitchTableVEXNode.Slot.PF3_MAP5] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP5 , RefiningPrefix.PF3),
+            [SwitchTableVEXNode.Slot.PF3_MAP7] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP7 , RefiningPrefix.PF3),
             [SwitchTableVEXNode.Slot.PF2     ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP0 , RefiningPrefix.PF2),
             [SwitchTableVEXNode.Slot.PF2_0F  ] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F  , RefiningPrefix.PF2),
             [SwitchTableVEXNode.Slot.PF2_0F38] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F38, RefiningPrefix.PF2),
-            [SwitchTableVEXNode.Slot.PF2_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F3A, RefiningPrefix.PF2)
+            [SwitchTableVEXNode.Slot.PF2_0F3A] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.M0F3A, RefiningPrefix.PF2),
+            [SwitchTableVEXNode.Slot.PF2_MAP5] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP5 , RefiningPrefix.PF2),
+            [SwitchTableVEXNode.Slot.PF2_MAP7] = CreateOpcodeTableSelectNode(InstructionEncoding.VEX, OpcodeMap.MAP7 , RefiningPrefix.PF2)
         };
 
         // VEX C5 (2-byte) only supports the 0F opcode map.
