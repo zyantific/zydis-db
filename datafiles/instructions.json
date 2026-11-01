@@ -143083,7 +143083,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int16",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143117,7 +143117,7 @@
         "action": "read_write",
         "operand_type": "mmx",
         "encoding": "modrm_reg",
-        "element_type": "int32",
+        "element_type": "int16",
         "width16": 8,
         "width32": 8,
         "width64": 8
@@ -143477,74 +143477,6 @@
       "isa_set": "AMD3DNOW"
     },
     "comment": "SUNMQVNTOlBGQ01QR1QNCkNQTDozDQpDQVRFR09SWTozRE5PVw0KRVhURU5TSU9OOjNETk9XDQpQQVRURVJOOjB4MEYgMHgwRiBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dIE1PRFJNKCkgMHhBMA0KT1BFUkFORFM6UkVHMD1NTVhfUigpOnJ3OnEgTUVNMDpyOnE="
-  },
-  {
-    "mnemonic": "pfcpit1",
-    "encoding": "3dnow",
-    "opcode_map": "0f0f",
-    "opcode": "A6",
-    "filters": {
-      "modrm_mod": "3"
-    },
-    "operands": [
-      {
-        "action": "read_write",
-        "operand_type": "mmx",
-        "encoding": "modrm_reg",
-        "element_type": "float32",
-        "width16": 8,
-        "width32": 8,
-        "width64": 8
-      },
-      {
-        "operand_type": "mmx",
-        "encoding": "modrm_rm",
-        "element_type": "float32",
-        "width16": 8,
-        "width32": 8,
-        "width64": 8
-      }
-    ],
-    "meta_info": {
-      "category": "AMD3DNOW",
-      "extension": "AMD3DNOW",
-      "isa_set": "AMD3DNOW"
-    },
-    "comment": "SUNMQVNTOlBGQ1BJVDENCkNQTDozDQpDQVRFR09SWTozRE5PVw0KRVhURU5TSU9OOjNETk9XDQpQQVRURVJOOjB4MEYgMHgwRiBNT0RbMGIxMV0gTU9EPTMgUkVHW3Jycl0gUk1bbm5uXSAweEE2DQpPUEVSQU5EUzpSRUcwPU1NWF9SKCk6cnc6cSBSRUcxPU1NWF9CKCk6cjpx"
-  },
-  {
-    "mnemonic": "pfcpit1",
-    "encoding": "3dnow",
-    "opcode_map": "0f0f",
-    "opcode": "A6",
-    "filters": {
-      "modrm_mod": "!3"
-    },
-    "operands": [
-      {
-        "action": "read_write",
-        "operand_type": "mmx",
-        "encoding": "modrm_reg",
-        "element_type": "float32",
-        "width16": 8,
-        "width32": 8,
-        "width64": 8
-      },
-      {
-        "operand_type": "mem",
-        "encoding": "modrm_rm",
-        "element_type": "float32",
-        "width16": 8,
-        "width32": 8,
-        "width64": 8
-      }
-    ],
-    "meta_info": {
-      "category": "AMD3DNOW",
-      "extension": "AMD3DNOW",
-      "isa_set": "AMD3DNOW"
-    },
-    "comment": "SUNMQVNTOlBGQ1BJVDENCkNQTDozDQpDQVRFR09SWTozRE5PVw0KRVhURU5TSU9OOjNETk9XDQpQQVRURVJOOjB4MEYgMHgwRiBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dIE1PRFJNKCkgMHhBNg0KT1BFUkFORFM6UkVHMD1NTVhfUigpOnJ3OnEgTUVNMDpyOnE="
   },
   {
     "mnemonic": "pfmax",
@@ -143955,6 +143887,74 @@
     "comment": "SUNMQVNTOlBGUkNQDQpDUEw6Mw0KQ0FURUdPUlk6M0ROT1cNCkVYVEVOU0lPTjozRE5PVw0KUEFUVEVSTjoweDBGIDB4MEYgTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSBNT0RSTSgpIDB4OTYNCk9QRVJBTkRTOlJFRzA9TU1YX1IoKTpydzpxIE1FTTA6cjpx"
   },
   {
+    "mnemonic": "pfrcpit1",
+    "encoding": "3dnow",
+    "opcode_map": "0f0f",
+    "opcode": "A6",
+    "filters": {
+      "modrm_mod": "3"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mmx",
+        "encoding": "modrm_reg",
+        "element_type": "float32",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mmx",
+        "encoding": "modrm_rm",
+        "element_type": "float32",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "AMD3DNOW",
+      "extension": "AMD3DNOW",
+      "isa_set": "AMD3DNOW"
+    },
+    "comment": "SUNMQVNTOlBGQ1BJVDENCkNQTDozDQpDQVRFR09SWTozRE5PVw0KRVhURU5TSU9OOjNETk9XDQpQQVRURVJOOjB4MEYgMHgwRiBNT0RbMGIxMV0gTU9EPTMgUkVHW3Jycl0gUk1bbm5uXSAweEE2DQpPUEVSQU5EUzpSRUcwPU1NWF9SKCk6cnc6cSBSRUcxPU1NWF9CKCk6cjpx"
+  },
+  {
+    "mnemonic": "pfrcpit1",
+    "encoding": "3dnow",
+    "opcode_map": "0f0f",
+    "opcode": "A6",
+    "filters": {
+      "modrm_mod": "!3"
+    },
+    "operands": [
+      {
+        "action": "read_write",
+        "operand_type": "mmx",
+        "encoding": "modrm_reg",
+        "element_type": "float32",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "float32",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "AMD3DNOW",
+      "extension": "AMD3DNOW",
+      "isa_set": "AMD3DNOW"
+    },
+    "comment": "SUNMQVNTOlBGQ1BJVDENCkNQTDozDQpDQVRFR09SWTozRE5PVw0KRVhURU5TSU9OOjNETk9XDQpQQVRURVJOOjB4MEYgMHgwRiBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dIE1PRFJNKCkgMHhBNg0KT1BFUkFORFM6UkVHMD1NTVhfUigpOnJ3OnEgTUVNMDpyOnE="
+  },
+  {
     "mnemonic": "pfrcpit2",
     "encoding": "3dnow",
     "opcode_map": "0f0f",
@@ -144091,7 +144091,7 @@
     "comment": "SUNMQVNTOlBGUlNRSVQxDQpDUEw6Mw0KQ0FURUdPUlk6M0ROT1cNCkVYVEVOU0lPTjozRE5PVw0KUEFUVEVSTjoweDBGIDB4MEYgTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSBNT0RSTSgpIDB4QTcNCk9QRVJBTkRTOlJFRzA9TU1YX1IoKTpydzpxIE1FTTA6cjpx"
   },
   {
-    "mnemonic": "pfsqrt",
+    "mnemonic": "pfrsqrt",
     "encoding": "3dnow",
     "opcode_map": "0f0f",
     "opcode": "97",
@@ -144125,7 +144125,7 @@
     "comment": "SUNMQVNTOlBGU1FSVA0KQ1BMOjMNCkNBVEVHT1JZOjNETk9XDQpFWFRFTlNJT046M0ROT1cNClBBVFRFUk46MHgwRiAweDBGIE1PRFswYjExXSBNT0Q9MyBSRUdbcnJyXSBSTVtubm5dIDB4OTcNCk9QRVJBTkRTOlJFRzA9TU1YX1IoKTpydzpxIFJFRzE9TU1YX0IoKTpyOnE="
   },
   {
-    "mnemonic": "pfsqrt",
+    "mnemonic": "pfrsqrt",
     "encoding": "3dnow",
     "opcode_map": "0f0f",
     "opcode": "97",
@@ -145349,7 +145349,7 @@
       {
         "operand_type": "gpr32",
         "encoding": "modrm_rm",
-        "element_type": "uint32",
+        "element_type": "uint8",
         "width16": 4,
         "width32": 4,
         "width64": 4
@@ -145611,7 +145611,7 @@
       {
         "operand_type": "gpr32",
         "encoding": "modrm_rm",
-        "element_type": "uint32"
+        "element_type": "uint16"
       },
       {
         "operand_type": "imm",
@@ -145692,7 +145692,7 @@
       {
         "operand_type": "gpr32",
         "encoding": "modrm_rm",
-        "element_type": "uint32"
+        "element_type": "uint16"
       },
       {
         "operand_type": "imm",
