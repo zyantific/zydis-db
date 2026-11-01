@@ -13,7 +13,7 @@ export interface AppState {
   // Replaced on every change, never mutated, so a subscriber can tell a change by identity.
   expanded: Set<number>;
   selectedNodeId: number | null;
-  // The widths of the item, mnemonic, operands and comment columns in px.
+  // The widths of the item, mnemonic and operands columns in px.
   columnWidths: number[];
   search: { text: string; mode: MatchMode; scope: SearchScope };
   searchError: string | null;
@@ -44,7 +44,7 @@ export const store: {
     loading: null,
     expanded: new Set(),
     selectedNodeId: null,
-    columnWidths: [420, 120, 260, 400],
+    columnWidths: [460, 130, 360],
     search: { text: '', mode: 'contains', scope: 'mnemonic' },
     searchError: null,
     searchInclude: null,

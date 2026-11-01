@@ -162,7 +162,7 @@ The `dp` mode writes into a Zydis checkout:
 
 The instruction viewer is a read-only browser app for `datafiles/instructions.json`. It parses the file with
 `Zydis.Generator.Core` on the .NET WebAssembly runtime and shows the decoder tree as a tree grid: opcode tables,
-opcodes, decision nodes with their slots, and definition rows with the mnemonic, the operands, and the comment.
+opcodes, decision nodes with their slots, and definition rows with the mnemonic and the operands.
 
 Ctrl+F focuses the search box. A search looks at one scope, which is the mnemonic by default and can be the category,
 extension, form id, ISA set, or opcode. Its match mode is exact, starts with, contains (the default), or regular

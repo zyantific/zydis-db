@@ -9,7 +9,7 @@ const OVERSCAN = 10;
 const INDENT = 16;
 const MIN_COLUMN_WIDTH = 40;
 const COLUMNS_KEY = 'zydis-viewer.columns';
-const COLUMN_TITLES = ['Item', 'Mnemonic', 'Operands', 'Comment'];
+const COLUMN_TITLES = ['Item', 'Mnemonic', 'Operands'];
 
 const KIND_ICONS: Record<NodeKind, string> = {
   conflict: '!',
@@ -105,7 +105,6 @@ export function mountGrid(container: HTMLElement): HTMLElement {
       item,
       element('div', 'grid-cell', definition?.mnemonic),
       element('div', 'grid-cell', definition?.operandSummary),
-      element('div', 'grid-cell', definition?.commentText?.split(/\r?\n/, 1)[0]),
     );
 
     return rowElement;
