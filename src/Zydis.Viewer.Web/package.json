@@ -13,8 +13,11 @@
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json"
   },
   "devDependencies": {
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@fontsource/ibm-plex-sans": "5.3.0",
     "@types/node": "20.19.43",
     "jsdom": "27.4.0",
+    "lucide": "1.66.0",
     "playwright": "1.64.1",
     "typescript": "5.9.3",
     "vite": "7.3.7",

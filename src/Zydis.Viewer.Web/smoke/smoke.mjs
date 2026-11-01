@@ -88,7 +88,9 @@ try {
   console.log(`Status bar after ${seconds} s: ${(await statusBar.innerText()).replace(/\s+/g, ' ')}`);
 
   // Only the rows in view exist in the DOM, so the count comes from the height of the scroll canvas.
-  const rowCount = () => page.locator('.grid-canvas').evaluate((canvas) => canvas.offsetHeight / 22);
+  // The grid publishes its row height as a custom property, so the count follows a change of the row height.
+  const rowCount = () => page.locator('.grid-canvas').evaluate((canvas) =>
+    canvas.offsetHeight / parseFloat(getComputedStyle(canvas.closest('.grid')).getPropertyValue('--row-height')));
   const firstRow = page.locator('.grid-row[data-index="0"]');
   const primaryLabel = await firstRow.locator('.label').innerText();
   if (primaryLabel !== 'PRIMARY') {

@@ -1,3 +1,4 @@
+import { actionIcon } from '../icons';
 import { store, type AppState } from '../store';
 import type { MatchMode, SearchScope } from './matcher';
 import { setSearch } from './searchState';
@@ -36,9 +37,12 @@ export function createSearchBox(onEnter: () => void, onEscape: () => void): HTML
   const error = document.createElement('span');
   error.className = 'search-error';
 
+  const field = document.createElement('div');
+  field.className = 'search-field';
+  field.append(actionIcon('search'), input);
   const box = document.createElement('div');
   box.className = 'search';
-  box.append(input, modeSelect, scopeSelect);
+  box.append(field, modeSelect, scopeSelect);
 
   const apply = (): void => setSearch({
     text: input.value,

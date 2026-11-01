@@ -1,4 +1,5 @@
 import { COUNT_SIGNS, counterpartOf, definitionFor, selectDiffRow, type DiffSession } from '../diff/diffState';
+import { kindGlyph } from '../icons';
 import type { DiffNode, DiffPair, ViewDefinition } from '../model';
 import type { LoadedDatabase } from '../store';
 import {
@@ -56,13 +57,13 @@ export function createDiffPanel(): DiffPanelRenderer {
       // tree tests has its names in the base model alone.
       const filterSlots = { ...diff.base.model.filterSlots, ...database.model.filterSlots };
       const tree = { filterSlots, nodes: diff.model.nodes, rootIds: diff.model.rootIds };
-      header.replaceChildren(element('span', 'inspector-title', node.label));
+      header.replaceChildren(kindGlyph(node.kind), element('span', 'inspector-title', node.label));
       body.replaceChildren(...renderSections([...nodeSections(tree, selectedNodeId), changeSection(node)]));
       return;
     }
 
     const { formId } = shown;
-    const title = [element('span', 'inspector-title', formId), copyButton(formId),
+    const title = [kindGlyph('definition'), element('span', 'inspector-title', formId), copyButton(formId),
       element('span', `diff-status status-${pair.status}`, pair.status)];
     if (base === null || head === null) {
       const side = base === null ? `only in B: ${database.name}` : `only in A: ${diff.base.name}`;

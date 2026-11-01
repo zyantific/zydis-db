@@ -172,6 +172,9 @@ The inspector shows the form of the selected definition row in sections: definit
 affected flags, encoding info, flags, annotations, comment, and raw. Top-level keys the viewer does not know go to an
 Other section. The address bar follows the selected form as `#form=<form id>`, so the URL links to that form.
 
+The viewer follows the color scheme of the system. The last button of the toolbar switches between the system setting,
+the light theme, and the dark theme, and the browser remembers the choice.
+
 ### Running the local host
 
 `src/Zydis.Viewer.Host` serves the built app together with the checkout's `datafiles/` folder and the git revisions the

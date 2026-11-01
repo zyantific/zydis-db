@@ -1,11 +1,13 @@
+import { actionIcon, icon, kindGlyph, SECTION_ICONS } from '../icons';
 import type { DiffModel, ViewDefinition, ViewModel, ViewNode } from '../model';
 import { store, type AppState } from '../store';
 import { ancestorsOf } from '../tree/rows';
 
 export interface Section {
   title: string;
-  // A row with an empty key spans the key and the value column, for a table or a block.
-  rows: Array<{ key: string; value: string | HTMLElement }>;
+  // A row with an empty key spans the key and the value column, for a table or a block. A prose row holds a sentence
+  // rather than an identifier, so the panel sets it in the text face.
+  rows: Array<{ key: string; value: string | HTMLElement; prose?: boolean }>;
 }
 
 type Row = Section['rows'][number];
@@ -84,6 +86,7 @@ export function nodeSections(model: Pick<ViewModel, 'filterSlots' | 'nodes' | 'r
     key: 'note',
     value: 'A form that does not test this filter shows once, under else, which a compact node folds into its second '
       + 'slot. The generator also copies the form into every claimed slot of the node.',
+    prose: true,
   });
   return [{ title: 'Node', rows }, { title: 'Slots', rows: slotRows(model, node) }];
 }
@@ -132,11 +135,12 @@ export function mountInspector(container: HTMLElement, renderDiff: DiffPanelRend
 
     const node = model.nodes[selectedNodeId];
     if (node.definitionIndex === undefined) {
-      header.replaceChildren(element('span', 'inspector-title', node.label));
+      header.replaceChildren(kindGlyph(node.kind), element('span', 'inspector-title', node.label));
       body.replaceChildren(...renderSections(nodeSections(model, selectedNodeId)));
     } else {
       const definition = model.definitions[node.definitionIndex];
-      header.replaceChildren(element('span', 'inspector-title', definition.formId), copyButton(definition.formId));
+      header.replaceChildren(kindGlyph('definition'), element('span', 'inspector-title', definition.formId),
+        copyButton(definition.formId));
       body.replaceChildren(...renderSections(definitionSections(definition)));
     }
     body.scrollTop = 0;
@@ -311,8 +315,10 @@ function slotRows(model: Pick<ViewModel, 'filterSlots' | 'nodes'>, node: ViewNod
 export function renderSections(sections: Section[]): HTMLElement[] {
   return sections.map((section) => {
     const rows = element('div', 'inspector-rows');
-    for (const { key, value } of section.rows) {
-      const valueCell = element('div', typeof value === 'string' ? 'inspector-value text' : 'inspector-value');
+    for (const { key, value, prose } of section.rows) {
+      const valueCell = element('div', typeof value === 'string'
+        ? `inspector-value text${prose === true ? ' prose' : ''}`
+        : 'inspector-value');
       valueCell.append(value);
       if (key === '') {
         valueCell.classList.add('wide');
@@ -322,22 +328,32 @@ export function renderSections(sections: Section[]): HTMLElement[] {
       }
     }
 
+    const title = element('h3', 'inspector-section-title');
+    const sectionIcon = SECTION_ICONS[section.title];
+    if (sectionIcon !== undefined) {
+      title.append(icon(sectionIcon));
+    }
+    title.append(element('span', '', section.title));
     const box = element('section', 'inspector-section');
-    box.append(element('h3', 'inspector-section-title', section.title), rows);
+    box.append(title, rows);
     return box;
   });
 }
 
 export function copyButton(text: string): HTMLButtonElement {
-  const button = element('button', 'copy', 'Copy');
+  const button = element('button', 'copy');
   button.type = 'button';
+  const label = element('span', '', 'Copy');
+  button.append(actionIcon('copy'), label);
   let reset: number | undefined;
 
-  const show = (label: string): void => {
-    button.textContent = label;
+  const show = (message: string, copied: boolean): void => {
+    button.replaceChildren(actionIcon(copied ? 'check' : 'copy'), label);
+    label.textContent = message;
     window.clearTimeout(reset);
     reset = window.setTimeout(() => {
-      button.textContent = 'Copy';
+      button.replaceChildren(actionIcon('copy'), label);
+      label.textContent = 'Copy';
     }, COPY_FEEDBACK_MS);
   };
 
@@ -345,7 +361,7 @@ export function copyButton(text: string): HTMLButtonElement {
     // Outside a secure context navigator.clipboard is missing, and the TypeError of the call ends in the rejection.
     void Promise.resolve()
       .then(() => navigator.clipboard.writeText(text))
-      .then(() => show('Copied'), () => show('Copy failed'));
+      .then(() => show('Copied', true), () => show('Copy failed', false));
   });
   return button;
 }

@@ -3,7 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
     <title>Zydis instruction viewer</title>
+    <script>
+      // Applies the stored theme before the first paint, so a dark page does not flash white.
+      try {
+        var theme = localStorage.getItem('zydis-viewer.theme');
+        if (theme === 'light' || theme === 'dark') {
+          document.documentElement.dataset.theme = theme;
+        }
+      } catch (error) {
+        // Blocked storage leaves the theme with the system setting.
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>

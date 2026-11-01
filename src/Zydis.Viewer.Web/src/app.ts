@@ -1,6 +1,7 @@
 import { createCompareDialog } from './diff/compareDialog';
 import { changedNodeIdsInOrder, closeDiff, COUNT_SIGNS, setChangesOnly, stepChange } from './diff/diffState';
 import { revealHashForm, trackSelectionInHash } from './hash';
+import { actionIcon, type ActionIcon } from './icons';
 import { createDiffPanel } from './inspector/diffInspector';
 import { mountInspector } from './inspector/inspector';
 import { describeLoadError, readSource, type LoadSource } from './loader';
@@ -9,6 +10,7 @@ import { startRuntime } from './runtime';
 import { createSearchBox } from './search/searchBox';
 import { setSearch } from './search/searchState';
 import { store, type AppState } from './store';
+import { createThemeToggle } from './theme';
 import { collapseAll, collapseSubtree, expandAll, expandSubtree, mountGrid, selectFirstDefinition } from './tree/grid';
 
 export function mountApp(root: HTMLElement): void {
@@ -17,22 +19,24 @@ export function mountApp(root: HTMLElement): void {
   fileInput.accept = '.json,application/json';
   fileInput.hidden = true;
 
-  const openButton = document.createElement('button');
-  openButton.type = 'button';
-  openButton.textContent = 'Open';
+  const openButton = toolbarButton('Open', () => fileInput.click(), 'open');
 
-  const treeButtons = [toolbarButton('Expand all', expandAll), toolbarButton('Collapse all', collapseAll)];
+  const treeButtons = [
+    toolbarButton('Expand all', expandAll, 'expandAll', true),
+    toolbarButton('Collapse all', collapseAll, 'collapseAll', true),
+  ];
   const subtreeButtons = [
-    toolbarButton('Expand subtree', expandSubtree),
-    toolbarButton('Collapse subtree', collapseSubtree),
+    toolbarButton('Expand subtree', expandSubtree, 'expandSubtree', true),
+    toolbarButton('Collapse subtree', collapseSubtree, 'collapseSubtree', true),
   ];
   const compareDialog = createCompareDialog();
-  const compareButton = toolbarButton('Compare', () => compareDialog.open());
+  const compareButton = toolbarButton('Compare', () => compareDialog.open(), 'compare');
   const diffControls = createDiffControls();
 
   const dropZone = document.createElement('div');
   dropZone.className = 'drop-zone';
-  dropZone.textContent = 'Drop an instructions.json file anywhere on the window, or pick one with Open.';
+  dropZone.append(actionIcon('open'),
+    textSpan('Drop an instructions.json file anywhere on the window, or pick one with Open.'));
 
   const content = document.createElement('main');
   content.className = 'content';
@@ -46,8 +50,16 @@ export function mountApp(root: HTMLElement): void {
     gridViewport.focus();
     selectFirstDefinition();
   }, () => gridViewport.focus());
-  toolbar.append(openButton, ...search, ...treeButtons, ...subtreeButtons, compareButton, diffControls.element,
-    fileInput);
+  const [searchBox, searchError] = search;
+  toolbar.append(
+    toolbarGroup(openButton),
+    toolbarGroup(searchBox),
+    toolbarGroup(...treeButtons, ...subtreeButtons),
+    toolbarGroup(compareButton, diffControls.element),
+    createThemeToggle(),
+    searchError,
+    fileInput,
+  );
 
   const statusBar = document.createElement('footer');
   statusBar.className = 'status-bar';
@@ -144,7 +156,6 @@ export function mountApp(root: HTMLElement): void {
     }
   };
 
-  openButton.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', () => {
     const file = fileInput.files?.[0];
     // Cleared so that picking the same file again still fires a change.
@@ -195,14 +206,14 @@ function createDiffControls(): { element: HTMLElement; render(state: AppState): 
   const changesOnlyLabel = document.createElement('label');
   changesOnlyLabel.append(changesOnly, ' Changes only');
 
-  const previous = toolbarButton('Previous', () => stepChange(-1));
-  const next = toolbarButton('Next', () => stepChange(1));
+  const previous = toolbarButton('Previous', () => stepChange(-1), 'previous', true);
+  const next = toolbarButton('Next', () => stepChange(1), 'next', true);
   const counter = document.createElement('span');
   counter.className = 'diff-counter';
 
   const element = document.createElement('div');
   element.className = 'diff-controls';
-  element.append(changesOnlyLabel, previous, counter, next, toolbarButton('Close diff', closeDiff));
+  element.append(changesOnlyLabel, previous, counter, next, toolbarButton('Close diff', closeDiff, 'close'));
 
   return {
     element,
@@ -278,12 +289,33 @@ function matchesItem(tree: { nodes: ViewNode[] }, include: ReadonlySet<number>):
   return statusItem(`${formatCount(matches)} ${matches === 1 ? 'match' : 'matches'}`);
 }
 
-function toolbarButton(text: string, action: () => void): HTMLButtonElement {
+// An icon-only button keeps its text as the accessible name and as the tooltip.
+function toolbarButton(text: string, action: () => void, iconName: ActionIcon, iconOnly = false): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.textContent = text;
+  button.append(actionIcon(iconName));
+  if (iconOnly) {
+    button.className = 'icon-button';
+    button.setAttribute('aria-label', text);
+    button.title = text;
+  } else {
+    button.append(textSpan(text));
+  }
   button.addEventListener('click', action);
   return button;
+}
+
+function toolbarGroup(...children: HTMLElement[]): HTMLElement {
+  const group = document.createElement('div');
+  group.className = 'toolbar-group';
+  group.append(...children);
+  return group;
+}
+
+function textSpan(text: string): HTMLElement {
+  const span = document.createElement('span');
+  span.textContent = text;
+  return span;
 }
 
 function statusItem(text: string, className?: string): HTMLElement {

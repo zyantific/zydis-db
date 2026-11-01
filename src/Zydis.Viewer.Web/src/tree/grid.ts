@@ -1,26 +1,16 @@
 import { COUNT_SIGNS, isMovedFrom } from '../diff/diffState';
-import type { DiffNode, NodeKind, ViewDefinition, ViewNode } from '../model';
+import { actionIcon, kindGlyph } from '../icons';
+import type { DiffNode, ViewDefinition, ViewNode } from '../model';
 import { store, type AppState } from '../store';
 import { rowFilter, sourceOf } from './gridSource';
 import { ancestorsOf, computeVisibleRows, innerNodeIds, type Row } from './rows';
 
-const ROW_HEIGHT = 22;
+const ROW_HEIGHT = 24;
 const OVERSCAN = 10;
 const INDENT = 16;
 const MIN_COLUMN_WIDTH = 40;
 const COLUMNS_KEY = 'zydis-viewer.columns';
 const COLUMN_TITLES = ['Item', 'Mnemonic', 'Operands'];
-
-const KIND_ICONS: Record<NodeKind, string> = {
-  conflict: '!',
-  decision: '◇',
-  definition: '•',
-  opcode: '#',
-  reference: '↪',
-  slot: '›',
-  switch: '⇄',
-  table: '▤',
-};
 
 type GridNode = ViewNode & Partial<Pick<DiffNode, 'counts' | 'headDefinitionIndex' | 'status'>>;
 
@@ -87,11 +77,14 @@ export function mountGrid(container: HTMLElement): HTMLElement {
       rowElement.classList.toggle('moved-from', isMovedFrom(node));
     }
 
-    const expander = element('span', 'expander', row.hasChildren ? (isOpen(index) ? '▾' : '▸') : '');
+    const expander = element('span', 'expander');
     expander.style.marginLeft = `${row.depth * INDENT}px`;
+    if (row.hasChildren) {
+      expander.classList.toggle('open', isOpen(index));
+      expander.append(actionIcon('expander'));
+    }
     const item = element('div', 'grid-cell');
-    item.append(expander, element('span', `icon icon-${node.kind}`, KIND_ICONS[node.kind]),
-      element('span', 'label', node.label));
+    item.append(expander, kindGlyph(node.kind), element('span', 'label', node.label));
     const detail = detailOf(node);
     if (detail !== undefined) {
       item.append(element('span', 'detail', detail));
@@ -103,8 +96,8 @@ export function mountGrid(container: HTMLElement): HTMLElement {
     const definition = rowSource.definitionOf(node.id);
     rowElement.append(
       item,
-      element('div', 'grid-cell', definition?.mnemonic),
-      element('div', 'grid-cell', definition?.operandSummary),
+      element('div', 'grid-cell mono', definition?.mnemonic),
+      element('div', 'grid-cell mono', definition?.operandSummary),
     );
 
     return rowElement;
@@ -223,7 +216,8 @@ export function mountGrid(container: HTMLElement): HTMLElement {
 
     const index = Number(rowElement.dataset.index);
     viewport.focus({ preventScroll: true });
-    if (target.classList.contains('expander') && rows[index].hasChildren) {
+    // The click lands on the chevron inside the expander as often as on the expander itself.
+    if (target.closest('.expander') !== null && rows[index].hasChildren) {
       toggle(index);
     } else {
       select(index);
