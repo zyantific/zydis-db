@@ -59,6 +59,7 @@ public sealed class FormIdTests
             { new InstructionOperand { Type = OperandType.CR }, "cr" },
             { new InstructionOperand { Type = OperandType.DR }, "dr" },
             { new InstructionOperand { Type = OperandType.TMM }, "tmm" },
+            { new InstructionOperand { Type = OperandType.BSR }, "bsr" },
             { new InstructionOperand { Type = OperandType.FPR }, "st" },
             { new InstructionOperand { Type = OperandType.MEM, Width16 = 32, Width32 = 32, Width64 = 32 }, "m32" },
             { new InstructionOperand { Type = OperandType.MEM, Width16 = 16, Width32 = 32, Width64 = 64 }, "mv" },

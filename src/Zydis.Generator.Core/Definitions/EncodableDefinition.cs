@@ -326,7 +326,7 @@ public sealed class EncodableDefinition :
                 OperandType.ImplicitReg or OperandType.GPR8 or OperandType.GPR16 or OperandType.GPR32 or OperandType.GPR64 or
                 OperandType.GPR16_32_64 or OperandType.GPR32_32_64 or OperandType.GPR16_32_32 or OperandType.GPRASZ or
                 OperandType.FPR or OperandType.MMX or OperandType.XMM or OperandType.YMM or OperandType.ZMM or
-                OperandType.TMM or OperandType.BND or OperandType.SREG or OperandType.CR or OperandType.DR or
+                OperandType.TMM or OperandType.BSR or OperandType.BND or OperandType.SREG or OperandType.CR or OperandType.DR or
                 OperandType.MASK => 0,
                 OperandType.ImplicitMem or OperandType.MEM or OperandType.MEMVSIBX or OperandType.MEMVSIBY or OperandType.MEMVSIBZ or
                 OperandType.AGEN or OperandType.AGENNoRel or OperandType.MIB or OperandType.MOFFS => 1,

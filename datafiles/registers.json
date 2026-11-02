@@ -454,6 +454,21 @@
       ]
     },
     {
+      "name_zydis": "BSR",
+      "name_editor": "BSR",
+      "description": "ACE block scale register",
+      "groups": [
+        {
+          "is_encodable": true,
+          "registers": [
+            "BSR0"
+          ],
+          "width": 1024,
+          "width_64": 1024
+        }
+      ]
+    },
+    {
       "name_zydis": "FLAGS",
       "name_editor": "FLAGS",
       "description": "Flags registers",

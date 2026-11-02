@@ -682,6 +682,10 @@ public enum Register
     [JsonStringEnumMemberName("tmm7")]
     TMM7,
 
+    // ACE block scale register
+    [JsonStringEnumMemberName("bsr0")]
+    BSR0,
+
     // Flags registers
     [JsonStringEnumMemberName("flags")]
     FLAGS,
@@ -982,6 +986,7 @@ public enum RegisterClass
     YMM,
     ZMM,
     TMM,
+    BSR,
     FLAGS,
     IP,
     SEGMENT,
@@ -1001,6 +1006,7 @@ public enum RegisterKind
     MMX,
     VR,
     TMM,
+    BSR,
     SEGMENT,
     TEST,
     CONTROL,
@@ -1029,6 +1035,7 @@ public static class RegisterExtensions
             { RegisterClass.YMM, (Register.YMM0, Register.YMM31) },
             { RegisterClass.ZMM, (Register.ZMM0, Register.ZMM31) },
             { RegisterClass.TMM, (Register.TMM0, Register.TMM7) },
+            { RegisterClass.BSR, (Register.BSR0, Register.BSR0) },
             { RegisterClass.FLAGS, (Register.FLAGS, Register.RFLAGS) },
             { RegisterClass.IP, (Register.IP, Register.RIP) },
             { RegisterClass.SEGMENT, (Register.ES, Register.GS) },
@@ -1090,6 +1097,7 @@ public static class RegisterExtensions
                 RegisterClass.YMM or
                 RegisterClass.ZMM => RegisterKind.VR,
             RegisterClass.TMM => RegisterKind.TMM,
+            RegisterClass.BSR => RegisterKind.BSR,
             RegisterClass.SEGMENT => RegisterKind.SEGMENT,
             RegisterClass.TEST => RegisterKind.TEST,
             RegisterClass.CONTROL => RegisterKind.CONTROL,
@@ -1324,6 +1332,7 @@ public static class RegisterExtensions
             Register.TMM5 => "TMM5",
             Register.TMM6 => "TMM6",
             Register.TMM7 => "TMM7",
+            Register.BSR0 => "BSR0",
             Register.FLAGS => "FLAGS",
             Register.EFLAGS => "EFLAGS",
             Register.RFLAGS => "RFLAGS",
