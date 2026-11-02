@@ -50,7 +50,8 @@ public static class FormId
         ("feature_lzcnt", "LZCNT"),
         ("feature_tzcnt", "TZCNT"),
         ("feature_wbnoinvd", "WBNOINVD"),
-        ("feature_ibhf", "IBHF")
+        ("feature_ibhf", "IBHF"),
+        ("feature_prefetchrst", "PREFETCHRST")
     ];
 
     /// <summary>
@@ -83,7 +84,8 @@ public static class FormId
         ["feature_knc"] = "0",
         ["feature_iprefetch"] = "0",
         ["feature_ud0_compat"] = "0",
-        ["feature_ibhf"] = "0"
+        ["feature_ibhf"] = "0",
+        ["feature_prefetchrst"] = "0"
     };
 
     /// <summary>

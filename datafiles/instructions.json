@@ -122674,6 +122674,216 @@
     "comment": "SUNMQVNTOk1PVlEyRFENCkNQTDozDQpDQVRFR09SWTpEQVRBWEZFUg0KRVhURU5TSU9OOlNTRTINCkFUVFJJQlVURVM6TU1YX0VYQ0VQVCBOT1RTWA0KUEFUVEVSTjoweDBGIDB4RDYgZjNfcmVmaW5pbmdfcHJlZml4IE1PRFswYjExXSBNT0Q9MyBSRUdbcnJyXSBSTVtubm5dIElHTk9SRTY2KCkNCk9QRVJBTkRTOlJFRzA9WE1NX1IoKTp3OmRxOnU2NCBSRUcxPU1NWF9CKCk6cjpxOnU2NA=="
   },
   {
+    "mnemonic": "movrs",
+    "opcode_map": "0f38",
+    "opcode": "8A",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "prefix_group1": "0"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "gpr8",
+        "encoding": "modrm_reg"
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "int8",
+        "width16": 1,
+        "width32": 1,
+        "width64": 1
+      }
+    ],
+    "opsize_map": "byteop",
+    "meta_info": {
+      "category": "LEGACY",
+      "extension": "MOVRS",
+      "isa_set": "MOVRS"
+    },
+    "exception_class": "legacy-movrs",
+    "comment": "SUNMQVNTOk1PVlJTDQpDUEw6Mw0KQ0FURUdPUlk6TEVHQUNZDQpFWFRFTlNJT046TU9WUlMNCklTQV9TRVQ6TU9WUlMNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QllURU9QDQpJRk9STTpNT1ZSU19HUFI4aThfTUVNaTgNClBBVFRFUk46MHgwRiAweDM4IDB4OEEgTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSBNT0RSTSgpIG5vcmVwIG1vZGU2NA0KT1BFUkFORFM6UkVHMD1HUFI4X1IoKTp3OmI6aTggTUVNMDpyOmI6aTgNCkVYQ0VQVElPTlM6TEVHQUNZLU1PVlJT"
+  },
+  {
+    "mnemonic": "movrs",
+    "opcode_map": "0f38",
+    "opcode": "8B",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "prefix_group1": "0"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "gpr16_32_64",
+        "encoding": "modrm_reg"
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "int",
+        "scale_factor": "osz",
+        "width16": 2,
+        "width32": 4,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "LEGACY",
+      "extension": "MOVRS",
+      "isa_set": "MOVRS"
+    },
+    "exception_class": "legacy-movrs",
+    "comment": "SUNMQVNTOk1PVlJTDQpDUEw6Mw0KQ0FURUdPUlk6TEVHQUNZDQpFWFRFTlNJT046TU9WUlMNCklTQV9TRVQ6TU9WUlMNClJFQUxfT1BDT0RFOlkNCklGT1JNOk1PVlJTX0dQUnZfTUVNdg0KUEFUVEVSTjoweDBGIDB4MzggMHg4QiBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dIE1PRFJNKCkgbm9yZXAgbW9kZTY0DQpPUEVSQU5EUzpSRUcwPUdQUnZfUigpOnc6diBNRU0wOnI6dg0KRVhDRVBUSU9OUzpMRUdBQ1ktTU9WUlM="
+  },
+  {
+    "mnemonic": "movrs",
+    "encoding": "evex",
+    "opcode_map": "map4",
+    "opcode": "8A",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "none",
+      "vector_length": "128",
+      "rex_w": "0",
+      "evex_nd": "0",
+      "evex_nf": "0"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "gpr8",
+        "encoding": "modrm_reg",
+        "element_type": "int8",
+        "width16": 1,
+        "width32": 1,
+        "width64": 1
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "int8",
+        "width16": 1,
+        "width32": 1,
+        "width64": 1
+      }
+    ],
+    "opsize_map": "byteop",
+    "meta_info": {
+      "category": "APX",
+      "extension": "APXEVEX",
+      "isa_set": "APX_F_MOVRS"
+    },
+    "exception_class": "apx-evex-movrs",
+    "evex": {
+      "mask_flags": [
+      ],
+      "tuple_type": "no_scale",
+      "is_eevex": true
+    },
+    "comment": "SUNMQVNTOk1PVlJTDQpDUEw6Mw0KQ0FURUdPUlk6QVBYDQpFWFRFTlNJT046TU9WUlMNCklTQV9TRVQ6QVBYX0ZfTU9WUlMNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6QllURU9QDQpJRk9STTpNT1ZSU19HUFI4aThfTUVNaThfQVBYDQpQQVRURVJOOkVWViAweDhBIFZOUCBNQVA0IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gTU9EUk0oKSBORD0wIE5GPTAgVzAgVkwxMjggbW9kZTY0IE5PRVZTUiBaRVJPSU5HPTAgRVZBUFgoKQ0KT1BFUkFORFM6UkVHMD1HUFI4X1IoKTp3OmI6aTggTUVNMDpyOmI6aTgNCkVYQ0VQVElPTlM6QVBYLUVWRVgtTU9WUlM="
+  },
+  {
+    "mnemonic": "movrs",
+    "encoding": "evex",
+    "opcode_map": "map4",
+    "opcode": "8B",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "none",
+      "vector_length": "128",
+      "evex_nd": "0",
+      "evex_nf": "0"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "gpr16_32_64",
+        "encoding": "modrm_reg",
+        "element_type": "int",
+        "scale_factor": "osz",
+        "width16": 2,
+        "width32": 4,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "int",
+        "scale_factor": "osz",
+        "width16": 2,
+        "width32": 4,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "APX",
+      "extension": "APXEVEX",
+      "isa_set": "APX_F_MOVRS"
+    },
+    "exception_class": "apx-evex-movrs",
+    "evex": {
+      "mask_flags": [
+      ],
+      "tuple_type": "no_scale",
+      "is_eevex": true
+    },
+    "comment": "SUNMQVNTOk1PVlJTDQpDUEw6Mw0KQ0FURUdPUlk6QVBYDQpFWFRFTlNJT046TU9WUlMNCklTQV9TRVQ6QVBYX0ZfTU9WUlMNClJFQUxfT1BDT0RFOlkNCklGT1JNOk1PVlJTX0dQUnZfTUVNdl9BUFgNClBBVFRFUk46RVZWIDB4OEIgVk5QIE1BUDQgTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSBNT0RSTSgpIE5EPTAgTkY9MCBWTDEyOCBtb2RlNjQgTk9FVlNSIFpFUk9JTkc9MCBFVkFQWCgpDQpPUEVSQU5EUzpSRUcwPUdQUnZfUigpOnc6diBNRU0wOnI6dg0KRVhDRVBUSU9OUzpBUFgtRVZFWC1NT1ZSUw=="
+  },
+  {
+    "mnemonic": "movrs",
+    "encoding": "evex",
+    "opcode_map": "map4",
+    "opcode": "8B",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "evex_nd": "0",
+      "evex_nf": "0"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "gpr16_32_64",
+        "encoding": "modrm_reg",
+        "element_type": "int",
+        "scale_factor": "osz",
+        "width16": 2,
+        "width32": 4,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "int",
+        "scale_factor": "osz",
+        "width16": 2,
+        "width32": 4,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "APX",
+      "extension": "APXEVEX",
+      "isa_set": "APX_F_MOVRS"
+    },
+    "exception_class": "apx-evex-movrs",
+    "evex": {
+      "mask_flags": [
+      ],
+      "tuple_type": "no_scale",
+      "is_eevex": true
+    },
+    "comment": "SUNMQVNTOk1PVlJTDQpDUEw6Mw0KQ0FURUdPUlk6QVBYDQpFWFRFTlNJT046TU9WUlMNCklTQV9TRVQ6QVBYX0ZfTU9WUlMNClJFQUxfT1BDT0RFOlkNCklGT1JNOk1PVlJTX0dQUnZfTUVNdl9BUFgNClBBVFRFUk46RVZWIDB4OEIgVjY2IE1BUDQgTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSBNT0RSTSgpIE5EPTAgTkY9MCBWTDEyOCBtb2RlNjQgTk9FVlNSIFpFUk9JTkc9MCBFVkFQWCgpDQpPUEVSQU5EUzpSRUcwPUdQUnZfUigpOnc6diBNRU0wOnI6dg0KRVhDRVBUSU9OUzpBUFgtRVZFWC1NT1ZSUw=="
+  },
+  {
     "mnemonic": "movsb",
     "opcode": "A4",
     "filters": {
@@ -127887,7 +128097,8 @@
     "opcode": "18",
     "filters": {
       "modrm_mod": "!3",
-      "modrm_reg": "4"
+      "modrm_reg": "4",
+      "feature_prefetchrst": "0"
     },
     "operands": [
       {
@@ -151672,6 +151883,34 @@
       "isa_set": "SSE_PREFETCH"
     },
     "comment": "SUNMQVNTOlBSRUZFVENITlRBDQpDUEw6Mw0KQ0FURUdPUlk6UFJFRkVUQ0gNCkFUVFJJQlVURVM6UFJFRkVUQ0ggTk9OVEVNUE9SQUwNCkVYVEVOU0lPTjpTU0UNCklTQV9TRVQ6U1NFX1BSRUZFVENIDQpQQVRURVJOOjB4MEYgMHgxOCBNT0RbbW1dIE1PRCE9MyBSRUdbMGIwMDBdIFJNW25ubl0gTU9EUk0oKQ0KT1BFUkFORFM6TUVNMDpyOm1wcmVmZXRjaA=="
+  },
+  {
+    "mnemonic": "prefetchrst2",
+    "opcode_map": "0f",
+    "opcode": "18",
+    "filters": {
+      "modrm_mod": "!3",
+      "modrm_reg": "4",
+      "feature_prefetchrst": "1",
+      "force_modrm_reg": true
+    },
+    "operands": [
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint8",
+        "width16": 1,
+        "width32": 1,
+        "width64": 1
+      }
+    ],
+    "meta_info": {
+      "category": "PREFETCH",
+      "extension": "MOVRS",
+      "isa_set": "MOVRS"
+    },
+    "exception_class": "legacy-prefetch",
+    "comment": "SUNMQVNTOlBSRUZFVENIUlNUMg0KQ1BMOjMNCkNBVEVHT1JZOlBSRUZFVENIDQpFWFRFTlNJT046TU9WUlMNCklTQV9TRVQ6TU9WUlMNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6UFJFRkVUQ0gNCklGT1JNOlBSRUZFVENIUlNUMl9NRU11OA0KUEFUVEVSTjoweDBGIDB4MTggTU9EW21tXSBNT0QhPTMgUkVHWzBiMTAwXSBSTVtubm5dIE1PRFJNKCkgUFJFRkVUQ0hSU1Q9MQ0KT1BFUkFORFM6TUVNMDpyOm1wcmVmZXRjaA0KRVhDRVBUSU9OUzpMRUdBQ1ktUFJFRkVUQ0g="
   },
   {
     "mnemonic": "prefetcht0",
@@ -216645,6 +216884,162 @@
       "is_eevex": true
     },
     "comment": "SUNMQVNTOlRJTEVMT0FERA0KQ1BMOjMNCkNBVEVHT1JZOkFNWF9USUxFDQpFWFRFTlNJT046QVBYRVZFWA0KSVNBX1NFVDpBUFhfRl9BTVgNCkVYQ0VQVElPTlM6QU1YLUUzLUVWRVgNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6RElTUDhfTk9fU0NBTEUgTk9UU1ggU1BFQ0lBTF9BR0VOX1JFUVVJUkVEDQpJRk9STTpUSUxFTE9BRERfVE1NdTMyX01FTXUzMl9BUFgNClBBVFRFUk46RVZWIDB4NEIgVkYyIFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNWzBiMTAwXSBNT0RSTSgpIEJDUkM9MCBVQklUPTEgVzAgVkwxMjggbW9kZTY0IE5PRVZTUiBaRVJPSU5HPTAgTUFTSz0wDQpPUEVSQU5EUzpSRUcwPVRNTV9SMygpOnc6dHY6dTMyIE1FTTA6cjpwdHI6dTMy"
+  },
+  {
+    "mnemonic": "tileloaddrs",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "4A",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "modrm_rm": "4",
+      "mandatory_prefix": "f2",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "tmm",
+        "encoding": "modrm_reg",
+        "element_type": "uint32"
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32"
+      }
+    ],
+    "meta_info": {
+      "category": "AMX_TILE",
+      "extension": "AMX_TILE",
+      "isa_set": "AMX_MOVRS"
+    },
+    "exception_class": "amxe3",
+    "comment": "SUNMQVNTOlRJTEVMT0FERFJTDQpDUEw6Mw0KQ0FURUdPUlk6QU1YX1RJTEUNCkVYVEVOU0lPTjpBTVhfVElMRQ0KSVNBX1NFVDpBTVhfTU9WUlMNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6Tk9UU1ggU1BFQ0lBTF9BR0VOX1JFUVVJUkVEDQpJRk9STTpUSUxFTE9BRERSU19UTU11MzJfTUVNdTMyDQpQQVRURVJOOlZWMSAweDRBIFZGMiBWMEYzOCBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVswYjEwMF0gTU9EUk0oKSBTSUIgVzAgVkwxMjggbW9kZTY0IE5PVlNSDQpPUEVSQU5EUzpSRUcwPVRNTV9SKCk6dzp0djp1MzIgTUVNMDpyOnB0cjp1MzINCkVYQ0VQVElPTlM6QU1YLUUz"
+  },
+  {
+    "mnemonic": "tileloaddrs",
+    "encoding": "evex",
+    "opcode_map": "0f38",
+    "opcode": "4A",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "modrm_rm": "4",
+      "mandatory_prefix": "f2",
+      "vector_length": "128",
+      "rex_w": "0",
+      "evex_b": "0",
+      "evex_u": "1",
+      "force_modrm_rm": true
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "tmm",
+        "encoding": "modrm_reg",
+        "element_type": "uint32"
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32"
+      }
+    ],
+    "meta_info": {
+      "category": "AMX_TILE",
+      "extension": "APXEVEX",
+      "isa_set": "APX_F_AMX_MOVRS"
+    },
+    "exception_class": "amxe3_evex",
+    "evex": {
+      "mask_mode": "forbidden",
+      "mask_flags": [
+      ],
+      "tuple_type": "no_scale",
+      "is_eevex": true
+    },
+    "comment": "SUNMQVNTOlRJTEVMT0FERFJTDQpDUEw6Mw0KQ0FURUdPUlk6QU1YX1RJTEUNCkVYVEVOU0lPTjpBTVhfVElMRQ0KSVNBX1NFVDpBUFhfRl9BTVhfTU9WUlMNClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6Tk9UU1ggU1BFQ0lBTF9BR0VOX1JFUVVJUkVEDQpJRk9STTpUSUxFTE9BRERSU19UTU11MzJfTUVNdTMyX0FQWA0KUEFUVEVSTjpFVlYgMHg0QSBWRjIgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bMGIxMDBdIE1PRFJNKCkgU0lCIEJDUkM9MCBXMCBWTDEyOCBtb2RlNjQgTk9FVlNSIE1BU0s9MA0KT1BFUkFORFM6UkVHMD1UTU1fUjMoKTp3OnR2OnUzMiBNRU0wOnI6cHRyOnUzMg0KRVhDRVBUSU9OUzpBTVgtRTMtRVZFWA=="
+  },
+  {
+    "mnemonic": "tileloaddrst1",
+    "encoding": "vex",
+    "opcode_map": "0f38",
+    "opcode": "4A",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "modrm_rm": "4",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "tmm",
+        "encoding": "modrm_reg",
+        "element_type": "uint32"
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32"
+      }
+    ],
+    "meta_info": {
+      "category": "AMX_TILE",
+      "extension": "AMX_TILE",
+      "isa_set": "AMX_MOVRS"
+    },
+    "exception_class": "amxe3",
+    "comment": "SUNMQVNTOlRJTEVMT0FERFJTVDENCkNQTDozDQpDQVRFR09SWTpBTVhfVElMRQ0KRVhURU5TSU9OOkFNWF9USUxFDQpJU0FfU0VUOkFNWF9NT1ZSUw0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpOT1RTWCBTUEVDSUFMX0FHRU5fUkVRVUlSRUQNCklGT1JNOlRJTEVMT0FERFJTVDFfVE1NdTMyX01FTXUzMg0KUEFUVEVSTjpWVjEgMHg0QSBWNjYgVjBGMzggTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bMGIxMDBdIE1PRFJNKCkgU0lCIFcwIFZMMTI4IG1vZGU2NCBOT1ZTUg0KT1BFUkFORFM6UkVHMD1UTU1fUigpOnc6dHY6dTMyIE1FTTA6cjpwdHI6dTMyDQpFWENFUFRJT05TOkFNWC1FMw=="
+  },
+  {
+    "mnemonic": "tileloaddrst1",
+    "encoding": "evex",
+    "opcode_map": "0f38",
+    "opcode": "4A",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "modrm_rm": "4",
+      "mandatory_prefix": "66",
+      "vector_length": "128",
+      "rex_w": "0",
+      "evex_b": "0",
+      "evex_u": "1",
+      "force_modrm_rm": true
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "tmm",
+        "encoding": "modrm_reg",
+        "element_type": "uint32"
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32"
+      }
+    ],
+    "meta_info": {
+      "category": "AMX_TILE",
+      "extension": "APXEVEX",
+      "isa_set": "APX_F_AMX_MOVRS"
+    },
+    "exception_class": "amxe3_evex",
+    "evex": {
+      "mask_mode": "forbidden",
+      "mask_flags": [
+      ],
+      "tuple_type": "no_scale",
+      "is_eevex": true
+    },
+    "comment": "SUNMQVNTOlRJTEVMT0FERFJTVDENCkNQTDozDQpDQVRFR09SWTpBTVhfVElMRQ0KRVhURU5TSU9OOkFNWF9USUxFDQpJU0FfU0VUOkFQWF9GX0FNWF9NT1ZSUw0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpOT1RTWCBTUEVDSUFMX0FHRU5fUkVRVUlSRUQNCklGT1JNOlRJTEVMT0FERFJTVDFfVE1NdTMyX01FTXUzMl9BUFgNClBBVFRFUk46RVZWIDB4NEEgVjY2IFYwRjM4IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNWzBiMTAwXSBNT0RSTSgpIFNJQiBCQ1JDPTAgVzAgVkwxMjggbW9kZTY0IE5PRVZTUiBNQVNLPTANCk9QRVJBTkRTOlJFRzA9VE1NX1IzKCk6dzp0djp1MzIgTUVNMDpyOnB0cjp1MzINCkVYQ0VQVElPTlM6QU1YLUUzLUVWRVg="
   },
   {
     "mnemonic": "tileloaddt1",
@@ -387369,6 +387764,654 @@
       "element_size": "64"
     },
     "comment": "SUNMQVNTOlZNT1ZRDQpDUEw6Mw0KQ0FURUdPUlk6REFUQVhGRVINCkVYVEVOU0lPTjpBVlg1MTJFVkVYDQpJU0FfU0VUOkFWWDUxMkZfMTI4Tg0KRVhDRVBUSU9OUzpBVlg1MTItRTlORg0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpESVNQOF9TQ0FMQVINCklGT1JNOlZNT1ZRX01FTXU2NF9YTU11NjRfQVZYNTEyDQpQQVRURVJOOkVWViAweEQ2IFY2NiBWMEYgTU9EW21tXSBNT0QhPTMgUkVHW3Jycl0gUk1bbm5uXSBCQ1JDPTAgTU9EUk0oKSBXMSBOT0VWU1IgWkVST0lORz0wIE1BU0s9MCBFU0laRV82NF9CSVRTKCkgTkVMRU1fU0NBTEFSKCkNCk9QRVJBTkRTOk1FTTA6dzpxOnU2NCBSRUcwPVhNTV9SMygpOnI6ZHE6dTY0"
+  },
+  {
+    "mnemonic": "vmovrsb",
+    "encoding": "evex",
+    "opcode_map": "map5",
+    "opcode": "6F",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "f2",
+      "vector_length": "128",
+      "rex_w": "0",
+      "evex_b": "0",
+      "evex_u": "1"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "xmm",
+        "encoding": "modrm_reg",
+        "element_type": "uint8",
+        "width16": 16,
+        "width32": 16,
+        "width64": 16
+      },
+      {
+        "operand_type": "mask",
+        "encoding": "mask",
+        "element_type": "int1",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint8",
+        "width16": 16,
+        "width32": 16,
+        "width64": 16
+      }
+    ],
+    "meta_info": {
+      "category": "DATAXFER",
+      "extension": "AVX512EVEX",
+      "isa_set": "AVX10_MOVRS_128"
+    },
+    "exception_class": "e4",
+    "evex": {
+      "mask_mode": "allowed",
+      "tuple_type": "fvm",
+      "element_size": "8"
+    },
+    "comment": "SUNMQVNTOlZNT1ZSU0INCkNQTDozDQpDQVRFR09SWTpEQVRBWEZFUg0KRVhURU5TSU9OOkFWWDUxMkVWRVgNCklTQV9TRVQ6QVZYMTBfTU9WUlNfMTI4DQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkRJU1A4X0ZVTExNRU0gTUFTS09QX0VWRVggTUVNT1JZX0ZBVUxUX1NVUFBSRVNTSU9ODQpJRk9STTpWTU9WUlNCX1hNTXU4X01BU0ttc2t3X01FTXU4X0FWWDUxMg0KUEFUVEVSTjpFVlYgMHg2RiBWRjIgTUFQNSBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dIE1PRFJNKCkgQkNSQz0wIFVCSVQ9MSBXMCBWTDEyOCBtb2RlNjQgTk9FVlNSIEVTSVpFXzhfQklUUygpIE5FTEVNX0ZVTExNRU0oKQ0KT1BFUkFORFM6UkVHMD1YTU1fUjMoKTp3OmRxOnU4IFJFRzE9TUFTSzEoKTpyOm1za3c6VFhUPVpFUk9TVFIgTUVNMDpyOmRxOnU4DQpFWENFUFRJT05TOkFWWDUxMi1FNA=="
+  },
+  {
+    "mnemonic": "vmovrsb",
+    "encoding": "evex",
+    "opcode_map": "map5",
+    "opcode": "6F",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "f2",
+      "vector_length": "256",
+      "rex_w": "0",
+      "evex_b": "0",
+      "evex_u": "1"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "ymm",
+        "encoding": "modrm_reg",
+        "element_type": "uint8",
+        "width16": 32,
+        "width32": 32,
+        "width64": 32
+      },
+      {
+        "operand_type": "mask",
+        "encoding": "mask",
+        "element_type": "int1",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint8",
+        "width16": 32,
+        "width32": 32,
+        "width64": 32
+      }
+    ],
+    "meta_info": {
+      "category": "DATAXFER",
+      "extension": "AVX512EVEX",
+      "isa_set": "AVX10_MOVRS_256"
+    },
+    "exception_class": "e4",
+    "evex": {
+      "mask_mode": "allowed",
+      "tuple_type": "fvm",
+      "element_size": "8"
+    },
+    "comment": "SUNMQVNTOlZNT1ZSU0INCkNQTDozDQpDQVRFR09SWTpEQVRBWEZFUg0KRVhURU5TSU9OOkFWWDUxMkVWRVgNCklTQV9TRVQ6QVZYMTBfTU9WUlNfMjU2DQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkRJU1A4X0ZVTExNRU0gTUFTS09QX0VWRVggTUVNT1JZX0ZBVUxUX1NVUFBSRVNTSU9ODQpJRk9STTpWTU9WUlNCX1lNTXU4X01BU0ttc2t3X01FTXU4X0FWWDUxMg0KUEFUVEVSTjpFVlYgMHg2RiBWRjIgTUFQNSBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dIE1PRFJNKCkgQkNSQz0wIFVCSVQ9MSBXMCBWTDI1NiBtb2RlNjQgTk9FVlNSIEVTSVpFXzhfQklUUygpIE5FTEVNX0ZVTExNRU0oKQ0KT1BFUkFORFM6UkVHMD1ZTU1fUjMoKTp3OnFxOnU4IFJFRzE9TUFTSzEoKTpyOm1za3c6VFhUPVpFUk9TVFIgTUVNMDpyOnFxOnU4DQpFWENFUFRJT05TOkFWWDUxMi1FNA=="
+  },
+  {
+    "mnemonic": "vmovrsb",
+    "encoding": "evex",
+    "opcode_map": "map5",
+    "opcode": "6F",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "f2",
+      "vector_length": "512",
+      "rex_w": "0",
+      "evex_b": "0",
+      "evex_u": "1"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "zmm",
+        "encoding": "modrm_reg",
+        "element_type": "uint8",
+        "width16": 64,
+        "width32": 64,
+        "width64": 64
+      },
+      {
+        "operand_type": "mask",
+        "encoding": "mask",
+        "element_type": "int1",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint8",
+        "width16": 64,
+        "width32": 64,
+        "width64": 64
+      }
+    ],
+    "meta_info": {
+      "category": "DATAXFER",
+      "extension": "AVX512EVEX",
+      "isa_set": "AVX10_MOVRS_512"
+    },
+    "exception_class": "e4",
+    "evex": {
+      "mask_mode": "allowed",
+      "tuple_type": "fvm",
+      "element_size": "8"
+    },
+    "comment": "SUNMQVNTOlZNT1ZSU0INCkNQTDozDQpDQVRFR09SWTpEQVRBWEZFUg0KRVhURU5TSU9OOkFWWDUxMkVWRVgNCklTQV9TRVQ6QVZYMTBfTU9WUlNfNTEyDQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkRJU1A4X0ZVTExNRU0gTUFTS09QX0VWRVggTUVNT1JZX0ZBVUxUX1NVUFBSRVNTSU9ODQpJRk9STTpWTU9WUlNCX1pNTXU4X01BU0ttc2t3X01FTXU4X0FWWDUxMg0KUEFUVEVSTjpFVlYgMHg2RiBWRjIgTUFQNSBNT0RbbW1dIE1PRCE9MyBSRUdbcnJyXSBSTVtubm5dIE1PRFJNKCkgQkNSQz0wIFVCSVQ9MSBXMCBWTDUxMiBtb2RlNjQgTk9FVlNSIEVTSVpFXzhfQklUUygpIE5FTEVNX0ZVTExNRU0oKQ0KT1BFUkFORFM6UkVHMD1aTU1fUjMoKTp3Onp1OCBSRUcxPU1BU0sxKCk6cjptc2t3OlRYVD1aRVJPU1RSIE1FTTA6cjp6ZDp1OA0KRVhDRVBUSU9OUzpBVlg1MTItRTQ="
+  },
+  {
+    "mnemonic": "vmovrsd",
+    "encoding": "evex",
+    "opcode_map": "map5",
+    "opcode": "6F",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "f3",
+      "vector_length": "128",
+      "rex_w": "0",
+      "evex_b": "0",
+      "evex_u": "1"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "xmm",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 16,
+        "width32": 16,
+        "width64": 16
+      },
+      {
+        "operand_type": "mask",
+        "encoding": "mask",
+        "element_type": "int1",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 16,
+        "width32": 16,
+        "width64": 16
+      }
+    ],
+    "meta_info": {
+      "category": "DATAXFER",
+      "extension": "AVX512EVEX",
+      "isa_set": "AVX10_MOVRS_128"
+    },
+    "exception_class": "e4",
+    "evex": {
+      "mask_mode": "allowed",
+      "tuple_type": "fvm",
+      "element_size": "32"
+    },
+    "comment": "SUNMQVNTOlZNT1ZSU0QNCkNQTDozDQpDQVRFR09SWTpEQVRBWEZFUg0KRVhURU5TSU9OOkFWWDUxMkVWRVgNCklTQV9TRVQ6QVZYMTBfTU9WUlNfMTI4DQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkRJU1A4X0ZVTExNRU0gTUFTS09QX0VWRVggTUVNT1JZX0ZBVUxUX1NVUFBSRVNTSU9ODQpJRk9STTpWTU9WUlNEX1hNTXUzMl9NQVNLbXNrd19NRU11MzJfQVZYNTEyDQpQQVRURVJOOkVWViAweDZGIFZGMyBNQVA1IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gTU9EUk0oKSBCQ1JDPTAgVUJJVD0xIFcwIFZMMTI4IG1vZGU2NCBOT0VWU1IgRVNJWkVfMzJfQklUUygpIE5FTEVNX0ZVTExNRU0oKQ0KT1BFUkFORFM6UkVHMD1YTU1fUjMoKTp3OmRxOnUzMiBSRUcxPU1BU0sxKCk6cjptc2t3OlRYVD1aRVJPU1RSIE1FTTA6cjpkcTp1MzINCkVYQ0VQVElPTlM6QVZYNTEyLUU0"
+  },
+  {
+    "mnemonic": "vmovrsd",
+    "encoding": "evex",
+    "opcode_map": "map5",
+    "opcode": "6F",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "f3",
+      "vector_length": "256",
+      "rex_w": "0",
+      "evex_b": "0",
+      "evex_u": "1"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "ymm",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 32,
+        "width32": 32,
+        "width64": 32
+      },
+      {
+        "operand_type": "mask",
+        "encoding": "mask",
+        "element_type": "int1",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 32,
+        "width32": 32,
+        "width64": 32
+      }
+    ],
+    "meta_info": {
+      "category": "DATAXFER",
+      "extension": "AVX512EVEX",
+      "isa_set": "AVX10_MOVRS_256"
+    },
+    "exception_class": "e4",
+    "evex": {
+      "mask_mode": "allowed",
+      "tuple_type": "fvm",
+      "element_size": "32"
+    },
+    "comment": "SUNMQVNTOlZNT1ZSU0QNCkNQTDozDQpDQVRFR09SWTpEQVRBWEZFUg0KRVhURU5TSU9OOkFWWDUxMkVWRVgNCklTQV9TRVQ6QVZYMTBfTU9WUlNfMjU2DQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkRJU1A4X0ZVTExNRU0gTUFTS09QX0VWRVggTUVNT1JZX0ZBVUxUX1NVUFBSRVNTSU9ODQpJRk9STTpWTU9WUlNEX1lNTXUzMl9NQVNLbXNrd19NRU11MzJfQVZYNTEyDQpQQVRURVJOOkVWViAweDZGIFZGMyBNQVA1IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gTU9EUk0oKSBCQ1JDPTAgVUJJVD0xIFcwIFZMMjU2IG1vZGU2NCBOT0VWU1IgRVNJWkVfMzJfQklUUygpIE5FTEVNX0ZVTExNRU0oKQ0KT1BFUkFORFM6UkVHMD1ZTU1fUjMoKTp3OnFxOnUzMiBSRUcxPU1BU0sxKCk6cjptc2t3OlRYVD1aRVJPU1RSIE1FTTA6cjpxcTp1MzINCkVYQ0VQVElPTlM6QVZYNTEyLUU0"
+  },
+  {
+    "mnemonic": "vmovrsd",
+    "encoding": "evex",
+    "opcode_map": "map5",
+    "opcode": "6F",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "f3",
+      "vector_length": "512",
+      "rex_w": "0",
+      "evex_b": "0",
+      "evex_u": "1"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "zmm",
+        "encoding": "modrm_reg",
+        "element_type": "uint32",
+        "width16": 64,
+        "width32": 64,
+        "width64": 64
+      },
+      {
+        "operand_type": "mask",
+        "encoding": "mask",
+        "element_type": "int1",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint32",
+        "width16": 64,
+        "width32": 64,
+        "width64": 64
+      }
+    ],
+    "meta_info": {
+      "category": "DATAXFER",
+      "extension": "AVX512EVEX",
+      "isa_set": "AVX10_MOVRS_512"
+    },
+    "exception_class": "e4",
+    "evex": {
+      "mask_mode": "allowed",
+      "tuple_type": "fvm",
+      "element_size": "32"
+    },
+    "comment": "SUNMQVNTOlZNT1ZSU0QNCkNQTDozDQpDQVRFR09SWTpEQVRBWEZFUg0KRVhURU5TSU9OOkFWWDUxMkVWRVgNCklTQV9TRVQ6QVZYMTBfTU9WUlNfNTEyDQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkRJU1A4X0ZVTExNRU0gTUFTS09QX0VWRVggTUVNT1JZX0ZBVUxUX1NVUFBSRVNTSU9ODQpJRk9STTpWTU9WUlNEX1pNTXUzMl9NQVNLbXNrd19NRU11MzJfQVZYNTEyDQpQQVRURVJOOkVWViAweDZGIFZGMyBNQVA1IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gTU9EUk0oKSBCQ1JDPTAgVUJJVD0xIFcwIFZMNTEyIG1vZGU2NCBOT0VWU1IgRVNJWkVfMzJfQklUUygpIE5FTEVNX0ZVTExNRU0oKQ0KT1BFUkFORFM6UkVHMD1aTU1fUjMoKTp3Onp1MzIgUkVHMT1NQVNLMSgpOnI6bXNrdzpUWFQ9WkVST1NUUiBNRU0wOnI6emQ6dTMyDQpFWENFUFRJT05TOkFWWDUxMi1FNA=="
+  },
+  {
+    "mnemonic": "vmovrsq",
+    "encoding": "evex",
+    "opcode_map": "map5",
+    "opcode": "6F",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "f3",
+      "vector_length": "128",
+      "rex_w": "1",
+      "evex_b": "0",
+      "evex_u": "1"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "xmm",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 16,
+        "width32": 16,
+        "width64": 16
+      },
+      {
+        "operand_type": "mask",
+        "encoding": "mask",
+        "element_type": "int1",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 16,
+        "width32": 16,
+        "width64": 16
+      }
+    ],
+    "meta_info": {
+      "category": "DATAXFER",
+      "extension": "AVX512EVEX",
+      "isa_set": "AVX10_MOVRS_128"
+    },
+    "exception_class": "e4",
+    "evex": {
+      "mask_mode": "allowed",
+      "tuple_type": "fvm",
+      "element_size": "64"
+    },
+    "comment": "SUNMQVNTOlZNT1ZSU1ENCkNQTDozDQpDQVRFR09SWTpEQVRBWEZFUg0KRVhURU5TSU9OOkFWWDUxMkVWRVgNCklTQV9TRVQ6QVZYMTBfTU9WUlNfMTI4DQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkRJU1A4X0ZVTExNRU0gTUFTS09QX0VWRVggTUVNT1JZX0ZBVUxUX1NVUFBSRVNTSU9ODQpJRk9STTpWTU9WUlNRX1hNTXU2NF9NQVNLbXNrd19NRU11NjRfQVZYNTEyDQpQQVRURVJOOkVWViAweDZGIFZGMyBNQVA1IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gTU9EUk0oKSBCQ1JDPTAgVUJJVD0xIFcxIFZMMTI4IG1vZGU2NCBOT0VWU1IgRVNJWkVfNjRfQklUUygpIE5FTEVNX0ZVTExNRU0oKQ0KT1BFUkFORFM6UkVHMD1YTU1fUjMoKTp3OmRxOnU2NCBSRUcxPU1BU0sxKCk6cjptc2t3OlRYVD1aRVJPU1RSIE1FTTA6cjpkcTp1NjQNCkVYQ0VQVElPTlM6QVZYNTEyLUU0"
+  },
+  {
+    "mnemonic": "vmovrsq",
+    "encoding": "evex",
+    "opcode_map": "map5",
+    "opcode": "6F",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "f3",
+      "vector_length": "256",
+      "rex_w": "1",
+      "evex_b": "0",
+      "evex_u": "1"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "ymm",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 32,
+        "width32": 32,
+        "width64": 32
+      },
+      {
+        "operand_type": "mask",
+        "encoding": "mask",
+        "element_type": "int1",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 32,
+        "width32": 32,
+        "width64": 32
+      }
+    ],
+    "meta_info": {
+      "category": "DATAXFER",
+      "extension": "AVX512EVEX",
+      "isa_set": "AVX10_MOVRS_256"
+    },
+    "exception_class": "e4",
+    "evex": {
+      "mask_mode": "allowed",
+      "tuple_type": "fvm",
+      "element_size": "64"
+    },
+    "comment": "SUNMQVNTOlZNT1ZSU1ENCkNQTDozDQpDQVRFR09SWTpEQVRBWEZFUg0KRVhURU5TSU9OOkFWWDUxMkVWRVgNCklTQV9TRVQ6QVZYMTBfTU9WUlNfMjU2DQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkRJU1A4X0ZVTExNRU0gTUFTS09QX0VWRVggTUVNT1JZX0ZBVUxUX1NVUFBSRVNTSU9ODQpJRk9STTpWTU9WUlNRX1lNTXU2NF9NQVNLbXNrd19NRU11NjRfQVZYNTEyDQpQQVRURVJOOkVWViAweDZGIFZGMyBNQVA1IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gTU9EUk0oKSBCQ1JDPTAgVUJJVD0xIFcxIFZMMjU2IG1vZGU2NCBOT0VWU1IgRVNJWkVfNjRfQklUUygpIE5FTEVNX0ZVTExNRU0oKQ0KT1BFUkFORFM6UkVHMD1ZTU1fUjMoKTp3OnFxOnU2NCBSRUcxPU1BU0sxKCk6cjptc2t3OlRYVD1aRVJPU1RSIE1FTTA6cjpxcTp1NjQNCkVYQ0VQVElPTlM6QVZYNTEyLUU0"
+  },
+  {
+    "mnemonic": "vmovrsq",
+    "encoding": "evex",
+    "opcode_map": "map5",
+    "opcode": "6F",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "f3",
+      "vector_length": "512",
+      "rex_w": "1",
+      "evex_b": "0",
+      "evex_u": "1"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "zmm",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 64,
+        "width32": 64,
+        "width64": 64
+      },
+      {
+        "operand_type": "mask",
+        "encoding": "mask",
+        "element_type": "int1",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 64,
+        "width32": 64,
+        "width64": 64
+      }
+    ],
+    "meta_info": {
+      "category": "DATAXFER",
+      "extension": "AVX512EVEX",
+      "isa_set": "AVX10_MOVRS_512"
+    },
+    "exception_class": "e4",
+    "evex": {
+      "mask_mode": "allowed",
+      "tuple_type": "fvm",
+      "element_size": "64"
+    },
+    "comment": "SUNMQVNTOlZNT1ZSU1ENCkNQTDozDQpDQVRFR09SWTpEQVRBWEZFUg0KRVhURU5TSU9OOkFWWDUxMkVWRVgNCklTQV9TRVQ6QVZYMTBfTU9WUlNfNTEyDQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkRJU1A4X0ZVTExNRU0gTUFTS09QX0VWRVggTUVNT1JZX0ZBVUxUX1NVUFBSRVNTSU9ODQpJRk9STTpWTU9WUlNRX1pNTXU2NF9NQVNLbXNrd19NRU11NjRfQVZYNTEyDQpQQVRURVJOOkVWViAweDZGIFZGMyBNQVA1IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gTU9EUk0oKSBCQ1JDPTAgVUJJVD0xIFcxIFZMNTEyIG1vZGU2NCBOT0VWU1IgRVNJWkVfNjRfQklUUygpIE5FTEVNX0ZVTExNRU0oKQ0KT1BFUkFORFM6UkVHMD1aTU1fUjMoKTp3Onp1NjQgUkVHMT1NQVNLMSgpOnI6bXNrdzpUWFQ9WkVST1NUUiBNRU0wOnI6emQ6dTY0DQpFWENFUFRJT05TOkFWWDUxMi1FNA=="
+  },
+  {
+    "mnemonic": "vmovrsw",
+    "encoding": "evex",
+    "opcode_map": "map5",
+    "opcode": "6F",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "f2",
+      "vector_length": "128",
+      "rex_w": "1",
+      "evex_b": "0",
+      "evex_u": "1"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "xmm",
+        "encoding": "modrm_reg",
+        "element_type": "uint16",
+        "width16": 16,
+        "width32": 16,
+        "width64": 16
+      },
+      {
+        "operand_type": "mask",
+        "encoding": "mask",
+        "element_type": "int1",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint16",
+        "width16": 16,
+        "width32": 16,
+        "width64": 16
+      }
+    ],
+    "meta_info": {
+      "category": "DATAXFER",
+      "extension": "AVX512EVEX",
+      "isa_set": "AVX10_MOVRS_128"
+    },
+    "exception_class": "e4",
+    "evex": {
+      "mask_mode": "allowed",
+      "tuple_type": "fvm",
+      "element_size": "16"
+    },
+    "comment": "SUNMQVNTOlZNT1ZSU1cNCkNQTDozDQpDQVRFR09SWTpEQVRBWEZFUg0KRVhURU5TSU9OOkFWWDUxMkVWRVgNCklTQV9TRVQ6QVZYMTBfTU9WUlNfMTI4DQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkRJU1A4X0ZVTExNRU0gTUFTS09QX0VWRVggTUVNT1JZX0ZBVUxUX1NVUFBSRVNTSU9ODQpJRk9STTpWTU9WUlNXX1hNTXUxNl9NQVNLbXNrd19NRU11MTZfQVZYNTEyDQpQQVRURVJOOkVWViAweDZGIFZGMiBNQVA1IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gTU9EUk0oKSBCQ1JDPTAgVUJJVD0xIFcxIFZMMTI4IG1vZGU2NCBOT0VWU1IgRVNJWkVfMTZfQklUUygpIE5FTEVNX0ZVTExNRU0oKQ0KT1BFUkFORFM6UkVHMD1YTU1fUjMoKTp3OmRxOnUxNiBSRUcxPU1BU0sxKCk6cjptc2t3OlRYVD1aRVJPU1RSIE1FTTA6cjpkcTp1MTYNCkVYQ0VQVElPTlM6QVZYNTEyLUU0"
+  },
+  {
+    "mnemonic": "vmovrsw",
+    "encoding": "evex",
+    "opcode_map": "map5",
+    "opcode": "6F",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "f2",
+      "vector_length": "256",
+      "rex_w": "1",
+      "evex_b": "0",
+      "evex_u": "1"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "ymm",
+        "encoding": "modrm_reg",
+        "element_type": "uint16",
+        "width16": 32,
+        "width32": 32,
+        "width64": 32
+      },
+      {
+        "operand_type": "mask",
+        "encoding": "mask",
+        "element_type": "int1",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint16",
+        "width16": 32,
+        "width32": 32,
+        "width64": 32
+      }
+    ],
+    "meta_info": {
+      "category": "DATAXFER",
+      "extension": "AVX512EVEX",
+      "isa_set": "AVX10_MOVRS_256"
+    },
+    "exception_class": "e4",
+    "evex": {
+      "mask_mode": "allowed",
+      "tuple_type": "fvm",
+      "element_size": "16"
+    },
+    "comment": "SUNMQVNTOlZNT1ZSU1cNCkNQTDozDQpDQVRFR09SWTpEQVRBWEZFUg0KRVhURU5TSU9OOkFWWDUxMkVWRVgNCklTQV9TRVQ6QVZYMTBfTU9WUlNfMjU2DQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkRJU1A4X0ZVTExNRU0gTUFTS09QX0VWRVggTUVNT1JZX0ZBVUxUX1NVUFBSRVNTSU9ODQpJRk9STTpWTU9WUlNXX1lNTXUxNl9NQVNLbXNrd19NRU11MTZfQVZYNTEyDQpQQVRURVJOOkVWViAweDZGIFZGMiBNQVA1IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gTU9EUk0oKSBCQ1JDPTAgVUJJVD0xIFcxIFZMMjU2IG1vZGU2NCBOT0VWU1IgRVNJWkVfMTZfQklUUygpIE5FTEVNX0ZVTExNRU0oKQ0KT1BFUkFORFM6UkVHMD1ZTU1fUjMoKTp3OnFxOnUxNiBSRUcxPU1BU0sxKCk6cjptc2t3OlRYVD1aRVJPU1RSIE1FTTA6cjpxcTp1MTYNCkVYQ0VQVElPTlM6QVZYNTEyLUU0"
+  },
+  {
+    "mnemonic": "vmovrsw",
+    "encoding": "evex",
+    "opcode_map": "map5",
+    "opcode": "6F",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "!3",
+      "mandatory_prefix": "f2",
+      "vector_length": "512",
+      "rex_w": "1",
+      "evex_b": "0",
+      "evex_u": "1"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "zmm",
+        "encoding": "modrm_reg",
+        "element_type": "uint16",
+        "width16": 64,
+        "width32": 64,
+        "width64": 64
+      },
+      {
+        "operand_type": "mask",
+        "encoding": "mask",
+        "element_type": "int1",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "mem",
+        "encoding": "modrm_rm",
+        "element_type": "uint16",
+        "width16": 64,
+        "width32": 64,
+        "width64": 64
+      }
+    ],
+    "meta_info": {
+      "category": "DATAXFER",
+      "extension": "AVX512EVEX",
+      "isa_set": "AVX10_MOVRS_512"
+    },
+    "exception_class": "e4",
+    "evex": {
+      "mask_mode": "allowed",
+      "tuple_type": "fvm",
+      "element_size": "16"
+    },
+    "comment": "SUNMQVNTOlZNT1ZSU1cNCkNQTDozDQpDQVRFR09SWTpEQVRBWEZFUg0KRVhURU5TSU9OOkFWWDUxMkVWRVgNCklTQV9TRVQ6QVZYMTBfTU9WUlNfNTEyDQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOkRJU1A4X0ZVTExNRU0gTUFTS09QX0VWRVggTUVNT1JZX0ZBVUxUX1NVUFBSRVNTSU9ODQpJRk9STTpWTU9WUlNXX1pNTXUxNl9NQVNLbXNrd19NRU11MTZfQVZYNTEyDQpQQVRURVJOOkVWViAweDZGIFZGMiBNQVA1IE1PRFttbV0gTU9EIT0zIFJFR1tycnJdIFJNW25ubl0gTU9EUk0oKSBCQ1JDPTAgVUJJVD0xIFcxIFZMNTEyIG1vZGU2NCBOT0VWU1IgRVNJWkVfMTZfQklUUygpIE5FTEVNX0ZVTExNRU0oKQ0KT1BFUkFORFM6UkVHMD1aTU1fUjMoKTp3Onp1MTYgUkVHMT1NQVNLMSgpOnI6bXNrdzpUWFQ9WkVST1NUUiBNRU0wOnI6emQ6dTE2DQpFWENFUFRJT05TOkFWWDUxMi1FNA=="
   },
   {
     "mnemonic": "vmovsd",
