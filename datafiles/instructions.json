@@ -166753,6 +166753,97 @@
     "comment": "SUNMQVNTOlJETVNSDQpDUEw6MA0KQ0FURUdPUlk6U1lTVEVNDQpFWFRFTlNJT046QkFTRQ0KSVNBX1NFVDpQRU5USVVNUkVBTA0KQVRUUklCVVRFUzpSSU5HMCBOT1RTWA0KUEFUVEVSTjoweDBGIDB4MzINCk9QRVJBTkRTOlJFRzA9WEVEX1JFR19FQVg6dzpTVVBQIFJFRzE9WEVEX1JFR19FRFg6dzpTVVBQIFJFRzI9WEVEX1JFR19FQ1g6cjpTVVBQIFJFRzM9WEVEX1JFR19NU1JTOnI6U1VQUA=="
   },
   {
+    "mnemonic": "rdmsr",
+    "encoding": "vex",
+    "opcode_map": "map7",
+    "opcode": "F6",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "3",
+      "modrm_reg": "0",
+      "mandatory_prefix": "f2",
+      "vector_length": "128",
+      "rex_w": "0",
+      "force_modrm_reg": true
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "imm",
+        "encoding": "uimm32",
+        "element_type": "int32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "cpl": 0,
+    "meta_info": {
+      "category": "VEX",
+      "extension": "MSR_IMM",
+      "isa_set": "MSR_IMM"
+    },
+    "exception_class": "msr-imm-vex",
+    "comment": "SUNMQVNTOlJETVNSDQpDUEw6MA0KQ0FURUdPUlk6VkVYDQpFWFRFTlNJT046TVNSX0lNTQ0KSVNBX1NFVDpNU1JfSU1NDQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOk5PVFNYIFJJTkcwDQpJRk9STTpSRE1TUl9HUFI2NHU2NF9JTU0zMg0KUEFUVEVSTjpWVjEgMHhGNiBWRjIgTUFQNyBNT0RbMGIxMV0gTU9EPTMgUkVHWzBiMDAwXSBSTVtubm5dIFZMMTI4IG1vZGU2NCBOT1ZTUiBVSU1NMzIoKQ0KT1BFUkFORFM6UkVHMD1WR1BSNjRfQigpOnc6cTp1NjQgSU1NMDpyOmQgUkVHMT1YRURfUkVHX01TUlM6cjpTVVBQDQpFWENFUFRJT05TOk1TUi1JTU0tVkVY"
+  },
+  {
+    "mnemonic": "rdmsr",
+    "encoding": "evex",
+    "opcode_map": "map7",
+    "opcode": "F6",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "3",
+      "modrm_reg": "0",
+      "mandatory_prefix": "f2",
+      "vector_length": "128",
+      "evex_u": "1",
+      "evex_nd": "0",
+      "evex_nf": "0",
+      "force_modrm_reg": true
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "imm",
+        "encoding": "uimm32",
+        "element_type": "int32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "cpl": 0,
+    "meta_info": {
+      "category": "SYSTEM",
+      "extension": "APXEVEX",
+      "isa_set": "APX_F_MSR_IMM"
+    },
+    "exception_class": "msr-imm-evex",
+    "evex": {
+      "mask_flags": [
+      ],
+      "is_eevex": true
+    },
+    "comment": "SUNMQVNTOlJETVNSDQpDUEw6MA0KQ0FURUdPUlk6U1lTVEVNDQpFWFRFTlNJT046TVNSX0lNTQ0KSVNBX1NFVDpBUFhfRl9NU1JfSU1NDQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOk5PVFNYIFJJTkcwDQpJRk9STTpSRE1TUl9HUFI2NHU2NF9JTU0zMl9BUFgNClBBVFRFUk46RVZWIDB4RjYgVkYyIE1BUDcgTU9EWzBiMTFdIE1PRD0zIFVCSVQ9MSBSRUdbMGIwMDBdIFJNW25ubl0gTkQ9MCBORj0wIFZMMTI4IG1vZGU2NCBOT0VWU1IgRVZBUFgoKSBVSU1NMzIoKQ0KT1BFUkFORFM6UkVHMD1HUFI2NF9CKCk6dzpxOnU2NCBJTU0wOnI6ZCBSRUcxPVhFRF9SRUdfTVNSUzpyOlNVUFANCkVYQ0VQVElPTlM6TVNSLUlNTS1FVkVY"
+  },
+  {
     "mnemonic": "rdmsrlist",
     "opcode_map": "0f",
     "opcode": "01",
@@ -222915,6 +223006,84 @@
   },
   {
     "mnemonic": "urdmsr",
+    "opcode_map": "0f38",
+    "opcode": "F8",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "3",
+      "mandatory_prefix": "f2"
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "opsize_map": "default64",
+    "meta_info": {
+      "category": "USER_MSR",
+      "extension": "USER_MSR",
+      "isa_set": "USER_MSR"
+    },
+    "exception_class": "user-msr-legacy",
+    "comment": "SUNMQVNTOlVSRE1TUg0KQ1BMOjMNCkNBVEVHT1JZOlVTRVJfTVNSDQpFWFRFTlNJT046VVNFUl9NU1INCklTQV9TRVQ6VVNFUl9NU1INClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6Tk9UU1gNCklGT1JNOlVSRE1TUl9HUFI2NHU2NF9HUFI2NHU2NA0KUEFUVEVSTjoweDBGIDB4MzggMHhGOCBNT0RbMGIxMV0gTU9EPTMgUkVHW3Jycl0gUk1bbm5uXSBmMl9yZWZpbmluZ19wcmVmaXggbW9kZTY0IERGNjQoKQ0KT1BFUkFORFM6UkVHMD1HUFI2NF9CKCk6dzpxOnU2NCBSRUcxPUdQUjY0X1IoKTpyOnE6dTY0IFJFRzI9WEVEX1JFR19NU1JTOnI6U1VQUA0KRVhDRVBUSU9OUzpVU0VSLU1TUi1MRUdBQ1k="
+  },
+  {
+    "mnemonic": "urdmsr",
+    "encoding": "vex",
+    "opcode_map": "map7",
+    "opcode": "F8",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "3",
+      "modrm_reg": "0",
+      "mandatory_prefix": "f2",
+      "vector_length": "128",
+      "rex_w": "0",
+      "force_modrm_reg": true
+    },
+    "operands": [
+      {
+        "action": "write",
+        "operand_type": "gpr64",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "imm",
+        "encoding": "uimm32",
+        "element_type": "int32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      }
+    ],
+    "meta_info": {
+      "category": "USER_MSR",
+      "extension": "USER_MSR",
+      "isa_set": "USER_MSR"
+    },
+    "exception_class": "user-msr-vex",
+    "comment": "SUNMQVNTOlVSRE1TUg0KQ1BMOjMNCkNBVEVHT1JZOlVTRVJfTVNSDQpFWFRFTlNJT046VVNFUl9NU1INCklTQV9TRVQ6VVNFUl9NU1INClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6Tk9UU1gNCklGT1JNOlVSRE1TUl9HUFI2NHU2NF9JTU0zMg0KUEFUVEVSTjpWVjEgMHhGOCBWRjIgTUFQNyBNT0RbMGIxMV0gTU9EPTMgUkVHWzBiMDAwXSBSTVtubm5dIFcwIFZMMTI4IG1vZGU2NCBOT1ZTUiBVSU1NMzIoKQ0KT1BFUkFORFM6UkVHMD1WR1BSNjRfQigpOnc6cTp1NjQgSU1NMDpyOmQgUkVHMT1YRURfUkVHX01TUlM6cjpTVVBQDQpFWENFUFRJT05TOlVTRVItTVNSLVZFWA=="
+  },
+  {
+    "mnemonic": "urdmsr",
     "encoding": "evex",
     "opcode_map": "map4",
     "opcode": "F8",
@@ -223008,6 +223177,82 @@
       "is_eevex": true
     },
     "comment": "SUNMQVNTOlVSRE1TUg0KQ1BMOjMNCkNBVEVHT1JZOkFQWA0KRVhURU5TSU9OOkFQWEVWRVgNCklTQV9TRVQ6QVBYX0ZfVVNFUl9NU1INCkVYQ0VQVElPTlM6VVNFUi1NU1ItRVZFWA0KUkVBTF9PUENPREU6WQ0KQVRUUklCVVRFUzpOT1RTWA0KSUZPUk06VVJETVNSX0dQUjY0dTY0X0lNTTMyX0FQWA0KUEFUVEVSTjpFVlYgMHhGOCBWRjIgTUFQNyBNT0RbMGIxMV0gTU9EPTMgVUJJVD0xIFJFR1swYjAwMF0gUk1bbm5uXSBORD0wIE5GPTAgVzAgVkwxMjggbW9kZTY0IE5PRVZTUiBaRVJPSU5HPTAgRVZBUFgoKSBVSU1NMzIoKQ0KT1BFUkFORFM6UkVHMD1HUFI2NF9CKCk6dzpxOnU2NCBJTU0wOnI6ZCBSRUcxPVhFRF9SRUdfTVNSUzpyOlNVUFA="
+  },
+  {
+    "mnemonic": "uwrmsr",
+    "opcode_map": "0f38",
+    "opcode": "F8",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "3",
+      "mandatory_prefix": "f3"
+    },
+    "operands": [
+      {
+        "operand_type": "gpr64",
+        "encoding": "modrm_reg",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "opsize_map": "default64",
+    "meta_info": {
+      "category": "USER_MSR",
+      "extension": "USER_MSR",
+      "isa_set": "USER_MSR"
+    },
+    "exception_class": "user-msr-legacy",
+    "comment": "SUNMQVNTOlVXUk1TUg0KQ1BMOjMNCkNBVEVHT1JZOlVTRVJfTVNSDQpFWFRFTlNJT046VVNFUl9NU1INCklTQV9TRVQ6VVNFUl9NU1INClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6Tk9UU1gNCklGT1JNOlVXUk1TUl9HUFI2NHU2NF9HUFI2NHU2NA0KUEFUVEVSTjoweDBGIDB4MzggMHhGOCBNT0RbMGIxMV0gTU9EPTMgUkVHW3Jycl0gUk1bbm5uXSBmM19yZWZpbmluZ19wcmVmaXggbW9kZTY0IERGNjQoKQ0KT1BFUkFORFM6UkVHMD1HUFI2NF9SKCk6cjpxOnU2NCBSRUcxPUdQUjY0X0IoKTpyOnE6dTY0IFJFRzI9WEVEX1JFR19NU1JTOnc6U1VQUA0KRVhDRVBUSU9OUzpVU0VSLU1TUi1MRUdBQ1k="
+  },
+  {
+    "mnemonic": "uwrmsr",
+    "encoding": "vex",
+    "opcode_map": "map7",
+    "opcode": "F8",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "3",
+      "modrm_reg": "0",
+      "mandatory_prefix": "f3",
+      "vector_length": "128",
+      "rex_w": "0",
+      "force_modrm_reg": true
+    },
+    "operands": [
+      {
+        "operand_type": "imm",
+        "encoding": "uimm32",
+        "element_type": "int32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "meta_info": {
+      "category": "USER_MSR",
+      "extension": "USER_MSR",
+      "isa_set": "USER_MSR"
+    },
+    "exception_class": "user-msr-vex",
+    "comment": "SUNMQVNTOlVXUk1TUg0KQ1BMOjMNCkNBVEVHT1JZOlVTRVJfTVNSDQpFWFRFTlNJT046VVNFUl9NU1INCklTQV9TRVQ6VVNFUl9NU1INClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6Tk9UU1gNCklGT1JNOlVXUk1TUl9JTU0zMl9HUFI2NHU2NA0KUEFUVEVSTjpWVjEgMHhGOCBWRjMgTUFQNyBNT0RbMGIxMV0gTU9EPTMgUkVHWzBiMDAwXSBSTVtubm5dIFcwIFZMMTI4IG1vZGU2NCBOT1ZTUiBVSU1NMzIoKQ0KT1BFUkFORFM6SU1NMDpyOmQgUkVHMD1WR1BSNjRfQigpOnI6cTp1NjQgUkVHMT1YRURfUkVHX01TUlM6dzpTVVBQDQpFWENFUFRJT05TOlVTRVItTVNSLVZFWA=="
   },
   {
     "mnemonic": "uwrmsr",
@@ -569188,6 +569433,95 @@
       "isa_set": "WRMSRNS"
     },
     "comment": "SUNMQVNTOldSTVNSTlMNCkNQTDowDQpDQVRFR09SWTpXUk1TUk5TDQpFWFRFTlNJT046V1JNU1JOUw0KSVNBX1NFVDpXUk1TUk5TDQpSRUFMX09QQ09ERTpZDQpBVFRSSUJVVEVTOk5PVFNYDQpJRk9STTpXUk1TUk5TDQpQQVRURVJOOjB4MEYgMHgwMSBNT0RbMGIxMV0gTU9EPTMgUkVHWzBiMDAwXSBSTVswYjExMF0gbm9fcmVmaW5pbmdfcHJlZml4DQpPUEVSQU5EUzpSRUcwPVhFRF9SRUdfRUFYOnI6U1VQUDpkOnUzMiBSRUcxPVhFRF9SRUdfRURYOnI6U1VQUDpkOnUzMiBSRUcyPVhFRF9SRUdfRUNYOnI6U1VQUDpkOnUzMg=="
+  },
+  {
+    "mnemonic": "wrmsrns",
+    "encoding": "vex",
+    "opcode_map": "map7",
+    "opcode": "F6",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "3",
+      "modrm_reg": "0",
+      "mandatory_prefix": "f3",
+      "vector_length": "128",
+      "rex_w": "0",
+      "force_modrm_reg": true
+    },
+    "operands": [
+      {
+        "operand_type": "imm",
+        "encoding": "uimm32",
+        "element_type": "int32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "cpl": 0,
+    "meta_info": {
+      "category": "VEX",
+      "extension": "MSR_IMM",
+      "isa_set": "MSR_IMM"
+    },
+    "exception_class": "msr-imm-vex",
+    "comment": "SUNMQVNTOldSTVNSTlMNCkNQTDowDQpDQVRFR09SWTpWRVgNCkVYVEVOU0lPTjpNU1JfSU1NDQpJU0FfU0VUOk1TUl9JTU0NClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6Tk9UU1ggUklORzANCklGT1JNOldSTVNSTlNfSU1NMzJfR1BSNjR1NjQNClBBVFRFUk46VlYxIDB4RjYgVkYzIE1BUDcgTU9EWzBiMTFdIE1PRD0zIFJFR1swYjAwMF0gUk1bbm5uXSBWTDEyOCBtb2RlNjQgTk9WU1IgVUlNTTMyKCkNCk9QRVJBTkRTOklNTTA6cjpkIFJFRzA9VkdQUjY0X0IoKTpyOnE6dTY0IFJFRzE9WEVEX1JFR19NU1JTOnc6U1VQUA0KRVhDRVBUSU9OUzpNU1ItSU1NLVZFWA=="
+  },
+  {
+    "mnemonic": "wrmsrns",
+    "encoding": "evex",
+    "opcode_map": "map7",
+    "opcode": "F6",
+    "filters": {
+      "mode": "64",
+      "modrm_mod": "3",
+      "modrm_reg": "0",
+      "mandatory_prefix": "f3",
+      "vector_length": "128",
+      "evex_u": "1",
+      "evex_nd": "0",
+      "evex_nf": "0",
+      "force_modrm_reg": true
+    },
+    "operands": [
+      {
+        "operand_type": "imm",
+        "encoding": "uimm32",
+        "element_type": "int32",
+        "width16": 4,
+        "width32": 4,
+        "width64": 4
+      },
+      {
+        "operand_type": "gpr64",
+        "encoding": "modrm_rm",
+        "element_type": "uint64",
+        "width16": 8,
+        "width32": 8,
+        "width64": 8
+      }
+    ],
+    "cpl": 0,
+    "meta_info": {
+      "category": "APX",
+      "extension": "APXEVEX",
+      "isa_set": "APX_F_MSR_IMM"
+    },
+    "exception_class": "msr-imm-evex",
+    "evex": {
+      "mask_flags": [
+      ],
+      "is_eevex": true
+    },
+    "comment": "SUNMQVNTOldSTVNSTlMNCkNQTDowDQpDQVRFR09SWTpBUFgNCkVYVEVOU0lPTjpNU1JfSU1NDQpJU0FfU0VUOkFQWF9GX01TUl9JTU0NClJFQUxfT1BDT0RFOlkNCkFUVFJJQlVURVM6Tk9UU1ggUklORzANCklGT1JNOldSTVNSTlNfSU1NMzJfR1BSNjR1NjRfQVBYDQpQQVRURVJOOkVWViAweEY2IFZGMyBNQVA3IE1PRFswYjExXSBNT0Q9MyBVQklUPTEgUkVHWzBiMDAwXSBSTVtubm5dIE5EPTAgTkY9MCBWTDEyOCBtb2RlNjQgTk9FVlNSIEVWQVBYKCkgVUlNTTMyKCkNCk9QRVJBTkRTOklNTTA6cjpkIFJFRzA9R1BSNjRfQigpOnI6cTp1NjQgUkVHMT1YRURfUkVHX01TUlM6dzpTVVBQDQpFWENFUFRJT05TOk1TUi1JTU0tRVZFWA=="
   },
   {
     "mnemonic": "wrpkru",
