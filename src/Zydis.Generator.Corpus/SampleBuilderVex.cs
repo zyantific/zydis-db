@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 using Zydis.Generator.Core.DecoderTree;
-using Zydis.Generator.Core.Definitions;
 using Zydis.Generator.Enums;
 
 namespace Zydis.Generator.Corpus;
@@ -17,12 +15,13 @@ internal static class SampleBuilderVex
 {
     private const byte VexPrefix = 0xC4;
     private const byte XopPrefix = 0x8F;
-    private const byte AddressSizePrefix = 0x67;
 
-    // R, X and B are stored inverted, and every canonical register index is below 8, so all three bits are set.
+    // R, X and B are stored inverted, and every canonical register index is below 8, so all three bits are set. Both
+    // top bits set also keep the decoder from reading C4 as LES outside 64-bit mode, and the XOP map fields 8 to A
+    // keep it from reading 8F as POP.
     private const byte InvertedRxb = 0xE0;
 
-    public static SampleBuildResult BuildVex(DecoderTreePath path, ModeNode.Slot mode, int id, string formId)
+    public static SampleBuildResult BuildVex(DecoderTreePath path, ModeNode.Slot mode)
     {
         // ZydisDecodeVEX accepts map 0 only in a build with KNC support, for the KNC short branches.
         byte? mmmmm = path.Map switch
@@ -36,10 +35,10 @@ internal static class SampleBuilderVex
             _ => null
         };
 
-        return Build(path, mode, id, formId, VexPrefix, mmmmm);
+        return Build(path, mode, VexPrefix, mmmmm);
     }
 
-    public static SampleBuildResult BuildXop(DecoderTreePath path, ModeNode.Slot mode, int id, string formId)
+    public static SampleBuildResult BuildXop(DecoderTreePath path, ModeNode.Slot mode)
     {
         byte? mmmmm = path.Map switch
         {
@@ -49,22 +48,16 @@ internal static class SampleBuilderVex
             _ => null
         };
 
-        return Build(path, mode, id, formId, XopPrefix, mmmmm);
+        return Build(path, mode, XopPrefix, mmmmm);
     }
 
-    private static SampleBuildResult Build(DecoderTreePath path, ModeNode.Slot mode, int id, string formId,
-        byte prefix, byte? mmmmm)
+    private static SampleBuildResult Build(DecoderTreePath path, ModeNode.Slot mode, byte prefix, byte? mmmmm)
     {
         var steps = path.Steps;
         var definition = path.Definition;
         var encoding = CorpusTags.EncodingTag(path.Encoding);
 
-        if (SampleBuilder.FindArchitecturalConflict(steps, mode, hasRexPrefixes: false) is { } impossible)
-        {
-            return new Impossible(impossible);
-        }
-
-        if (steps.FirstOrDefault(step => !IsVexStep(step)) is { } foreign)
+        if (steps.FirstOrDefault(step => !SampleBuilder.IsPayloadStep(step)) is { } foreign)
         {
             return new Unencodable($"{DecoderTreePath.FormatStep(foreign)} does not apply to the {encoding} encoding");
         }
@@ -74,79 +67,43 @@ internal static class SampleBuilderVex
             return new Unencodable($"{encoding} has no {CorpusTags.MapTag(path.Map)} table");
         }
 
-        if (path.Prefix is not { } refiningPrefix)
-        {
-            return new Unencodable($"the {encoding} table of {CorpusTags.MapTag(path.Map)} has no refining prefix");
-        }
-
-        if (!SampleBuilder.TrySelectPrefixState(steps, mode, SampleBuilder.PayloadPrefixStates, out var prefixes,
+        if (!SampleBuilder.TrySelectPayloadPrefixes(path, mode, out var refiningPrefix, out var prefixes,
                 out var prefixFailure))
         {
             return new Unencodable(prefixFailure);
         }
 
-        if (prefixes.OperandSize66)
-        {
-            var operandSize = steps.First(step => step.Node == SampleBuilder.OperandSizeAxis);
-            return new Unencodable(
-                $"{DecoderTreePath.FormatStep(operandSize)} needs a 66 prefix, which {encoding} does not allow");
-        }
-
-        if (!TryChooseVectorLength(steps, encoding, out var l, out var vectorLengthFailure))
+        if (!SampleBuilder.TryChooseSlot(steps, [SampleBuilder.VectorLengthAxis], ["128", "256"], encoding,
+                out var vectorLength, out var vectorLengthFailure))
         {
             return new Unencodable(vectorLengthFailure);
         }
 
-        var (osz, asz) = EffectiveSizes.Compute(mode, operandSizePrefix: false, prefixes.AddressSize67, prefixes.W,
-            definition.OpsizeMap, definition.AdsizeMap);
-        var operandWidth = EffectiveSizes.ComputeOperandWidth(mode, operandSizePrefix: false, prefixes.W,
-            definition.OpsizeMap);
+        var l = (vectorLength == "256") ? 1 : 0;
 
-        var hasVsib = (definition.Operands ?? []).Any(operand => operand.Type is
-            OperandType.MEMVSIBX or OperandType.MEMVSIBY or OperandType.MEMVSIBZ);
-        if (hasVsib && (asz == 16))
+        var (osz, asz, operandWidth) = EffectiveSizes.Compute(mode, operandSizePrefix: false, prefixes.AddressSize67,
+            prefixes.W, definition.OpsizeMap, definition.AdsizeMap);
+
+        var registers = SampleBuilder.AssignRegisters(definition);
+        if ((registers.VsibIndex is not null) && (asz == 16))
         {
             return new Unencodable("a VSIB operand has no 16-bit address form");
         }
 
-        var registers = SampleBuilder.AssignRegisters(definition);
-        var hasModrmEncoding = SampleBuilder.HasModrmEncoding(definition);
-        var hasModrmStep = steps.Any(step => step.Node is SampleBuilder.ModrmModAxis or
-            SampleBuilder.ModrmModCompactAxis or SampleBuilder.ModrmRegAxis or SampleBuilder.ModrmRmAxis);
-
-        SampleBuilder.Modrm? modrm = null;
-        if (hasModrmEncoding || hasModrmStep)
+        if (!SampleBuilder.TryChooseModrm(steps, definition, registers, asz, forcesModrm: false, out var modrm,
+                out var modrmFailure))
         {
-            if (!SampleBuilder.TryChooseModrm(steps, definition, registers, asz, out var chosen,
-                    out var modrmFailure))
-            {
-                return new Unencodable(modrmFailure);
-            }
-
-            modrm = chosen;
-        }
-
-        // The decoder reads the VSIB index from a SIB byte, which needs rm=4 and a memory form.
-        if (hasVsib && modrm is not { Mod: not 3, Rm: 4 })
-        {
-            return new Unencodable("the ModRM steps exclude the SIB form a VSIB operand needs");
+            return new Unencodable(modrmFailure);
         }
 
         var payload1 = (byte)(InvertedRxb | map);
-        var payload2 = (byte)(((prefixes.W ? 1 : 0) << 7) | ((~(registers.Vvvv ?? 0) & 0x0F) << 3) | (l << 2) |
-            SampleBuilder.PpField(refiningPrefix));
-
-        if (!IsReadAsPrefix(prefix, payload1, mode))
-        {
-            return new Unencodable(
-                $"the {encoding} payload byte {payload1:X2} makes the decoder read {prefix:X2} as an opcode in " +
-                $"{CorpusTags.ModeTag(mode)}-bit mode");
-        }
+        var payload2 = SampleBuilder.WvvvvPpByte(prefixes.W, SampleBuilder.InvertedVvvv(registers.Vvvv), l,
+            refiningPrefix);
 
         var bytes = new List<byte>();
         if (prefixes.AddressSize67)
         {
-            bytes.Add(AddressSizePrefix);
+            bytes.Add(SampleBuilder.AddressSizePrefix);
         }
 
         bytes.Add(prefix);
@@ -156,8 +113,7 @@ internal static class SampleBuilderVex
 
         if (modrm is { } fields)
         {
-            var readsAddressing = hasModrmEncoding && !definition.Flags.HasFlag(InstructionFlagsEnum.ForceRegForm);
-            SampleBuilder.AppendModrm(bytes, fields, asz, readsAddressing, hasVsib ? registers.VsibIndex : null);
+            SampleBuilder.AppendModrm(bytes, fields, asz, registers.VsibIndex);
         }
 
         byte? is4Byte = (registers.Is4 is { } is4) ? (byte)(is4 << 4) : null;
@@ -169,60 +125,9 @@ internal static class SampleBuilderVex
 
         // VEX map 0 exists only in a build with KNC support. The knc tag lets the checker skip the sample in a build
         // without it instead of failing it.
-        var decoderModes = SampleBuilder.GetDecoderModes(steps, hasRex2: false,
+        var decoderModes = SampleBuilder.GetDecoderModes(steps,
             requiresKnc: (path.Encoding is InstructionEncoding.VEX) && (path.Map is OpcodeMap.MAP0));
 
-        return new Built(SampleBuilder.CreateSample(path, mode, bytes, decoderModes, osz, asz, id, formId));
-    }
-
-    /// <summary>
-    /// Chooses the L bit from the <c>vector_length</c> steps, 128 bits when the path leaves the axis open.
-    /// </summary>
-    private static bool TryChooseVectorLength(IReadOnlyList<PathStep> steps, string encoding, out int l,
-        out string failure)
-    {
-        var allowed = new HashSet<string>(["128", "256"], StringComparer.Ordinal);
-
-        foreach (var step in steps.Where(step => step.Node == SampleBuilder.VectorLengthAxis))
-        {
-            allowed.IntersectWith(step.Slots);
-            if (allowed.Count == 0)
-            {
-                l = 0;
-                failure = $"{DecoderTreePath.FormatStep(step)} has no {encoding} encoding";
-                return false;
-            }
-        }
-
-        l = allowed.Contains("128") ? 0 : 1;
-        failure = string.Empty;
-        return true;
-    }
-
-    /// <summary>
-    /// The test <c>ZydisNodeHandlerOpcode</c> applies to the byte after <c>C4</c> or <c>8F</c>. Outside 64-bit mode
-    /// <c>C4</c> is LES unless both top bits of that byte are set. <c>8F</c> is POP unless its map field is 8 or above,
-    /// in every mode.
-    /// </summary>
-    private static bool IsReadAsPrefix(byte prefix, byte payload1, ModeNode.Slot mode)
-    {
-        return (prefix == XopPrefix)
-            ? ((payload1 & 0x1F) >= 0x08)
-            : ((mode is ModeNode.Slot.M64) || ((payload1 & 0xC0) == 0xC0));
-    }
-
-    private static bool IsVexStep(PathStep step)
-    {
-        return step.Node.StartsWith(SampleBuilder.FeatureAxisPrefix, StringComparison.Ordinal) || step.Node is
-            SampleBuilder.AddressSizeAxis or
-            SampleBuilder.ModeAxis or
-            SampleBuilder.ModeCompactAxis or
-            SampleBuilder.ModrmModAxis or
-            SampleBuilder.ModrmModCompactAxis or
-            SampleBuilder.ModrmRegAxis or
-            SampleBuilder.ModrmRmAxis or
-            SampleBuilder.OperandSizeAxis or
-            SampleBuilder.RexWAxis or
-            SampleBuilder.VectorLengthAxis;
+        return new Built(bytes, decoderModes, osz, asz);
     }
 }

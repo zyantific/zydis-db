@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 using Zydis.Generator.Core.DecoderTree;
@@ -75,10 +74,10 @@ internal sealed class CorpusGenerator
 
             foreach (var mode in ExpandModes(path))
             {
-                switch (SampleBuilder.Build(path, mode, id, form))
+                switch (SampleBuilder.Build(path, mode))
                 {
                     case Built built:
-                        accumulator.Samples.Add(built.Sample);
+                        accumulator.Samples.Add(SampleBuilder.CreateSample(path, mode, built, id, form));
                         accumulator.Sampled.Add(definition);
                         break;
                     case Impossible impossible:
@@ -209,7 +208,7 @@ internal sealed class CorpusGenerator
         {
             return [.. samples
                 .OrderBy(sample => sample.Id)
-                .ThenBy(sample => int.Parse(sample.Mode, CultureInfo.InvariantCulture))
+                .ThenBy(sample => sample.Mode)
                 .ThenBy(sample => sample.Path, StringComparer.Ordinal)];
         }
 

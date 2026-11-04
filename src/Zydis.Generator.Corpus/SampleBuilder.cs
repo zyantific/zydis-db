@@ -18,6 +18,7 @@ namespace Zydis.Generator.Corpus;
 internal static class SampleBuilder
 {
     internal const string AddressSizeAxis = "address_size";
+    internal const string EvexUAxis = "evex_u";
     internal const string FeatureAxisPrefix = "feature_";
     internal const string MandatoryPrefixAxis = "mandatory_prefix";
     internal const string ModeAxis = "mode";
@@ -34,6 +35,8 @@ internal static class SampleBuilder
     internal const string SwitchTableAxisPrefix = "switch_table_";
     internal const string SwitchTableDefaultSlot = "default";
     internal const string VectorLengthAxis = "vector_length";
+
+    internal const byte AddressSizePrefix = 0x67;
 
     private static readonly int[] AllModrmFieldValues = [0, 1, 2, 3, 4, 5, 6, 7];
     private static readonly int[] RegisterFormMods = [3];
@@ -56,7 +59,7 @@ internal static class SampleBuilder
     /// with a 66 come last and only serve to name the operand_size step that needs one. The pp field replaces the
     /// refining prefix bytes.
     /// </remarks>
-    internal static readonly PrefixState[] PayloadPrefixStates =
+    private static readonly PrefixState[] PayloadPrefixStates =
     [
         .. from operandSize66 in Booleans
            from addressSize67 in Booleans
@@ -67,39 +70,44 @@ internal static class SampleBuilder
     /// <summary>
     /// Builds the sample of <paramref name="path"/> in <paramref name="mode"/>.
     /// </summary>
-    public static SampleBuildResult Build(DecoderTreePath path, ModeNode.Slot mode, int id, string formId)
+    public static SampleBuildResult Build(DecoderTreePath path, ModeNode.Slot mode)
     {
         ArgumentNullException.ThrowIfNull(path);
-        ArgumentNullException.ThrowIfNull(formId);
+
+        var hasRexPrefixes = path.Encoding is InstructionEncoding.Default or InstructionEncoding.AMD3DNOW;
+        if (FindArchitecturalConflict(path.Steps, mode, hasRexPrefixes) is { } impossible)
+        {
+            return new Impossible(impossible);
+        }
 
         return path.Encoding switch
         {
-            InstructionEncoding.Default or InstructionEncoding.AMD3DNOW =>
-                SampleBuilderLegacy.Build(path, mode, id, formId),
-            InstructionEncoding.VEX => SampleBuilderVex.BuildVex(path, mode, id, formId),
-            InstructionEncoding.XOP => SampleBuilderVex.BuildXop(path, mode, id, formId),
-            InstructionEncoding.EVEX => SampleBuilderEvex.BuildEvex(path, mode, id, formId),
-            InstructionEncoding.MVEX => SampleBuilderMvex.BuildMvex(path, mode, id, formId),
-            _ => new Unencodable($"no builder for {CorpusTags.EncodingTag(path.Encoding)}")
+            InstructionEncoding.Default or InstructionEncoding.AMD3DNOW => SampleBuilderLegacy.Build(path, mode),
+            InstructionEncoding.VEX => SampleBuilderVex.BuildVex(path, mode),
+            InstructionEncoding.XOP => SampleBuilderVex.BuildXop(path, mode),
+            InstructionEncoding.EVEX => SampleBuilderEvex.BuildEvex(path, mode),
+            InstructionEncoding.MVEX => SampleBuilderMvex.BuildMvex(path, mode),
+            _ => throw new ArgumentOutOfRangeException(nameof(path), path.Encoding, null)
         };
     }
 
-    public static CorpusSample CreateSample(DecoderTreePath path, ModeNode.Slot mode, IReadOnlyCollection<byte> bytes,
-        DecoderModes decoderModes, int osz, int asz, int id, string formId)
+    public static CorpusSample CreateSample(DecoderTreePath path, ModeNode.Slot mode, Built built, int id,
+        string formId)
     {
         ArgumentNullException.ThrowIfNull(path);
-        ArgumentNullException.ThrowIfNull(bytes);
+        ArgumentNullException.ThrowIfNull(built);
+        ArgumentNullException.ThrowIfNull(formId);
 
         return new CorpusSample(
-            Convert.ToHexString([.. bytes]),
-            CorpusTags.ModeTag(mode),
-            decoderModes.Enable,
-            decoderModes.Disable,
-            CorpusTags.EncodingTag(path.Encoding),
-            CorpusTags.MapTag(path.Map),
-            path.Opcode.ToString("X2", CultureInfo.InvariantCulture),
-            osz.ToString(CultureInfo.InvariantCulture),
-            asz.ToString(CultureInfo.InvariantCulture),
+            Convert.ToHexString([.. built.Bytes]),
+            mode,
+            built.DecoderModes.Enable,
+            built.DecoderModes.Disable,
+            path.Encoding,
+            path.Map,
+            path.Opcode,
+            built.Osz,
+            built.Asz,
             id,
             formId,
             path.Definition.Mnemonic,
@@ -117,11 +125,9 @@ internal static class SampleBuilder
     /// mode has. VEX, XOP, EVEX and MVEX carry them in their payload in every mode.
     /// </param>
     /// <returns>The reason for the report, or <see langword="null"/> if the mode can reach every step.</returns>
-    public static string? FindArchitecturalConflict(IReadOnlyList<PathStep> steps, ModeNode.Slot mode,
+    private static string? FindArchitecturalConflict(IReadOnlyList<PathStep> steps, ModeNode.Slot mode,
         bool hasRexPrefixes)
     {
-        ArgumentNullException.ThrowIfNull(steps);
-
         var is64 = mode is ModeNode.Slot.M64;
 
         foreach (var step in steps)
@@ -220,6 +226,46 @@ internal static class SampleBuilder
         return false;
     }
 
+    /// <summary>
+    /// Selects the refining prefix and the prefix state of an encoding that carries W and the refining prefix in its
+    /// payload.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> if the table has a refining prefix and a state without a <c>66</c> byte serves every
+    /// prefix step.
+    /// </returns>
+    internal static bool TrySelectPayloadPrefixes(DecoderTreePath path, ModeNode.Slot mode,
+        out RefiningPrefix refiningPrefix, out PrefixState prefixes, out string failure)
+    {
+        ArgumentNullException.ThrowIfNull(path);
+
+        var encoding = CorpusTags.EncodingTag(path.Encoding);
+        prefixes = default;
+
+        if (path.Prefix is not { } prefix)
+        {
+            refiningPrefix = default;
+            failure = $"the {encoding} table of {CorpusTags.MapTag(path.Map)} has no refining prefix";
+            return false;
+        }
+
+        refiningPrefix = prefix;
+
+        if (!TrySelectPrefixState(path.Steps, mode, PayloadPrefixStates, out prefixes, out failure))
+        {
+            return false;
+        }
+
+        if (prefixes.OperandSize66)
+        {
+            var operandSize = path.Steps.First(step => step.Node == OperandSizeAxis);
+            failure = $"{DecoderTreePath.FormatStep(operandSize)} needs a 66 prefix, which {encoding} does not allow";
+            return false;
+        }
+
+        return true;
+    }
+
     private static bool Routes(PathStep step, PrefixState state, ModeNode.Slot mode)
     {
         return step.Slots.Contains(RoutePrefixAxis(step.Node, state, mode));
@@ -255,27 +301,50 @@ internal static class SampleBuilder
     }
 
     /// <summary>
+    /// Chooses the first slot of <paramref name="preference"/> that every step of <paramref name="axes"/> serves. An
+    /// axis the path leaves open takes the first slot.
+    /// </summary>
+    /// <param name="encoding">The encoding tag the failure reason names.</param>
+    internal static bool TryChooseSlot(IReadOnlyList<PathStep> steps, string[] axes, string[] preference,
+        string encoding, out string slot, out string failure)
+    {
+        ArgumentNullException.ThrowIfNull(steps);
+
+        var allowed = new HashSet<string>(preference, StringComparer.Ordinal);
+        PathStep? first = null;
+
+        foreach (var step in steps.Where(step => axes.Contains(step.Node)))
+        {
+            allowed.IntersectWith(step.Slots);
+            if (allowed.Count == 0)
+            {
+                slot = string.Empty;
+                failure = ((first is null) || !preference.Any(step.Slots.Contains))
+                    ? $"{DecoderTreePath.FormatStep(step)} has no {encoding} encoding"
+                    : $"{DecoderTreePath.FormatStep(first)} contradicts {DecoderTreePath.FormatStep(step)}";
+                return false;
+            }
+
+            first ??= step;
+        }
+
+        slot = preference.First(allowed.Contains);
+        failure = string.Empty;
+        return true;
+    }
+
+    /// <summary>
     /// The decoder modes the path depends on. A <c>feature_*</c> step takes slot <c>0</c> when it serves it, which
     /// needs no mode change for most features, and still names the mode so the checker pins it.
     /// </summary>
     /// <param name="steps">The path steps.</param>
-    /// <param name="hasRex2">
-    /// <see langword="true"/> if the sample carries a REX2 prefix, which puts <c>apx</c> on the enable list.
-    /// </param>
+    /// <param name="apx">How the sample depends on APX.</param>
     /// <param name="requiresKnc">
     /// <see langword="true"/> if the sample decodes only in a build with KNC support, which puts <c>knc</c> on the
     /// enable list.
     /// </param>
-    /// <param name="requiresApx">
-    /// <see langword="true"/> if the sample depends on APX without a REX2 prefix, as an EEVEX, map 4 or map 7 form,
-    /// which puts <c>apx</c> on the enable list.
-    /// </param>
-    /// <param name="forbidsApx">
-    /// <see langword="true"/> if the decoder routes the sample to its leaf only with APX off, which puts <c>apx</c> on
-    /// the disable list.
-    /// </param>
-    public static DecoderModes GetDecoderModes(IReadOnlyList<PathStep> steps, bool hasRex2, bool requiresKnc = false,
-        bool requiresApx = false, bool forbidsApx = false)
+    public static DecoderModes GetDecoderModes(IReadOnlyList<PathStep> steps, ApxRequirement apx = ApxRequirement.None,
+        bool requiresKnc = false)
     {
         ArgumentNullException.ThrowIfNull(steps);
 
@@ -297,15 +366,15 @@ internal static class SampleBuilder
             }
         }
 
-        // APX is on by default. Naming it keeps a changed default from silently breaking the APX samples.
-        if (hasRex2 || requiresApx)
+        switch (apx)
         {
-            enable.Add("apx");
-        }
-
-        if (forbidsApx)
-        {
-            disable.Add("apx");
+            case ApxRequirement.Forbidden:
+                disable.Add("apx");
+                break;
+            case ApxRequirement.Required:
+                // APX is on by default. Naming it keeps a changed default from silently breaking the APX samples.
+                enable.Add("apx");
+                break;
         }
 
         if (requiresKnc)
@@ -326,21 +395,24 @@ internal static class SampleBuilder
     {
         ArgumentNullException.ThrowIfNull(definition);
 
-        var next = new Dictionary<RegisterClass, int>();
+        var next = new Dictionary<RegisterKind, int>();
         int? reg = null;
         int? rm = null;
         int? vvvv = null;
         int? is4 = null;
+        var hasVsib = false;
 
         foreach (var operand in definition.Operands ?? [])
         {
-            var registerClass = GetRegisterClass(operand.Type);
-            if (registerClass is RegisterClass.None)
+            hasVsib |= operand.Type is OperandType.MEMVSIBX or OperandType.MEMVSIBY or OperandType.MEMVSIBZ;
+
+            var registerKind = GetRegisterKind(operand.Type);
+            if (registerKind is RegisterKind.INVALID)
             {
                 continue;
             }
 
-            var index = next.GetValueOrDefault(registerClass, FirstRegisterIndex(registerClass));
+            var index = next.GetValueOrDefault(registerKind, FirstRegisterIndex(registerKind));
 
             switch (operand.Encoding)
             {
@@ -360,10 +432,10 @@ internal static class SampleBuilder
                     continue;
             }
 
-            next[registerClass] = index + 1;
+            next[registerKind] = index + 1;
         }
 
-        var vsibIndex = next.GetValueOrDefault(RegisterClass.Vector, FirstRegisterIndex(RegisterClass.Vector));
+        int? vsibIndex = hasVsib ? next.GetValueOrDefault(RegisterKind.VR, FirstRegisterIndex(RegisterKind.VR)) : null;
 
         return new RegisterAssignment(reg, rm, vvvv, is4, vsibIndex);
     }
@@ -372,10 +444,8 @@ internal static class SampleBuilder
     /// <see langword="true"/> if the decoder reads a ModRM byte for <paramref name="definition"/>, by the rule the
     /// generator applies to the encoding info of the definition.
     /// </summary>
-    public static bool HasModrmEncoding(InstructionDefinition definition)
+    private static bool HasModrmEncoding(InstructionDefinition definition)
     {
-        ArgumentNullException.ThrowIfNull(definition);
-
         var pattern = definition.Pattern;
         if ((pattern is not null) && (pattern.ContainsKey(ModrmModAxis) || pattern.ContainsKey(ModrmRegAxis) ||
                 pattern.ContainsKey(ModrmRmAxis)))
@@ -388,17 +458,60 @@ internal static class SampleBuilder
     }
 
     /// <summary>
-    /// Chooses the ModRM fields from the path slots and the register assignment. A <c>modrm_mod</c> axis the path
-    /// leaves open takes the register form unless an operand in <c>rm</c> is a memory operand.
+    /// Chooses the ModRM fields when the decoder reads a ModRM byte for the path, which it does for a definition with
+    /// a ModRM in its encoding info and for a path through a ModRM or <c>evex_u</c> filter.
     /// </summary>
-    /// <returns><see langword="true"/> if every ModRM step has a slot the fields can take.</returns>
+    /// <param name="forcesModrm">
+    /// <see langword="true"/> if the decoder reads a ModRM byte with its addressing form, whatever the encoding info of
+    /// the definition says.
+    /// </param>
+    /// <param name="modrm">The ModRM fields, or <see langword="null"/> if the decoder reads no ModRM byte.</param>
+    /// <param name="failure">The reason the path leaves no ModRM byte the sample can carry.</param>
+    /// <returns>
+    /// <see langword="true"/> if every ModRM step has a slot the fields can take and a VSIB operand gets its SIB form.
+    /// </returns>
     public static bool TryChooseModrm(IReadOnlyList<PathStep> steps, InstructionDefinition definition,
-        RegisterAssignment registers, int addressWidth, out Modrm modrm, out string failure)
+        RegisterAssignment registers, int addressWidth, bool forcesModrm, out Modrm? modrm, out string failure)
     {
         ArgumentNullException.ThrowIfNull(steps);
         ArgumentNullException.ThrowIfNull(definition);
         ArgumentNullException.ThrowIfNull(registers);
 
+        modrm = null;
+
+        var hasModrmEncoding = forcesModrm || HasModrmEncoding(definition);
+
+        // ZydisNodeHandlerEvexU reads the ModRM byte itself, because U means X4 on a memory form under APX.
+        if (hasModrmEncoding || steps.Any(step => IsModrmAxis(step.Node) || (step.Node == EvexUAxis)))
+        {
+            if (!TryChooseModrmFields(steps, definition, registers, addressWidth, hasModrmEncoding, out var fields,
+                    out failure))
+            {
+                return false;
+            }
+
+            modrm = fields;
+        }
+
+        // The decoder reads the VSIB index from a SIB byte, which needs rm=4 and a memory form.
+        if ((registers.VsibIndex is not null) && modrm is not { Mod: not 3, Rm: 4 })
+        {
+            failure = "the ModRM steps exclude the SIB form a VSIB operand needs";
+            return false;
+        }
+
+        failure = string.Empty;
+        return true;
+    }
+
+    /// <summary>
+    /// Chooses the ModRM fields from the path slots and the register assignment. A <c>modrm_mod</c> axis the path
+    /// leaves open takes the register form unless an operand in <c>rm</c> is a memory operand.
+    /// </summary>
+    /// <returns><see langword="true"/> if every ModRM step has a slot the fields can take.</returns>
+    private static bool TryChooseModrmFields(IReadOnlyList<PathStep> steps, InstructionDefinition definition,
+        RegisterAssignment registers, int addressWidth, bool hasModrmEncoding, out Modrm modrm, out string failure)
+    {
         modrm = default;
 
         var mods = FieldValues(steps, ModrmModAxis);
@@ -432,7 +545,7 @@ internal static class SampleBuilder
             .Any(operand => (operand.Encoding is OperandEncoding.ModrmRm) && IsMemoryOperand(operand.Type));
 
         int[] modOrder = prefersMemory ? [0, 1, 2, 3] : [3, 0, 1, 2];
-        var mod = modOrder.Cast<int?>().FirstOrDefault(value => mods.Contains(value!.Value));
+        var mod = Choose(mods, modOrder);
         if (mod is null)
         {
             failure = "the ModRM steps exclude every mod value";
@@ -452,15 +565,40 @@ internal static class SampleBuilder
             return false;
         }
 
-        modrm = new Modrm(mod.Value, reg.Value, rm.Value);
+        modrm = new Modrm(mod.Value, reg.Value, rm.Value, ReadsAddressing: hasModrmEncoding && !isForcedRegisterForm);
         failure = string.Empty;
         return true;
 
         static int[] Prefer(int? preferred, int[] order) =>
             (preferred is { } value) ? [value & 0x07, .. order.Where(other => other != (value & 0x07))] : order;
 
-        static int? Choose(HashSet<int> allowed, int[] order) =>
-            order.Cast<int?>().FirstOrDefault(value => allowed.Contains(value!.Value));
+        static int? Choose(HashSet<int> allowed, int[] order)
+        {
+            var index = Array.FindIndex(order, allowed.Contains);
+            return (index < 0) ? null : order[index];
+        }
+    }
+
+    internal static bool IsModrmAxis(string node)
+    {
+        return node is ModrmModAxis or ModrmModCompactAxis or ModrmRegAxis or ModrmRmAxis;
+    }
+
+    /// <summary>
+    /// <see langword="true"/> for a step on an axis that every encoding can route.
+    /// </summary>
+    internal static bool IsSharedStep(PathStep step)
+    {
+        return step.Node.StartsWith(FeatureAxisPrefix, StringComparison.Ordinal) || IsModrmAxis(step.Node) ||
+            step.Node is AddressSizeAxis or ModeAxis or ModeCompactAxis or OperandSizeAxis or RexWAxis;
+    }
+
+    /// <summary>
+    /// <see langword="true"/> for a step on an axis that the EVEX, MVEX, VEX and XOP encodings can route.
+    /// </summary>
+    internal static bool IsPayloadStep(PathStep step)
+    {
+        return IsSharedStep(step) || (step.Node == VectorLengthAxis);
     }
 
     /// <summary>
@@ -471,21 +609,16 @@ internal static class SampleBuilder
     /// <param name="bytes">The sample bytes.</param>
     /// <param name="modrm">The ModRM fields.</param>
     /// <param name="addressWidth">The effective address size.</param>
-    /// <param name="readsAddressing">
-    /// <see langword="false"/> if the definition reads no SIB byte and displacement, because it has no ModRM in its
-    /// encoding info (only a filter read the byte) or it forces the register form.
-    /// </param>
     /// <param name="sibIndex">
     /// The SIB index register in place of rcx, for the vector register of a VSIB operand.
     /// </param>
-    public static void AppendModrm(List<byte> bytes, Modrm modrm, int addressWidth, bool readsAddressing,
-        int? sibIndex = null)
+    public static void AppendModrm(List<byte> bytes, Modrm modrm, int addressWidth, int? sibIndex = null)
     {
         ArgumentNullException.ThrowIfNull(bytes);
 
         bytes.Add((byte)((modrm.Mod << 6) | (modrm.Reg << 3) | modrm.Rm));
 
-        if (!readsAddressing || (modrm.Mod == 3))
+        if (!modrm.ReadsAddressing || (modrm.Mod == 3))
         {
             return;
         }
@@ -526,7 +659,7 @@ internal static class SampleBuilder
     /// <param name="definition">The definition.</param>
     /// <param name="operandWidth">
     /// The operand width that selects the size of variable immediates, see
-    /// <see cref="EffectiveSizes.ComputeOperandWidth"/>.
+    /// <see cref="EffectiveSizes.Compute"/>.
     /// </param>
     /// <param name="addressWidth">The effective address size, which selects the size of a displacement operand.</param>
     /// <param name="is4Byte">
@@ -602,9 +735,26 @@ internal static class SampleBuilder
     }
 
     /// <summary>
+    /// The vvvv field of an EVEX, MVEX, VEX or XOP payload, which stores the register index inverted.
+    /// </summary>
+    internal static int InvertedVvvv(int? index)
+    {
+        return ~(index ?? 0) & 0x0F;
+    }
+
+    /// <summary>
+    /// The payload byte the EVEX, MVEX, VEX and XOP encodings share: W in bit 7, vvvv in bits 6 to 3, a bit of the
+    /// encoding in bit 2 and pp in bits 1 and 0.
+    /// </summary>
+    internal static byte WvvvvPpByte(bool w, int vvvv, int bit2, RefiningPrefix prefix)
+    {
+        return (byte)(((w ? 1 : 0) << 7) | (vvvv << 3) | (bit2 << 2) | PpField(prefix));
+    }
+
+    /// <summary>
     /// The pp field of an EVEX, MVEX, VEX or XOP payload, which stands for the refining prefix byte.
     /// </summary>
-    internal static int PpField(RefiningPrefix prefix)
+    private static int PpField(RefiningPrefix prefix)
     {
         return prefix switch
         {
@@ -677,35 +827,35 @@ internal static class SampleBuilder
             OperandType.AGEN or OperandType.AGENNoRel or OperandType.MIB;
     }
 
-    private static RegisterClass GetRegisterClass(OperandType type)
+    private static RegisterKind GetRegisterKind(OperandType type)
     {
         return type switch
         {
             OperandType.GPR8 or OperandType.GPR16 or OperandType.GPR32 or OperandType.GPR64 or
                 OperandType.GPR16_32_64 or OperandType.GPR32_32_64 or OperandType.GPR16_32_32 or
-                OperandType.GPRASZ => RegisterClass.Gpr,
-            OperandType.BND => RegisterClass.Bound,
-            OperandType.BSR => RegisterClass.BlockScale,
-            OperandType.CR => RegisterClass.Control,
-            OperandType.DR => RegisterClass.Debug,
-            OperandType.FPR => RegisterClass.X87,
-            OperandType.MASK => RegisterClass.Mask,
-            OperandType.MMX => RegisterClass.Mmx,
-            OperandType.SREG => RegisterClass.Segment,
-            OperandType.TMM => RegisterClass.Tile,
-            OperandType.XMM or OperandType.YMM or OperandType.ZMM => RegisterClass.Vector,
-            _ => RegisterClass.None
+                OperandType.GPRASZ => RegisterKind.GPR,
+            OperandType.BND => RegisterKind.BOUND,
+            OperandType.BSR => RegisterKind.BSR,
+            OperandType.CR => RegisterKind.CONTROL,
+            OperandType.DR => RegisterKind.DEBUG,
+            OperandType.FPR => RegisterKind.X87,
+            OperandType.MASK => RegisterKind.MASK,
+            OperandType.MMX => RegisterKind.MMX,
+            OperandType.SREG => RegisterKind.SEGMENT,
+            OperandType.TMM => RegisterKind.TMM,
+            OperandType.XMM or OperandType.YMM or OperandType.ZMM => RegisterKind.VR,
+            _ => RegisterKind.INVALID
         };
     }
 
-    private static int FirstRegisterIndex(RegisterClass registerClass)
+    private static int FirstRegisterIndex(RegisterKind registerKind)
     {
-        return registerClass switch
+        return registerKind switch
         {
-            // The classes with holes start at the first index the decoder accepts. Index 0 of a segment register is
+            // The kinds with holes start at the first index the decoder accepts. Index 0 of a segment register is
             // ES, which unlike CS is a valid destination.
-            RegisterClass.BlockScale or RegisterClass.Bound or RegisterClass.Control or RegisterClass.Debug or
-                RegisterClass.Segment or RegisterClass.Tile => 0,
+            RegisterKind.BOUND or RegisterKind.BSR or RegisterKind.CONTROL or RegisterKind.DEBUG or
+                RegisterKind.SEGMENT or RegisterKind.TMM => 0,
 
             // Starting at 1 keeps the register operands apart from the [rax] memory base.
             _ => 1
@@ -734,35 +884,56 @@ internal static class SampleBuilder
             (Rex2 ? 2 : ((W || B) ? 1 : 0));
     }
 
-    internal readonly record struct Modrm(int Mod, int Reg, int Rm);
+    /// <param name="ReadsAddressing">
+    /// <see langword="false"/> if the decoder reads no SIB byte and displacement, because the definition has no ModRM
+    /// in its encoding info (only a filter read the byte) or it forces the register form.
+    /// </param>
+    internal readonly record struct Modrm(int Mod, int Reg, int Rm, bool ReadsAddressing);
 
     /// <param name="Reg">The register index of the operand in <c>ModRM.reg</c>, if any.</param>
     /// <param name="Rm">The register index of the register operand in <c>ModRM.rm</c>, if any.</param>
     /// <param name="Vvvv">The register index of the operand in <c>vvvv</c>, if any.</param>
     /// <param name="Is4">The register index of the operand in the high nibble of the <c>is4</c> byte, if any.</param>
     /// <param name="VsibIndex">
-    /// The lowest vector register index that no register operand takes. The decoder rejects a gather whose VSIB index
-    /// equals its destination or its mask.
+    /// For a definition with a VSIB operand, the lowest vector register index that no register operand takes. The
+    /// decoder rejects a gather whose VSIB index equals its destination or its mask.
     /// </param>
-    internal sealed record RegisterAssignment(int? Reg, int? Rm, int? Vvvv, int? Is4, int VsibIndex);
+    internal sealed record RegisterAssignment(int? Reg, int? Rm, int? Vvvv, int? Is4, int? VsibIndex)
+    {
+        /// <summary>
+        /// The first of <see cref="Reg"/>, <see cref="Rm"/>, <see cref="Vvvv"/> and <see cref="VsibIndex"/> that is 8
+        /// or above, which needs a register extension bit.
+        /// </summary>
+        public int? WideIndex
+        {
+            get
+            {
+                int?[] indices = [Reg, Rm, Vvvv, VsibIndex];
+                return indices.FirstOrDefault(index => index >= 8);
+            }
+        }
+    }
 
     /// <param name="Enable">The decoder modes to enable, comma-separated, or <c>-</c>.</param>
     /// <param name="Disable">The decoder modes to disable, comma-separated, or <c>-</c>.</param>
     internal readonly record struct DecoderModes(string Enable, string Disable);
 
-    private enum RegisterClass
+    /// <summary>
+    /// How a sample depends on the <c>apx</c> decoder mode.
+    /// </summary>
+    internal enum ApxRequirement
     {
         None,
-        BlockScale,
-        Bound,
-        Control,
-        Debug,
-        Gpr,
-        Mask,
-        Mmx,
-        Segment,
-        Tile,
-        Vector,
-        X87
+
+        /// <summary>
+        /// The decoder routes the sample to its leaf only with APX off, which puts <c>apx</c> on the disable list.
+        /// </summary>
+        Forbidden,
+
+        /// <summary>
+        /// The sample carries a REX2 prefix or is an EEVEX, map 4 or map 7 form, which puts <c>apx</c> on the enable
+        /// list.
+        /// </summary>
+        Required
     }
 }

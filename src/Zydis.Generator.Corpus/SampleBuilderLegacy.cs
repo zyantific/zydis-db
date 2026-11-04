@@ -16,16 +16,15 @@ internal static class SampleBuilderLegacy
     // F3 before F2, which is the slot order of mandatory_prefix and gives a bare prefix_group1=1 step an F3.
     private static readonly byte[] Group1Prefixes = [0x00, 0xF3, 0xF2];
 
-    public static SampleBuildResult Build(DecoderTreePath path, ModeNode.Slot mode, int id, string formId)
+    // Static initializers run in textual order, so these two follow the Group1Prefixes they read.
+    private static readonly SampleBuilder.PrefixState[] PrefixStates64 = CreateLegacyPrefixStates(is64: true);
+    private static readonly SampleBuilder.PrefixState[] PrefixStatesNot64 = CreateLegacyPrefixStates(is64: false);
+
+    public static SampleBuildResult Build(DecoderTreePath path, ModeNode.Slot mode)
     {
         var steps = path.Steps;
         var definition = path.Definition;
         var is3DNow = path.Encoding is InstructionEncoding.AMD3DNOW;
-
-        if (SampleBuilder.FindArchitecturalConflict(steps, mode, hasRexPrefixes: true) is { } impossible)
-        {
-            return new Impossible(impossible);
-        }
 
         if (steps.FirstOrDefault(step => !IsLegacyStep(step)) is { } foreign)
         {
@@ -43,32 +42,19 @@ internal static class SampleBuilderLegacy
             return new Unencodable($"REX2 has no {CorpusTags.MapTag(path.Map)} table");
         }
 
-        // A 66 that the definition consumes as its mandatory prefix does not override the operand size. No 3DNow
-        // definition consumes one.
-        var consumes66 = !is3DNow && (prefixes.MandatoryCandidate == 0x66) && ConsumesMandatoryPrefix(definition);
+        // A 66 that the definition consumes as its mandatory prefix does not override the operand size.
+        var consumes66 = (prefixes.MandatoryCandidate == 0x66) && ConsumesMandatoryPrefix(definition);
         var operandSizePrefix = prefixes.OperandSize66 && !consumes66;
 
-        var (osz, asz) = EffectiveSizes.Compute(mode, operandSizePrefix, prefixes.AddressSize67, prefixes.W,
-            definition.OpsizeMap, definition.AdsizeMap);
-        var operandWidth = EffectiveSizes.ComputeOperandWidth(mode, operandSizePrefix, prefixes.W,
-            definition.OpsizeMap);
-
-        var hasModrmEncoding = SampleBuilder.HasModrmEncoding(definition);
-        var hasModrmStep = steps.Any(step => step.Node is SampleBuilder.ModrmModAxis or
-            SampleBuilder.ModrmModCompactAxis or SampleBuilder.ModrmRegAxis or SampleBuilder.ModrmRmAxis);
+        var (osz, asz, operandWidth) = EffectiveSizes.Compute(mode, operandSizePrefix, prefixes.AddressSize67,
+            prefixes.W, definition.OpsizeMap, definition.AdsizeMap);
 
         // The decoder reads the ModRM byte of every 3DNow instruction through the definition at slot 0C of the 3DNow
         // table, before the suffix opcode selects the actual definition.
-        SampleBuilder.Modrm? modrm = null;
-        if (hasModrmEncoding || hasModrmStep || is3DNow)
+        if (!SampleBuilder.TryChooseModrm(steps, definition, SampleBuilder.AssignRegisters(definition), asz,
+                forcesModrm: is3DNow, out var modrm, out var modrmFailure))
         {
-            if (!SampleBuilder.TryChooseModrm(steps, definition, SampleBuilder.AssignRegisters(definition), asz,
-                    out var chosen, out var modrmFailure))
-            {
-                return new Unencodable(modrmFailure);
-            }
-
-            modrm = chosen;
+            return new Unencodable(modrmFailure);
         }
 
         var bytes = new List<byte>();
@@ -80,9 +66,6 @@ internal static class SampleBuilderLegacy
             bytes.AddRange(EscapeBytes(path.Map));
         }
 
-        var readsAddressing = (hasModrmEncoding || is3DNow) &&
-            !definition.Flags.HasFlag(InstructionFlagsEnum.ForceRegForm);
-
         if (!is3DNow)
         {
             bytes.Add(path.Opcode);
@@ -90,7 +73,7 @@ internal static class SampleBuilderLegacy
 
         if (modrm is { } fields)
         {
-            SampleBuilder.AppendModrm(bytes, fields, asz, readsAddressing);
+            SampleBuilder.AppendModrm(bytes, fields, asz);
         }
 
         // The 3DNow opcode is a suffix that follows the ModRM, SIB and displacement bytes.
@@ -104,48 +87,34 @@ internal static class SampleBuilderLegacy
             return new Unencodable(immediateFailure);
         }
 
-        var decoderModes = SampleBuilder.GetDecoderModes(steps, prefixes.Rex2);
+        var decoderModes = SampleBuilder.GetDecoderModes(steps,
+            prefixes.Rex2 ? SampleBuilder.ApxRequirement.Required : SampleBuilder.ApxRequirement.None);
 
-        return new Built(SampleBuilder.CreateSample(path, mode, bytes, decoderModes, osz, asz, id, formId));
+        return new Built(bytes, decoderModes, osz, asz);
     }
 
     /// <summary>
     /// The legacy prefix, REX and REX2 combinations a legacy or 3DNow sample can carry in <paramref name="mode"/>,
     /// fewest bytes first.
     /// </summary>
-    private static IReadOnlyList<SampleBuilder.PrefixState> LegacyPrefixStates(ModeNode.Slot mode)
+    private static SampleBuilder.PrefixState[] LegacyPrefixStates(ModeNode.Slot mode)
     {
-        var states = new List<SampleBuilder.PrefixState>();
+        return (mode is ModeNode.Slot.M64) ? PrefixStates64 : PrefixStatesNot64;
+    }
 
-        foreach (var rex2 in SampleBuilder.Booleans)
-        {
-            foreach (var w in SampleBuilder.Booleans)
-            {
-                foreach (var b in SampleBuilder.Booleans)
-                {
-                    if ((rex2 || w || b) && (mode is not ModeNode.Slot.M64))
-                    {
-                        continue;
-                    }
-
-                    foreach (var addressSize67 in SampleBuilder.Booleans)
-                    {
-                        foreach (var group1 in Group1Prefixes)
-                        {
-                            foreach (var operandSize66 in SampleBuilder.Booleans)
-                            {
-                                states.Add(new SampleBuilder.PrefixState(group1, operandSize66, addressSize67, w, b,
-                                    rex2));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
+    private static SampleBuilder.PrefixState[] CreateLegacyPrefixStates(bool is64)
+    {
         // OrderBy is stable, so states of equal size keep the enumeration order, which puts the lowest slot of each
         // axis first.
-        return [.. states.OrderBy(state => state.ByteCount)];
+        return [.. (from rex2 in SampleBuilder.Booleans
+                    from w in SampleBuilder.Booleans
+                    from b in SampleBuilder.Booleans
+                    where is64 || !(rex2 || w || b)
+                    from addressSize67 in SampleBuilder.Booleans
+                    from group1 in Group1Prefixes
+                    from operandSize66 in SampleBuilder.Booleans
+                    select new SampleBuilder.PrefixState(group1, operandSize66, addressSize67, w, b, rex2))
+                .OrderBy(state => state.ByteCount)];
     }
 
     private static void AppendLegacyPrefixes(List<byte> bytes, SampleBuilder.PrefixState state)
@@ -164,7 +133,7 @@ internal static class SampleBuilderLegacy
 
         if (state.AddressSize67)
         {
-            bytes.Add(0x67);
+            bytes.Add(SampleBuilder.AddressSizePrefix);
         }
     }
 
@@ -204,20 +173,11 @@ internal static class SampleBuilderLegacy
             return step.Slots.Contains(SampleBuilder.SwitchTableDefaultSlot);
         }
 
-        return step.Node.StartsWith(SampleBuilder.FeatureAxisPrefix, StringComparison.Ordinal) || step.Node is
-            SampleBuilder.AddressSizeAxis or
+        return SampleBuilder.IsSharedStep(step) || step.Node is
             SampleBuilder.MandatoryPrefixAxis or
-            SampleBuilder.ModeAxis or
-            SampleBuilder.ModeCompactAxis or
-            SampleBuilder.ModrmModAxis or
-            SampleBuilder.ModrmModCompactAxis or
-            SampleBuilder.ModrmRegAxis or
-            SampleBuilder.ModrmRmAxis or
-            SampleBuilder.OperandSizeAxis or
             SampleBuilder.PrefixGroup1Axis or
             SampleBuilder.Rex2Axis or
-            SampleBuilder.RexBAxis or
-            SampleBuilder.RexWAxis;
+            SampleBuilder.RexBAxis;
     }
 
     private static byte[] EscapeBytes(OpcodeMap map)
@@ -239,20 +199,10 @@ internal static class SampleBuilderLegacy
     /// </summary>
     private static bool ConsumesMandatoryPrefix(InstructionDefinition definition)
     {
-        if (!(definition.Pattern?.TryGetValue(SampleBuilder.MandatoryPrefixAxis, out var value) ?? false))
-        {
-            return false;
-        }
+        var mandatoryPrefix = MandatoryPrefixNode.NodeDefinition.Instance;
 
-        return value.GetString() switch
-        {
-            "none" or "ignore" => false,
-            "66" or "f3" or "f2" => true,
-            // A negated prefix decodes for every candidate but the named one and consumes none.
-            { } negated when negated.StartsWith('!') => false,
-            var unknown => throw new InvalidOperationException(
-                $"Invalid value '{unknown}' for the {SampleBuilder.MandatoryPrefixAxis} filter of " +
-                $"'{definition.Mnemonic}'.")
-        };
+        // A negated prefix decodes for every candidate but the named one and consumes none.
+        return (definition.GetDecisionNodeIndex(mandatoryPrefix) is { IsNegated: false, Index: var index }) &&
+            (mandatoryPrefix.GetSlotName(index) is "66" or "f3" or "f2");
     }
 }

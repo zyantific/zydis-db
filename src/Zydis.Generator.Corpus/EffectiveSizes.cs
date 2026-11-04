@@ -31,7 +31,7 @@ public static class EffectiveSizes
     ];
 
     /// <summary>
-    /// Computes the effective operand and address size.
+    /// Computes the effective operand and address size and the operand width of the variable-size immediates.
     /// </summary>
     /// <param name="mode">The machine mode.</param>
     /// <param name="operandSizePrefix">
@@ -42,24 +42,23 @@ public static class EffectiveSizes
     /// <param name="rexW">The W bit of the REX, REX2, VEX, XOP, EVEX or MVEX prefix.</param>
     /// <param name="opsizeMap">The operand size map of the definition.</param>
     /// <param name="adsizeMap">The address size map of the definition.</param>
-    /// <returns>The operand size, <c>8</c> for byte operations, and the address size.</returns>
-    public static (int Osz, int Asz) Compute(ModeNode.Slot mode, bool operandSizePrefix, bool addressSizePrefix,
-        bool rexW, OperandSizeMap opsizeMap, AddressSizeMap adsizeMap)
+    /// <returns>
+    /// The operand size, <c>8</c> for byte operations, the address size, and the operand width that selects the size
+    /// of variable-size immediates. A byte operation keeps the width of the default map there, as the decoder derives
+    /// its immediate size index before it forces the width to 8.
+    /// </returns>
+    public static (int Osz, int Asz, int OperandWidth) Compute(ModeNode.Slot mode, bool operandSizePrefix,
+        bool addressSizePrefix, bool rexW, OperandSizeMap opsizeMap, AddressSizeMap adsizeMap)
     {
-        var osz = (opsizeMap is OperandSizeMap.ByteOperation)
-            ? 8
-            : ComputeOperandWidth(mode, operandSizePrefix, rexW, opsizeMap);
+        var operandWidth = ComputeOperandWidth(mode, operandSizePrefix, rexW, opsizeMap);
+        var osz = (opsizeMap is OperandSizeMap.ByteOperation) ? 8 : operandWidth;
 
         var asz = AddressSizeTable[(int)adsizeMap][((int)mode * 2) + (addressSizePrefix ? 1 : 0)];
 
-        return (osz, asz);
+        return (osz, asz, operandWidth);
     }
 
-    /// <summary>
-    /// Computes the operand width that selects the size of variable-size immediates. A byte operation keeps the
-    /// width of the default map here, as the decoder derives its immediate size index before it forces the width to 8.
-    /// </summary>
-    internal static int ComputeOperandWidth(ModeNode.Slot mode, bool operandSizePrefix, bool rexW,
+    private static int ComputeOperandWidth(ModeNode.Slot mode, bool operandSizePrefix, bool rexW,
         OperandSizeMap opsizeMap)
     {
         var index = ((int)mode * 2) + (operandSizePrefix ? 1 : 0);
