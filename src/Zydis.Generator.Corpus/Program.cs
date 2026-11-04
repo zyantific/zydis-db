@@ -24,9 +24,10 @@ internal static class Program
         var corpus = new CorpusGenerator(generator.OpcodeTables, generator.Definitions, generator.GetDefinitionId,
             formIds);
         var report = corpus.Generate();
+        var renderedReport = report.Render();
 
-        CorpusWriter.Write(report, args[1]);
-        Console.Write(report.Render());
+        CorpusWriter.Write(report, renderedReport, args[1]);
+        Console.Write(renderedReport);
 
         // A leaf without a sample leaves the corpus incomplete, while impossible leaves and unreachable definitions
         // are findings that do not fail the run.

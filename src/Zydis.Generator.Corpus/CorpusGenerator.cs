@@ -33,7 +33,6 @@ internal sealed class CorpusGenerator
     private readonly IReadOnlyList<InstructionDefinition> _definitions;
     private readonly IReadOnlyDictionary<InstructionDefinition, string> _formIds;
     private readonly Func<InstructionDefinition, int> _definitionId;
-    private readonly Dictionary<InstructionDefinition, int> _definitionIds = new(ReferenceEqualityComparer.Instance);
 
     /// <param name="tables">The built decoder tree.</param>
     /// <param name="definitions">
@@ -59,7 +58,7 @@ internal sealed class CorpusGenerator
     {
         var accumulators = EncodingOrder.ToDictionary(encoding => encoding, _ => new EncodingAccumulator());
 
-        foreach (var table in _tables.Tables.Where(table => table.EnumerateSlots().Any(slot => slot is not null)))
+        foreach (var table in _tables.Tables.Where(table => !table.IsEmpty))
         {
             accumulators[table.Encoding].TablesWalked++;
         }
@@ -70,7 +69,7 @@ internal sealed class CorpusGenerator
             accumulator.LeavesFound++;
 
             var definition = path.Definition;
-            var id = GetDefinitionId(definition);
+            var id = _definitionId(definition);
             var form = _formIds[definition];
             accumulator.Reached.Add(definition);
 
@@ -80,16 +79,15 @@ internal sealed class CorpusGenerator
                 {
                     case Built built:
                         accumulator.Samples.Add(built.Sample);
-                        accumulator.SampleIds.Add(id);
                         accumulator.Sampled.Add(definition);
                         break;
                     case Impossible impossible:
-                        accumulator.Impossible.Add(new CorpusIssue(mode, path, id, form, impossible.Reason));
-                        accumulator.AddReason(definition, impossible.Reason);
+                        accumulator.AddIssue(accumulator.Impossible,
+                            new CorpusIssue(mode, path, id, form, impossible.Reason));
                         break;
                     case Unencodable unencodable:
-                        accumulator.Unencodable.Add(new CorpusIssue(mode, path, id, form, unencodable.Reason));
-                        accumulator.AddReason(definition, unencodable.Reason);
+                        accumulator.AddIssue(accumulator.Unencodable,
+                            new CorpusIssue(mode, path, id, form, unencodable.Reason));
                         break;
                     default:
                         throw new InvalidOperationException("Unknown sample build result.");
@@ -99,23 +97,14 @@ internal sealed class CorpusGenerator
 
         foreach (var definition in _definitions)
         {
-            var accumulator = accumulators[definition.Encoding];
-            accumulator.Definitions.Add(definition);
-            accumulator.RegistryIds.Add(GetDefinitionId(definition));
+            accumulators[definition.Encoding].Definitions.Add(definition);
         }
 
-        var samples = EncodingOrder
-            .SelectMany(encoding => accumulators[encoding].Samples
-                .OrderBy(sample => sample.Id)
-                .ThenBy(sample => int.Parse(sample.Mode, CultureInfo.InvariantCulture))
-                .ThenBy(sample => sample.Path, StringComparer.Ordinal))
-            .ToArray();
-
         var encodings = EncodingOrder
-            .Select(encoding => accumulators[encoding].ToReport(encoding, GetDefinitionId, _formIds))
+            .Select(encoding => accumulators[encoding].ToReport(encoding, _definitionId, _formIds))
             .ToArray();
 
-        return new CorpusReport(samples, encodings);
+        return new CorpusReport(encodings);
     }
 
     /// <summary>
@@ -152,19 +141,7 @@ internal sealed class CorpusGenerator
             }
         }
 
-        return [.. modes.Order()];
-    }
-
-    private int GetDefinitionId(InstructionDefinition definition)
-    {
-        // The registry lookup is linear in the number of definitions of the encoding.
-        if (!_definitionIds.TryGetValue(definition, out var id))
-        {
-            id = _definitionId(definition);
-            _definitionIds.Add(definition, id);
-        }
-
-        return id;
+        return [.. modes];
     }
 
     private sealed class EncodingAccumulator
@@ -175,8 +152,6 @@ internal sealed class CorpusGenerator
 
         public List<CorpusSample> Samples { get; } = [];
 
-        public HashSet<int> SampleIds { get; } = [];
-
         public List<CorpusIssue> Impossible { get; } = [];
 
         public List<CorpusIssue> Unencodable { get; } = [];
@@ -186,8 +161,6 @@ internal sealed class CorpusGenerator
         /// </summary>
         public List<InstructionDefinition> Definitions { get; } = [];
 
-        public HashSet<int> RegistryIds { get; } = [];
-
         // Twins share an id but are separate objects in the tree, so reachability is tracked per reference.
         public HashSet<InstructionDefinition> Reached { get; } = new(ReferenceEqualityComparer.Instance);
 
@@ -196,17 +169,20 @@ internal sealed class CorpusGenerator
         private readonly Dictionary<InstructionDefinition, List<string>> _reasons =
             new(ReferenceEqualityComparer.Instance);
 
-        public void AddReason(InstructionDefinition definition, string reason)
+        public void AddIssue(List<CorpusIssue> issues, CorpusIssue issue)
         {
+            issues.Add(issue);
+
+            var definition = issue.Path.Definition;
             if (!_reasons.TryGetValue(definition, out var reasons))
             {
                 reasons = [];
                 _reasons.Add(definition, reasons);
             }
 
-            if (!reasons.Contains(reason))
+            if (!reasons.Contains(issue.Reason))
             {
-                reasons.Add(reason);
+                reasons.Add(issue.Reason);
             }
         }
 
@@ -221,11 +197,20 @@ internal sealed class CorpusGenerator
                 .Where(definition => Reached.Contains(definition) && !Sampled.Contains(definition))
                 .Select(definition => Entry(definition, _reasons.GetValueOrDefault(definition, [])));
 
-            return new CorpusEncodingReport(encoding, TablesWalked, LeavesFound, Samples.Count, RegistryIds.Count,
-                SampleIds.Count, Sorted(Impossible), Sorted(Unencodable), Sorted(unreachable), Sorted(withoutSample));
+            return new CorpusEncodingReport(encoding, TablesWalked, LeavesFound, Sorted(Samples),
+                Definitions.Select(definitionId).Distinct().Count(), Sampled.Select(definitionId).Distinct().Count(),
+                Sorted(Impossible), Sorted(Unencodable), Sorted(unreachable), Sorted(withoutSample));
 
             CorpusDefinitionEntry Entry(InstructionDefinition definition, IReadOnlyList<string> reasons) =>
                 new(definitionId(definition), formIds[definition], definition.Mnemonic, reasons);
+        }
+
+        private static CorpusSample[] Sorted(List<CorpusSample> samples)
+        {
+            return [.. samples
+                .OrderBy(sample => sample.Id)
+                .ThenBy(sample => int.Parse(sample.Mode, CultureInfo.InvariantCulture))
+                .ThenBy(sample => sample.Path, StringComparer.Ordinal)];
         }
 
         private static CorpusDefinitionEntry[] Sorted(IEnumerable<CorpusDefinitionEntry> entries)

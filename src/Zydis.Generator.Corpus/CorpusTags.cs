@@ -46,12 +46,6 @@ internal static class CorpusTags
 
     public static string ModeTag(ModeNode.Slot mode)
     {
-        return mode switch
-        {
-            ModeNode.Slot.M16 => "16",
-            ModeNode.Slot.M32 => "32",
-            ModeNode.Slot.M64 => "64",
-            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
-        };
+        return ModeNode.NodeDefinition.Instance.GetSlotName((int)mode);
     }
 }

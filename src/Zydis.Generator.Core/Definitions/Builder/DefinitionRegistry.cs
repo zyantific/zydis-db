@@ -17,7 +17,11 @@ internal sealed class DefinitionRegistry : IEnumerable<InstructionDefinition>
     private static readonly SortedDictionary<InstructionDefinition, int> Empty = new(InstructionDefinitionTableComparer.Instance);
 
     private readonly SortedSet<InstructionDefinition> _instructions = new(InstructionDefinitionTableComparer.Instance);
+
+    // The value is the definition id, the sorted position inside the encoding. An insert shifts the positions after
+    // it, so the ids are renumbered on the first lookup after an insert.
     private readonly Dictionary<InstructionEncoding, SortedDictionary<InstructionDefinition, int>> _encodingInstructions = [];
+    private bool _idsAssigned;
 
     public IEnumerable<InstructionDefinition> this[InstructionEncoding encoding] => _encodingInstructions.GetValueOrDefault(encoding, Empty).Keys;
 
@@ -36,12 +40,17 @@ internal sealed class DefinitionRegistry : IEnumerable<InstructionDefinition>
             throw new ArgumentException("Unknown instruction encoding.", nameof(definition));
         }
 
+        if (!_idsAssigned)
+        {
+            AssignIds();
+        }
+
         if (!instructions.TryGetValue(definition, out var id))
         {
             throw new ArgumentException("Unknown instruction definition.", nameof(definition));
         }
 
-        return instructions.Index().First(x => InstructionDefinitionTableComparer.Instance.Compare(x.Item.Key, definition) is 0).Index;
+        return id;
     }
 
     /// <summary>
@@ -68,7 +77,8 @@ internal sealed class DefinitionRegistry : IEnumerable<InstructionDefinition>
         }
 
         _instructions.Add(definition);
-        instructions.Add(definition, instructions.Count);
+        instructions.Add(definition, 0);
+        _idsAssigned = false;
     }
 
     public IEnumerator<InstructionDefinition> GetEnumerator()
@@ -79,6 +89,19 @@ internal sealed class DefinitionRegistry : IEnumerable<InstructionDefinition>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
+    }
+
+    private void AssignIds()
+    {
+        foreach (var instructions in _encodingInstructions.Values)
+        {
+            foreach (var (index, key) in instructions.Keys.ToArray().Index())
+            {
+                instructions[key] = index;
+            }
+        }
+
+        _idsAssigned = true;
     }
 }
 

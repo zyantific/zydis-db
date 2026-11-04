@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace Zydis.Generator.Corpus;
@@ -10,9 +9,10 @@ namespace Zydis.Generator.Corpus;
 /// </summary>
 internal static class CorpusWriter
 {
-    public static void Write(CorpusReport report, string directory)
+    public static void Write(CorpusReport report, string renderedReport, string directory)
     {
         ArgumentNullException.ThrowIfNull(report);
+        ArgumentNullException.ThrowIfNull(renderedReport);
         ArgumentException.ThrowIfNullOrEmpty(directory);
 
         Directory.CreateDirectory(directory);
@@ -22,15 +22,16 @@ internal static class CorpusWriter
         // An encoding without samples still gets its header, so the checker can tell an empty file from a missing one.
         foreach (var encodingReport in report.Encodings)
         {
-            var tag = CorpusTags.EncodingTag(encodingReport.Encoding);
-            var lines = report.Samples
-                .Where(sample => sample.Encoding == tag)
-                .Select(sample => sample.ToTsvLine())
-                .Prepend(CorpusSample.Header);
+            var path = Path.Combine(directory, $"{CorpusTags.EncodingTag(encodingReport.Encoding)}.tsv");
+            using var writer = new StreamWriter(path, append: false, encoding) { NewLine = "\n" };
 
-            File.WriteAllText(Path.Combine(directory, $"{tag}.tsv"), string.Join('\n', lines) + "\n", encoding);
+            writer.WriteLine(CorpusSample.Header);
+            foreach (var sample in encodingReport.Samples)
+            {
+                writer.WriteLine(sample.ToTsvLine());
+            }
         }
 
-        File.WriteAllText(Path.Combine(directory, "report.txt"), report.Render(), encoding);
+        File.WriteAllText(Path.Combine(directory, "report.txt"), renderedReport, encoding);
     }
 }

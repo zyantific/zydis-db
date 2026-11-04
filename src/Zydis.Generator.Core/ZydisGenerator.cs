@@ -201,7 +201,7 @@ public sealed class ZydisGenerator
 
         foreach (var table in OpcodeTables.Tables)
         {
-            if (table.EnumerateSlots().All(x => x is null))
+            if (table.IsEmpty)
             {
                 continue; // Skip empty tables.
             }
@@ -241,7 +241,7 @@ public sealed class ZydisGenerator
         {
             initializerListWriter.WriteInlineComment("{0,-12}", table);
 
-            if (table.EnumerateSlots().All(x => x is null))
+            if (table.IsEmpty)
             {
                 initializerListWriter.WriteNull();
                 continue; // Skip empty tables.

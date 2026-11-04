@@ -1,5 +1,3 @@
-using System;
-
 using Zydis.Generator.Core.DecoderTree;
 using Zydis.Generator.Core.Definitions;
 
@@ -52,7 +50,7 @@ public static class EffectiveSizes
             ? 8
             : ComputeOperandWidth(mode, operandSizePrefix, rexW, opsizeMap);
 
-        var asz = AddressSizeTable[(int)adsizeMap][(ModeIndex(mode) * 2) + (addressSizePrefix ? 1 : 0)];
+        var asz = AddressSizeTable[(int)adsizeMap][((int)mode * 2) + (addressSizePrefix ? 1 : 0)];
 
         return (osz, asz);
     }
@@ -64,23 +62,12 @@ public static class EffectiveSizes
     internal static int ComputeOperandWidth(ModeNode.Slot mode, bool operandSizePrefix, bool rexW,
         OperandSizeMap opsizeMap)
     {
-        var index = (ModeIndex(mode) * 2) + (operandSizePrefix ? 1 : 0);
+        var index = ((int)mode * 2) + (operandSizePrefix ? 1 : 0);
         if ((mode is ModeNode.Slot.M64) && rexW)
         {
             index += 2;
         }
 
         return OperandSizeTable[(int)opsizeMap][index];
-    }
-
-    private static int ModeIndex(ModeNode.Slot mode)
-    {
-        return mode switch
-        {
-            ModeNode.Slot.M16 => 0,
-            ModeNode.Slot.M32 => 1,
-            ModeNode.Slot.M64 => 2,
-            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
-        };
     }
 }

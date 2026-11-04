@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq;
 
 using Zydis.Generator.Core.Common;
 using Zydis.Generator.Enums;
@@ -46,6 +47,11 @@ public sealed partial class OpcodeTableNode
     public InstructionEncoding Encoding { get; }
     public OpcodeMap Map { get; }
     public RefiningPrefix? Prefix { get; }
+
+    /// <summary>
+    /// <see langword="true"/> if no slot of the table holds an entry. Generation emits no tree for such a table.
+    /// </summary>
+    public bool IsEmpty => EnumerateSlots().All(slot => slot is null);
 
     internal OpcodeTableNode(InstructionEncoding encoding, RefiningPrefix? prefix, OpcodeMap map) :
         base(NodeDefinition.Instance)

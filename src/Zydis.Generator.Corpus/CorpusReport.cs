@@ -10,23 +10,16 @@ using Zydis.Generator.Enums;
 namespace Zydis.Generator.Corpus;
 
 /// <summary>
-/// The samples of a corpus run and, per encoding, the counts and the leaves and definitions without a sample.
+/// Per encoding, the samples of a corpus run, the counts and the leaves and definitions without a sample.
 /// </summary>
 internal sealed class CorpusReport
 {
-    public CorpusReport(IReadOnlyList<CorpusSample> samples, IReadOnlyList<CorpusEncodingReport> encodings)
+    public CorpusReport(IReadOnlyList<CorpusEncodingReport> encodings)
     {
-        ArgumentNullException.ThrowIfNull(samples);
         ArgumentNullException.ThrowIfNull(encodings);
 
-        Samples = samples;
         Encodings = encodings;
     }
-
-    /// <summary>
-    /// The samples, sorted by encoding, definition id, machine mode and path.
-    /// </summary>
-    public IReadOnlyList<CorpusSample> Samples { get; }
 
     public IReadOnlyList<CorpusEncodingReport> Encodings { get; }
 
@@ -44,33 +37,14 @@ internal sealed class CorpusReport
             builder.Append(CultureInfo.InvariantCulture, $"encoding {CorpusTags.EncodingTag(encoding.Encoding)}\n");
             AppendCount(builder, "tables walked", encoding.TablesWalked);
             AppendCount(builder, "leaves found", encoding.LeavesFound);
-            AppendCount(builder, "samples written", encoding.SamplesWritten);
+            AppendCount(builder, "samples written", encoding.Samples.Count);
             AppendCount(builder, "registry size", encoding.RegistrySize);
             AppendCount(builder, "distinct sample ids", encoding.DistinctSampleIds);
 
-            AppendCount(builder, "impossible by architecture", encoding.Impossible.Count);
-            foreach (var issue in encoding.Impossible)
-            {
-                AppendIssue(builder, issue);
-            }
-
-            AppendCount(builder, "unencodable", encoding.Unencodable.Count);
-            foreach (var issue in encoding.Unencodable)
-            {
-                AppendIssue(builder, issue);
-            }
-
-            AppendCount(builder, "unreachable definitions", encoding.Unreachable.Count);
-            foreach (var definition in encoding.Unreachable)
-            {
-                AppendDefinition(builder, encoding.Encoding, definition);
-            }
-
-            AppendCount(builder, "definitions without a sample", encoding.WithoutSample.Count);
-            foreach (var definition in encoding.WithoutSample)
-            {
-                AppendDefinition(builder, encoding.Encoding, definition);
-            }
+            AppendIssues(builder, "impossible by architecture", encoding.Impossible);
+            AppendIssues(builder, "unencodable", encoding.Unencodable);
+            AppendDefinitions(builder, "unreachable definitions", encoding.Encoding, encoding.Unreachable);
+            AppendDefinitions(builder, "definitions without a sample", encoding.Encoding, encoding.WithoutSample);
 
             builder.Append('\n');
         }
@@ -83,26 +57,36 @@ internal sealed class CorpusReport
         builder.Append(CultureInfo.InvariantCulture, $"  {name + ":",-32}{count}\n");
     }
 
-    private static void AppendDefinition(StringBuilder builder, InstructionEncoding encoding,
-        CorpusDefinitionEntry definition)
+    private static void AppendDefinitions(StringBuilder builder, string name, InstructionEncoding encoding,
+        IReadOnlyList<CorpusDefinitionEntry> definitions)
     {
-        builder.Append(CultureInfo.InvariantCulture,
-            $"    {CorpusTags.EncodingTag(encoding)} {definition.Id} {definition.Form} {definition.Mnemonic}");
+        AppendCount(builder, name, definitions.Count);
 
-        if (definition.Reasons.Count > 0)
+        foreach (var definition in definitions)
         {
-            builder.Append(CultureInfo.InvariantCulture, $": {string.Join(" | ", definition.Reasons)}");
-        }
+            builder.Append(CultureInfo.InvariantCulture,
+                $"    {CorpusTags.EncodingTag(encoding)} {definition.Id} {definition.Form} {definition.Mnemonic}");
 
-        builder.Append('\n');
+            if (definition.Reasons.Count > 0)
+            {
+                builder.Append(CultureInfo.InvariantCulture, $": {string.Join(" | ", definition.Reasons)}");
+            }
+
+            builder.Append('\n');
+        }
     }
 
-    private static void AppendIssue(StringBuilder builder, CorpusIssue issue)
+    private static void AppendIssues(StringBuilder builder, string name, IReadOnlyList<CorpusIssue> issues)
     {
-        builder.Append(CultureInfo.InvariantCulture,
-            $"    mode={CorpusTags.ModeTag(issue.Mode)} map={CorpusTags.MapTag(issue.Path.Map)} " +
-            $"opcode={issue.Path.Opcode:X2} id={issue.Id} form={issue.Form} path={issue.Path.PathString}: " +
-            $"{issue.Reason}\n");
+        AppendCount(builder, name, issues.Count);
+
+        foreach (var issue in issues)
+        {
+            builder.Append(CultureInfo.InvariantCulture,
+                $"    mode={CorpusTags.ModeTag(issue.Mode)} map={CorpusTags.MapTag(issue.Path.Map)} " +
+                $"opcode={issue.Path.Opcode:X2} id={issue.Id} form={issue.Form} path={issue.Path.PathString}: " +
+                $"{issue.Reason}\n");
+        }
     }
 }
 
@@ -112,7 +96,7 @@ internal sealed class CorpusReport
 /// <param name="Encoding">The encoding.</param>
 /// <param name="TablesWalked">The opcode tables of the encoding that hold at least one entry.</param>
 /// <param name="LeavesFound">The decoder-tree paths that end in a definition of the encoding.</param>
-/// <param name="SamplesWritten">The samples of the encoding.</param>
+/// <param name="Samples">The samples of the encoding, sorted by definition id, machine mode and path.</param>
 /// <param name="RegistrySize">The number of distinct definition ids of the encoding.</param>
 /// <param name="DistinctSampleIds">The number of distinct definition ids the samples carry.</param>
 /// <param name="Impossible">The (leaf, machine mode) pairs no instruction can reach.</param>
@@ -126,7 +110,7 @@ internal sealed record CorpusEncodingReport(
     InstructionEncoding Encoding,
     int TablesWalked,
     int LeavesFound,
-    int SamplesWritten,
+    IReadOnlyList<CorpusSample> Samples,
     int RegistrySize,
     int DistinctSampleIds,
     IReadOnlyList<CorpusIssue> Impossible,

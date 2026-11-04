@@ -35,7 +35,7 @@ public sealed record DecoderTreePath(
     /// The <see cref="Steps"/> as <c>node=slot</c> pairs joined by <c>,</c>, with several slots joined by <c>|</c>
     /// and an else step written as <c>node=else:slot|slot</c>.
     /// </summary>
-    public string PathString => string.Join(',', Steps.Select(FormatStep));
+    public string PathString { get; } = string.Join(',', Steps.Select(FormatStep));
 
     /// <summary>
     /// Renders one step the way <see cref="PathString"/> does.
@@ -60,7 +60,8 @@ public static class DecoderTreePathEnumerator
     /// <param name="tables">The opcode tables of a built decoder tree.</param>
     /// <returns>The routes to every reachable definition.</returns>
     /// <exception cref="InvalidOperationException">
-    /// The tree contains a node kind the enumerator does not know, for example an <see cref="OverflowNode"/>.
+    /// The tree contains a node kind the enumerator does not know, for example an <see cref="OverflowNode"/>, or a
+    /// decision node that <see cref="DecisionNode.EnumerateSlots"/> rejects.
     /// </exception>
     public static IEnumerable<DecoderTreePath> Enumerate(OpcodeTables tables)
     {
@@ -109,55 +110,36 @@ public static class DecoderTreePathEnumerator
 
             default:
                 throw new InvalidOperationException(
-                    $"Unexpected '{node.Definition.Name}' node in opcode table " +
-                    $"'{OpcodeTables.FormatTableString(table.Encoding, table.Map, table.Prefix)}' at opcode " +
-                    $"0x{opcode:X2}.");
+                    $"Unexpected '{node.Definition.Name}' node in opcode table '{table}' at opcode 0x{opcode:X2}.");
         }
     }
 
     private static IEnumerable<(PathStep Step, DecoderTreeNode Child)> EnumerateBranches(DecisionNode node)
     {
         var definition = node.Definition;
-        var isExplicit = new bool[definition.NumberOfSlots];
+        var slots = node.EnumerateSlots().ToArray();
+
+        // EnumerateSlots rejects a node with both a negated entry and an else entry, so a slot reaches the else entry
+        // exactly when the node has one and the slot holds no explicit entry.
+        bool IsElseSlot(int slot) => (node.ElseEntry is not null) && (node[DecisionNodeIndex.ForIndex(slot)] is null);
 
         // The interner shares identical subtrees, so one child object can occupy several slots. Such a child is one
         // branch that lists every slot it occupies.
-        var children = new Dictionary<DecoderTreeNode, SortedSet<int>>(ReferenceEqualityComparer.Instance);
+        var branches = Enumerable.Range(0, slots.Length)
+            .Where(slot => (slots[slot] is not null) && !IsElseSlot(slot))
+            .GroupBy<int, DecoderTreeNode>(slot => slots[slot]!, ReferenceEqualityComparer.Instance);
 
-        foreach (var (index, child) in node.EnumerateVirtualSlots())
+        foreach (var branch in branches)
         {
-            if (child is null)
-            {
-                continue;
-            }
-
-            if (!children.TryGetValue(child, out var slots))
-            {
-                slots = [];
-                children.Add(child, slots);
-            }
-
-            for (var i = 0; i < isExplicit.Length; i++)
-            {
-                var covers = index.IsNegated ? (i != index.Index) : (i == index.Index);
-                if (covers)
-                {
-                    slots.Add(i);
-                    isExplicit[i] = true;
-                }
-            }
-        }
-
-        foreach (var (child, slots) in children.OrderBy(entry => entry.Value.Min))
-        {
-            yield return (new PathStep(definition.Name, SlotNames(definition, slots), IsElse: false), child);
+            yield return (new PathStep(definition.Name, SlotNames(definition, branch), IsElse: false), branch.Key);
         }
 
         // An else entry that no slot resolves to is unreachable for the decoder.
-        var elseSlots = Enumerable.Range(0, isExplicit.Length).Where(i => !isExplicit[i]).ToArray();
-        if ((node.ElseEntry is not null) && (elseSlots.Length > 0))
+        var elseSlots = Enumerable.Range(0, slots.Length).Where(IsElseSlot).ToArray();
+        if (elseSlots.Length > 0)
         {
-            yield return (new PathStep(definition.Name, SlotNames(definition, elseSlots), IsElse: true), node.ElseEntry);
+            yield return (new PathStep(definition.Name, SlotNames(definition, elseSlots), IsElse: true),
+                node.ElseEntry!);
         }
     }
 
