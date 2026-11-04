@@ -69,8 +69,10 @@ internal sealed class CorpusGenerator
             var accumulator = accumulators[path.Encoding];
             accumulator.LeavesFound++;
 
-            var id = GetDefinitionId(path.Definition);
-            var form = _formIds[path.Definition];
+            var definition = path.Definition;
+            var id = GetDefinitionId(definition);
+            var form = _formIds[definition];
+            accumulator.Reached.Add(definition);
 
             foreach (var mode in ExpandModes(path))
             {
@@ -79,12 +81,15 @@ internal sealed class CorpusGenerator
                     case Built built:
                         accumulator.Samples.Add(built.Sample);
                         accumulator.SampleIds.Add(id);
+                        accumulator.Sampled.Add(definition);
                         break;
                     case Impossible impossible:
                         accumulator.Impossible.Add(new CorpusIssue(mode, path, id, form, impossible.Reason));
+                        accumulator.AddReason(definition, impossible.Reason);
                         break;
                     case Unencodable unencodable:
                         accumulator.Unencodable.Add(new CorpusIssue(mode, path, id, form, unencodable.Reason));
+                        accumulator.AddReason(definition, unencodable.Reason);
                         break;
                     default:
                         throw new InvalidOperationException("Unknown sample build result.");
@@ -94,16 +99,9 @@ internal sealed class CorpusGenerator
 
         foreach (var definition in _definitions)
         {
-            var registry = accumulators[definition.Encoding].Registry;
-            var id = GetDefinitionId(definition);
-
-            if (!registry.TryGetValue(id, out var sharing))
-            {
-                sharing = [];
-                registry.Add(id, sharing);
-            }
-
-            sharing.Add(definition);
+            var accumulator = accumulators[definition.Encoding];
+            accumulator.Definitions.Add(definition);
+            accumulator.RegistryIds.Add(GetDefinitionId(definition));
         }
 
         var samples = EncodingOrder
@@ -114,7 +112,7 @@ internal sealed class CorpusGenerator
             .ToArray();
 
         var encodings = EncodingOrder
-            .Select(encoding => accumulators[encoding].ToReport(encoding, _formIds))
+            .Select(encoding => accumulators[encoding].ToReport(encoding, GetDefinitionId, _formIds))
             .ToArray();
 
         return new CorpusReport(samples, encodings);
@@ -183,19 +181,56 @@ internal sealed class CorpusGenerator
 
         public List<CorpusIssue> Unencodable { get; } = [];
 
-        public SortedDictionary<int, List<InstructionDefinition>> Registry { get; } = [];
+        /// <summary>
+        /// The definitions of the encoding in file order, twins included.
+        /// </summary>
+        public List<InstructionDefinition> Definitions { get; } = [];
+
+        public HashSet<int> RegistryIds { get; } = [];
+
+        // Twins share an id but are separate objects in the tree, so reachability is tracked per reference.
+        public HashSet<InstructionDefinition> Reached { get; } = new(ReferenceEqualityComparer.Instance);
+
+        public HashSet<InstructionDefinition> Sampled { get; } = new(ReferenceEqualityComparer.Instance);
+
+        private readonly Dictionary<InstructionDefinition, List<string>> _reasons =
+            new(ReferenceEqualityComparer.Instance);
+
+        public void AddReason(InstructionDefinition definition, string reason)
+        {
+            if (!_reasons.TryGetValue(definition, out var reasons))
+            {
+                reasons = [];
+                _reasons.Add(definition, reasons);
+            }
+
+            if (!reasons.Contains(reason))
+            {
+                reasons.Add(reason);
+            }
+        }
 
         public CorpusEncodingReport ToReport(InstructionEncoding encoding,
-            IReadOnlyDictionary<InstructionDefinition, string> formIds)
+            Func<InstructionDefinition, int> definitionId, IReadOnlyDictionary<InstructionDefinition, string> formIds)
         {
-            var unreachable = Registry
-                .Where(entry => !SampleIds.Contains(entry.Key))
-                .Select(entry => new CorpusUnreachableDefinition(entry.Key,
-                    [.. entry.Value.Select(definition => formIds[definition])], entry.Value[0].Mnemonic))
-                .ToArray();
+            var unreachable = Definitions
+                .Where(definition => !Reached.Contains(definition))
+                .Select(definition => Entry(definition, []));
 
-            return new CorpusEncodingReport(encoding, TablesWalked, LeavesFound, Samples.Count, Registry.Count,
-                Sorted(Impossible), Sorted(Unencodable), unreachable);
+            var withoutSample = Definitions
+                .Where(definition => Reached.Contains(definition) && !Sampled.Contains(definition))
+                .Select(definition => Entry(definition, _reasons.GetValueOrDefault(definition, [])));
+
+            return new CorpusEncodingReport(encoding, TablesWalked, LeavesFound, Samples.Count, RegistryIds.Count,
+                SampleIds.Count, Sorted(Impossible), Sorted(Unencodable), Sorted(unreachable), Sorted(withoutSample));
+
+            CorpusDefinitionEntry Entry(InstructionDefinition definition, IReadOnlyList<string> reasons) =>
+                new(definitionId(definition), formIds[definition], definition.Mnemonic, reasons);
+        }
+
+        private static CorpusDefinitionEntry[] Sorted(IEnumerable<CorpusDefinitionEntry> entries)
+        {
+            return [.. entries.OrderBy(entry => entry.Id).ThenBy(entry => entry.Form, StringComparer.Ordinal)];
         }
 
         private static CorpusIssue[] Sorted(List<CorpusIssue> issues)

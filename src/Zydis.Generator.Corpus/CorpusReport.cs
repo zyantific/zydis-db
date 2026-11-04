@@ -41,11 +41,12 @@ internal sealed class CorpusReport
 
         foreach (var encoding in Encodings)
         {
-            builder.Append(CultureInfo.InvariantCulture, $"encoding {SampleBuilder.EncodingTag(encoding.Encoding)}\n");
+            builder.Append(CultureInfo.InvariantCulture, $"encoding {CorpusTags.EncodingTag(encoding.Encoding)}\n");
             AppendCount(builder, "tables walked", encoding.TablesWalked);
             AppendCount(builder, "leaves found", encoding.LeavesFound);
             AppendCount(builder, "samples written", encoding.SamplesWritten);
             AppendCount(builder, "registry size", encoding.RegistrySize);
+            AppendCount(builder, "distinct sample ids", encoding.DistinctSampleIds);
 
             AppendCount(builder, "impossible by architecture", encoding.Impossible.Count);
             foreach (var issue in encoding.Impossible)
@@ -62,9 +63,13 @@ internal sealed class CorpusReport
             AppendCount(builder, "unreachable definitions", encoding.Unreachable.Count);
             foreach (var definition in encoding.Unreachable)
             {
-                builder.Append(CultureInfo.InvariantCulture,
-                    $"    {SampleBuilder.EncodingTag(encoding.Encoding)} {definition.Id} " +
-                    $"{string.Join(',', definition.Forms)} {definition.Mnemonic}\n");
+                AppendDefinition(builder, encoding.Encoding, definition);
+            }
+
+            AppendCount(builder, "definitions without a sample", encoding.WithoutSample.Count);
+            foreach (var definition in encoding.WithoutSample)
+            {
+                AppendDefinition(builder, encoding.Encoding, definition);
             }
 
             builder.Append('\n');
@@ -75,13 +80,27 @@ internal sealed class CorpusReport
 
     private static void AppendCount(StringBuilder builder, string name, int count)
     {
-        builder.Append(CultureInfo.InvariantCulture, $"  {name + ":",-28}{count}\n");
+        builder.Append(CultureInfo.InvariantCulture, $"  {name + ":",-32}{count}\n");
+    }
+
+    private static void AppendDefinition(StringBuilder builder, InstructionEncoding encoding,
+        CorpusDefinitionEntry definition)
+    {
+        builder.Append(CultureInfo.InvariantCulture,
+            $"    {CorpusTags.EncodingTag(encoding)} {definition.Id} {definition.Form} {definition.Mnemonic}");
+
+        if (definition.Reasons.Count > 0)
+        {
+            builder.Append(CultureInfo.InvariantCulture, $": {string.Join(" | ", definition.Reasons)}");
+        }
+
+        builder.Append('\n');
     }
 
     private static void AppendIssue(StringBuilder builder, CorpusIssue issue)
     {
         builder.Append(CultureInfo.InvariantCulture,
-            $"    mode={SampleBuilder.ModeTag(issue.Mode)} map={SampleBuilder.MapTag(issue.Path.Map)} " +
+            $"    mode={CorpusTags.ModeTag(issue.Mode)} map={CorpusTags.MapTag(issue.Path.Map)} " +
             $"opcode={issue.Path.Opcode:X2} id={issue.Id} form={issue.Form} path={issue.Path.PathString}: " +
             $"{issue.Reason}\n");
     }
@@ -95,18 +114,25 @@ internal sealed class CorpusReport
 /// <param name="LeavesFound">The decoder-tree paths that end in a definition of the encoding.</param>
 /// <param name="SamplesWritten">The samples of the encoding.</param>
 /// <param name="RegistrySize">The number of distinct definition ids of the encoding.</param>
+/// <param name="DistinctSampleIds">The number of distinct definition ids the samples carry.</param>
 /// <param name="Impossible">The (leaf, machine mode) pairs no instruction can reach.</param>
 /// <param name="Unencodable">The (leaf, machine mode) pairs the walk could not encode.</param>
-/// <param name="Unreachable">The definition ids no sample carries.</param>
+/// <param name="Unreachable">The definitions that no decoder-tree path reaches.</param>
+/// <param name="WithoutSample">
+/// The definitions that paths reach but that got no sample, because every (leaf, machine mode) pair is impossible or
+/// unencodable.
+/// </param>
 internal sealed record CorpusEncodingReport(
     InstructionEncoding Encoding,
     int TablesWalked,
     int LeavesFound,
     int SamplesWritten,
     int RegistrySize,
+    int DistinctSampleIds,
     IReadOnlyList<CorpusIssue> Impossible,
     IReadOnlyList<CorpusIssue> Unencodable,
-    IReadOnlyList<CorpusUnreachableDefinition> Unreachable);
+    IReadOnlyList<CorpusDefinitionEntry> Unreachable,
+    IReadOnlyList<CorpusDefinitionEntry> WithoutSample);
 
 /// <summary>
 /// A (leaf, machine mode) pair without a sample.
@@ -114,6 +140,6 @@ internal sealed record CorpusEncodingReport(
 internal sealed record CorpusIssue(ModeNode.Slot Mode, DecoderTreePath Path, int Id, string Form, string Reason);
 
 /// <summary>
-/// A definition id that no sample carries, with the FormIds of every definition that shares it.
+/// A definition the report lists, with the distinct reasons its (leaf, machine mode) pairs got no sample.
 /// </summary>
-internal sealed record CorpusUnreachableDefinition(int Id, IReadOnlyList<string> Forms, string Mnemonic);
+internal sealed record CorpusDefinitionEntry(int Id, string Form, string Mnemonic, IReadOnlyList<string> Reasons);

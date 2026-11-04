@@ -37,7 +37,10 @@ public sealed record DecoderTreePath(
     /// </summary>
     public string PathString => string.Join(',', Steps.Select(FormatStep));
 
-    private static string FormatStep(PathStep step)
+    /// <summary>
+    /// Renders one step the way <see cref="PathString"/> does.
+    /// </summary>
+    internal static string FormatStep(PathStep step)
     {
         var slots = string.Join('|', step.Slots);
 

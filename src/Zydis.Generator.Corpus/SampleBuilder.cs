@@ -33,11 +33,6 @@ internal static class SampleBuilder
     internal const string SwitchTableAxisPrefix = "switch_table_";
     internal const string SwitchTableDefaultSlot = "default";
 
-    private static readonly bool[] Booleans = [false, true];
-
-    // F3 before F2, which is the slot order of mandatory_prefix and gives a bare prefix_group1=1 step an F3.
-    private static readonly byte[] Group1Prefixes = [0x00, 0xF3, 0xF2];
-
     private static readonly int[] AllModrmFieldValues = [0, 1, 2, 3, 4, 5, 6, 7];
     private static readonly int[] RegisterFormMods = [3];
     private static readonly int[] MemoryFormMods = [0, 1, 2];
@@ -60,62 +55,8 @@ internal static class SampleBuilder
         {
             InstructionEncoding.Default or InstructionEncoding.AMD3DNOW =>
                 SampleBuilderLegacy.Build(path, mode, id, formId),
-            _ => new Unencodable($"no builder for {EncodingTag(path.Encoding)}")
+            _ => new Unencodable($"no builder for {CorpusTags.EncodingTag(path.Encoding)}")
         };
-    }
-
-    public static string EncodingTag(InstructionEncoding encoding)
-    {
-        return encoding switch
-        {
-            InstructionEncoding.Default => "default",
-            InstructionEncoding.AMD3DNOW => "3dnow",
-            InstructionEncoding.XOP => "xop",
-            InstructionEncoding.VEX => "vex",
-            InstructionEncoding.EVEX => "evex",
-            InstructionEncoding.MVEX => "mvex",
-            _ => throw new ArgumentOutOfRangeException(nameof(encoding), encoding, null)
-        };
-    }
-
-    public static string MapTag(OpcodeMap map)
-    {
-        return map switch
-        {
-            OpcodeMap.MAP0 => "map0",
-            OpcodeMap.M0F => "0f",
-            OpcodeMap.M0F38 => "0f38",
-            OpcodeMap.M0F3A => "0f3a",
-            OpcodeMap.M0F0F => "0f0f",
-            OpcodeMap.MAP4 => "map4",
-            OpcodeMap.MAP5 => "map5",
-            OpcodeMap.MAP6 => "map6",
-            OpcodeMap.MAP7 => "map7",
-            OpcodeMap.XOP8 => "xop8",
-            OpcodeMap.XOP9 => "xop9",
-            OpcodeMap.XOPA => "xopa",
-            _ => throw new ArgumentOutOfRangeException(nameof(map), map, null)
-        };
-    }
-
-    public static string ModeTag(ModeNode.Slot mode)
-    {
-        return mode switch
-        {
-            ModeNode.Slot.M16 => "16",
-            ModeNode.Slot.M32 => "32",
-            ModeNode.Slot.M64 => "64",
-            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
-        };
-    }
-
-    public static string FormatStep(PathStep step)
-    {
-        ArgumentNullException.ThrowIfNull(step);
-
-        var slots = string.Join('|', step.Slots);
-
-        return step.IsElse ? $"{step.Node}=else:{slots}" : $"{step.Node}={slots}";
     }
 
     public static CorpusSample CreateSample(DecoderTreePath path, ModeNode.Slot mode, IReadOnlyCollection<byte> bytes,
@@ -126,11 +67,11 @@ internal static class SampleBuilder
 
         return new CorpusSample(
             Convert.ToHexString([.. bytes]),
-            ModeTag(mode),
+            CorpusTags.ModeTag(mode),
             decoderModes.Enable,
             decoderModes.Disable,
-            EncodingTag(path.Encoding),
-            MapTag(path.Map),
+            CorpusTags.EncodingTag(path.Encoding),
+            CorpusTags.MapTag(path.Map),
             path.Opcode.ToString("X2", CultureInfo.InvariantCulture),
             osz.ToString(CultureInfo.InvariantCulture),
             asz.ToString(CultureInfo.InvariantCulture),
@@ -178,7 +119,7 @@ internal static class SampleBuilder
 
             if (isImpossible)
             {
-                return $"{FormatStep(step)} in {ModeTag(mode)}-bit mode";
+                return $"{DecoderTreePath.FormatStep(step)} in {CorpusTags.ModeTag(mode)}-bit mode";
             }
         }
 
@@ -227,44 +168,6 @@ internal static class SampleBuilder
     }
 
     /// <summary>
-    /// The legacy prefix, REX and REX2 combinations a legacy or 3DNow sample can carry in <paramref name="mode"/>,
-    /// fewest bytes first.
-    /// </summary>
-    public static IReadOnlyList<PrefixState> LegacyPrefixStates(ModeNode.Slot mode)
-    {
-        var states = new List<PrefixState>();
-
-        foreach (var rex2 in Booleans)
-        {
-            foreach (var w in Booleans)
-            {
-                foreach (var b in Booleans)
-                {
-                    if ((rex2 || w || b) && (mode is not ModeNode.Slot.M64))
-                    {
-                        continue;
-                    }
-
-                    foreach (var addressSize67 in Booleans)
-                    {
-                        foreach (var group1 in Group1Prefixes)
-                        {
-                            foreach (var operandSize66 in Booleans)
-                            {
-                                states.Add(new PrefixState(group1, operandSize66, addressSize67, w, b, rex2));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // OrderBy is stable, so states of equal size keep the enumeration order, which puts the lowest slot of each
-        // axis first.
-        return [.. states.OrderBy(state => state.ByteCount)];
-    }
-
-    /// <summary>
     /// Selects the first of <paramref name="candidates"/> that routes every prefix step of the path to one of its
     /// slots.
     /// </summary>
@@ -300,13 +203,13 @@ internal static class SampleBuilder
     private static string DiagnosePrefixConflict(PathStep[] prefixSteps, ModeNode.Slot mode,
         IReadOnlyList<PrefixState> candidates)
     {
-        var modeText = $"in {ModeTag(mode)}-bit mode";
+        var modeText = $"in {CorpusTags.ModeTag(mode)}-bit mode";
 
         foreach (var step in prefixSteps)
         {
             if (!candidates.Any(state => Routes(step, state, mode)))
             {
-                return $"{FormatStep(step)} has no encodable slot {modeText}";
+                return $"{DecoderTreePath.FormatStep(step)} has no encodable slot {modeText}";
             }
         }
 
@@ -317,61 +220,13 @@ internal static class SampleBuilder
                 var (first, second) = (prefixSteps[i], prefixSteps[j]);
                 if (!candidates.Any(state => Routes(first, state, mode) && Routes(second, state, mode)))
                 {
-                    return $"{FormatStep(first)} contradicts {FormatStep(second)} {modeText}";
+                    return $"{DecoderTreePath.FormatStep(first)} contradicts " +
+                        $"{DecoderTreePath.FormatStep(second)} {modeText}";
                 }
             }
         }
 
-        return $"{string.Join(", ", prefixSteps.Select(FormatStep))} contradict each other {modeText}";
-    }
-
-    public static void AppendLegacyPrefixes(List<byte> bytes, PrefixState state)
-    {
-        ArgumentNullException.ThrowIfNull(bytes);
-
-        if (state.Group1 != 0)
-        {
-            bytes.Add(state.Group1);
-        }
-
-        if (state.OperandSize66)
-        {
-            bytes.Add(0x66);
-        }
-
-        if (state.AddressSize67)
-        {
-            bytes.Add(0x67);
-        }
-    }
-
-    /// <summary>
-    /// Appends the REX prefix when W or B is set, or the REX2 prefix for <paramref name="state"/>.
-    /// </summary>
-    /// <param name="bytes">The sample bytes.</param>
-    /// <param name="state">The prefix state.</param>
-    /// <param name="map">
-    /// The opcode map of the table. REX2 has no escape bytes, its <c>M0</c> bit selects the <c>0F</c> table instead.
-    /// </param>
-    public static void AppendRexPrefix(List<byte> bytes, PrefixState state, OpcodeMap map)
-    {
-        ArgumentNullException.ThrowIfNull(bytes);
-
-        var w = state.W ? 1 : 0;
-        var b = state.B ? 1 : 0;
-
-        if (state.Rex2)
-        {
-            var m0 = (map is OpcodeMap.M0F) ? 1 : 0;
-            bytes.Add(0xD5);
-            bytes.Add((byte)((m0 << 7) | (w << 3) | b));
-            return;
-        }
-
-        if ((w | b) != 0)
-        {
-            bytes.Add((byte)(0x40 | (w << 3) | b));
-        }
+        return $"{string.Join(", ", prefixSteps.Select(DecoderTreePath.FormatStep))} contradict each other {modeText}";
     }
 
     /// <summary>
@@ -490,7 +345,24 @@ internal static class SampleBuilder
 
         foreach (var step in steps.Where(step => step.Node == ModrmModCompactAxis))
         {
-            mods.IntersectWith(step.Slots.SelectMany(slot => (slot == "reg") ? RegisterFormMods : MemoryFormMods));
+            var compact = new HashSet<int>();
+            foreach (var slot in step.Slots)
+            {
+                switch (slot)
+                {
+                    case "reg":
+                        compact.UnionWith(RegisterFormMods);
+                        break;
+                    case "mem":
+                        compact.UnionWith(MemoryFormMods);
+                        break;
+                    default:
+                        failure = $"unknown slot {ModrmModCompactAxis}={slot}";
+                        return false;
+                }
+            }
+
+            mods.IntersectWith(compact);
         }
 
         var isForcedRegisterForm = definition.Flags.HasFlag(InstructionFlagsEnum.ForceRegForm);
@@ -621,7 +493,7 @@ internal static class SampleBuilder
             {
                 immediates.Add(immediateWidth);
             }
-            else if (operand.Encoding is OperandEncoding.IS4)
+            else if (!IsByteFreeEncoding(operand.Encoding))
             {
                 failure = $"operand {operand.Type} has the unsupported encoding {operand.Encoding}";
                 return false;
@@ -694,6 +566,16 @@ internal static class SampleBuilder
                 Math.Min(32, operandWidth),
             _ => null
         };
+    }
+
+    /// <summary>
+    /// <see langword="true"/> for the operand encodings that add no byte after the opcode and the ModRM byte, because
+    /// they live in the opcode, the ModRM byte or a prefix payload.
+    /// </summary>
+    private static bool IsByteFreeEncoding(OperandEncoding encoding)
+    {
+        return encoding is OperandEncoding.MASK or OperandEncoding.ModrmReg or OperandEncoding.ModrmRm or
+            OperandEncoding.NDSNDD or OperandEncoding.None or OperandEncoding.Opcode or OperandEncoding.OpcodeBits;
     }
 
     private static bool IsMemoryOperand(OperandType type)

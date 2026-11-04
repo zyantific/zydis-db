@@ -22,7 +22,7 @@ internal static class CorpusWriter
         // An encoding without samples still gets its header, so the checker can tell an empty file from a missing one.
         foreach (var encodingReport in report.Encodings)
         {
-            var tag = SampleBuilder.EncodingTag(encodingReport.Encoding);
+            var tag = CorpusTags.EncodingTag(encodingReport.Encoding);
             var lines = report.Samples
                 .Where(sample => sample.Encoding == tag)
                 .Select(sample => sample.ToTsvLine())

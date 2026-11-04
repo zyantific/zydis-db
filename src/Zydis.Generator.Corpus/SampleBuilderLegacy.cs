@@ -13,6 +13,11 @@ namespace Zydis.Generator.Corpus;
 /// </summary>
 internal static class SampleBuilderLegacy
 {
+    private static readonly bool[] Booleans = [false, true];
+
+    // F3 before F2, which is the slot order of mandatory_prefix and gives a bare prefix_group1=1 step an F3.
+    private static readonly byte[] Group1Prefixes = [0x00, 0xF3, 0xF2];
+
     public static SampleBuildResult Build(DecoderTreePath path, ModeNode.Slot mode, int id, string formId)
     {
         var steps = path.Steps;
@@ -26,10 +31,10 @@ internal static class SampleBuilderLegacy
 
         if (steps.FirstOrDefault(step => !IsLegacyStep(step)) is { } foreign)
         {
-            return new Unencodable($"{SampleBuilder.FormatStep(foreign)} does not apply to the legacy encoding");
+            return new Unencodable($"{DecoderTreePath.FormatStep(foreign)} does not apply to the legacy encoding");
         }
 
-        if (!SampleBuilder.TrySelectPrefixState(steps, mode, SampleBuilder.LegacyPrefixStates(mode), out var prefixes,
+        if (!SampleBuilder.TrySelectPrefixState(steps, mode, LegacyPrefixStates(mode), out var prefixes,
                 out var prefixFailure))
         {
             return new Unencodable(prefixFailure);
@@ -37,7 +42,7 @@ internal static class SampleBuilderLegacy
 
         if (prefixes.Rex2 && (path.Map is not (OpcodeMap.MAP0 or OpcodeMap.M0F)))
         {
-            return new Unencodable($"REX2 has no {SampleBuilder.MapTag(path.Map)} table");
+            return new Unencodable($"REX2 has no {CorpusTags.MapTag(path.Map)} table");
         }
 
         // A 66 that the definition consumes as its mandatory prefix does not override the operand size. No 3DNow
@@ -69,8 +74,8 @@ internal static class SampleBuilderLegacy
         }
 
         var bytes = new List<byte>();
-        SampleBuilder.AppendLegacyPrefixes(bytes, prefixes);
-        SampleBuilder.AppendRexPrefix(bytes, prefixes, path.Map);
+        AppendLegacyPrefixes(bytes, prefixes);
+        AppendRexPrefix(bytes, prefixes, path.Map);
 
         if (!prefixes.Rex2)
         {
@@ -104,6 +109,94 @@ internal static class SampleBuilderLegacy
         var decoderModes = SampleBuilder.GetDecoderModes(steps, prefixes.Rex2);
 
         return new Built(SampleBuilder.CreateSample(path, mode, bytes, decoderModes, osz, asz, id, formId));
+    }
+
+    /// <summary>
+    /// The legacy prefix, REX and REX2 combinations a legacy or 3DNow sample can carry in <paramref name="mode"/>,
+    /// fewest bytes first.
+    /// </summary>
+    private static IReadOnlyList<SampleBuilder.PrefixState> LegacyPrefixStates(ModeNode.Slot mode)
+    {
+        var states = new List<SampleBuilder.PrefixState>();
+
+        foreach (var rex2 in Booleans)
+        {
+            foreach (var w in Booleans)
+            {
+                foreach (var b in Booleans)
+                {
+                    if ((rex2 || w || b) && (mode is not ModeNode.Slot.M64))
+                    {
+                        continue;
+                    }
+
+                    foreach (var addressSize67 in Booleans)
+                    {
+                        foreach (var group1 in Group1Prefixes)
+                        {
+                            foreach (var operandSize66 in Booleans)
+                            {
+                                states.Add(new SampleBuilder.PrefixState(group1, operandSize66, addressSize67, w, b,
+                                    rex2));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // OrderBy is stable, so states of equal size keep the enumeration order, which puts the lowest slot of each
+        // axis first.
+        return [.. states.OrderBy(state => state.ByteCount)];
+    }
+
+    private static void AppendLegacyPrefixes(List<byte> bytes, SampleBuilder.PrefixState state)
+    {
+        ArgumentNullException.ThrowIfNull(bytes);
+
+        if (state.Group1 != 0)
+        {
+            bytes.Add(state.Group1);
+        }
+
+        if (state.OperandSize66)
+        {
+            bytes.Add(0x66);
+        }
+
+        if (state.AddressSize67)
+        {
+            bytes.Add(0x67);
+        }
+    }
+
+    /// <summary>
+    /// Appends the REX prefix when W or B is set, or the REX2 prefix for <paramref name="state"/>.
+    /// </summary>
+    /// <param name="bytes">The sample bytes.</param>
+    /// <param name="state">The prefix state.</param>
+    /// <param name="map">
+    /// The opcode map of the table. REX2 has no escape bytes, its <c>M0</c> bit selects the <c>0F</c> table instead.
+    /// </param>
+    private static void AppendRexPrefix(List<byte> bytes, SampleBuilder.PrefixState state, OpcodeMap map)
+    {
+        ArgumentNullException.ThrowIfNull(bytes);
+
+        var w = state.W ? 1 : 0;
+        var b = state.B ? 1 : 0;
+
+        if (state.Rex2)
+        {
+            var m0 = (map is OpcodeMap.M0F) ? 1 : 0;
+            bytes.Add(0xD5);
+            bytes.Add((byte)((m0 << 7) | (w << 3) | b));
+            return;
+        }
+
+        if ((w | b) != 0)
+        {
+            bytes.Add((byte)(0x40 | (w << 3) | b));
+        }
     }
 
     private static bool IsLegacyStep(PathStep step)
@@ -153,6 +246,15 @@ internal static class SampleBuilderLegacy
             return false;
         }
 
-        return value.GetString() is "66" or "f3" or "f2";
+        return value.GetString() switch
+        {
+            "none" or "ignore" => false,
+            "66" or "f3" or "f2" => true,
+            // A negated prefix decodes for every candidate but the named one and consumes none.
+            { } negated when negated.StartsWith('!') => false,
+            var unknown => throw new InvalidOperationException(
+                $"Invalid value '{unknown}' for the {SampleBuilder.MandatoryPrefixAxis} filter of " +
+                $"'{definition.Mnemonic}'.")
+        };
     }
 }
