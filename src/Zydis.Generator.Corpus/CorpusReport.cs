@@ -54,7 +54,7 @@ internal sealed class CorpusReport
 
     private static void AppendCount(StringBuilder builder, string name, int count)
     {
-        builder.Append(CultureInfo.InvariantCulture, $"  {name + ":",-32}{count}\n");
+        builder.Append(CultureInfo.InvariantCulture, $"  {name + ":",-40}{count}\n");
     }
 
     private static void AppendDefinitions(StringBuilder builder, string name, InstructionEncoding encoding,
