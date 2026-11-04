@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.DecoderTree;
 using Zydis.Generator.Core.Definitions;
 using Zydis.Generator.Enums;
@@ -22,19 +21,6 @@ internal static class SampleBuilderVex
 
     // R, X and B are stored inverted, and every canonical register index is below 8, so all three bits are set.
     private const byte InvertedRxb = 0xE0;
-
-    private static readonly bool[] Booleans = [false, true];
-
-    // A 66, F2 or F3 before C4 or 8F makes the decoder fail with ZYDIS_STATUS_ILLEGAL_LEGACY_PFX, so the states with a
-    // 66 come last and only serve to name the operand_size step that needs one. The pp field replaces the refining
-    // prefix bytes.
-    private static readonly SampleBuilder.PrefixState[] PrefixStates =
-    [
-        .. from operandSize66 in Booleans
-           from addressSize67 in Booleans
-           from w in Booleans
-           select new SampleBuilder.PrefixState(0x00, operandSize66, addressSize67, w, B: false, Rex2: false)
-    ];
 
     public static SampleBuildResult BuildVex(DecoderTreePath path, ModeNode.Slot mode, int id, string formId)
     {
@@ -93,7 +79,8 @@ internal static class SampleBuilderVex
             return new Unencodable($"the {encoding} table of {CorpusTags.MapTag(path.Map)} has no refining prefix");
         }
 
-        if (!SampleBuilder.TrySelectPrefixState(steps, mode, PrefixStates, out var prefixes, out var prefixFailure))
+        if (!SampleBuilder.TrySelectPrefixState(steps, mode, SampleBuilder.PayloadPrefixStates, out var prefixes,
+                out var prefixFailure))
         {
             return new Unencodable(prefixFailure);
         }
@@ -147,7 +134,7 @@ internal static class SampleBuilderVex
 
         var payload1 = (byte)(InvertedRxb | map);
         var payload2 = (byte)(((prefixes.W ? 1 : 0) << 7) | ((~(registers.Vvvv ?? 0) & 0x0F) << 3) | (l << 2) |
-            PpField(refiningPrefix));
+            SampleBuilder.PpField(refiningPrefix));
 
         if (!IsReadAsPrefix(prefix, payload1, mode))
         {
@@ -222,18 +209,6 @@ internal static class SampleBuilderVex
         return (prefix == XopPrefix)
             ? ((payload1 & 0x1F) >= 0x08)
             : ((mode is ModeNode.Slot.M64) || ((payload1 & 0xC0) == 0xC0));
-    }
-
-    private static int PpField(RefiningPrefix prefix)
-    {
-        return prefix switch
-        {
-            RefiningPrefix.PNP => 0b00,
-            RefiningPrefix.P66 => 0b01,
-            RefiningPrefix.PF3 => 0b10,
-            RefiningPrefix.PF2 => 0b11,
-            _ => throw new ArgumentOutOfRangeException(nameof(prefix), prefix, null)
-        };
     }
 
     private static bool IsVexStep(PathStep step)

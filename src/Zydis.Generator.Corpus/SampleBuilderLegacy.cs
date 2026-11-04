@@ -13,8 +13,6 @@ namespace Zydis.Generator.Corpus;
 /// </summary>
 internal static class SampleBuilderLegacy
 {
-    private static readonly bool[] Booleans = [false, true];
-
     // F3 before F2, which is the slot order of mandatory_prefix and gives a bare prefix_group1=1 step an F3.
     private static readonly byte[] Group1Prefixes = [0x00, 0xF3, 0xF2];
 
@@ -119,22 +117,22 @@ internal static class SampleBuilderLegacy
     {
         var states = new List<SampleBuilder.PrefixState>();
 
-        foreach (var rex2 in Booleans)
+        foreach (var rex2 in SampleBuilder.Booleans)
         {
-            foreach (var w in Booleans)
+            foreach (var w in SampleBuilder.Booleans)
             {
-                foreach (var b in Booleans)
+                foreach (var b in SampleBuilder.Booleans)
                 {
                     if ((rex2 || w || b) && (mode is not ModeNode.Slot.M64))
                     {
                         continue;
                     }
 
-                    foreach (var addressSize67 in Booleans)
+                    foreach (var addressSize67 in SampleBuilder.Booleans)
                     {
                         foreach (var group1 in Group1Prefixes)
                         {
-                            foreach (var operandSize66 in Booleans)
+                            foreach (var operandSize66 in SampleBuilder.Booleans)
                             {
                                 states.Add(new SampleBuilder.PrefixState(group1, operandSize66, addressSize67, w, b,
                                     rex2));

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
+using Zydis.Generator.Core.Common;
 using Zydis.Generator.Core.DecoderTree;
 using Zydis.Generator.Core.Definitions;
 using Zydis.Generator.Enums;
@@ -43,6 +44,25 @@ internal static class SampleBuilder
     // with `mod=0` is a bare disp16, so these come last.
     private static readonly int[] MemoryRmOrder = [0, 1, 2, 3, 6, 7, 4, 5];
     private static readonly int[] MemoryRmOrder16 = [0, 1, 2, 3, 4, 5, 7, 6];
+
+    internal static readonly bool[] Booleans = [false, true];
+
+    /// <summary>
+    /// The prefix states of the encodings that carry W and the refining prefix in their payload: EVEX, MVEX, VEX and
+    /// XOP.
+    /// </summary>
+    /// <remarks>
+    /// A 66, F2 or F3 before 62, 8F or C4 makes the decoder fail with ZYDIS_STATUS_ILLEGAL_LEGACY_PFX, so the states
+    /// with a 66 come last and only serve to name the operand_size step that needs one. The pp field replaces the
+    /// refining prefix bytes.
+    /// </remarks>
+    internal static readonly PrefixState[] PayloadPrefixStates =
+    [
+        .. from operandSize66 in Booleans
+           from addressSize67 in Booleans
+           from w in Booleans
+           select new PrefixState(0x00, operandSize66, addressSize67, w, B: false, Rex2: false)
+    ];
 
     /// <summary>
     /// Builds the sample of <paramref name="path"/> in <paramref name="mode"/>.
@@ -578,6 +598,21 @@ internal static class SampleBuilder
         {
             bytes.Add((byte)(0x11 * (i + 1)));
         }
+    }
+
+    /// <summary>
+    /// The pp field of an EVEX, MVEX, VEX or XOP payload, which stands for the refining prefix byte.
+    /// </summary>
+    internal static int PpField(RefiningPrefix prefix)
+    {
+        return prefix switch
+        {
+            RefiningPrefix.PNP => 0b00,
+            RefiningPrefix.P66 => 0b01,
+            RefiningPrefix.PF3 => 0b10,
+            RefiningPrefix.PF2 => 0b11,
+            _ => throw new ArgumentOutOfRangeException(nameof(prefix), prefix, null)
+        };
     }
 
     private static HashSet<int> FieldValues(IReadOnlyList<PathStep> steps, string axis)

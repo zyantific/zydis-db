@@ -37,23 +37,10 @@ internal static class SampleBuilderEvex
     // The NF bit is bit 2 of aaa.
     private const int NfBit = 0x04;
 
-    private static readonly bool[] Booleans = [false, true];
-
     // Each list starts with the canonical default: U is 1, the vector length 128 and every other field 0.
     private static readonly string[] BitSlots = ["0", "1"];
     private static readonly string[] USlots = ["1", "0"];
     private static readonly string[] VectorLengthSlots = ["128", "256", "512"];
-
-    // A 66, F2 or F3 before 62 makes the decoder fail with ZYDIS_STATUS_ILLEGAL_LEGACY_PFX, so the states with a 66
-    // come last and only serve to name the operand_size step that needs one. The pp field replaces the refining prefix
-    // bytes.
-    private static readonly SampleBuilder.PrefixState[] PrefixStates =
-    [
-        .. from operandSize66 in Booleans
-           from addressSize67 in Booleans
-           from w in Booleans
-           select new SampleBuilder.PrefixState(0x00, operandSize66, addressSize67, w, B: false, Rex2: false)
-    ];
 
     public static SampleBuildResult BuildEvex(DecoderTreePath path, ModeNode.Slot mode, int id, string formId)
     {
@@ -86,7 +73,8 @@ internal static class SampleBuilderEvex
             return new Unencodable($"the evex table of {mapTag} has no refining prefix");
         }
 
-        if (!SampleBuilder.TrySelectPrefixState(steps, mode, PrefixStates, out var prefixes, out var prefixFailure))
+        if (!SampleBuilder.TrySelectPrefixState(steps, mode, SampleBuilder.PayloadPrefixStates, out var prefixes,
+                out var prefixFailure))
         {
             return new Unencodable(prefixFailure);
         }
@@ -192,7 +180,7 @@ internal static class SampleBuilderEvex
 
         var p0 = (byte)(P0ExtensionBits | mmm);
         var p1 = (byte)(((prefixes.W ? 1 : 0) << 7) | (vvvv << 3) | (int.Parse(u, CultureInfo.InvariantCulture) << 2) |
-            PpField(refiningPrefix));
+            SampleBuilder.PpField(refiningPrefix));
         // z stays 0. A force_zero_mask definition gets the zeroing mode without it, and a definition without
         // accepts_zero_mask rejects it.
         var p2 = (byte)((ll << 5) | (int.Parse(bit4, CultureInfo.InvariantCulture) << 4) | lowNibble);
@@ -330,18 +318,6 @@ internal static class SampleBuilderEvex
             OpcodeMap.MAP6 => 0x06,
             OpcodeMap.MAP7 => 0x07,
             _ => null
-        };
-    }
-
-    private static int PpField(RefiningPrefix prefix)
-    {
-        return prefix switch
-        {
-            RefiningPrefix.PNP => 0b00,
-            RefiningPrefix.P66 => 0b01,
-            RefiningPrefix.PF3 => 0b10,
-            RefiningPrefix.PF2 => 0b11,
-            _ => throw new ArgumentOutOfRangeException(nameof(prefix), prefix, null)
         };
     }
 
