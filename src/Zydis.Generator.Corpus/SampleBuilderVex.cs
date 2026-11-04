@@ -180,7 +180,10 @@ internal static class SampleBuilderVex
             return new Unencodable(immediateFailure);
         }
 
-        var decoderModes = SampleBuilder.GetDecoderModes(steps, hasRex2: false);
+        // VEX map 0 exists only in a build with KNC support. The knc tag lets the checker skip the sample in a build
+        // without it instead of failing it.
+        var decoderModes = SampleBuilder.GetDecoderModes(steps, hasRex2: false,
+            requiresKnc: (path.Encoding is InstructionEncoding.VEX) && (path.Map is OpcodeMap.MAP0));
 
         return new Built(SampleBuilder.CreateSample(path, mode, bytes, decoderModes, osz, asz, id, formId));
     }

@@ -236,7 +236,15 @@ internal static class SampleBuilder
     /// The decoder modes the path depends on. A <c>feature_*</c> step takes slot <c>0</c> when it serves it, which
     /// needs no mode change for most features, and still names the mode so the checker pins it.
     /// </summary>
-    public static DecoderModes GetDecoderModes(IReadOnlyList<PathStep> steps, bool hasRex2)
+    /// <param name="steps">The path steps.</param>
+    /// <param name="hasRex2">
+    /// <see langword="true"/> if the sample carries a REX2 prefix, which puts <c>apx</c> on the enable list.
+    /// </param>
+    /// <param name="requiresKnc">
+    /// <see langword="true"/> if the sample decodes only in a build with KNC support, which puts <c>knc</c> on the
+    /// enable list.
+    /// </param>
+    public static DecoderModes GetDecoderModes(IReadOnlyList<PathStep> steps, bool hasRex2, bool requiresKnc = false)
     {
         ArgumentNullException.ThrowIfNull(steps);
 
@@ -262,6 +270,11 @@ internal static class SampleBuilder
         if (hasRex2)
         {
             enable.Add("apx");
+        }
+
+        if (requiresKnc)
+        {
+            enable.Add("knc");
         }
 
         return new DecoderModes(Join(enable), Join(disable));
