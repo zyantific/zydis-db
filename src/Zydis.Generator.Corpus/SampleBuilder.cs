@@ -58,6 +58,7 @@ internal static class SampleBuilder
                 SampleBuilderLegacy.Build(path, mode, id, formId),
             InstructionEncoding.VEX => SampleBuilderVex.BuildVex(path, mode, id, formId),
             InstructionEncoding.XOP => SampleBuilderVex.BuildXop(path, mode, id, formId),
+            InstructionEncoding.EVEX => SampleBuilderEvex.BuildEvex(path, mode, id, formId),
             _ => new Unencodable($"no builder for {CorpusTags.EncodingTag(path.Encoding)}")
         };
     }
@@ -244,7 +245,16 @@ internal static class SampleBuilder
     /// <see langword="true"/> if the sample decodes only in a build with KNC support, which puts <c>knc</c> on the
     /// enable list.
     /// </param>
-    public static DecoderModes GetDecoderModes(IReadOnlyList<PathStep> steps, bool hasRex2, bool requiresKnc = false)
+    /// <param name="requiresApx">
+    /// <see langword="true"/> if the sample depends on APX without a REX2 prefix, as an EEVEX or map 4 to 7 form, which
+    /// puts <c>apx</c> on the enable list.
+    /// </param>
+    /// <param name="forbidsApx">
+    /// <see langword="true"/> if the decoder routes the sample to its leaf only with APX off, which puts <c>apx</c> on
+    /// the disable list.
+    /// </param>
+    public static DecoderModes GetDecoderModes(IReadOnlyList<PathStep> steps, bool hasRex2, bool requiresKnc = false,
+        bool requiresApx = false, bool forbidsApx = false)
     {
         ArgumentNullException.ThrowIfNull(steps);
 
@@ -266,10 +276,15 @@ internal static class SampleBuilder
             }
         }
 
-        // APX is on by default. Naming it keeps a changed default from silently breaking the REX2 samples.
-        if (hasRex2)
+        // APX is on by default. Naming it keeps a changed default from silently breaking the APX samples.
+        if (hasRex2 || requiresApx)
         {
             enable.Add("apx");
+        }
+
+        if (forbidsApx)
+        {
+            disable.Add("apx");
         }
 
         if (requiresKnc)
