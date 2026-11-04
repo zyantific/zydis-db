@@ -32,6 +32,7 @@ internal static class SampleBuilder
     internal const string RexWAxis = "rex_w";
     internal const string SwitchTableAxisPrefix = "switch_table_";
     internal const string SwitchTableDefaultSlot = "default";
+    internal const string VectorLengthAxis = "vector_length";
 
     private static readonly int[] AllModrmFieldValues = [0, 1, 2, 3, 4, 5, 6, 7];
     private static readonly int[] RegisterFormMods = [3];
@@ -55,6 +56,8 @@ internal static class SampleBuilder
         {
             InstructionEncoding.Default or InstructionEncoding.AMD3DNOW =>
                 SampleBuilderLegacy.Build(path, mode, id, formId),
+            InstructionEncoding.VEX => SampleBuilderVex.BuildVex(path, mode, id, formId),
+            InstructionEncoding.XOP => SampleBuilderVex.BuildXop(path, mode, id, formId),
             _ => new Unencodable($"no builder for {CorpusTags.EncodingTag(path.Encoding)}")
         };
     }
@@ -277,6 +280,8 @@ internal static class SampleBuilder
         var next = new Dictionary<RegisterClass, int>();
         int? reg = null;
         int? rm = null;
+        int? vvvv = null;
+        int? is4 = null;
 
         foreach (var operand in definition.Operands ?? [])
         {
@@ -296,6 +301,12 @@ internal static class SampleBuilder
                 case OperandEncoding.ModrmRm:
                     rm = index;
                     break;
+                case OperandEncoding.NDSNDD:
+                    vvvv = index;
+                    break;
+                case OperandEncoding.IS4:
+                    is4 = index;
+                    break;
                 default:
                     continue;
             }
@@ -303,7 +314,9 @@ internal static class SampleBuilder
             next[registerClass] = index + 1;
         }
 
-        return new RegisterAssignment(reg, rm);
+        var vsibIndex = next.GetValueOrDefault(RegisterClass.Vector, FirstRegisterIndex(RegisterClass.Vector));
+
+        return new RegisterAssignment(reg, rm, vvvv, is4, vsibIndex);
     }
 
     /// <summary>
@@ -403,8 +416,8 @@ internal static class SampleBuilder
 
     /// <summary>
     /// Appends the ModRM byte and, when the decoder reads the addressing form, the SIB byte and the displacement. The
-    /// canonical memory operand is base-only, a fixed <c>rm=4</c> gets the SIB byte <c>08</c> (scale 0, index rcx,
-    /// base rax).
+    /// canonical memory operand is base-only. A fixed <c>rm=4</c> gets a SIB byte with scale 0, base rax and index rcx,
+    /// which is <c>08</c>, unless <paramref name="sibIndex"/> names another index.
     /// </summary>
     /// <param name="bytes">The sample bytes.</param>
     /// <param name="modrm">The ModRM fields.</param>
@@ -413,7 +426,11 @@ internal static class SampleBuilder
     /// <see langword="false"/> if the definition reads no SIB byte and displacement, because it has no ModRM in its
     /// encoding info (only a filter read the byte) or it forces the register form.
     /// </param>
-    public static void AppendModrm(List<byte> bytes, Modrm modrm, int addressWidth, bool readsAddressing)
+    /// <param name="sibIndex">
+    /// The SIB index register in place of rcx, for the vector register of a VSIB operand.
+    /// </param>
+    public static void AppendModrm(List<byte> bytes, Modrm modrm, int addressWidth, bool readsAddressing,
+        int? sibIndex = null)
     {
         ArgumentNullException.ThrowIfNull(bytes);
 
@@ -438,7 +455,7 @@ internal static class SampleBuilder
         {
             if (modrm.Rm == 4)
             {
-                bytes.Add(0x08);
+                bytes.Add((byte)((sibIndex ?? 1) << 3));
             }
 
             displacementWidth = modrm.Mod switch
@@ -463,16 +480,20 @@ internal static class SampleBuilder
     /// <see cref="EffectiveSizes.ComputeOperandWidth"/>.
     /// </param>
     /// <param name="addressWidth">The effective address size, which selects the size of a displacement operand.</param>
+    /// <param name="is4Byte">
+    /// The <c>is4</c> immediate byte, or <see langword="null"/> for an encoding without one.
+    /// </param>
     /// <param name="failure">The operand the builder cannot encode.</param>
     /// <returns><see langword="true"/> if every operand could be encoded.</returns>
     public static bool TryAppendImmediates(List<byte> bytes, InstructionDefinition definition, int operandWidth,
-        int addressWidth, out string failure)
+        int addressWidth, out string failure, byte? is4Byte = null)
     {
         ArgumentNullException.ThrowIfNull(bytes);
         ArgumentNullException.ThrowIfNull(definition);
 
-        var displacements = new List<int>();
-        var immediates = new List<int>();
+        var displacement = new List<byte>();
+        var immediates = new List<byte>();
+        var hasIs4Byte = false;
 
         foreach (var operand in definition.Operands ?? [])
         {
@@ -480,18 +501,28 @@ internal static class SampleBuilder
             // collecting immediates at it.
             if (operand.Type is OperandType.PTR)
             {
-                immediates.Add((operandWidth == 16) ? 16 : 32);
-                immediates.Add(16);
+                AppendValue(immediates, (operandWidth == 16) ? 16 : 32);
+                AppendValue(immediates, 16);
                 break;
             }
 
             if (DisplacementWidth(operand.Encoding, addressWidth) is { } displacementWidth)
             {
-                displacements.Add(displacementWidth);
+                AppendValue(displacement, displacementWidth);
             }
             else if (ImmediateWidth(operand.Encoding, operandWidth) is { } immediateWidth)
             {
-                immediates.Add(immediateWidth);
+                AppendValue(immediates, immediateWidth);
+            }
+            else if ((operand.Encoding is OperandEncoding.IS4) && (is4Byte is { } value))
+            {
+                // The register and the 4-bit immediate of an is4 encoding share one byte, which the generator
+                // places at the first is4 operand.
+                if (!hasIs4Byte)
+                {
+                    immediates.Add(value);
+                    hasIs4Byte = true;
+                }
             }
             else if (!IsByteFreeEncoding(operand.Encoding))
             {
@@ -500,10 +531,8 @@ internal static class SampleBuilder
             }
         }
 
-        foreach (var width in displacements.Concat(immediates))
-        {
-            AppendValue(bytes, width);
-        }
+        bytes.AddRange(displacement);
+        bytes.AddRange(immediates);
 
         failure = string.Empty;
         return true;
@@ -645,7 +674,13 @@ internal static class SampleBuilder
 
     /// <param name="Reg">The register index of the operand in <c>ModRM.reg</c>, if any.</param>
     /// <param name="Rm">The register index of the register operand in <c>ModRM.rm</c>, if any.</param>
-    internal sealed record RegisterAssignment(int? Reg, int? Rm);
+    /// <param name="Vvvv">The register index of the operand in <c>vvvv</c>, if any.</param>
+    /// <param name="Is4">The register index of the operand in the high nibble of the <c>is4</c> byte, if any.</param>
+    /// <param name="VsibIndex">
+    /// The lowest vector register index that no register operand takes. The decoder rejects a gather whose VSIB index
+    /// equals its destination or its mask.
+    /// </param>
+    internal sealed record RegisterAssignment(int? Reg, int? Rm, int? Vvvv, int? Is4, int VsibIndex);
 
     /// <param name="Enable">The decoder modes to enable, comma-separated, or <c>-</c>.</param>
     /// <param name="Disable">The decoder modes to disable, comma-separated, or <c>-</c>.</param>
