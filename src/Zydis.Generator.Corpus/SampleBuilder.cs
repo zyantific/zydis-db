@@ -823,8 +823,8 @@ internal static class SampleBuilder
 
     private static bool IsMemoryOperand(OperandType type)
     {
-        return type is OperandType.MEM or OperandType.MEMVSIBX or OperandType.MEMVSIBY or OperandType.MEMVSIBZ or
-            OperandType.AGEN or OperandType.AGENNoRel or OperandType.MIB;
+        return type is OperandType.AGEN or OperandType.AGENNoRel or OperandType.MEM or OperandType.MEMVSIBX or
+            OperandType.MEMVSIBY or OperandType.MEMVSIBZ or OperandType.MIB;
     }
 
     private static RegisterKind GetRegisterKind(OperandType type)

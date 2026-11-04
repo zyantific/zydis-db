@@ -203,7 +203,7 @@ public sealed class ZydisGenerator
         {
             if (table.IsEmpty)
             {
-                continue; // Skip empty tables.
+                continue;
             }
 
             var declarationWriter = new DeclarationWriter(writer, true);
@@ -244,7 +244,7 @@ public sealed class ZydisGenerator
             if (table.IsEmpty)
             {
                 initializerListWriter.WriteNull();
-                continue; // Skip empty tables.
+                continue;
             }
 
             initializerListWriter.WriteExpression("&DECODER_TREE_{0}[0]", table);

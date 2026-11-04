@@ -41,7 +41,7 @@ internal sealed class CorpusReport
             AppendCount(builder, "registry size", encoding.RegistrySize);
             AppendCount(builder, "distinct sample ids", encoding.DistinctSampleIds);
 
-            AppendIssues(builder, "impossible by architecture", encoding.Impossible);
+            AppendIssues(builder, "impossible by architecture or routing", encoding.Impossible);
             AppendIssues(builder, "unencodable", encoding.Unencodable);
             AppendDefinitions(builder, "unreachable definitions", encoding.Encoding, encoding.Unreachable);
             AppendDefinitions(builder, "definitions without a sample", encoding.Encoding, encoding.WithoutSample);
