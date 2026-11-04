@@ -29,6 +29,7 @@ public sealed class ZydisGenerator
     private readonly ConditionCodeRegistry _conditionCodeRegistry = new();
     private readonly RelativeInfoRegistry _relativeInfoRegistry = new();
     private readonly FormatterStringsRegistry _formatterStringsRegistry = new();
+    private readonly List<InstructionDefinition> _parsedDefinitions = [];
 
     /// <summary>
     /// The variable-position construction statistics from the most recent <see cref="ReadDefinitionsAsync"/>;
@@ -41,7 +42,24 @@ public sealed class ZydisGenerator
     /// </summary>
     public IReadOnlyList<TableEmissionStatistics> DecoderTableEmissionStatistics { get; private set; } = [];
 
-    private OpcodeTables OpcodeTables => _variablePositionTreeBuilder.OpcodeTables;
+    /// <summary>
+    /// The decoder tree built by the most recent <see cref="ReadDefinitionsAsync"/>.
+    /// </summary>
+    public OpcodeTables OpcodeTables => _variablePositionTreeBuilder.OpcodeTables;
+
+    /// <summary>
+    /// Every definition <see cref="ReadDefinitionsAsync"/> parsed, in file order. Definitions with identical table
+    /// content stay separate entries here, because the decoder tree references each of them.
+    /// </summary>
+    public IReadOnlyList<InstructionDefinition> Definitions => _parsedDefinitions;
+
+    /// <summary>
+    /// Returns the id that the emitted tables use for <paramref name="definition"/> inside its encoding. Definitions
+    /// with identical table content share one id.
+    /// </summary>
+    /// <param name="definition">A definition from <see cref="Definitions"/>.</param>
+    /// <returns>The definition id.</returns>
+    public int GetDefinitionId(InstructionDefinition definition) => _definitionRegistry.GetDefinitionId(definition);
 
     public async Task ReadDefinitionsAsync(string datafilesPath, CancellationToken cancellationToken = default)
     {
@@ -49,6 +67,7 @@ public sealed class ZydisGenerator
 
         await foreach (var definition in DefinitionReader.ReadAsync<InstructionDefinition>(Path.Join(datafilesPath, "instructions.json"), cancellationToken).ConfigureAwait(false))
         {
+            _parsedDefinitions.Add(definition);
             _definitionRegistry.InsertDefinition(definition);
             _encoderRegistry.InsertDefinition(definition);
             _variablePositionTreeBuilder.InsertDefinition(definition);
