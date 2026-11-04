@@ -79,6 +79,7 @@ internal static class SampleBuilder
             InstructionEncoding.VEX => SampleBuilderVex.BuildVex(path, mode, id, formId),
             InstructionEncoding.XOP => SampleBuilderVex.BuildXop(path, mode, id, formId),
             InstructionEncoding.EVEX => SampleBuilderEvex.BuildEvex(path, mode, id, formId),
+            InstructionEncoding.MVEX => SampleBuilderMvex.BuildMvex(path, mode, id, formId),
             _ => new Unencodable($"no builder for {CorpusTags.EncodingTag(path.Encoding)}")
         };
     }
