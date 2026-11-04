@@ -174,8 +174,9 @@ internal static class SampleBuilderEvex
 
         // ZydisNodeHandlerEvexU routes every memory form as U=1 under APX, so only APX off reaches a U=0 memory leaf.
         var forbidsApx = (u == "0") && modrm is { Mod: not 3 };
-        var requiresApx = evex.IsEevex || (path.Map is OpcodeMap.MAP4 or OpcodeMap.MAP5 or OpcodeMap.MAP6 or
-            OpcodeMap.MAP7);
+
+        // Maps 4 and 7 are the APX maps. Maps 5 and 6 hold AVX512-FP16 and AVX10 forms, which decode without APX.
+        var requiresApx = evex.IsEevex || (path.Map is OpcodeMap.MAP4 or OpcodeMap.MAP7);
 
         if (forbidsApx && requiresApx)
         {

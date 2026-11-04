@@ -246,8 +246,8 @@ internal static class SampleBuilder
     /// enable list.
     /// </param>
     /// <param name="requiresApx">
-    /// <see langword="true"/> if the sample depends on APX without a REX2 prefix, as an EEVEX or map 4 to 7 form, which
-    /// puts <c>apx</c> on the enable list.
+    /// <see langword="true"/> if the sample depends on APX without a REX2 prefix, as an EEVEX, map 4 or map 7 form,
+    /// which puts <c>apx</c> on the enable list.
     /// </param>
     /// <param name="forbidsApx">
     /// <see langword="true"/> if the decoder routes the sample to its leaf only with APX off, which puts <c>apx</c> on
