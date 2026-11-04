@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- CA1515: the test project consumes the corpus types through their public surface. -->
+    <NoWarn>$(NoWarn);CA1515</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Zydis.Generator.Core\Zydis.Generator.Core.csproj" />
+  </ItemGroup>
+
+</Project>

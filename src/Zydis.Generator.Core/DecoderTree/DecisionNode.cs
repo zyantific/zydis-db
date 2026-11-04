@@ -66,7 +66,7 @@ public abstract class DecisionNodeDefinition :
     /// <returns>The name of the slot at the specified <paramref name="index"/> as a string.</returns>
     /// <exception cref="ArgumentOutOfRangeException">If the slot index is out of range.</exception>
     [Pure]
-    internal string GetSlotName(int index)
+    public string GetSlotName(int index)
     {
         var name = IndexToSlotName(index);
 

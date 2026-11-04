@@ -43,23 +43,23 @@ public sealed partial class OpcodeTableNode
 
 #pragma warning restore CA1034
 
-    private readonly InstructionEncoding _encoding;
-    private readonly RefiningPrefix? _prefix;
-    private readonly OpcodeMap _map;
+    public InstructionEncoding Encoding { get; }
+    public OpcodeMap Map { get; }
+    public RefiningPrefix? Prefix { get; }
 
     internal OpcodeTableNode(InstructionEncoding encoding, RefiningPrefix? prefix, OpcodeMap map) :
         base(NodeDefinition.Instance)
     {
-        _encoding = encoding;
-        _prefix = prefix;
-        _map = map;
+        Encoding = encoding;
+        Prefix = prefix;
+        Map = map;
     }
 
     #region Debugging
 
     public override string ToString()
     {
-        return OpcodeTables.FormatTableString(_encoding, _map, _prefix);
+        return OpcodeTables.FormatTableString(Encoding, Map, Prefix);
     }
 
     #endregion Debugging
