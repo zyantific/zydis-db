@@ -141,7 +141,8 @@ internal static class SampleBuilder
     }
 
     /// <summary>
-    /// Returns the first step whose every slot the architecture rules out in <paramref name="mode"/>.
+    /// Returns the first step whose every slot the architecture or the decoder's routing rules out in
+    /// <paramref name="mode"/>.
     /// </summary>
     /// <param name="steps">The path steps.</param>
     /// <param name="mode">The machine mode.</param>
@@ -159,6 +160,13 @@ internal static class SampleBuilder
 
         foreach (var step in steps)
         {
+            // ZydisNodeHandlerMandatoryPrefix yields the indices of none, 66, f3 and f2 only, so no byte sequence
+            // reaches a leaf behind slot 0.
+            if ((step.Node == MandatoryPrefixAxis) && step.Slots.All(slot => slot == "ignore"))
+            {
+                return "mandatory_prefix slot ignore is never routed";
+            }
+
             var isImpossible = step.Node switch
             {
                 RexWAxis or RexBAxis => hasRexPrefixes && !is64 && step.Slots.All(slot => slot == "1"),
