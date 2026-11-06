@@ -77,19 +77,6 @@ public sealed class EncodableDefinition :
     {
         Instruction = instruction;
         IsEncodable = !GetBoolFilter(FeatureAmdNode.NodeDefinition.Instance) && !Instruction.HasAnnotation<AnnotationDecodeOnly>();
-        if (Instruction.Mnemonic == "nop" && IsEncodable)
-        {
-            if (!GetBoolFilter(FeatureMpxNode.NodeDefinition.Instance, true) ||
-                !GetBoolFilter(FeatureCldemoteNode.NodeDefinition.Instance, true) ||
-                !GetBoolFilter(FeatureCetNode.NodeDefinition.Instance, true) ||
-                !GetBoolFilter(FeatureIbhfNode.NodeDefinition.Instance, true) ||
-                !GetBoolFilter(FeaturePrefetchrstNode.NodeDefinition.Instance, true) ||
-                !GetBoolFilter(FeatureKncNode.NodeDefinition.Instance, true) ||
-                (GetFilter(ModrmRegNode.NodeDefinition.Instance)?.StartsWith('!') ?? false))
-            {
-                IsEncodable = false;
-            }
-        }
         AddressSizes = GetWidthFilter(AddressSizeNode.NodeDefinition.Instance);
         OperandSizes = GetWidthFilter(OperandSizeNode.NodeDefinition.Instance);
         RexW = GetBoolFilter(RexWNode.NodeDefinition.Instance);
