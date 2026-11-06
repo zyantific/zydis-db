@@ -76,7 +76,7 @@ public sealed class EncodableDefinition :
     public EncodableDefinition(InstructionDefinition instruction)
     {
         Instruction = instruction;
-        IsEncodable = !GetBoolFilter(FeatureAmdNode.NodeDefinition.Instance) && !Instruction.HasAnnotation<AnnotationDecodeOnly>();
+        IsEncodable = !Instruction.HasAnnotation<AnnotationDecodeOnly>();
         AddressSizes = GetWidthFilter(AddressSizeNode.NodeDefinition.Instance);
         OperandSizes = GetWidthFilter(OperandSizeNode.NodeDefinition.Instance);
         RexW = GetBoolFilter(RexWNode.NodeDefinition.Instance);
