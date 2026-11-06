@@ -76,7 +76,7 @@ public sealed class EncodableDefinition :
     public EncodableDefinition(InstructionDefinition instruction)
     {
         Instruction = instruction;
-        IsEncodable = !GetBoolFilter(FeatureAmdNode.NodeDefinition.Instance);
+        IsEncodable = !GetBoolFilter(FeatureAmdNode.NodeDefinition.Instance) && !Instruction.HasAnnotation<AnnotationDecodeOnly>();
         if (Instruction.Mnemonic == "nop" && IsEncodable)
         {
             if (!GetBoolFilter(FeatureMpxNode.NodeDefinition.Instance, true) ||
