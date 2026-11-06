@@ -6,6 +6,7 @@ namespace Zydis.Generator.Core.Definitions;
 [JsonDerivedType(typeof(AnnotationName), typeDiscriminator: "name")]
 [JsonDerivedType(typeof(AnnotationSwappable), typeDiscriminator: "swappable")]
 [JsonDerivedType(typeof(AnnotationApxCc), typeDiscriminator: "apx_cc")]
+[JsonDerivedType(typeof(AnnotationDecodeOnly), typeDiscriminator: "decode_only")]
 public abstract class Annotation
 {
 
@@ -22,6 +23,14 @@ public class AnnotationSwappable : Annotation
 }
 
 public class AnnotationApxCc : Annotation
+{
+
+}
+
+/// <summary>
+/// The encoder never uses a definition that carries this annotation.
+/// </summary>
+public class AnnotationDecodeOnly : Annotation
 {
 
 }
