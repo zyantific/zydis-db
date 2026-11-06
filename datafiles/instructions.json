@@ -22846,6 +22846,7 @@
         "encoding": "modrm_reg"
       },
       {
+        "action": "none",
         "operand_type": "agen",
         "encoding": "modrm_rm"
       }
@@ -22902,6 +22903,7 @@
         "encoding": "modrm_reg"
       },
       {
+        "action": "none",
         "operand_type": "agen",
         "encoding": "modrm_rm"
       }
@@ -22956,6 +22958,7 @@
         "encoding": "modrm_reg"
       },
       {
+        "action": "none",
         "operand_type": "agen",
         "encoding": "modrm_rm"
       }
@@ -23012,6 +23015,7 @@
         "encoding": "modrm_reg"
       },
       {
+        "action": "none",
         "operand_type": "agen",
         "encoding": "modrm_rm"
       }
@@ -23066,6 +23070,7 @@
         "encoding": "modrm_reg"
       },
       {
+        "action": "none",
         "operand_type": "agen",
         "encoding": "modrm_rm"
       }
@@ -23122,6 +23127,7 @@
         "encoding": "modrm_reg"
       },
       {
+        "action": "none",
         "operand_type": "agen",
         "encoding": "modrm_rm"
       }
@@ -23150,6 +23156,7 @@
         "encoding": "modrm_reg"
       },
       {
+        "action": "none",
         "operand_type": "mib",
         "encoding": "modrm_rm",
         "element_type": "uint64",
@@ -23184,6 +23191,7 @@
         "encoding": "modrm_reg"
       },
       {
+        "action": "none",
         "operand_type": "mib",
         "encoding": "modrm_rm",
         "element_type": "uint32",
@@ -23216,6 +23224,7 @@
         "encoding": "modrm_reg"
       },
       {
+        "action": "none",
         "operand_type": "agen_norel",
         "encoding": "modrm_rm"
       }
@@ -23246,6 +23255,7 @@
         "encoding": "modrm_reg"
       },
       {
+        "action": "none",
         "operand_type": "agen_norel",
         "encoding": "modrm_rm"
       }
@@ -23455,7 +23465,7 @@
     },
     "operands": [
       {
-        "action": "write",
+        "action": "none",
         "operand_type": "mib",
         "encoding": "modrm_rm",
         "element_type": "uint64",
@@ -23489,7 +23499,7 @@
     },
     "operands": [
       {
-        "action": "write",
+        "action": "none",
         "operand_type": "mib",
         "encoding": "modrm_rm",
         "element_type": "uint32",
@@ -57565,6 +57575,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "uint8",
@@ -57594,6 +57605,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -57622,6 +57634,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -57654,6 +57667,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -57682,6 +57696,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -107203,6 +107218,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "uint8",
@@ -117394,6 +117410,7 @@
         "encoding": "modrm_reg"
       },
       {
+        "action": "none",
         "operand_type": "agen",
         "encoding": "modrm_rm"
       }
@@ -154278,6 +154295,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -154303,6 +154321,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -154328,6 +154347,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -154353,6 +154373,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -154378,6 +154399,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -154403,6 +154425,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -154430,6 +154453,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "uint8",
@@ -154457,6 +154481,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "uint8",
@@ -154482,6 +154507,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -154509,6 +154535,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "uint8",
@@ -154535,6 +154562,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -154560,6 +154588,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -154585,6 +154614,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -154610,6 +154640,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -154635,6 +154666,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "uint8",
@@ -495104,6 +495136,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495132,6 +495165,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495164,6 +495198,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495192,6 +495227,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495224,6 +495260,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495252,6 +495289,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495284,6 +495322,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495312,6 +495351,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495344,6 +495384,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495372,6 +495413,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495404,6 +495446,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495432,6 +495475,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495464,6 +495508,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495492,6 +495537,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495524,6 +495570,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
@@ -495552,6 +495599,7 @@
     },
     "operands": [
       {
+        "action": "none",
         "operand_type": "mem",
         "encoding": "modrm_rm",
         "element_type": "int64",
