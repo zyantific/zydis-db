@@ -36,6 +36,20 @@ internal static class DefinitionEmitter
                 _ => throw new InvalidOperationException()
             };
 
+            // Zydis declares the EVEX and MVEX definition structs behind these macros, so the tables
+            // follow the same guards.
+            var featureGuard = encoding switch
+            {
+                InstructionEncoding.EVEX => "ZYDIS_DISABLE_AVX512",
+                InstructionEncoding.MVEX => "ZYDIS_DISABLE_KNC",
+                _ => null
+            };
+
+            if (featureGuard is not null)
+            {
+                await writer.WriteLineAsync($"#ifndef {featureGuard}").ConfigureAwait(false);
+            }
+
             var definitionWriter = declarationWriter
                 .BeginDeclaration("static const", $"ZydisInstructionDefinition{encodingName}", $"ISTR_DEFINITIONS_{encodingName}[]")
                 .WriteInitializerList()
@@ -173,6 +187,11 @@ internal static class DefinitionEmitter
             definitionWriter.EndList();
             declarationWriter.EndDeclaration();
             await writer.WriteLineAsync().ConfigureAwait(false);
+
+            if (featureGuard is not null)
+            {
+                await writer.WriteLineAsync("#endif").ConfigureAwait(false);
+            }
         }
     }
 
