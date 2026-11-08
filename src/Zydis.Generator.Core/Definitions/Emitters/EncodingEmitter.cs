@@ -18,7 +18,7 @@ internal static class EncodingEmitter
 
         var declarationWriter = DeclarationWriter.Create(writer);
         var encodingsWriter = declarationWriter
-            .BeginDeclaration("static const", "ZydisInstructionEncodingInfo", "INSTR_ENCODINGS[]")
+            .BeginDeclaration("const", "ZydisInstructionEncodingInfo", "INSTR_ENCODINGS[]")
             .WriteInitializerList()
             .BeginList();
         var instructionEncodingInfoDeclaration = new SimpleObjectDeclaration("flags", "disp", "imm");

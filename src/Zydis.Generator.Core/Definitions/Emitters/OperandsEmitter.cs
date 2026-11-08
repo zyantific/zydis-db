@@ -24,7 +24,7 @@ internal static class OperandsEmitter
 
         var declarationWriter = DeclarationWriter.Create(writer);
         var operandsWriter = declarationWriter
-            .BeginDeclaration("static const", "ZydisOperandDefinition", "OPERAND_DEFINITIONS[]")
+            .BeginDeclaration("const", "ZydisOperandDefinition", "OPERAND_DEFINITIONS[]")
             .WriteInitializerList()
             .BeginList();
         var operandDeclaration = new ObjectDeclaration<InstructionOperand>();
@@ -54,7 +54,7 @@ internal static class OperandsEmitter
         declarationWriter.WriteNewline();
 
         var sizesWriter = declarationWriter
-            .BeginDeclaration("static const", "ZyanU16", "OPERAND_SIZES[][3]")
+            .BeginDeclaration("const", "ZyanU16", "OPERAND_SIZES[][3]")
             .WriteInitializerList()
             .BeginList();
         var sizeArrayDeclaration = new ArrayObjectDeclaration(3);
@@ -74,7 +74,7 @@ internal static class OperandsEmitter
         declarationWriter.WriteNewline();
 
         var detailsWriter = declarationWriter
-            .BeginDeclaration("static const", "ZydisOperandDetails", "OPERAND_DETAILS[]")
+            .BeginDeclaration("const", "ZydisOperandDetails", "OPERAND_DETAILS[]")
             .WriteInitializerList()
             .BeginList();
         var detailsDeclaration = new SimpleObjectDeclaration(InitializerType.Designated, "encoding", "reg", "mem");

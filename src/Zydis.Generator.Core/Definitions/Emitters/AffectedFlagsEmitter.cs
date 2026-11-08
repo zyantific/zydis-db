@@ -21,7 +21,7 @@ internal sealed class AffectedFlagsEmitter
 
         var declarationWriter = DeclarationWriter.Create(writer);
         var flagsWriter = declarationWriter
-            .BeginDeclaration("static const", "ZydisDefinitionAccessedFlags", "ACCESSED_FLAGS[]")
+            .BeginDeclaration("const", "ZydisDefinitionAccessedFlags", "ACCESSED_FLAGS[]")
             .WriteInitializerList()
             .BeginList();
         var definitionAccessedFlagsDeclaration = new ObjectDeclaration<DefinitionAccessedFlags>();
