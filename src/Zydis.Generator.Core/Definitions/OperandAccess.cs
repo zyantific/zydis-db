@@ -9,6 +9,12 @@ namespace Zydis.Generator.Core.Definitions;
 public enum OperandAccess
 {
     /// <summary>
+    /// The operand is neither read nor written.
+    /// </summary>
+    [JsonStringEnumMemberName("none")]
+    None,
+
+    /// <summary>
     /// The operand is read.
     /// </summary>
     [JsonStringEnumMemberName("read")]
@@ -63,6 +69,7 @@ public static class OperandAccessExtensions
     {
         return value switch
         {
+            OperandAccess.None => "NONE",
             OperandAccess.Read => "READ",
             OperandAccess.Write => "WRITE",
             OperandAccess.ReadWrite => "READWRITE",

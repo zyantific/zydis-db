@@ -68,6 +68,14 @@ public sealed class InstructionOperand :
         _ => OperandVisibility.Explicit
     };
 
+    // A missing `action` reads as `read`. The source-generated JSON reader sets init-only members from an
+    // argument array, so the default lives in the constructor parameter.
+    [JsonConstructor]
+    public InstructionOperand(OperandAccess access = OperandAccess.Read)
+    {
+        Access = access;
+    }
+
     public int CompareTo(InstructionOperand? other)
     {
         return FluentComparer.Compare(this, other,

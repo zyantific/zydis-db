@@ -28,7 +28,7 @@ public sealed class EncodableDefinition :
 {
     public InstructionDefinition Instruction { get; init; }
 
-    public bool IsEncodable { get; set; }
+    public bool IsEncodable => !Instruction.HasAnnotation<AnnotationDecodeOnly>();
 
     public bool IsSwappable { get => (SwappableIndex & 1) != 0; }
 
@@ -76,20 +76,6 @@ public sealed class EncodableDefinition :
     public EncodableDefinition(InstructionDefinition instruction)
     {
         Instruction = instruction;
-        IsEncodable = !GetBoolFilter(FeatureAmdNode.NodeDefinition.Instance);
-        if (Instruction.Mnemonic == "nop" && IsEncodable)
-        {
-            if (!GetBoolFilter(FeatureMpxNode.NodeDefinition.Instance, true) ||
-                !GetBoolFilter(FeatureCldemoteNode.NodeDefinition.Instance, true) ||
-                !GetBoolFilter(FeatureCetNode.NodeDefinition.Instance, true) ||
-                !GetBoolFilter(FeatureIbhfNode.NodeDefinition.Instance, true) ||
-                !GetBoolFilter(FeaturePrefetchrstNode.NodeDefinition.Instance, true) ||
-                !GetBoolFilter(FeatureKncNode.NodeDefinition.Instance, true) ||
-                (GetFilter(ModrmRegNode.NodeDefinition.Instance)?.StartsWith('!') ?? false))
-            {
-                IsEncodable = false;
-            }
-        }
         AddressSizes = GetWidthFilter(AddressSizeNode.NodeDefinition.Instance);
         OperandSizes = GetWidthFilter(OperandSizeNode.NodeDefinition.Instance);
         RexW = GetBoolFilter(RexWNode.NodeDefinition.Instance);
@@ -469,11 +455,11 @@ public sealed class EncodableDefinition :
         };
     }
 
-    public bool GetBoolFilter(DecisionNodeDefinition selector, bool defaultValue = false)
+    public bool GetBoolFilter(DecisionNodeDefinition selector)
     {
         return GetFilter(selector) switch
         {
-            null => defaultValue,
+            null => false,
             "0" => false,
             "1" => true,
             _ => throw new ArgumentOutOfRangeException(nameof(selector), $"Invalid boolean value for selector ${selector.Name}")
