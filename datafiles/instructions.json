@@ -158761,6 +158761,7 @@
     "filters": {
       "modrm_mod": "3",
       "modrm_reg": "4",
+      "prefix_group3": "0",
       "mandatory_prefix": "f3",
       "rex_2": "no_rex2"
     },
@@ -158784,6 +158785,7 @@
     "filters": {
       "modrm_mod": "3",
       "modrm_reg": "4",
+      "prefix_group3": "0",
       "mandatory_prefix": "f3",
       "rex_2": "rex2"
     },
@@ -158807,6 +158809,7 @@
     "filters": {
       "modrm_mod": "!3",
       "modrm_reg": "4",
+      "prefix_group3": "0",
       "mandatory_prefix": "f3",
       "rex_2": "no_rex2"
     },
@@ -158835,6 +158838,7 @@
     "filters": {
       "modrm_mod": "!3",
       "modrm_reg": "4",
+      "prefix_group3": "0",
       "mandatory_prefix": "f3",
       "rex_2": "rex2"
     },

@@ -25,6 +25,7 @@ internal static class FixedFilterOrder
                 "prefix_group1",
                 "mandatory_prefix",
                 "modrm_reg",
+                "prefix_group3",
                 "modrm_rm",
                 "mode",
                 "address_size",
