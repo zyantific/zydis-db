@@ -215,6 +215,15 @@
   },
   {
     "type": "decision",
+    "name": "prefix_group3",
+    "description": "",
+    "parameters": [],
+    "named_slots": [
+      "0:P0", "1:P1"
+    ]
+  },
+  {
+    "type": "decision",
     "name": "mandatory_prefix",
     "description": "",
     "parameters": [],
