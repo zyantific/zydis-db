@@ -214,7 +214,7 @@ public sealed class ZydisGenerator
 
         var declarationWriter = new DeclarationWriter(writer, true);
         declarationWriter
-            .BeginDeclaration("static const", "ZydisDecoderTreeNode* const", "OPCODE_TABLE_TREES[]");
+            .BeginDeclaration("const", "ZydisDecoderTreeNode* const", "OPCODE_TABLE_TREES[]");
 
         var initializerListWriter = declarationWriter.WriteInitializerList().BeginList();
 

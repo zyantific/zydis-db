@@ -51,7 +51,7 @@ internal static class DefinitionEmitter
             }
 
             var definitionWriter = declarationWriter
-                .BeginDeclaration("static const", $"ZydisInstructionDefinition{encodingName}", $"ISTR_DEFINITIONS_{encodingName}[]")
+                .BeginDeclaration("const", $"ZydisInstructionDefinition{encodingName}", $"ISTR_DEFINITIONS_{encodingName}[]")
                 .WriteInitializerList()
                 .BeginList();
             var fieldList = ObjectDeclaration<InstructionDefinition>.GetFieldNames();
